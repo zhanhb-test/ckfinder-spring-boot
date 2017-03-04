@@ -47,7 +47,7 @@ public class FileUtils {
    * max read file buffer size.
    */
   private static final int MAX_BUFFER_SIZE = 1024;
-  private static final Pattern invalidFileNamePatt = Pattern.compile(Constants.INVALID_FILE_NAME_REGEX);
+  private static final Pattern INVALID_FILENAME_PATTERN = Pattern.compile(Constants.INVALID_FILE_NAME_REGEX);
 
   private static final URLEncoder URI_COMPONENT = new URLEncoder("-_.*!'()~");
   // https://tools.ietf.org/html/rfc5987#section-3.2.1
@@ -66,7 +66,8 @@ public class FileUtils {
    */
   public static List<String> findChildrensList(Path dir, boolean searchDirs)
           throws IOException {
-    try (DirectoryStream<Path> ds = Files.newDirectoryStream(dir, file -> searchDirs == Files.isDirectory(file))) {
+    DirectoryStream.Filter<Path>filter = searchDirs ? Files::isDirectory : Files::isRegularFile;
+    try (DirectoryStream<Path> ds = Files.newDirectoryStream(dir, filter)) {
       return StreamSupport.stream(ds.spliterator(), false)
               .map(Path::getFileName)
               .map(Object::toString)
@@ -282,7 +283,7 @@ public class FileUtils {
    * @return true if it does contain disallowed characters.
    */
   private static boolean isFileNameCharacterInvalid(String fileName) {
-    return invalidFileNamePatt.matcher(fileName).find();
+    return INVALID_FILENAME_PATTERN.matcher(fileName).find();
   }
 
   /**
