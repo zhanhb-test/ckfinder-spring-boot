@@ -57,20 +57,20 @@ class URLEncoder {
     StringBuilder out = new StringBuilder(length);
 
     for (int i = 0; i < length;) {
-      int cur = i;
-      while (cur < length && dontNeedEncoding.get(s.charAt(cur))) {
-        ++cur;
+      int start = i;
+      while (i < length && dontNeedEncoding.get(s.charAt(i))) {
+        ++i;
       }
-      if (i != cur) {
-        out.append(s, i, cur);
-        i = cur;
+      if (start != i) {
+        out.append(s, start, i);
+        start = i;
       }
-      while (cur < length && !dontNeedEncoding.get(s.charAt(cur))) {
-        ++cur;
+      while (i < length && !dontNeedEncoding.get(s.charAt(i))) {
+        ++i;
       }
-      if (i != cur) {
+      if (start != i) {
         // convert to external encoding before hex conversion
-        byte[] bytes = s.substring(i, cur).getBytes(charset);
+        byte[] bytes = s.substring(start, i).getBytes(charset);
         for (int j = 0, limit = bytes.length; j < limit; ++j) {
           byte b = bytes[j];
           out.append('%').append(HEX_CHARS[b >> 4 & 0xF]).append(HEX_CHARS[b & 0xF]);
