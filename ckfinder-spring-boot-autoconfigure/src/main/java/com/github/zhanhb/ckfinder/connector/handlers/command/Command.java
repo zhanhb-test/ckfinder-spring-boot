@@ -24,7 +24,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -39,11 +38,6 @@ import lombok.RequiredArgsConstructor;
  */
 @RequiredArgsConstructor
 public abstract class Command<T extends Arguments> {
-
-  /**
-   * Name of the csrf token passed as request parameter.
-   */
-  protected static final String tokenParamName = "ckCsrfToken";
 
   @Getter
   @NonNull
@@ -212,42 +206,6 @@ public abstract class Command<T extends Arguments> {
     } else {
       return "/";
     }
-  }
-
-  /**
-   * Checks if the request contains a valid CSRF token that matches the value
-   * sent in the cookie.<br>
-   *
-   * @see
-   * <a href="https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)_Prevention_Cheat_Sheet#Double_Submit_Cookies">Cross-Site_Request_Forgery_(CSRF)_Prevention</a>
-   *
-   * @param request current request object
-   * @return {@code true} if token is valid, {@code false} otherwise.
-   */
-  protected boolean checkCsrfToken(final HttpServletRequest request) {
-    final String tokenCookieName = "ckCsrfToken", paramToken;
-    final int minTokenLength = 32;
-
-    String token = request.getParameter(tokenParamName);
-    paramToken = token != null ? token.trim() : "";
-
-    Cookie[] cookies = request.getCookies();
-    String cookieToken = "";
-    if (cookies != null) {
-      for (Cookie cookie : cookies) {
-        if (cookie.getName().equals(tokenCookieName)) {
-          cookieToken = cookie.getValue();
-          cookieToken = cookieToken != null ? cookieToken.trim() : "";
-          break;
-        }
-      }
-    }
-
-    if (paramToken.length() >= minTokenLength && cookieToken.length() >= minTokenLength) {
-      return paramToken.equals(cookieToken);
-    }
-
-    return false;
   }
 
 }

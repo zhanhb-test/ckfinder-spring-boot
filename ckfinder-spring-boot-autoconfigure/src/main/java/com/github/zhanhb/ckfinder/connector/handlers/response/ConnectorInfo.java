@@ -23,8 +23,6 @@ public class ConnectorInfo implements ConnectorElement {
 
   @XmlAttribute(name = "c")
   private String licenseKey;
-  @XmlAttribute(name = "csrfProtection")
-  private boolean csrfProtection;
   @XmlAttribute(name = "enabled")
   private boolean enabled;
   @XmlAttribute(name = "imgHeight")

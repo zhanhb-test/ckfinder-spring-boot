@@ -96,7 +96,6 @@ public class InitCommand extends XMLCommand<XMLArguments> {
     }
     element.imgWidth(configuration.getImgWidth());
     element.imgHeight(configuration.getImgHeight());
-    element.csrfProtection(configuration.isEnableCsrfProtection());
     String plugins = getPlugins(configuration);
     if (plugins.length() > 0) {
       element.plugins(plugins);

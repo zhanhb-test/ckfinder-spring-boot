@@ -181,9 +181,6 @@ public class CKFinderAutoConfiguration {
       if (properties.getForceAscii() != null) {
         builder.forceAscii(properties.getForceAscii());
       }
-      if (properties.getEnableCsrfProtection() != null) {
-        builder.enableCsrfProtection(properties.getEnableCsrfProtection());
-      }
       if (properties.getHideFolders() != null) {
         builder.hiddenFolders(Arrays.asList(properties.getHideFolders()));
       }

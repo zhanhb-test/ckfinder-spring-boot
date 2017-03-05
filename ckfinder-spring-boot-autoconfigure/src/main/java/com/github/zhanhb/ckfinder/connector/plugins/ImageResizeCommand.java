@@ -61,10 +61,6 @@ public class ImageResizeCommand extends XMLCommand<ImageResizeArguments> impleme
 
   @Override
   protected int getDataForXml(ImageResizeArguments arguments, IConfiguration configuration) {
-    if (configuration.isEnableCsrfProtection() && !checkCsrfToken(arguments.getRequest())) {
-      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST;
-    }
-
     try {
       checkTypeExists(arguments.getType(), configuration);
     } catch (ConnectorException ex) {

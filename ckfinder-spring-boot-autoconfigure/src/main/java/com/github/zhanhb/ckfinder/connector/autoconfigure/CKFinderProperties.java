@@ -51,7 +51,6 @@ public class CKFinderProperties {
   private Boolean secureImageUploads;
   private String[] htmlExtensions;
   private Boolean forceAscii;
-  private Boolean enableCsrfProtection;
   private String[] hideFolders;
   private String[] hideFiles;
   private Watermark watermark = new Watermark();

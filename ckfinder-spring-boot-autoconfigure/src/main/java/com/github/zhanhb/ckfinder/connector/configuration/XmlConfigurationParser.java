@@ -198,9 +198,6 @@ public enum XmlConfigurationParser {
           case "plugins":
             setPlugins(builder, childNode, resourceLoader);
             break;
-          case "enableCsrfProtection":
-            builder.enableCsrfProtection(Boolean.parseBoolean(nullNodeToString(childNode)));
-            break;
           default:
             break;
         }

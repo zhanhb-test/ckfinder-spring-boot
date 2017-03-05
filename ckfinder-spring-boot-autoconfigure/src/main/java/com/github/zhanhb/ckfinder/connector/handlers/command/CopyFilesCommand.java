@@ -269,9 +269,6 @@ public class CopyFilesCommand extends XMLCommand<CopyFilesArguments> implements 
   @SuppressWarnings("CollectionWithoutInitialCapacity")
   protected void initParams(CopyFilesArguments arguments, HttpServletRequest request, IConfiguration configuration) throws ConnectorException {
     super.initParams(arguments, request, configuration);
-    if (configuration.isEnableCsrfProtection() && !checkCsrfToken(request)) {
-      throw new ConnectorException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST, "CSRF Attempt");
-    }
     arguments.setFiles(new ArrayList<>());
     arguments.setCopiedAll(request.getParameter("copied") != null ? Integer.parseInt(request.getParameter("copied")) : 0);
 

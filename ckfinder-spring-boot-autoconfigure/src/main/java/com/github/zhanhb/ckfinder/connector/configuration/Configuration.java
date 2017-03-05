@@ -65,7 +65,6 @@ public class Configuration implements IConfiguration {
   private boolean disallowUnsafeCharacters;
   private Events events;
   private AccessControl accessControl;
-  private boolean enableCsrfProtection;
 
   public static class Builder {
 
