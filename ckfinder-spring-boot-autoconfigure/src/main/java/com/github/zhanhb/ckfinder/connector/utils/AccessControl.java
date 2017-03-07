@@ -12,21 +12,16 @@
 package com.github.zhanhb.ckfinder.connector.utils;
 
 import com.github.zhanhb.ckfinder.connector.data.AccessControlLevel;
-import java.io.File;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
-import lombok.Singular;
-import lombok.ToString;
 
 /**
  * Class to generate ACL values.
  */
-@Builder(builderClassName = "Builder")
-@SuppressWarnings({"FinalClass", "AccessingNonPublicFieldOfAnotherObject"})
-@ToString
-public final class AccessControl {
+public class AccessControl {
 
   /**
    * Folder view mask.
@@ -61,11 +56,7 @@ public final class AccessControl {
    */
   public static final int CKFINDER_CONNECTOR_ACL_FILE_DELETE = 1 << 7;
 
-  /**
-   * mask configuration.
-   */
-  @Singular
-  private final List<AccessControlLevel> aclEntries;
+  private final Map<CheckEntry, AclContext> aclMap = new ConcurrentHashMap<>(4);
 
   /**
    * check ACL for folder.
@@ -73,11 +64,23 @@ public final class AccessControl {
    * @param resourceType resource type name
    * @param folder folder name
    * @param acl mask to check.
-   * @param currentUserRole user role
+   * @param role user role
    * @return true if acl flag is true
    */
-  public boolean hasPermission(String resourceType, String folder, String currentUserRole, int acl) {
-    return (checkACLForRole(resourceType, folder, currentUserRole) & acl) == acl;
+  public boolean hasPermission(String resourceType, String folder, String role, int acl) {
+    return (getAcl(resourceType, folder, role) & acl) == acl;
+  }
+
+  public void addPermission(AccessControlLevel acl) {
+    aclContext(acl.getResourceType(), acl.getRole()).getMask(acl.getFolder()).setValue(acl.getMask());
+  }
+
+  private AclContext getAclContext(String type, String role) {
+    return aclMap.get(CheckEntry.builder().role(role).type(type).build());
+  }
+
+  private AclContext aclContext(String type, String role) {
+    return aclMap.computeIfAbsent(CheckEntry.builder().role(role).type(type).build(), __ -> new AclContext());
   }
 
   /**
@@ -85,85 +88,32 @@ public final class AccessControl {
    *
    * @param resourceType resource type
    * @param folder current folder
-   * @param currentUserRole current user role
-   * @return mask value
-   */
-  public int checkACLForRole(String resourceType, String folder, String currentUserRole) {
-    final CheckEntry[] ce = currentUserRole != null ? new CheckEntry[]{
-      new CheckEntry("*", "*"),
-      new CheckEntry("*", resourceType),
-      new CheckEntry(currentUserRole, "*"),
-      new CheckEntry(currentUserRole, resourceType)
-    } : new CheckEntry[]{
-      new CheckEntry("*", "*"),
-      new CheckEntry("*", resourceType)
-    };
-
-    int acl = 0;
-    for (CheckEntry checkEntry : ce) {
-      List<AccessControlLevel> aclEntrieForType = findACLEntryByRoleAndType(checkEntry);
-
-      for (AccessControlLevel aclEntry : aclEntrieForType) {
-        String cuttedPath = folder;
-
-        while (true) {
-          if (cuttedPath.length() > 1
-                  && cuttedPath.lastIndexOf('/') == cuttedPath.length() - 1) {
-            cuttedPath = cuttedPath.substring(0, cuttedPath.length() - 1);
-          }
-          if (aclEntry.getFolder().equals(cuttedPath)) {
-            acl |= checkACLForFolder(aclEntry, cuttedPath);
-            break;
-          } else if (cuttedPath.length() == 1) {
-            break;
-          } else if (cuttedPath.lastIndexOf('/') > -1) {
-            cuttedPath = cuttedPath.substring(0,
-                    cuttedPath.lastIndexOf('/') + 1);
-          } else {
-            break;
-          }
-        }
-      }
-    }
-    return acl;
-  }
-
-  /**
-   * Checks ACL for given folder.
-   *
-   * @param entry current ACL entry
-   * @param folder current folder
-   * @return mask value
-   */
-  private int checkACLForFolder(AccessControlLevel entry, String folder) {
-    int acl = 0;
-    if (folder.contains(entry.getFolder()) || entry.getFolder().equals(File.separator)) {
-      acl ^= entry.getMask();
-    }
-    return acl;
-  }
-
-  /**
-   * Gets a list of ACL entries for current role and resource type.
-   *
-   * @param type resource type
    * @param role current user role
-   * @return list of ACL entries.
+   * @return mask value
    */
-  private List<AccessControlLevel> findACLEntryByRoleAndType(CheckEntry checkEntry) {
-    return aclEntries.stream()
-            .filter(item -> (item.getRole().equals(checkEntry.role) && item.getResourceType().equals(checkEntry.type)))
-            .collect(Collectors.toList());
+  public int getAcl(String resourceType, String folder, String role) {
+    int acl = getAcl0("*", "*", folder) | getAcl0("*", resourceType, folder);
+    if (role != null) {
+      acl |= getAcl0(role, "*", folder) | getAcl0(role, resourceType, folder);
+    }
+    return acl;
+  }
+
+  private int getAcl0(String role, String resourceType, String path) {
+    AclContext aclContext = getAclContext(resourceType, role);
+    return aclContext == null ? 0 : aclContext.closest(path).getEffectiveValue();
   }
 
   /**
    * simple check ACL entry.
    */
+  @Builder(builderClassName = "Builder")
+  @EqualsAndHashCode
   @RequiredArgsConstructor
   private static class CheckEntry {
 
-    private final String role;
-    private final String type;
+    final String role;
+    final String type;
 
   }
 

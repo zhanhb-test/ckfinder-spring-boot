@@ -295,17 +295,17 @@ public enum XmlConfigurationParser {
    * @param childNodes nodes with ACL configuration.
    */
   private void setACLs(Configuration.Builder builder, NodeList childNodes) {
-    AccessControl.Builder accessControlBuilder = AccessControl.builder();
+    AccessControl accessControl = new AccessControl();
     for (int i = 0, j = childNodes.getLength(); i < j; i++) {
       Node childNode = childNodes.item(i);
       if (childNode.getNodeName().equals("accessControl")) {
         AccessControlLevel acl = getACLFromNode(childNode);
         if (acl != null) {
-          accessControlBuilder.aclEntry(acl);
+          accessControl.addPermission(acl);
         }
       }
     }
-    builder.accessControl(accessControlBuilder.build());
+    builder.accessControl(accessControl);
   }
 
   /**

@@ -193,7 +193,7 @@ public class InitCommand extends XMLCommand<XMLArguments> {
 
         com.github.zhanhb.ckfinder.connector.handlers.response.ResourceType.Builder childElement = com.github.zhanhb.ckfinder.connector.handlers.response.ResourceType.builder();
         childElement.name(resourceType.getName());
-        childElement.acl(configuration.getAccessControl().checkACLForRole(key, "/", arguments.getUserRole()));
+        childElement.acl(configuration.getAccessControl().getAcl(key, "/", arguments.getUserRole()));
         childElement.hash(randomHash(
                 resourceType.getPath()));
         childElement.allowedExtensions(resourceType.getAllowedExtensions());

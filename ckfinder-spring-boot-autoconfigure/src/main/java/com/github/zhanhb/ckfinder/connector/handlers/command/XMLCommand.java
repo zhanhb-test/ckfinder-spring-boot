@@ -117,7 +117,7 @@ public abstract class XMLCommand<T extends XMLArguments> extends Command<T> {
             .path(arguments.getCurrentFolder())
             .url(configuration.getTypes().get(arguments.getType()).getUrl()
                     + arguments.getCurrentFolder())
-            .acl(configuration.getAccessControl().checkACLForRole(arguments.getType(), arguments.getCurrentFolder(), arguments.getUserRole()))
+            .acl(configuration.getAccessControl().getAcl(arguments.getType(), arguments.getCurrentFolder(), arguments.getUserRole()))
             .build());
   }
 

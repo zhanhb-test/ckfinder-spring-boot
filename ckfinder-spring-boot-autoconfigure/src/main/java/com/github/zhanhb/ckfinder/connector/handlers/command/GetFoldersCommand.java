@@ -122,7 +122,7 @@ public class GetFoldersCommand extends XMLCommand<GetFoldersArguments> {
                 .name(dirPath)
                 .hasChildren(hasChildren)
                 .acl(configuration.getAccessControl()
-                        .checkACLForRole(arguments.getType(),
+                        .getAcl(arguments.getType(),
                                 arguments.getCurrentFolder()
                                 + dirPath, arguments.getUserRole())).build());
       }

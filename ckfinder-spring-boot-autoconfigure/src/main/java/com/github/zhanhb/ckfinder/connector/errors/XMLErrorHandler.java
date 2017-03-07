@@ -54,7 +54,7 @@ public enum XMLErrorHandler {
       rootElement.currentFolder(CurrentFolder.builder()
               .path(currentFolder)
               .url(types.get(type).getUrl() + currentFolder)
-              .acl(configuration.getAccessControl().checkACLForRole(type, currentFolder, userRole))
+              .acl(configuration.getAccessControl().getAcl(type, currentFolder, userRole))
               .build());
     }
     rootElement.error(Error.builder()
