@@ -26,9 +26,9 @@ import javax.xml.bind.JAXBException;
 public enum XMLCreator {
   INSTANCE;
 
-  public void writeTo(Connector connector, Writer writer) {
+  public void writeTo(Object obj, Writer writer) {
     try {
-      JAXBContext.newInstance(Connector.class).createMarshaller().marshal(connector, writer);
+      JAXBContext.newInstance(obj.getClass()).createMarshaller().marshal(obj, writer);
     } catch (JAXBException e) {
       throw new IllegalStateException("fail to instance xml transformer", e);
     }

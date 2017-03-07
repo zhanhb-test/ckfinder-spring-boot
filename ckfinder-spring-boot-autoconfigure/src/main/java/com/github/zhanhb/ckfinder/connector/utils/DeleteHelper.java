@@ -28,7 +28,7 @@ import java.nio.file.attribute.BasicFileAttributes;
  * @author zhanhb
  */
 enum DeleteHelper {
-  INSTANCE;
+  ;
 
   public static Path delete(Path path) throws IOException {
     try {

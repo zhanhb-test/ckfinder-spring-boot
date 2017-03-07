@@ -27,7 +27,7 @@ public interface Constants {
   /**
    * Regular expression to identify full URL.
    */
-  String URL_REGEX = "^(https?)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]";
+  String URL_REGEX = "^(https?)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]$";
 
   String CKFINDER_CHARS = "123456789ABCDEFGHJKLMNPQRSTUVWXYZ";
   /**

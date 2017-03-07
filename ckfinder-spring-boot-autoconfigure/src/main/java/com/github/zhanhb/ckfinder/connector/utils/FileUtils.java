@@ -541,23 +541,6 @@ public class FileUtils {
     return fileName.replace(toReplace, "\\" + toReplace);
   }
 
-  private static class EncodingMapHolder {
-
-    static final Map<String, String> encodingMap;
-
-    static {
-      Map<String, String> mapHelper = new HashMap<>(6);
-      mapHelper.put("%21", "!");
-      mapHelper.put("%27", "'");
-      mapHelper.put("%28", "(");
-      mapHelper.put("%29", ")");
-      mapHelper.put("%7E", "~");
-      mapHelper.put("[+]", "%20");
-      encodingMap = Collections.unmodifiableMap(mapHelper);
-    }
-
-  }
-
   private static class DateTimeFormatterHolder {
 
     static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmm", Locale.US)

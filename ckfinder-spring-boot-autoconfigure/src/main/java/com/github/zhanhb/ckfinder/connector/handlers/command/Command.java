@@ -77,9 +77,7 @@ public abstract class Command<T extends Arguments> {
     String userRole = session == null ? null : (String) session.getAttribute(configuration.getUserRoleName());
     arguments.setUserRole(userRole);
 
-    arguments.setCurrentFolder(getCurrentFolderParam(request));
-
-    String currentFolder = arguments.getCurrentFolder();
+    String currentFolder = getCurrentFolderParam(request);
     checkConnectorEnabled(configuration);
     checkRequestPathValid(currentFolder);
 
