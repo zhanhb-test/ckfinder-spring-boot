@@ -143,14 +143,17 @@ public class CKFinderAutoConfiguration {
       if (properties.getLicenseName() != null) {
         builder.licenseName(properties.getLicenseName());
       }
-      if (properties.getImgWidth() != null) {
-        builder.imgWidth(properties.getImgWidth());
-      }
-      if (properties.getImgHeight() != null) {
-        builder.imgHeight(properties.getImgHeight());
-      }
-      if (properties.getImgQuality() != null) {
-        builder.imgQuality(properties.getImgQuality());
+      CKFinderProperties.Image image = properties.getImage();
+      if (image != null) {
+        if (image.getWidth() != null) {
+          builder.imgWidth(image.getWidth());
+        }
+        if (image.getHeight() != null) {
+          builder.imgHeight(image.getHeight());
+        }
+        if (image.getQuality() != null) {
+          builder.imgQuality(image.getQuality());
+        }
       }
       if (properties.getDefaultResourceTypes() != null) {
         builder.defaultResourceTypes(Arrays.asList(properties.getDefaultResourceTypes()));

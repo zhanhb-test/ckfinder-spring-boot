@@ -4,9 +4,10 @@ ckfinder:
   base-url:
   license-key:
   license-name:
-  img-width: 1600
-  img-height: 1200
-  img-quality: 0.8
+  imgage:
+    width: 1600
+    height: 1200
+    quality: 0.8
   default-resource-types:
   types:
     - name: Files

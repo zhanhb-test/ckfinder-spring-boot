@@ -37,9 +37,7 @@ public class CKFinderProperties {
   private String baseUrl;
   private String licenseKey;
   private String licenseName;
-  private Integer imgWidth;
-  private Integer imgHeight;
-  private Float imgQuality;
+  private Image image = new Image();
   private String[] defaultResourceTypes;
   private Type[] types;
   private String userRoleSessionVar;
@@ -55,6 +53,16 @@ public class CKFinderProperties {
   private String[] hideFiles;
   private Watermark watermark = new Watermark();
   private ImageResize imageResize = new ImageResize();
+
+  @Getter
+  @Setter
+  public static class Image {
+
+    private Integer width;
+    private Integer height;
+    private Float quality;
+
+  }
 
   @Getter
   @Setter
