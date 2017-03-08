@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletRequest;
 import lombok.Builder;
 import lombok.Singular;
 import lombok.Value;
@@ -34,8 +35,7 @@ import lombok.Value;
 public class Configuration implements IConfiguration {
 
   private boolean enabled;
-  private String licenseName;
-  private String licenseKey;
+  private LicenseFactory licenseFactory;
   private int imgWidth;
   private int imgHeight;
   private float imgQuality;
@@ -66,11 +66,14 @@ public class Configuration implements IConfiguration {
   private Events events;
   private AccessControl accessControl;
 
+  @Override
+  public License getLicense(HttpServletRequest request) {
+    return licenseFactory.getLicense(request);
+  }
+
   public static class Builder {
 
     Builder() {
-      licenseName = "";
-      licenseKey = "";
       imgWidth = DEFAULT_IMG_WIDTH;
       imgHeight = DEFAULT_IMG_HEIGHT;
       imgQuality = DEFAULT_IMG_QUALITY;

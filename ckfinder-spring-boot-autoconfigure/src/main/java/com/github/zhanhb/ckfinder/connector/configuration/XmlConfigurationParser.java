@@ -108,6 +108,7 @@ public enum XmlConfigurationParser {
       doc = db.parse(stream);
     }
     doc.normalize();
+    License.Builder licenseBuilder = License.builder().name("").key("");
     Node node = doc.getFirstChild();
     if (node != null) {
       NodeList nodeList = node.getChildNodes();
@@ -118,10 +119,10 @@ public enum XmlConfigurationParser {
             builder.enabled(Boolean.parseBoolean(nullNodeToString(childNode)));
             break;
           case "licenseName":
-            builder.licenseName(nullNodeToString(childNode));
+            licenseBuilder.name(nullNodeToString(childNode));
             break;
           case "licenseKey":
-            builder.licenseKey(nullNodeToString(childNode));
+            licenseBuilder.key(nullNodeToString(childNode));
             break;
           case "imgWidth":
             String width = nullNodeToString(childNode);
@@ -203,6 +204,7 @@ public enum XmlConfigurationParser {
         }
       }
     }
+    builder.licenseFactory(new FixLicenseFactory(licenseBuilder.build()));
     setTypes(builder, doc, basePathBuilder);
   }
 

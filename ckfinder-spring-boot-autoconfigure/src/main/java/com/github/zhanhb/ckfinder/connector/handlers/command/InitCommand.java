@@ -13,9 +13,11 @@ package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.configuration.Constants;
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
+import com.github.zhanhb.ckfinder.connector.configuration.License;
 import com.github.zhanhb.ckfinder.connector.data.InitCommandEventArgs;
 import com.github.zhanhb.ckfinder.connector.data.ResourceType;
-import com.github.zhanhb.ckfinder.connector.handlers.arguments.XMLArguments;
+import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
+import com.github.zhanhb.ckfinder.connector.handlers.arguments.InitArgument;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.ConnectorInfo;
 import com.github.zhanhb.ckfinder.connector.handlers.response.ResourceTypes;
@@ -36,7 +38,7 @@ import lombok.extern.slf4j.Slf4j;
  * Class to handle <code>Init</code> command.
  */
 @Slf4j
-public class InitCommand extends XMLCommand<XMLArguments> {
+public class InitCommand extends XMLCommand<InitArgument> {
 
   /**
    * chars taken to license key.
@@ -47,7 +49,7 @@ public class InitCommand extends XMLCommand<XMLArguments> {
   private static final char[] hexChars = "0123456789abcdef".toCharArray();
 
   public InitCommand() {
-    super(XMLArguments::new);
+    super(InitArgument::new);
   }
 
   /**
@@ -58,12 +60,12 @@ public class InitCommand extends XMLCommand<XMLArguments> {
    * @return 0
    */
   @Override
-  protected int getDataForXml(XMLArguments arguments, IConfiguration configuration) {
+  protected int getDataForXml(InitArgument arguments, IConfiguration configuration) {
     return Constants.Errors.CKFINDER_CONNECTOR_ERROR_NONE;
   }
 
   @Override
-  protected void createXMLChildNodes(int errorNum, Connector.Builder rootElement, XMLArguments arguments, IConfiguration configuration) {
+  protected void createXMLChildNodes(int errorNum, Connector.Builder rootElement, InitArgument arguments, IConfiguration configuration) {
     if (errorNum == Constants.Errors.CKFINDER_CONNECTOR_ERROR_NONE) {
       createConnectorData(rootElement, arguments, configuration);
       try {
@@ -71,7 +73,7 @@ public class InitCommand extends XMLCommand<XMLArguments> {
       } catch (Exception e) {
         log.error("", e);
       }
-      createPluginsData(rootElement, arguments, configuration);
+      createPluginsData(rootElement, configuration);
     }
   }
 
@@ -80,12 +82,13 @@ public class InitCommand extends XMLCommand<XMLArguments> {
    *
    * @param rootElement root element in XML
    */
-  private void createConnectorData(Connector.Builder rootElement, XMLArguments arguments, IConfiguration configuration) {
+  private void createConnectorData(Connector.Builder rootElement, InitArgument arguments, IConfiguration configuration) {
     // connector info
     ConnectorInfo.Builder element = ConnectorInfo.builder();
     element.enabled(configuration.isEnabled());
-    element.licenseName(getLicenseName(configuration));
-    element.licenseKey(createLicenseKey(configuration.getLicenseKey()));
+    License license = configuration.getLicense(arguments.getRequest());
+    element.licenseName(getLicenseName(license));
+    element.licenseKey(createLicenseKey(license.getKey()));
     element.thumbsEnabled(configuration.isThumbsEnabled());
     element.uploadCheckImages(!configuration.isCheckSizeAfterScaling());
     if (configuration.isThumbsEnabled()) {
@@ -117,12 +120,12 @@ public class InitCommand extends XMLCommand<XMLArguments> {
    *
    * @return license name if key is ok, or empty string if not.
    */
-  private String getLicenseName(IConfiguration configuration) {
-    if (validateLicenseKey(configuration.getLicenseKey())) {
-      int index = Constants.CKFINDER_CHARS.indexOf(configuration.getLicenseKey().charAt(0))
+  private String getLicenseName(License license) {
+    if (validateLicenseKey(license.getKey())) {
+      int index = Constants.CKFINDER_CHARS.indexOf(license.getKey().charAt(0))
               % LICENSE_CHAR_NR;
       if (index == 1 || index == 4) {
-        return configuration.getLicenseName();
+        return license.getName();
       }
     }
     return "";
@@ -160,7 +163,7 @@ public class InitCommand extends XMLCommand<XMLArguments> {
    *
    * @param rootElement root element in XML
    */
-  private void createPluginsData(Connector.Builder rootElement, XMLArguments arguments, IConfiguration configuration) {
+  private void createPluginsData(Connector.Builder rootElement, IConfiguration configuration) {
     if (configuration.getEvents() != null) {
       InitCommandEventArgs args = new InitCommandEventArgs(rootElement);
       configuration.getEvents().runInitCommand(args, configuration);
@@ -174,7 +177,7 @@ public class InitCommand extends XMLCommand<XMLArguments> {
    * @throws Exception when error occurs
    */
   @SuppressWarnings("CollectionWithoutInitialCapacity")
-  private void createResouceTypesData(Connector.Builder rootElement, XMLArguments arguments, IConfiguration configuration) throws IOException {
+  private void createResouceTypesData(Connector.Builder rootElement, InitArgument arguments, IConfiguration configuration) throws IOException {
     //resurcetypes
     ResourceTypes.Builder resourceTypes = ResourceTypes.builder();
     Set<String> types;
@@ -248,8 +251,15 @@ public class InitCommand extends XMLCommand<XMLArguments> {
   }
 
   @Override
-  protected boolean shouldAddCurrentFolderNode(XMLArguments arguments) {
+  protected boolean shouldAddCurrentFolderNode(InitArgument arguments) {
     return false;
+  }
+
+  @Override
+  protected void initParams(InitArgument arguments, HttpServletRequest request, IConfiguration configuration)
+          throws ConnectorException {
+    super.initParams(arguments, request, configuration);
+    arguments.setRequest(request);
   }
 
   @Deprecated

@@ -35,8 +35,7 @@ public class CKFinderProperties {
   private Boolean enabled;
   private String baseDir;
   private String baseUrl;
-  private String licenseKey;
-  private String licenseName;
+  private License license = new License();
   private Image image = new Image();
   private String[] defaultResourceTypes;
   private Type[] types;
@@ -53,6 +52,20 @@ public class CKFinderProperties {
   private String[] hideFiles;
   private Watermark watermark = new Watermark();
   private ImageResize imageResize = new ImageResize();
+
+  @Getter
+  @Setter
+  public static class License {
+
+    private LicenseStrategy strategy = LicenseStrategy.none;
+    private String name;
+    private String key;
+
+  }
+
+  public static enum LicenseStrategy {
+    none, host, auth;
+  }
 
   @Getter
   @Setter

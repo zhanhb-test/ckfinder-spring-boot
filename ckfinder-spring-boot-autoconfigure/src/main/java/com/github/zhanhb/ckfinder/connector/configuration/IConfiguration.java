@@ -16,6 +16,7 @@ import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Interface for configuration.
@@ -46,18 +47,12 @@ public interface IConfiguration {
   public Map<String, ResourceType> getTypes();
 
   /**
-   * returns license key.
+   * returns license.
    *
-   * @return license key
+   * @param request
+   * @return license
    */
-  public String getLicenseKey();
-
-  /**
-   * returns license name.
-   *
-   * @return license name.
-   */
-  public String getLicenseName();
+  public License getLicense(HttpServletRequest request);
 
   /**
    * gets image max width.

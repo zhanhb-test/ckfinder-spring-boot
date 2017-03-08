@@ -17,8 +17,11 @@ package com.github.zhanhb.ckfinder.connector.autoconfigure;
 
 import com.github.zhanhb.ckfinder.connector.configuration.Constants;
 import com.github.zhanhb.ckfinder.connector.configuration.DefaultPathBuilder;
+import com.github.zhanhb.ckfinder.connector.configuration.FixLicenseFactory;
 import com.github.zhanhb.ckfinder.connector.configuration.IBasePathBuilder;
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
+import com.github.zhanhb.ckfinder.connector.configuration.KeyGenerator;
+import com.github.zhanhb.ckfinder.connector.configuration.License;
 import com.github.zhanhb.ckfinder.connector.configuration.Plugin;
 import com.github.zhanhb.ckfinder.connector.data.AccessControlLevel;
 import com.github.zhanhb.ckfinder.connector.data.PluginInfo;
@@ -137,11 +140,23 @@ public class CKFinderAutoConfiguration {
       if (properties.getEnabled() != null) {
         builder.enabled(properties.getEnabled());
       }
-      if (properties.getLicenseKey() != null) {
-        builder.licenseKey(properties.getLicenseKey());
-      }
-      if (properties.getLicenseName() != null) {
-        builder.licenseName(properties.getLicenseName());
+      CKFinderProperties.License license = properties.getLicense();
+      label:
+      {
+        License.Builder licenseBuilder = License.builder().name("").key("");
+        if (license != null) {
+          licenseBuilder.name(license.getName()).key(license.getKey());
+          CKFinderProperties.LicenseStrategy strategy = license.getStrategy();
+          if (strategy == CKFinderProperties.LicenseStrategy.host) {
+            builder.licenseFactory(new HostLicenseFactory());
+            break label;
+          } else if (strategy == CKFinderProperties.LicenseStrategy.auth) {
+            if (!StringUtils.isEmpty(license.getName()) && StringUtils.isEmpty(license.getKey())) {
+              licenseBuilder.key(KeyGenerator.INSTANCE.generateKey(false, license.getName(), 34));
+            }
+          }
+        }
+        builder.licenseFactory(new FixLicenseFactory(licenseBuilder.build()));
       }
       CKFinderProperties.Image image = properties.getImage();
       if (image != null) {

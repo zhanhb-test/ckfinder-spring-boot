@@ -2,7 +2,8 @@ package com.github.zhanhb.ckfinder.connector.configuration;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-public class KeyGenerator {
+public enum KeyGenerator {
+  INSTANCE;
 
   private int nextInt(int n) {
     return ThreadLocalRandom.current().nextInt(n);
@@ -55,7 +56,7 @@ public class KeyGenerator {
      * then divide by the length of the character set minus 1 => the position of
      * the character. 12th in the character set
      */
-    licenseKey[12] = chars.charAt((chars.indexOf(licenseKey[11]) + chars.indexOf(licenseKey[8])) * 9 % (chars.length() - 1));
+    licenseKey[12] = chars.charAt((chars.indexOf(licenseKey[11]) + chars.indexOf(licenseKey[8])) * 9 % 32);
 
     /*
      * ----------------------------------------------

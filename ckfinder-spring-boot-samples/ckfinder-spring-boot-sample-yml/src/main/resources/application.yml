@@ -2,8 +2,10 @@ ckfinder:
   enabled: true
   base-dir:
   base-url:
-  license-key:
-  license-name:
+  license:
+    strategy:
+    key:
+    name:
   imgage:
     width: 1600
     height: 1200

@@ -15,7 +15,7 @@ public class KeyGeneratorTest {
     boolean host = true;
     String licenseName = "localhost";
     int len = 34;
-    KeyGenerator instance = new KeyGenerator();
+    KeyGenerator instance = KeyGenerator.INSTANCE;
     String result = instance.generateKey(host, licenseName, len);
     log.info(result);
   }
