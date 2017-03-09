@@ -32,7 +32,7 @@ public class WatermarkSettings {
   private final int marginBottom;
   private final int marginRight;
 
-  @SuppressWarnings("PackageVisibleInnerClass")
+  @SuppressWarnings("PublicInnerClass")
   public static class Builder {
 
     Builder() {

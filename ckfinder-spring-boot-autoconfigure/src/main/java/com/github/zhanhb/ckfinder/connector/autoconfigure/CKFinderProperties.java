@@ -15,7 +15,7 @@
  */
 package com.github.zhanhb.ckfinder.connector.autoconfigure;
 
-import java.util.Properties;
+import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -38,7 +38,7 @@ public class CKFinderProperties {
   private License license = new License();
   private Image image = new Image();
   private String[] defaultResourceTypes;
-  private Type[] types;
+  private Map<String, Type> types;
   private String userRoleSessionVar;
   private AccessControl[] accessControls;
   private Thumbs thumbs = new Thumbs();
@@ -81,12 +81,11 @@ public class CKFinderProperties {
   @Setter
   public static class Type {
 
-    private String name;
     private String url;
     private String directory;
     private Integer maxSize;
-    private String allowedExtensions;
-    private String deniedExtensions;
+    private String[] allowedExtensions;
+    private String[] deniedExtensions;
 
   }
 
@@ -127,7 +126,7 @@ public class CKFinderProperties {
   public static class ImageResize {
 
     private Boolean enabled;
-    private Properties params;
+    private Map<String, String> params;
 
   }
 

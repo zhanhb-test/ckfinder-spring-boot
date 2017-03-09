@@ -1,6 +1,7 @@
 package com.github.zhanhb.ckfinder.connector.configuration;
 
 import javax.servlet.http.HttpServletRequest;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -10,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class FixLicenseFactory implements LicenseFactory {
 
+  @NonNull
   private final License license;
 
   @Override

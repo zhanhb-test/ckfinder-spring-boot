@@ -56,14 +56,12 @@ public class GetFoldersCommand extends XMLCommand<GetFoldersArguments> {
    */
   @Override
   protected int getDataForXml(GetFoldersArguments arguments, IConfiguration configuration) {
-    try {
-      checkTypeExists(arguments.getType(), configuration);
-    } catch (ConnectorException ex) {
-      arguments.setType(null);
-      return ex.getErrorCode();
+
+    if (arguments.getType() == null) {
+      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE;
     }
 
-    if (!configuration.getAccessControl().hasPermission(arguments.getType(),
+    if (!configuration.getAccessControl().hasPermission(arguments.getType().getName(),
             arguments.getCurrentFolder(), arguments.getUserRole(),
             AccessControl.CKFINDER_CONNECTOR_ACL_FOLDER_VIEW)) {
       return Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED;
@@ -72,7 +70,7 @@ public class GetFoldersCommand extends XMLCommand<GetFoldersArguments> {
       return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST;
     }
 
-    Path dir = Paths.get(configuration.getTypes().get(arguments.getType()).getPath(),
+    Path dir = Paths.get(arguments.getType().getPath(),
             arguments.getCurrentFolder());
     try {
       if (!Files.exists(dir)) {
@@ -94,7 +92,7 @@ public class GetFoldersCommand extends XMLCommand<GetFoldersArguments> {
    */
   private void filterListByHiddenAndNotAllowed(GetFoldersArguments arguments, IConfiguration configuration) {
     List<String> tmpDirs = arguments.getDirectories().stream()
-            .filter(dir -> (configuration.getAccessControl().hasPermission(arguments.getType(), arguments.getCurrentFolder() + dir, arguments.getUserRole(),
+            .filter(dir -> (configuration.getAccessControl().hasPermission(arguments.getType().getName(), arguments.getCurrentFolder() + dir, arguments.getUserRole(),
             AccessControl.CKFINDER_CONNECTOR_ACL_FOLDER_VIEW)
             && !FileUtils.isDirectoryHidden(dir, configuration)))
             .collect(Collectors.toList());
@@ -112,17 +110,17 @@ public class GetFoldersCommand extends XMLCommand<GetFoldersArguments> {
   private void createFoldersData(Connector.Builder rootElement, GetFoldersArguments arguments, IConfiguration configuration) {
     Folders.Builder folders = Folders.builder();
     for (String dirPath : arguments.getDirectories()) {
-      Path dir = Paths.get(configuration.getTypes().get(arguments.getType()).getPath(),
+      Path dir = Paths.get(arguments.getType().getPath(),
               arguments.getCurrentFolder(), dirPath);
       if (Files.exists(dir)) {
         boolean hasChildren = FileUtils.hasChildren(configuration.getAccessControl(),
                 arguments.getCurrentFolder() + dirPath + "/", dir,
-                configuration, arguments.getType(), arguments.getUserRole());
+                configuration, arguments.getType().getName(), arguments.getUserRole());
         folders.folder(Folder.builder()
                 .name(dirPath)
                 .hasChildren(hasChildren)
                 .acl(configuration.getAccessControl()
-                        .getAcl(arguments.getType(),
+                        .getAcl(arguments.getType().getName(),
                                 arguments.getCurrentFolder()
                                 + dirPath, arguments.getUserRole())).build());
       }

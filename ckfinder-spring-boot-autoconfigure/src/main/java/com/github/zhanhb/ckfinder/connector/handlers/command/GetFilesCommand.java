@@ -77,17 +77,14 @@ public class GetFilesCommand extends XMLCommand<GetFilesArguments> {
    */
   @Override
   protected int getDataForXml(GetFilesArguments arguments, IConfiguration configuration) {
-    try {
-      checkTypeExists(arguments.getType(), configuration);
-    } catch (ConnectorException ex) {
-      arguments.setType(null);
-      return ex.getErrorCode();
+    if (arguments.getType() == null) {
+      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE;
     }
 
-    arguments.setFullCurrentPath(Paths.get(configuration.getTypes().get(arguments.getType()).getPath(),
+    arguments.setFullCurrentPath(Paths.get(arguments.getType().getPath(),
             arguments.getCurrentFolder()).toString());
 
-    if (!configuration.getAccessControl().hasPermission(arguments.getType(),
+    if (!configuration.getAccessControl().hasPermission(arguments.getType().getName(),
             arguments.getCurrentFolder(), arguments.getUserRole(),
             AccessControl.CKFINDER_CONNECTOR_ACL_FILE_VIEW)) {
       return Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED;
@@ -114,7 +111,7 @@ public class GetFilesCommand extends XMLCommand<GetFilesArguments> {
    */
   private void filterListByHiddenAndNotAllowed(GetFilesArguments arguments, IConfiguration configuration) {
     List<String> tmpFiles = arguments.getFiles().stream()
-            .filter(file -> (FileUtils.checkFileExtension(file, configuration.getTypes().get(arguments.getType())) == 0
+            .filter(file -> (FileUtils.checkFileExtension(file, arguments.getType()) == 0
             && !FileUtils.isFileHidden(file, configuration)))
             .collect(Collectors.toList());
 
@@ -160,7 +157,7 @@ public class GetFilesCommand extends XMLCommand<GetFilesArguments> {
    */
   private String createThumbAttr(Path file, GetFilesArguments arguments, IConfiguration configuration) {
     Path thumbFile = Paths.get(configuration.getThumbsPath(),
-            arguments.getType(), arguments.getCurrentFolder(),
+            arguments.getType().getName(), arguments.getCurrentFolder(),
             file.getFileName().toString());
     if (Files.exists(thumbFile)) {
       return file.getFileName().toString();

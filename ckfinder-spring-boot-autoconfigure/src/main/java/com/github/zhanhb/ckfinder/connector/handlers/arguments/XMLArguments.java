@@ -15,7 +15,7 @@ import lombok.Setter;
 @Setter
 public class XMLArguments extends Arguments {
 
-  private Connector.Builder connector;
+  private Connector.Builder connector = Connector.builder();
 
   /**
    *

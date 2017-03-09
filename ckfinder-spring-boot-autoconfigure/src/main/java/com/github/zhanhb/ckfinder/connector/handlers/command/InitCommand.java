@@ -92,7 +92,7 @@ public class InitCommand extends XMLCommand<InitArgument> {
     element.thumbsEnabled(configuration.isThumbsEnabled());
     element.uploadCheckImages(!configuration.isCheckSizeAfterScaling());
     if (configuration.isThumbsEnabled()) {
-      element.thumbsUrl(configuration.getThumbsUrl());
+      element.thumbsUrl(PathUtils.addSlashToEnd(configuration.getThumbsUrl()));
       element.thumbsDirectAccess(configuration.isThumbsDirectAccess());
       element.thumbsWidth(configuration.getMaxThumbWidth());
       element.thumbsHeight(configuration.getMaxThumbHeight());
@@ -181,27 +181,26 @@ public class InitCommand extends XMLCommand<InitArgument> {
     //resurcetypes
     ResourceTypes.Builder resourceTypes = ResourceTypes.builder();
     Set<String> types;
-    if (arguments.getType() != null && !arguments.getType().isEmpty()) {
+    if (arguments.getType() != null) {
       types = new LinkedHashSet<>();
-      types.add(arguments.getType());
+      types.add(arguments.getType().getName());
     } else {
       types = getTypes(configuration);
     }
 
     for (String key : types) {
       ResourceType resourceType = configuration.getTypes().get(key);
-      if (((arguments.getType() == null || arguments.getType().equals(key)) && resourceType != null)
+      if (((arguments.getType() == null || arguments.getType().getName().equals(key)) && resourceType != null)
               && configuration.getAccessControl().hasPermission(key, "/", arguments.getUserRole(),
                       AccessControl.CKFINDER_CONNECTOR_ACL_FOLDER_VIEW)) {
 
         com.github.zhanhb.ckfinder.connector.handlers.response.ResourceType.Builder childElement = com.github.zhanhb.ckfinder.connector.handlers.response.ResourceType.builder();
         childElement.name(resourceType.getName());
         childElement.acl(configuration.getAccessControl().getAcl(key, "/", arguments.getUserRole()));
-        childElement.hash(randomHash(
-                resourceType.getPath()));
+        childElement.hash(randomHash(resourceType.getPath()));
         childElement.allowedExtensions(resourceType.getAllowedExtensions());
         childElement.deniedExtensions(resourceType.getDeniedExtensions());
-        childElement.url(resourceType.getUrl() + "/");
+        childElement.url(PathUtils.addSlashToEnd(resourceType.getUrl()));
         long maxSize = resourceType.getMaxSize();
         childElement.maxSize(maxSize > 0 ? maxSize : 0);
         boolean hasChildren = FileUtils.hasChildren(configuration.getAccessControl(), "/", Paths.get(PathUtils.escape(resourceType.getPath())), configuration, resourceType.getName(), arguments.getUserRole());
@@ -251,8 +250,7 @@ public class InitCommand extends XMLCommand<InitArgument> {
   }
 
   @Override
-  protected boolean shouldAddCurrentFolderNode(InitArgument arguments) {
-    return false;
+  protected void createCurrentFolderNode(InitArgument arguments, Connector.Builder rootElement, IConfiguration configuration) {
   }
 
   @Override
@@ -264,7 +262,7 @@ public class InitCommand extends XMLCommand<InitArgument> {
 
   @Deprecated
   @Override
-  String getCurrentFolderParam(HttpServletRequest request) {
+  String setCurrentFolder(InitArgument arguments, HttpServletRequest request) {
     return null;
   }
 

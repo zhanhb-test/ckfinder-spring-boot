@@ -21,29 +21,29 @@ import lombok.NoArgsConstructor;
 @XmlRootElement(name = "ConnectorInfo")
 public class ConnectorInfo implements ConnectorElement {
 
-  @XmlAttribute(name = "c")
-  private String licenseKey;
   @XmlAttribute(name = "enabled")
   private boolean enabled;
-  @XmlAttribute(name = "imgHeight")
-  private int imgHeight;
-  @XmlAttribute(name = "imgWidth")
-  private int imgWidth;
-  @XmlAttribute(name = "plugins")
-  private String plugins;
   @XmlAttribute(name = "s")
   private String licenseName;
-  @XmlAttribute(name = "thumbsDirectAccess")
-  private boolean thumbsDirectAccess;
+  @XmlAttribute(name = "c")
+  private String licenseKey;
   @XmlAttribute(name = "thumbsEnabled")
   private boolean thumbsEnabled;
-  @XmlAttribute(name = "thumbsHeight")
-  private Integer thumbsHeight;
   @XmlAttribute(name = "thumbsUrl")
   private String thumbsUrl;
   @XmlAttribute(name = "thumbsWidth")
   private Integer thumbsWidth;
+  @XmlAttribute(name = "thumbsHeight")
+  private Integer thumbsHeight;
+  @XmlAttribute(name = "imgWidth")
+  private int imgWidth;
+  @XmlAttribute(name = "imgHeight")
+  private int imgHeight;
   @XmlAttribute(name = "uploadCheckImages")
   private boolean uploadCheckImages;
+  @XmlAttribute(name = "plugins")
+  private String plugins;
+  @XmlAttribute(name = "thumbsDirectAccess")
+  private boolean thumbsDirectAccess;
 
 }

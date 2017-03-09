@@ -23,6 +23,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import org.springframework.util.StringUtils;
 
 /**
  * Class to handle errors from commands returning XML response.
@@ -37,31 +38,30 @@ public enum XMLErrorHandler {
     HttpSession session = request.getSession(false);
     String userRole = session == null ? null : (String) session.getAttribute(configuration.getUserRoleName());
 
-    Connector.Builder rootElement = Connector.builder();
+    Connector.Builder connector = Connector.builder();
     String currentFolder = connectorException.getCurrentFolder();
-    String type = connectorException.getType();
-
-    Map<String, ResourceType> types = configuration.getTypes();
+    ResourceType type = connectorException.getType();
 
     response.setContentType("text/xml;charset=UTF-8");
     response.setHeader("Cache-Control", "no-cache");
     int errorNum = connectorException.getErrorCode();
 
-    if (type != null && !type.isEmpty()) {
-      rootElement.resourceType(type);
+    if (type != null) {
+      String typeName = type.getName();
+      connector.resourceType(typeName);
+      if (!StringUtils.isEmpty(currentFolder)) {
+        connector.currentFolder(CurrentFolder.builder()
+                .path(currentFolder)
+                .url(type.getUrl() + currentFolder)
+                .acl(configuration.getAccessControl().getAcl(typeName, currentFolder, userRole))
+                .build());
+      }
     }
-    if (currentFolder != null) {
-      rootElement.currentFolder(CurrentFolder.builder()
-              .path(currentFolder)
-              .url(types.get(type).getUrl() + currentFolder)
-              .acl(configuration.getAccessControl().getAcl(type, currentFolder, userRole))
-              .build());
-    }
-    rootElement.error(Error.builder()
+    connector.error(Error.builder()
             .number(errorNum)
             .value(connectorException.getMessage()).build());
     try (PrintWriter out = response.getWriter()) {
-      XMLCreator.INSTANCE.writeTo(rootElement.build(), out);
+      XMLCreator.INSTANCE.writeTo(connector.build(), out);
     }
   }
 

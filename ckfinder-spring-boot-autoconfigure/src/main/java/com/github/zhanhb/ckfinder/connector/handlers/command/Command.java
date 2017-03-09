@@ -73,24 +73,19 @@ public abstract class Command<T extends Arguments> {
    */
   protected void initParams(T arguments, HttpServletRequest request,
           IConfiguration configuration) throws ConnectorException {
-    HttpSession session = request.getSession(false);
-    String userRole = session == null ? null : (String) session.getAttribute(configuration.getUserRoleName());
-    arguments.setUserRole(userRole);
+    setUserRole(arguments, request, configuration);
+    String currentFolder = setCurrentFolder(arguments, request);
 
-    String currentFolder = getCurrentFolderParam(request);
     checkConnectorEnabled(configuration);
     checkRequestPathValid(currentFolder);
 
-    currentFolder = PathUtils.escape(currentFolder);
-    arguments.setCurrentFolder(currentFolder);
-    if (FileUtils.isDirectoryHidden(arguments.getCurrentFolder(), configuration)) {
+    if (FileUtils.isDirectoryHidden(currentFolder, configuration)) {
       throw new ConnectorException(
               Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
     }
 
-    if (currentFolder == null || currentFolder.isEmpty()
-            || isCurrFolderExists(arguments, request, configuration)) {
-      arguments.setType(request.getParameter("type"));
+    if (currentFolder == null || isCurrFolderExists(arguments, request, configuration)) {
+      arguments.setType(configuration.getTypes().get(request.getParameter("type")));
     }
   }
 
@@ -191,19 +186,29 @@ public abstract class Command<T extends Arguments> {
     }
   }
 
+  private void setUserRole(T arguments, HttpServletRequest request, IConfiguration configuration) {
+    HttpSession session = request.getSession(false);
+    String userRole = session == null ? null : (String) session.getAttribute(configuration.getUserRoleName());
+    arguments.setUserRole(userRole);
+  }
+
   /**
    * gets current folder request param or sets default value if it's not set.
    *
+   * @param arguments
    * @param request request
+   * @return
    */
-  @Deprecated
-  String getCurrentFolderParam(HttpServletRequest request) {
+  String setCurrentFolder(T arguments, HttpServletRequest request) {
     String currFolder = request.getParameter("currentFolder");
     if (currFolder != null && !currFolder.isEmpty()) {
-      return PathUtils.addSlashToBeginning(PathUtils.addSlashToEnd(currFolder));
+      currFolder = PathUtils.addSlashToBeginning(PathUtils.addSlashToEnd(currFolder));
     } else {
-      return "/";
+      currFolder = "/";
     }
+    currFolder = PathUtils.escape(currFolder);
+    arguments.setCurrentFolder(currFolder);
+    return currFolder;
   }
 
 }

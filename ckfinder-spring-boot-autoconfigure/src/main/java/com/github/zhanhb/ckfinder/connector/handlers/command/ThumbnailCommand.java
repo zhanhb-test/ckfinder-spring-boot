@@ -45,57 +45,6 @@ public class ThumbnailCommand extends Command<ThumbnailArguments> {
   private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US)
           .withZone(ZoneId.of("GMT"));
 
-  /**
-   * Backup map holding mime types for images just in case if they aren't set in
-   * a request
-   */
-  private static final Map<String, String> imgMimeTypeMap = new HashMap<>(57);
-
-  static {
-    imgMimeTypeMap.put(".art", "image/x-jg");
-    imgMimeTypeMap.put(".bm", "image/bmp");
-    imgMimeTypeMap.put(".bmp", "image/bmp");
-    imgMimeTypeMap.put(".dwg", "image/vnd.dwg");
-    imgMimeTypeMap.put(".dxf", "image/vnd.dwg");
-    imgMimeTypeMap.put(".fif", "image/fif");
-    imgMimeTypeMap.put(".flo", "image/florian");
-    imgMimeTypeMap.put(".fpx", "image/vnd.fpx");
-    imgMimeTypeMap.put(".g3", "image/g3fax");
-    imgMimeTypeMap.put(".gif", "image/gif");
-    imgMimeTypeMap.put(".ico", "image/x-icon");
-    imgMimeTypeMap.put(".ief", "image/ief");
-    imgMimeTypeMap.put(".iefs", "image/ief");
-    imgMimeTypeMap.put(".jut", "image/jutvision");
-    imgMimeTypeMap.put(".mcf", "image/vasa");
-    imgMimeTypeMap.put(".nap", "image/naplps");
-    imgMimeTypeMap.put(".naplps", "image/naplps");
-    imgMimeTypeMap.put(".nif", "image/x-niff");
-    imgMimeTypeMap.put(".niff", "image/x-niff");
-    imgMimeTypeMap.put(".pct", "image/x-pict");
-    imgMimeTypeMap.put(".pcx", "image/x-pcx");
-    imgMimeTypeMap.put(".pgm", "image/x-portable-graymap");
-    imgMimeTypeMap.put(".pic", "image/pict");
-    imgMimeTypeMap.put(".pict", "image/pict");
-    imgMimeTypeMap.put(".pm", "image/x-xpixmap");
-    imgMimeTypeMap.put(".png", "image/png");
-    imgMimeTypeMap.put(".pnm", "image/x-portable-anymap");
-    imgMimeTypeMap.put(".ppm", "image/x-portable-pixmap");
-    imgMimeTypeMap.put(".ras", "image/x-cmu-raster");
-    imgMimeTypeMap.put(".rast", "image/cmu-raster");
-    imgMimeTypeMap.put(".rf", "image/vnd.rn-realflash");
-    imgMimeTypeMap.put(".rgb", "image/x-rgb");
-    imgMimeTypeMap.put(".rp", "image/vnd.rn-realpix");
-    imgMimeTypeMap.put(".svf", "image/vnd.dwg");
-    imgMimeTypeMap.put(".svf", "image/x-dwg");
-    imgMimeTypeMap.put(".tiff", "image/tiff");
-    imgMimeTypeMap.put(".turbot", "image/florian");
-    imgMimeTypeMap.put(".wbmp", "image/vnd.wap.wbmp");
-    imgMimeTypeMap.put(".xif", "image/vnd.xiff");
-    imgMimeTypeMap.put(".xpm", "image/x-xpixmap");
-    imgMimeTypeMap.put(".x-png", "image/png");
-    imgMimeTypeMap.put(".xwd", "image/x-xwindowdump");
-  }
-
   public ThumbnailCommand() {
     super(ThumbnailArguments::new);
   }
@@ -121,23 +70,18 @@ public class ThumbnailCommand extends Command<ThumbnailArguments> {
   private String getMimeTypeOfImage(ServletContext sc,
           HttpServletResponse response, ThumbnailArguments arguments) {
     String fileName = arguments.getFileName();
-    if (fileName == null || fileName.length() == 0) {
-      response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-      return null;
+    if (fileName != null && fileName.length() != 0) {
+      String fileExtension = FileUtils.getFileExtension(fileName);
+      if (fileExtension != null) {
+        String tempFileName = fileName.substring(0, fileName.lastIndexOf(46) + 1).concat(fileExtension.toLowerCase());
+        String mimeType = sc.getMimeType(tempFileName);
+        if (mimeType != null && mimeType.length() != 0) {
+          return mimeType;
+        }
+      }
     }
-    String tempFileName = fileName.substring(0,
-            fileName.lastIndexOf('.') + 1).concat(
-            FileUtils.getFileExtension(fileName).toLowerCase());
-    String mimeType = sc.getMimeType(tempFileName);
-    if (mimeType == null || mimeType.length() == 0) {
-      mimeType = imgMimeTypeMap.get(arguments.getFileName().substring(arguments.getFileName().lastIndexOf('.')).toLowerCase());
-    }
-
-    if (mimeType == null) {
-      response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-      return null;
-    }
-    return mimeType;
+    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+    return null;
   }
 
   @Override
@@ -183,14 +127,12 @@ public class ThumbnailCommand extends Command<ThumbnailArguments> {
     if (!configuration.isThumbsEnabled()) {
       arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_THUMBNAILS_DISABLED);
     }
-    try {
-      checkTypeExists(arguments.getType(), configuration);
-    } catch (ConnectorException ex) {
-      arguments.setType(null);
-      throw ex;
+
+    if (arguments.getType() == null) {
+      throw new ConnectorException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE);
     }
 
-    if (!configuration.getAccessControl().hasPermission(arguments.getType(),
+    if (!configuration.getAccessControl().hasPermission(arguments.getType().getName(),
             arguments.getCurrentFolder(), arguments.getUserRole(),
             AccessControl.CKFINDER_CONNECTOR_ACL_FILE_VIEW)) {
       arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED);
@@ -205,7 +147,7 @@ public class ThumbnailCommand extends Command<ThumbnailArguments> {
     }
 
     log.debug("configuration thumbsPath: {}", configuration.getThumbsPath());
-    Path fullCurrentDir = Paths.get(configuration.getThumbsPath(), arguments.getType(), arguments.getCurrentFolder());
+    Path fullCurrentDir = Paths.get(configuration.getThumbsPath(), arguments.getType().getName(), arguments.getCurrentFolder());
     log.debug("typeThumbDir: {}", fullCurrentDir);
 
     try {
@@ -237,7 +179,7 @@ public class ThumbnailCommand extends Command<ThumbnailArguments> {
     arguments.setThumbFile(thumbFile);
     try {
       if (!Files.exists(thumbFile)) {
-        Path orginFile = Paths.get(configuration.getTypes().get(arguments.getType()).getPath(),
+        Path orginFile = Paths.get(arguments.getType().getPath(),
                 arguments.getCurrentFolder(), arguments.getFileName());
         log.debug("orginFile: {}", orginFile);
         if (!Files.exists(orginFile)) {

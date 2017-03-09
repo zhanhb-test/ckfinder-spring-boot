@@ -52,7 +52,9 @@ public abstract class XMLCommand<T extends XMLArguments> extends Command<T> {
    * executes XML command. Creates XML response and writes it to response output
    * stream.
    *
-   * @throws ConnectorException to handle in error handler.
+   * @param arguments
+   * @param configuration
+   * @throws java.io.IOException
    */
   @Override
   @SuppressWarnings("FinalMethod")
@@ -71,12 +73,10 @@ public abstract class XMLCommand<T extends XMLArguments> extends Command<T> {
    */
   private void createXMLResponse(T arguments, int errorNum, IConfiguration configuration) {
     Connector.Builder rootElement = arguments.getConnector();
-    if (arguments.getType() != null && !arguments.getType().isEmpty()) {
-      rootElement.resourceType(arguments.getType());
+    if (arguments.getType() != null) {
+      rootElement.resourceType(arguments.getType().getName());
     }
-    if (shouldAddCurrentFolderNode(arguments)) {
-      createCurrentFolderNode(arguments, rootElement, configuration);
-    }
+    createCurrentFolderNode(arguments, rootElement, configuration);
     rootElement.error(Error.builder().number(errorNum).build());
     createXMLChildNodes(errorNum, rootElement, arguments, configuration);
   }
@@ -111,32 +111,15 @@ public abstract class XMLCommand<T extends XMLArguments> extends Command<T> {
    * @param rootElement XML root node.
    * @param configuration connector configuration
    */
-  @SuppressWarnings("FinalMethod")
-  protected final void createCurrentFolderNode(T arguments, Connector.Builder rootElement, IConfiguration configuration) {
-    rootElement.currentFolder(CurrentFolder.builder()
-            .path(arguments.getCurrentFolder())
-            .url(configuration.getTypes().get(arguments.getType()).getUrl()
-                    + arguments.getCurrentFolder())
-            .acl(configuration.getAccessControl().getAcl(arguments.getType(), arguments.getCurrentFolder(), arguments.getUserRole()))
-            .build());
-  }
-
-  @Override
-  protected void initParams(T arguments, HttpServletRequest request, IConfiguration configuration)
-          throws ConnectorException {
-    arguments.setConnector(Connector.builder());
-    super.initParams(arguments, request, configuration);
-  }
-
-  /**
-   * whether <code>CurrentFolder</code> element should be added to the XML
-   * response.
-   *
-   * @param arguments
-   * @return true if should add
-   */
-  protected boolean shouldAddCurrentFolderNode(T arguments) {
-    return arguments.getType() != null && arguments.getCurrentFolder() != null;
+  protected void createCurrentFolderNode(T arguments, Connector.Builder rootElement, IConfiguration configuration) {
+    if (arguments.getType() != null && arguments.getCurrentFolder() != null) {
+      rootElement.currentFolder(CurrentFolder.builder()
+              .path(arguments.getCurrentFolder())
+              .url(arguments.getType().getUrl()
+                      + arguments.getCurrentFolder())
+              .acl(configuration.getAccessControl().getAcl(arguments.getType().getName(), arguments.getCurrentFolder(), arguments.getUserRole()))
+              .build());
+    }
   }
 
 }

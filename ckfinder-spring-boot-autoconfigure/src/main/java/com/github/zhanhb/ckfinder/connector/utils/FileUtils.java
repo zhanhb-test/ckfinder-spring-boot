@@ -24,11 +24,8 @@ import java.nio.file.StandardCopyOption;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -66,7 +63,7 @@ public class FileUtils {
    */
   public static List<String> findChildrensList(Path dir, boolean searchDirs)
           throws IOException {
-    DirectoryStream.Filter<Path>filter = searchDirs ? Files::isDirectory : Files::isRegularFile;
+    DirectoryStream.Filter<Path> filter = searchDirs ? Files::isDirectory : Files::isRegularFile;
     try (DirectoryStream<Path> ds = Files.newDirectoryStream(dir, filter)) {
       return StreamSupport.stream(ds.spliterator(), false)
               .map(Path::getFileName)
@@ -506,7 +503,7 @@ public class FileUtils {
       boolean more;
       do {
         currToken = tokens.nextToken();
-        more = tokens.hasMoreElements();
+        more = tokens.hasMoreTokens();
         if (more) {
           cfileName.append(isExtensionAllowed(currToken, type) ? '.' : '_').append(currToken);
         } else {

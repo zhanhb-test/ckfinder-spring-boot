@@ -44,14 +44,11 @@ public class DeleteFolderCommand extends XMLCommand<XMLArguments> implements IPo
    */
   @Override
   protected int getDataForXml(XMLArguments arguments, IConfiguration configuration) {
-    try {
-      checkTypeExists(arguments.getType(), configuration);
-    } catch (ConnectorException ex) {
-      arguments.setType(null);
-      return ex.getErrorCode();
+    if (arguments.getType() == null) {
+      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE;
     }
 
-    if (!configuration.getAccessControl().hasPermission(arguments.getType(),
+    if (!configuration.getAccessControl().hasPermission(arguments.getType().getName(),
             arguments.getCurrentFolder(),
             arguments.getUserRole(),
             AccessControl.CKFINDER_CONNECTOR_ACL_FOLDER_DELETE)) {
@@ -65,8 +62,7 @@ public class DeleteFolderCommand extends XMLCommand<XMLArguments> implements IPo
       return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST;
     }
 
-    Path dir = Paths.get(configuration.getTypes().get(arguments.getType()).getPath(),
-            arguments.getCurrentFolder());
+    Path dir = Paths.get(arguments.getType().getPath(), arguments.getCurrentFolder());
 
     try {
       if (!Files.isDirectory(dir)) {
@@ -75,7 +71,7 @@ public class DeleteFolderCommand extends XMLCommand<XMLArguments> implements IPo
 
       if (FileUtils.delete(dir)) {
         Path thumbDir = Paths.get(configuration.getThumbsPath(),
-                arguments.getType(), arguments.getCurrentFolder());
+                arguments.getType().getName(), arguments.getCurrentFolder());
         FileUtils.delete(thumbDir);
       } else {
         return Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED;

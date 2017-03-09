@@ -20,21 +20,21 @@ import lombok.NoArgsConstructor;
 @XmlRootElement(name = "ResourceType")
 public class ResourceType {
 
-  @XmlAttribute(name = "acl")
-  private int acl;
-  @XmlAttribute(name = "allowedExtensions")
-  private String allowedExtensions;
-  @XmlAttribute(name = "deniedExtensions")
-  private String deniedExtensions;
-  @XmlAttribute(name = "hasChildren")
-  private boolean hasChildren;
-  @XmlAttribute(name = "hash")
-  private String hash;
-  @XmlAttribute(name = "maxSize")
-  private long maxSize;
   @XmlAttribute(name = "name")
   private String name;
   @XmlAttribute(name = "url")
   private String url;
+  @XmlAttribute(name = "allowedExtensions")
+  private String allowedExtensions;
+  @XmlAttribute(name = "deniedExtensions")
+  private String deniedExtensions;
+  @XmlAttribute(name = "hash")
+  private String hash;
+  @XmlAttribute(name = "hasChildren")
+  private boolean hasChildren;
+  @XmlAttribute(name = "acl")
+  private int acl;
+  @XmlAttribute(name = "maxSize")
+  private long maxSize;
 
 }

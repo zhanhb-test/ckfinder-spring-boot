@@ -2,7 +2,6 @@ package com.github.zhanhb.ckfinder.connector.configuration;
 
 import lombok.Builder;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 /**
  *
@@ -10,7 +9,6 @@ import lombok.RequiredArgsConstructor;
  */
 @Builder(builderClassName = "Builder")
 @Getter
-@RequiredArgsConstructor
 public class License {
 
   private final String name;

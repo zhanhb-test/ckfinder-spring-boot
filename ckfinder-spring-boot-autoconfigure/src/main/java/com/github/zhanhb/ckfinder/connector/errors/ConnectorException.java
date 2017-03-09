@@ -12,6 +12,7 @@
 package com.github.zhanhb.ckfinder.connector.errors;
 
 import com.github.zhanhb.ckfinder.connector.configuration.Constants;
+import com.github.zhanhb.ckfinder.connector.data.ResourceType;
 import com.github.zhanhb.ckfinder.connector.handlers.arguments.Arguments;
 import java.util.Objects;
 import lombok.Getter;
@@ -28,7 +29,7 @@ public class ConnectorException extends Exception {
   private static final long serialVersionUID = -8643752550259111562L;
   private final int errorCode;
   private final String currentFolder;
-  private String type;
+  private ResourceType type;
 
   /**
    * standard constructor.
@@ -92,6 +93,11 @@ public class ConnectorException extends Exception {
     }
     this.currentFolder = null;
     this.errorCode = Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNKNOWN;
+  }
+
+  @Override
+  public Throwable fillInStackTrace() {
+    return this;
   }
 
 }

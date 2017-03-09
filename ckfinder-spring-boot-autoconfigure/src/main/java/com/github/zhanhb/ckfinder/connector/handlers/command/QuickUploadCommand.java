@@ -37,7 +37,7 @@ public class QuickUploadCommand extends FileUploadCommand {
       writer.write("window.parent.OnUploadCompleted(");
       writer.write("" + arguments.getErrorCode() + ", ");
       if (arguments.isUploaded()) {
-        writer.write("'" + configuration.getTypes().get(arguments.getType()).getUrl()
+        writer.write("'" + arguments.getType().getUrl()
                 + arguments.getCurrentFolder()
                 + FileUtils.backupWithBackSlash(FileUtils.encodeURIComponent(arguments.getNewFileName()), "'")
                 + "', ");
@@ -105,7 +105,7 @@ public class QuickUploadCommand extends FileUploadCommand {
         jsonObj.put("url", path + FileUtils.backupWithBackSlash(FileUtils.encodeURIComponent(arguments.getNewFileName()), "'"));
       } else {
         jsonObj.put("url",
-                configuration.getTypes().get(arguments.getType()).getUrl()
+                arguments.getType().getUrl()
                 + arguments.getCurrentFolder()
                 + FileUtils.backupWithBackSlash(FileUtils
                         .encodeURIComponent(arguments.getNewFileName()),

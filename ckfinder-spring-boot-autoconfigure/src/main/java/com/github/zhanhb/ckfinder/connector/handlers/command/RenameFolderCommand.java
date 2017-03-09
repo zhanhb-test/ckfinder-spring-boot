@@ -54,7 +54,7 @@ public class RenameFolderCommand extends XMLCommand<RenameFolderArguments> imple
     rootElement.renamedFolder(RenamedFolder.builder()
             .newName(arguments.getNewFolderName())
             .newPath(arguments.getNewFolderPath())
-            .newUrl(configuration.getTypes().get(arguments.getType()).getUrl() + arguments.getNewFolderPath())
+            .newUrl(arguments.getType().getUrl() + arguments.getNewFolderPath())
             .build());
   }
 
@@ -67,14 +67,11 @@ public class RenameFolderCommand extends XMLCommand<RenameFolderArguments> imple
       return e.getErrorCode();
     }
 
-    try {
-      checkTypeExists(arguments.getType(), configuration);
-    } catch (ConnectorException ex) {
-      arguments.setType(null);
-      return ex.getErrorCode();
+    if (arguments.getType() == null) {
+      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE;
     }
 
-    if (!configuration.getAccessControl().hasPermission(arguments.getType(),
+    if (!configuration.getAccessControl().hasPermission(arguments.getType().getName(),
             arguments.getCurrentFolder(),
             arguments.getUserRole(),
             AccessControl.CKFINDER_CONNECTOR_ACL_FOLDER_RENAME)) {
@@ -94,14 +91,14 @@ public class RenameFolderCommand extends XMLCommand<RenameFolderArguments> imple
       return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST;
     }
 
-    Path dir = Paths.get(configuration.getTypes().get(arguments.getType()).getPath(),
+    Path dir = Paths.get(arguments.getType().getPath(),
             arguments.getCurrentFolder());
     try {
       if (!Files.isDirectory(dir)) {
         return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST;
       }
       setNewFolder(arguments);
-      Path newDir = Paths.get(configuration.getTypes().get(arguments.getType()).getPath(),
+      Path newDir = Paths.get(arguments.getType().getPath(),
               arguments.getNewFolderPath());
       if (Files.exists(newDir)) {
         return Constants.Errors.CKFINDER_CONNECTOR_ERROR_ALREADY_EXIST;
@@ -125,9 +122,9 @@ public class RenameFolderCommand extends XMLCommand<RenameFolderArguments> imple
    */
   private void renameThumb(RenameFolderArguments arguments, IConfiguration configuration) throws IOException {
     Path thumbDir = Paths.get(configuration.getThumbsPath(),
-            arguments.getType(), arguments.getCurrentFolder());
+            arguments.getType().getName(), arguments.getCurrentFolder());
     Path newThumbDir = Paths.get(configuration.getThumbsPath(),
-            arguments.getType(), arguments.getNewFolderPath());
+            arguments.getType().getName(), arguments.getNewFolderPath());
     try {
       Files.move(thumbDir, newThumbDir);
     } catch (IOException ex) {

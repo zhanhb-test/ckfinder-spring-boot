@@ -66,16 +66,11 @@ public class RenameFileCommand extends XMLCommand<RenameFileArguments> implement
   @Override
   protected int getDataForXml(RenameFileArguments arguments, IConfiguration configuration) {
     log.trace("getDataForXml");
-
-    try {
-      checkTypeExists(arguments.getType(), configuration);
-    } catch (ConnectorException ex) {
-      log.info("isTypeExists({}): false", arguments.getType());
-      arguments.setType(null);
-      return ex.getErrorCode();
+    if (arguments.getType() == null) {
+      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE;
     }
 
-    if (!configuration.getAccessControl().hasPermission(arguments.getType(),
+    if (!configuration.getAccessControl().hasPermission(arguments.getType().getName(),
             arguments.getCurrentFolder(), arguments.getUserRole(),
             AccessControl.CKFINDER_CONNECTOR_ACL_FILE_RENAME)) {
       return Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED;
@@ -91,12 +86,12 @@ public class RenameFileCommand extends XMLCommand<RenameFileArguments> implement
     }
 
     int checkFileExt = FileUtils.checkFileExtension(arguments.getNewFileName(),
-            configuration.getTypes().get(arguments.getType()));
+            arguments.getType());
     if (checkFileExt == 1) {
       return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_EXTENSION;
     }
     if (configuration.isCheckDoubleFileExtensions()) {
-      arguments.setNewFileName(FileUtils.renameFileWithBadExt(configuration.getTypes().get(arguments.getType()),
+      arguments.setNewFileName(FileUtils.renameFileWithBadExt(arguments.getType(),
               arguments.getNewFileName()));
     }
 
@@ -111,11 +106,11 @@ public class RenameFileCommand extends XMLCommand<RenameFileArguments> implement
     }
 
     if (FileUtils.checkFileExtension(arguments.getFileName(),
-            configuration.getTypes().get(arguments.getType())) == 1) {
+            arguments.getType()) == 1) {
       return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST;
     }
 
-    String dirPath = configuration.getTypes().get(arguments.getType()).getPath();
+    String dirPath = arguments.getType().getPath();
     Path file = Paths.get(dirPath, arguments.getCurrentFolder(), arguments.getFileName());
     Path newFile = Paths.get(dirPath, arguments.getCurrentFolder(), arguments.getNewFileName());
 
@@ -150,10 +145,10 @@ public class RenameFileCommand extends XMLCommand<RenameFileArguments> implement
    */
   private void renameThumb(RenameFileArguments arguments, IConfiguration configuration) throws IOException {
     Path thumbFile = Paths.get(configuration.getThumbsPath(),
-            arguments.getType(), arguments.getCurrentFolder(),
+            arguments.getType().getName(), arguments.getCurrentFolder(),
             arguments.getFileName());
     Path newThumbFile = Paths.get(configuration.getThumbsPath(),
-            arguments.getType(), arguments.getCurrentFolder(),
+            arguments.getType().getName(), arguments.getCurrentFolder(),
             arguments.getNewFileName());
 
     try {

@@ -38,7 +38,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
-import java.util.Properties;
+import java.util.stream.Collectors;
 import javax.servlet.ServletContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -48,6 +48,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -124,6 +125,10 @@ public class CKFinderAutoConfiguration {
   @Configuration
   @ConditionalOnMissingBean(IConfiguration.class)
   public static class DefaultConfigurationConfiguration {
+
+    private static String toString(String[] array) {
+      return Arrays.stream(array).collect(Collectors.joining(","));
+    }
 
     @Autowired
     private CKFinderProperties properties;
@@ -212,17 +217,18 @@ public class CKFinderAutoConfiguration {
     private void setTypes(com.github.zhanhb.ckfinder.connector.configuration.Configuration.Builder builder) throws IOException {
       String baseDir = basePathBuilder.getBaseDir();
       String baseUrl = basePathBuilder.getBaseUrl();
-      for (CKFinderProperties.Type type : properties.getTypes()) {
+      for (Map.Entry<String, CKFinderProperties.Type> entry : properties.getTypes().entrySet()) {
+        final String typeName = entry.getKey();
+        CKFinderProperties.Type type = entry.getValue();
+        Assert.hasText(typeName, "Resource type name should not be empty");
         ResourceType.Builder resourceTypeBuilder = ResourceType.builder();
-        final String typeName = type.getName();
-        Assert.notNull(typeName, "Resource type name should not be null");
         resourceTypeBuilder.name(typeName);
 
         if (type.getAllowedExtensions() != null) {
-          resourceTypeBuilder.allowedExtensions(type.getAllowedExtensions());
+          resourceTypeBuilder.allowedExtensions(toString(type.getAllowedExtensions()));
         }
         if (type.getDeniedExtensions() != null) {
-          resourceTypeBuilder.deniedExtensions(type.getDeniedExtensions());
+          resourceTypeBuilder.deniedExtensions(toString(type.getDeniedExtensions()));
         }
         if (type.getMaxSize() != null) {
           resourceTypeBuilder.maxSize(type.getMaxSize());
@@ -234,7 +240,7 @@ public class CKFinderAutoConfiguration {
                 Paths.get(path
                         .replace(Constants.BASE_DIR_PLACEHOLDER, baseDir)))
                 .toAbsolutePath().toString());
-        String url = (type.getUrl() != null) ? type.getUrl() : Constants.BASE_URL_PLACEHOLDER + "/" + typeName.toLowerCase() + "/";
+        String url = type.getUrl() != null ? type.getUrl() : Constants.BASE_URL_PLACEHOLDER + "/" + typeName.toLowerCase();
         resourceTypeBuilder.url(url.replace(Constants.BASE_URL_PLACEHOLDER, baseUrl));
 
         ResourceType resourceType = resourceTypeBuilder.build();
@@ -297,14 +303,10 @@ public class CKFinderAutoConfiguration {
     @Bean
     public ImageResize imageResize() {
       CKFinderProperties.ImageResize imageResize = properties.getImageResize();
-      Properties params = imageResize.getParams();
+      Map<String, String> params = imageResize.getParams();
       PluginInfo.Builder pluginInfoBuilder = PluginInfo.builder();
       if (params != null && !params.isEmpty()) {
-        for (Map.Entry<Object, Object> entry : params.entrySet()) {
-          String key = (String) entry.getKey();
-          String value = (String) entry.getValue();
-          pluginInfoBuilder.param(key, value);
-        }
+        pluginInfoBuilder.params(params);
       }
       return new ImageResize(pluginInfoBuilder.build().getParams());
     }
@@ -325,6 +327,10 @@ public class CKFinderAutoConfiguration {
     public Watermark watermark() {
       CKFinderProperties.Watermark watermark = properties.getWatermark();
       WatermarkSettings.Builder builder = WatermarkSettings.builder();
+      String source = watermark.getSource();
+      Assert.notNull(source, "waltermark source should not be null");
+      Resource resource = resourceLoader.getResource(source);
+      Assert.isTrue(resource.exists(), "waltermark resource not exists");
       if (watermark.getMarginBottom() != null) {
         builder.marginBottom(watermark.getMarginBottom());
       }
@@ -335,7 +341,7 @@ public class CKFinderAutoConfiguration {
         builder.quality(watermark.getQuality());
       }
       if (watermark.getSource() != null) {
-        builder.source(resourceLoader.getResource(watermark.getSource()));
+        builder.source(resource);
       }
       if (watermark.getTransparency() != null) {
         builder.transparency(watermark.getTransparency());

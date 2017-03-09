@@ -52,7 +52,6 @@ public class FileUploadArguments extends Arguments {
     this.errorCode = 0;
     this.fileName = "";
     this.newFileName = "";
-    setType("");
     this.uploaded = false;
   }
 

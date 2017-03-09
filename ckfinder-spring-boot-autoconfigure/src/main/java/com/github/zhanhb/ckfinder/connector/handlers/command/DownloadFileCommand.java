@@ -41,15 +41,11 @@ public class DownloadFileCommand extends Command<DownloadFileArguments> {
   @Override
   void execute(DownloadFileArguments arguments, HttpServletResponse response, IConfiguration configuration)
           throws ConnectorException {
-    try {
-      checkTypeExists(arguments.getType(), configuration);
-    } catch (ConnectorException ex) {
-      arguments.setType(null);
-      throw new ConnectorException(ex.getErrorCode());
+    if (arguments.getType() == null) {
+      throw new ConnectorException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE);
     }
 
-    Path file = Paths.get(configuration.getTypes().get(arguments.getType()).getPath(),
-            arguments.getCurrentFolder(), arguments.getFileName());
+    Path file = Paths.get(arguments.getType().getPath(), arguments.getCurrentFolder(), arguments.getFileName());
 
     if (file != null) {
       try {
@@ -66,7 +62,7 @@ public class DownloadFileCommand extends Command<DownloadFileArguments> {
     response.setHeader("Pragma", "public");
     response.setHeader("Expires", "0");
 
-    if (!configuration.getAccessControl().hasPermission(arguments.getType(),
+    if (!configuration.getAccessControl().hasPermission(arguments.getType().getName(),
             arguments.getCurrentFolder(), arguments.getUserRole(),
             AccessControl.CKFINDER_CONNECTOR_ACL_FILE_VIEW)) {
       arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED);
@@ -74,7 +70,7 @@ public class DownloadFileCommand extends Command<DownloadFileArguments> {
 
     if (!FileUtils.isFileNameInvalid(arguments.getFileName())
             || FileUtils.checkFileExtension(arguments.getFileName(),
-                    configuration.getTypes().get(arguments.getType())) == 1) {
+                    arguments.getType()) == 1) {
       arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
     }
 

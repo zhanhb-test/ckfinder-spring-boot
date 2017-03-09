@@ -73,8 +73,7 @@ public class FileUploadCommand extends Command<FileUploadArguments> implements I
         arguments.setNewFileName("");
         arguments.setCurrentFolder("");
       } else {
-        path = configuration.getTypes().get(arguments.getType()).getUrl()
-                + arguments.getCurrentFolder();
+        path = arguments.getType().getUrl() + arguments.getCurrentFolder();
       }
       PrintWriter writer = response.getWriter();
       if ("txt".equals(arguments.getResponseType())) {
@@ -174,7 +173,7 @@ public class FileUploadCommand extends Command<FileUploadArguments> implements I
    * @return true if uploaded correctly.
    */
   private boolean uploadFile(HttpServletRequest request, FileUploadArguments arguments, IConfiguration configuration) {
-    if (!configuration.getAccessControl().hasPermission(arguments.getType(),
+    if (!configuration.getAccessControl().hasPermission(arguments.getType().getName(),
             arguments.getCurrentFolder(), arguments.getUserRole(),
             AccessControl.CKFINDER_CONNECTOR_ACL_FILE_UPLOAD)) {
       arguments.setErrorCode(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED);
@@ -192,7 +191,7 @@ public class FileUploadCommand extends Command<FileUploadArguments> implements I
     try {
       Collection<Part> parts = request.getParts();
       for (Part part : parts) {
-        String path = Paths.get(configuration.getTypes().get(arguments.getType()).getPath(),
+        String path = Paths.get(arguments.getType().getPath(),
                 arguments.getCurrentFolder()).toString();
         arguments.setFileName(getFileItemName(part));
         if (validateUploadItem(part, path, arguments, configuration)) {
@@ -245,7 +244,7 @@ public class FileUploadCommand extends Command<FileUploadArguments> implements I
             || configuration.isCheckSizeAfterScaling()) {
       ImageUtils.createTmpThumb(item, file, getFileItemName(item), configuration);
       if (!configuration.isCheckSizeAfterScaling()
-              || FileUtils.isFileSizeInRange(configuration.getTypes().get(arguments.getType()), Files.size(file))) {
+              || FileUtils.isFileSizeInRange(arguments.getType(), Files.size(file))) {
         if (configuration.getEvents() != null) {
           AfterFileUploadEventArgs args = new AfterFileUploadEventArgs(arguments.getCurrentFolder(), file);
           configuration.getEvents().runAfterFileUpload(args, configuration);
@@ -330,7 +329,7 @@ public class FileUploadCommand extends Command<FileUploadArguments> implements I
       arguments.setErrorCode(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_NAME);
       return false;
     }
-    final ResourceType resourceType = configuration.getTypes().get(arguments.getType());
+    final ResourceType resourceType = arguments.getType();
     int checkFileExt = FileUtils.checkFileExtension(arguments.getNewFileName(), resourceType);
     if (checkFileExt == 1) {
       arguments.setErrorCode(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_EXTENSION);

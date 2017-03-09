@@ -1,5 +1,6 @@
 package com.github.zhanhb.ckfinder.connector.handlers.arguments;
 
+import com.github.zhanhb.ckfinder.connector.data.ResourceType;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,7 +15,7 @@ public abstract class Arguments {
 
   private String userRole;
   private String currentFolder;
-  private String type;
+  private ResourceType type;
 
   public void throwException(int code) throws ConnectorException {
     throw new ConnectorException(this, code);

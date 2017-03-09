@@ -20,6 +20,7 @@ import lombok.Value;
  */
 @Builder(builderClassName = "Builder")
 @Value
+@SuppressWarnings("FinalClass")
 public class ResourceType {
 
   /**

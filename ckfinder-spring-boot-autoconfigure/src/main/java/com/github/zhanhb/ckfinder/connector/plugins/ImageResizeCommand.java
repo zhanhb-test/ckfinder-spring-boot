@@ -61,14 +61,11 @@ public class ImageResizeCommand extends XMLCommand<ImageResizeArguments> impleme
 
   @Override
   protected int getDataForXml(ImageResizeArguments arguments, IConfiguration configuration) {
-    try {
-      checkTypeExists(arguments.getType(), configuration);
-    } catch (ConnectorException ex) {
-      arguments.setType(null);
-      return ex.getErrorCode();
+    if (arguments.getType() == null) {
+      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE;
     }
 
-    if (!configuration.getAccessControl().hasPermission(arguments.getType(),
+    if (!configuration.getAccessControl().hasPermission(arguments.getType().getName(),
             arguments.getCurrentFolder(), arguments.getUserRole(),
             AccessControl.CKFINDER_CONNECTOR_ACL_FILE_DELETE
             | AccessControl.CKFINDER_CONNECTOR_ACL_FILE_UPLOAD)) {
@@ -84,11 +81,11 @@ public class ImageResizeCommand extends XMLCommand<ImageResizeArguments> impleme
       return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST;
     }
 
-    if (FileUtils.checkFileExtension(arguments.getFileName(), configuration.getTypes().get(arguments.getType())) == 1) {
+    if (FileUtils.checkFileExtension(arguments.getFileName(), arguments.getType()) == 1) {
       return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST;
     }
 
-    Path file = Paths.get(configuration.getTypes().get(arguments.getType()).getPath(),
+    Path file = Paths.get(arguments.getType().getPath(),
             arguments.getCurrentFolder(),
             arguments.getFileName());
     try {
@@ -108,11 +105,11 @@ public class ImageResizeCommand extends XMLCommand<ImageResizeArguments> impleme
         }
 
         if (FileUtils.checkFileExtension(arguments.getNewFileName(),
-                configuration.getTypes().get(arguments.getType())) == 1) {
+                arguments.getType()) == 1) {
           return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_EXTENSION;
         }
 
-        Path thumbFile = Paths.get(configuration.getTypes().get(arguments.getType()).getPath(),
+        Path thumbFile = Paths.get(arguments.getType().getPath(),
                 arguments.getCurrentFolder(),
                 arguments.getNewFileName());
 
@@ -144,7 +141,7 @@ public class ImageResizeCommand extends XMLCommand<ImageResizeArguments> impleme
       for (String size : SIZES) {
         if ("1".equals(arguments.getSizesFromReq().get(size))) {
           String thumbName = fileNameWithoutExt + "_" + size + "." + fileExt;
-          Path thumbFile = Paths.get(configuration.getTypes().get(arguments.getType()).getPath(),
+          Path thumbFile = Paths.get(arguments.getType().getPath(),
                   arguments.getCurrentFolder(), thumbName);
           String value = pluginParams.get(size + "Thumb");
           if (value != null) {

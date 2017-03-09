@@ -51,6 +51,7 @@ public class Events {
     return true;
   }
 
+  @Deprecated
   @Singular
   private final List<BeforeExecuteCommandEventHandler> beforeExecuteCommandEventHandlers;
   @Singular
@@ -66,6 +67,7 @@ public class Events {
    * @return false when end executing command.
    * @throws ConnectorException when error occurs.
    */
+  @Deprecated
   public boolean runBeforeExecuteCommand(BeforeExecuteCommandEventArgs args, IConfiguration configuration)
           throws ConnectorException {
     return run(beforeExecuteCommandEventHandlers, args, configuration);

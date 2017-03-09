@@ -43,11 +43,10 @@ public class PathUtils {
 
     // preserve // at the beginning for UNC paths
     if (suffix.startsWith("//")) {
-      suffix = "/" + suffix.replaceAll("/+", "/");
+      return prefix + "/" + suffix.replaceAll("/+", "/");
     } else {
-      suffix = suffix.replaceAll("/+", "/");
+      return prefix.concat(suffix.replaceAll("/+", "/"));
     }
-    return prefix.concat(suffix);
   }
 
   /**

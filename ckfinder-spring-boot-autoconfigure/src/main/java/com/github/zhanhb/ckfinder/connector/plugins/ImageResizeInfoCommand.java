@@ -66,14 +66,11 @@ public class ImageResizeInfoCommand extends XMLCommand<ImageResizeInfoArguments>
 
   @Override
   protected int getDataForXml(ImageResizeInfoArguments arguments, IConfiguration configuration) {
-    try {
-      checkTypeExists(arguments.getType(), configuration);
-    } catch (ConnectorException ex) {
-      arguments.setType(null);
-      return ex.getErrorCode();
+    if (arguments.getType() == null) {
+      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE;
     }
 
-    if (!configuration.getAccessControl().hasPermission(arguments.getType(),
+    if (!configuration.getAccessControl().hasPermission(arguments.getType().getName(),
             arguments.getCurrentFolder(), arguments.getUserRole(),
             AccessControl.CKFINDER_CONNECTOR_ACL_FILE_VIEW)) {
       return Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED;
@@ -85,11 +82,11 @@ public class ImageResizeInfoCommand extends XMLCommand<ImageResizeInfoArguments>
       return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST;
     }
 
-    if (FileUtils.checkFileExtension(arguments.getFileName(), configuration.getTypes().get(arguments.getType())) == 1) {
+    if (FileUtils.checkFileExtension(arguments.getFileName(), arguments.getType()) == 1) {
       return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST;
     }
 
-    Path imageFile = Paths.get(configuration.getTypes().get(arguments.getType()).getPath(),
+    Path imageFile = Paths.get(arguments.getType().getPath(),
             arguments.getCurrentFolder(),
             arguments.getFileName());
 
@@ -119,7 +116,7 @@ public class ImageResizeInfoCommand extends XMLCommand<ImageResizeInfoArguments>
     arguments.setImageHeight(0);
     arguments.setImageWidth(0);
     arguments.setCurrentFolder(request.getParameter("currentFolder"));
-    arguments.setType(request.getParameter("type"));
+    arguments.setType(configuration.getTypes().get(request.getParameter("type")));
     arguments.setFileName(request.getParameter("fileName"));
   }
 
