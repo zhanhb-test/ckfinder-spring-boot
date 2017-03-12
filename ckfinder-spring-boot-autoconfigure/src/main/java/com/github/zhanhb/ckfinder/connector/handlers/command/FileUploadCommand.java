@@ -330,8 +330,7 @@ public class FileUploadCommand extends Command<FileUploadArguments> implements I
       return false;
     }
     final ResourceType resourceType = arguments.getType();
-    int checkFileExt = FileUtils.checkFileExtension(arguments.getNewFileName(), resourceType);
-    if (checkFileExt == 1) {
+    if (!FileUtils.isFileExtensionAllwed(arguments.getNewFileName(), resourceType)) {
       arguments.setErrorCode(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_EXTENSION);
       return false;
     }

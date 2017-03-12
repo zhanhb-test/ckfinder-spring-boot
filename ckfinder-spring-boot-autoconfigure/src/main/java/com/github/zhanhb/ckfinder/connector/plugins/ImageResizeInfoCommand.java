@@ -80,7 +80,7 @@ public class ImageResizeInfoCommand extends OnSuccessXmlCommand<ImageResizeInfoA
       arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
     }
 
-    if (FileUtils.checkFileExtension(arguments.getFileName(), arguments.getType()) == 1) {
+    if (!FileUtils.isFileExtensionAllwed(arguments.getFileName(), arguments.getType())) {
       arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
     }
 

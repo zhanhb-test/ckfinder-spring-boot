@@ -85,9 +85,8 @@ public class RenameFileCommand extends XMLCommand<RenameFileArguments> implement
       arguments.setAddRenameNode(true);
     }
 
-    int checkFileExt = FileUtils.checkFileExtension(arguments.getNewFileName(),
-            arguments.getType());
-    if (checkFileExt == 1) {
+    if (!FileUtils.isFileExtensionAllwed(arguments.getNewFileName(),
+            arguments.getType())) {
       return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_EXTENSION;
     }
     if (configuration.isCheckDoubleFileExtensions()) {
@@ -105,8 +104,8 @@ public class RenameFileCommand extends XMLCommand<RenameFileArguments> implement
       return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_NAME;
     }
 
-    if (FileUtils.checkFileExtension(arguments.getFileName(),
-            arguments.getType()) == 1) {
+    if (!FileUtils.isFileExtensionAllwed(arguments.getFileName(),
+            arguments.getType())) {
       return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST;
     }
 

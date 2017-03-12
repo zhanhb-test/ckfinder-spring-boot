@@ -111,15 +111,15 @@ public class MoveFilesCommand extends XMLCommand<MoveFilesArguments> implements 
       if (file.getFolder() == null || file.getFolder().isEmpty()) {
         return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST;
       }
-      if (FileUtils.checkFileExtension(file.getName(), arguments.getType()) == 1) {
+      if (!FileUtils.isFileExtensionAllwed(file.getName(), arguments.getType())) {
         XMLCreator.INSTANCE.appendErrorNodeChild(arguments, Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_EXTENSION,
                 file.getName(), file.getFolder(), file.getType());
         continue;
       }
 
       if (!arguments.getType().getName().equals(file.getType())) {
-        if (FileUtils.checkFileExtension(file.getName(),
-                configuration.getTypes().get(file.getType())) == 1) {
+        if (!FileUtils.isFileExtensionAllwed(file.getName(),
+                configuration.getTypes().get(file.getType()))) {
           XMLCreator.INSTANCE.appendErrorNodeChild(arguments, Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_EXTENSION,
                   file.getName(), file.getFolder(), file.getType());
           continue;

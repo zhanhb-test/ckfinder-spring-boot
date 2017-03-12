@@ -290,17 +290,16 @@ public class FileUtils {
    * @param type resource type
    * @return 0 if ok, 1 if not ok, 2 if rename required
    */
-  public static int checkFileExtension(String fileName,
-          ResourceType type) {
+  public static boolean isFileExtensionAllwed(String fileName, ResourceType type) {
     if (type == null || fileName == null) {
-      return 1;
+      return false;
     }
 
     if (fileName.indexOf('.') == -1) {
-      return 0;
+      return true;
     }
 
-    return isExtensionAllowed(getFileExtension(fileName), type) ? 0 : 1;
+    return isExtensionAllowed(getFileExtension(fileName), type);
   }
 
   /**

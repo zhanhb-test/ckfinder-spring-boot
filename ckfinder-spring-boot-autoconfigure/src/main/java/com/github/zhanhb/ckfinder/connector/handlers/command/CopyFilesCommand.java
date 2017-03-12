@@ -111,8 +111,8 @@ public class CopyFilesCommand extends XMLCommand<CopyFilesArguments> implements 
       if (file.getFolder() == null || file.getFolder().isEmpty()) {
         return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST;
       }
-      if (FileUtils.checkFileExtension(file.getName(),
-              type) == 1) {
+      if (!FileUtils.isFileExtensionAllwed(file.getName(),
+              type)) {
         XMLCreator.INSTANCE.appendErrorNodeChild(arguments, Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_EXTENSION,
                 file.getName(), file.getFolder(), file.getType());
         continue;
@@ -120,8 +120,8 @@ public class CopyFilesCommand extends XMLCommand<CopyFilesArguments> implements 
       // check #4 (extension) - when moving to another resource type,
       //double check extension
       if (!type.getName().equals(file.getType())) {
-        if (FileUtils.checkFileExtension(file.getName(),
-                configuration.getTypes().get(file.getType())) == 1) {
+        if (!FileUtils.isFileExtensionAllwed(file.getName(),
+                configuration.getTypes().get(file.getType()))) {
           XMLCreator.INSTANCE.appendErrorNodeChild(arguments, Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_EXTENSION,
                   file.getName(), file.getFolder(), file.getType());
           continue;

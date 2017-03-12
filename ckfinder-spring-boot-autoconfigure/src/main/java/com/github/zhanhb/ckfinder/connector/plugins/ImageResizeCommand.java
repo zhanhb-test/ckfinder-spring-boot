@@ -81,7 +81,7 @@ public class ImageResizeCommand extends OnSuccessXmlCommand<ImageResizeArguments
       arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
     }
 
-    if (FileUtils.checkFileExtension(arguments.getFileName(), arguments.getType()) == 1) {
+    if (!FileUtils.isFileExtensionAllwed(arguments.getFileName(), arguments.getType())) {
       arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
     }
 
@@ -104,8 +104,8 @@ public class ImageResizeCommand extends OnSuccessXmlCommand<ImageResizeArguments
           arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_NAME);
         }
 
-        if (FileUtils.checkFileExtension(arguments.getNewFileName(),
-                arguments.getType()) == 1) {
+        if (!FileUtils.isFileExtensionAllwed(arguments.getNewFileName(),
+                arguments.getType())) {
           arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_EXTENSION);
         }
 

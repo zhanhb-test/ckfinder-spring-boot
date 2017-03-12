@@ -100,7 +100,7 @@ public class DeleteFilesCommand extends XMLCommand<DeleteFilesArguments> impleme
         return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST;
       }
 
-      if (FileUtils.checkFileExtension(fileItem.getName(), configuration.getTypes().get(fileItem.getType())) == 1) {
+      if (!FileUtils.isFileExtensionAllwed(fileItem.getName(), configuration.getTypes().get(fileItem.getType()))) {
         return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST;
 
       }

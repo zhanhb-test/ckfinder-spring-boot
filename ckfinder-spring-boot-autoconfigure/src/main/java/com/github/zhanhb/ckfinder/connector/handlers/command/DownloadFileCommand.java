@@ -69,8 +69,8 @@ public class DownloadFileCommand extends Command<DownloadFileArguments> {
     }
 
     if (!FileUtils.isFileNameInvalid(arguments.getFileName())
-            || FileUtils.checkFileExtension(arguments.getFileName(),
-                    arguments.getType()) == 1) {
+            || !FileUtils.isFileExtensionAllwed(arguments.getFileName(),
+                    arguments.getType())) {
       arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
     }
 

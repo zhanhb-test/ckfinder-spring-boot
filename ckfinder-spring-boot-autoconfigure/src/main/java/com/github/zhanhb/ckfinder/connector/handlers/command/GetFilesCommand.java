@@ -109,7 +109,7 @@ public class GetFilesCommand extends OnSuccessXmlCommand<GetFilesArguments> {
    */
   private void filterListByHiddenAndNotAllowed(GetFilesArguments arguments, IConfiguration configuration) {
     List<String> tmpFiles = arguments.getFiles().stream()
-            .filter(file -> (FileUtils.checkFileExtension(file, arguments.getType()) == 0
+            .filter(file -> (FileUtils.isFileExtensionAllwed(file, arguments.getType())
             && !FileUtils.isFileHidden(file, configuration)))
             .collect(Collectors.toList());
 
