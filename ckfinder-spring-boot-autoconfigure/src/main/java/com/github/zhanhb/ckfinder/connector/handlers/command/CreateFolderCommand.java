@@ -30,17 +30,15 @@ import lombok.extern.slf4j.Slf4j;
  * Class to handle <code>CreateFolder</code> command. Create subfolder.
  */
 @Slf4j
-public class CreateFolderCommand extends XMLCommand<CreateFolderArguments> implements IPostCommand {
+public class CreateFolderCommand extends OnSuccessXmlCommand<CreateFolderArguments> implements IPostCommand {
 
   public CreateFolderCommand() {
     super(CreateFolderArguments::new);
   }
 
   @Override
-  protected void createXMLChildNodes(int errorNum, Connector.Builder rootElement, CreateFolderArguments arguments, IConfiguration configuration) {
-    if (errorNum == Constants.Errors.CKFINDER_CONNECTOR_ERROR_NONE) {
-      createNewFolderElement(rootElement, arguments);
-    }
+  protected void createXMLChildNodesInternal(Connector.Builder rootElement, CreateFolderArguments arguments, IConfiguration configuration) {
+    createNewFolderElement(rootElement, arguments);
   }
 
   /**
@@ -59,24 +57,20 @@ public class CreateFolderCommand extends XMLCommand<CreateFolderArguments> imple
    *
    * @param arguments
    * @param configuration connector configuration
-   * @return returns 0 if success
+   * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
    */
   @Override
-  protected int getDataForXml(CreateFolderArguments arguments, IConfiguration configuration) {
-    try {
-      checkRequestPathValid(arguments.getNewFolderName());
-    } catch (ConnectorException e) {
-      return e.getErrorCode();
-    }
+  protected void createXml(CreateFolderArguments arguments, IConfiguration configuration) throws ConnectorException {
+    checkRequestPathValid(arguments.getNewFolderName());
 
     if (arguments.getType() == null) {
-      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE;
+      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE);
     }
 
     if (!configuration.getAccessControl().hasPermission(arguments.getType().getName(),
             arguments.getCurrentFolder(), arguments.getUserRole(),
             AccessControl.CKFINDER_CONNECTOR_ACL_FOLDER_CREATE)) {
-      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED;
+      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED);
     }
 
     if (configuration.isForceAscii()) {
@@ -84,27 +78,24 @@ public class CreateFolderCommand extends XMLCommand<CreateFolderArguments> imple
     }
 
     if (!FileUtils.isFolderNameInvalid(arguments.getNewFolderName(), configuration)) {
-      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_NAME;
+      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_NAME);
     }
     if (FileUtils.isDirectoryHidden(arguments.getCurrentFolder(), configuration)) {
-      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST;
+      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
     }
     if (FileUtils.isDirectoryHidden(arguments.getNewFolderName(), configuration)) {
-      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_NAME;
+      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_NAME);
     }
 
     try {
       if (createFolder(arguments)) {
-        return Constants.Errors.CKFINDER_CONNECTOR_ERROR_NONE;
       } else {
-        return Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED;
+        arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED);
       }
 
     } catch (SecurityException e) {
       log.error("", e);
-      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED;
-    } catch (ConnectorException e) {
-      return e.getErrorCode();
+      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED);
     }
   }
 

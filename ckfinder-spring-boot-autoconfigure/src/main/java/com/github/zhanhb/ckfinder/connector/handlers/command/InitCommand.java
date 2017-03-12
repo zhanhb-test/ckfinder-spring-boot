@@ -38,7 +38,7 @@ import lombok.extern.slf4j.Slf4j;
  * Class to handle <code>Init</code> command.
  */
 @Slf4j
-public class InitCommand extends XMLCommand<InitArgument> {
+public class InitCommand extends OnSuccessXmlCommand<InitArgument> {
 
   /**
    * chars taken to license key.
@@ -52,29 +52,19 @@ public class InitCommand extends XMLCommand<InitArgument> {
     super(InitArgument::new);
   }
 
-  /**
-   * method from super class - not used in this command.
-   *
-   * @param arguments
-   * @param configuration connector configuration
-   * @return 0
-   */
   @Override
-  protected int getDataForXml(InitArgument arguments, IConfiguration configuration) {
-    return Constants.Errors.CKFINDER_CONNECTOR_ERROR_NONE;
+  protected void createXml(InitArgument arguments, IConfiguration configuration) throws ConnectorException {
   }
 
   @Override
-  protected void createXMLChildNodes(int errorNum, Connector.Builder rootElement, InitArgument arguments, IConfiguration configuration) {
-    if (errorNum == Constants.Errors.CKFINDER_CONNECTOR_ERROR_NONE) {
-      createConnectorData(rootElement, arguments, configuration);
-      try {
-        createResouceTypesData(rootElement, arguments, configuration);
-      } catch (Exception e) {
-        log.error("", e);
-      }
-      createPluginsData(rootElement, configuration);
+  protected void createXMLChildNodesInternal(Connector.Builder rootElement, InitArgument arguments, IConfiguration configuration) {
+    createConnectorData(rootElement, arguments, configuration);
+    try {
+      createResouceTypesData(rootElement, arguments, configuration);
+    } catch (Exception e) {
+      log.error("", e);
     }
+    createPluginsData(rootElement, configuration);
   }
 
   /**

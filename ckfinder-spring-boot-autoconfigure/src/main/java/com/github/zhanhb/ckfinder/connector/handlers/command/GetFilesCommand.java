@@ -35,7 +35,7 @@ import lombok.extern.slf4j.Slf4j;
  * command.
  */
 @Slf4j
-public class GetFilesCommand extends XMLCommand<GetFilesArguments> {
+public class GetFilesCommand extends OnSuccessXmlCommand<GetFilesArguments> {
 
   /**
    * number of bytes in kilobyte.
@@ -63,22 +63,21 @@ public class GetFilesCommand extends XMLCommand<GetFilesArguments> {
   }
 
   @Override
-  protected void createXMLChildNodes(int errorNum, Connector.Builder rootElement, GetFilesArguments arguments, IConfiguration configuration) {
-    if (errorNum == Constants.Errors.CKFINDER_CONNECTOR_ERROR_NONE) {
-      createFilesData(rootElement, arguments, configuration);
-    }
+  protected void createXMLChildNodesInternal(Connector.Builder rootElement, GetFilesArguments arguments, IConfiguration configuration) {
+    createFilesData(rootElement, arguments, configuration);
   }
 
   /**
    * gets data to XML response.
    *
    * @param arguments
-   * @return 0 if ok, otherwise error code
+   * @param configuration
+   * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
    */
   @Override
-  protected int getDataForXml(GetFilesArguments arguments, IConfiguration configuration) {
+  protected void createXml(GetFilesArguments arguments, IConfiguration configuration) throws ConnectorException {
     if (arguments.getType() == null) {
-      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE;
+      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE);
     }
 
     arguments.setFullCurrentPath(Paths.get(arguments.getType().getPath(),
@@ -87,22 +86,21 @@ public class GetFilesCommand extends XMLCommand<GetFilesArguments> {
     if (!configuration.getAccessControl().hasPermission(arguments.getType().getName(),
             arguments.getCurrentFolder(), arguments.getUserRole(),
             AccessControl.CKFINDER_CONNECTOR_ACL_FILE_VIEW)) {
-      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED;
+      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED);
     }
 
     Path dir = Paths.get(arguments.getFullCurrentPath());
     try {
       if (!Files.exists(dir)) {
-        return Constants.Errors.CKFINDER_CONNECTOR_ERROR_FOLDER_NOT_FOUND;
+        arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_FOLDER_NOT_FOUND);
       }
       arguments.setFiles(FileUtils.findChildrensList(dir, false));
     } catch (IOException | SecurityException e) {
       log.error("", e);
-      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED;
+      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED);
     }
     filterListByHiddenAndNotAllowed(arguments, configuration);
     Collections.sort(arguments.getFiles());
-    return Constants.Errors.CKFINDER_CONNECTOR_ERROR_NONE;
   }
 
   /**

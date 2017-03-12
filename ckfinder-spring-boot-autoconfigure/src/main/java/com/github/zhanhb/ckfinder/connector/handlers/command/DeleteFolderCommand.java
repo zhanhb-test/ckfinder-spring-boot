@@ -27,46 +27,46 @@ import lombok.extern.slf4j.Slf4j;
  * Class to handle <code>DeleteFolder</code> command.
  */
 @Slf4j
-public class DeleteFolderCommand extends XMLCommand<XMLArguments> implements IPostCommand {
+public class DeleteFolderCommand extends OnSuccessXmlCommand<XMLArguments> implements IPostCommand {
 
   public DeleteFolderCommand() {
     super(XMLArguments::new);
   }
 
   @Override
-  protected void createXMLChildNodes(int errorNum, Connector.Builder rootElement, XMLArguments arguments, IConfiguration configuration) {
+  protected void createXMLChildNodesInternal(Connector.Builder rootElement, XMLArguments arguments, IConfiguration configuration) {
   }
 
   /**
    * @param arguments
    * @param configuration connector configuration
-   * @return error code or 0 if ok. Deletes folder and thumb folder.
+   * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
    */
   @Override
-  protected int getDataForXml(XMLArguments arguments, IConfiguration configuration) {
+  protected void createXml(XMLArguments arguments, IConfiguration configuration) throws ConnectorException {
     if (arguments.getType() == null) {
-      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE;
+      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE);
     }
 
     if (!configuration.getAccessControl().hasPermission(arguments.getType().getName(),
             arguments.getCurrentFolder(),
             arguments.getUserRole(),
             AccessControl.CKFINDER_CONNECTOR_ACL_FOLDER_DELETE)) {
-      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED;
+      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED);
     }
     if (arguments.getCurrentFolder().equals("/")) {
-      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST;
+      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
     }
 
     if (FileUtils.isDirectoryHidden(arguments.getCurrentFolder(), configuration)) {
-      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST;
+      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
     }
 
     Path dir = Paths.get(arguments.getType().getPath(), arguments.getCurrentFolder());
 
     try {
       if (!Files.isDirectory(dir)) {
-        return Constants.Errors.CKFINDER_CONNECTOR_ERROR_FOLDER_NOT_FOUND;
+        arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_FOLDER_NOT_FOUND);
       }
 
       if (FileUtils.delete(dir)) {
@@ -74,14 +74,13 @@ public class DeleteFolderCommand extends XMLCommand<XMLArguments> implements IPo
                 arguments.getType().getName(), arguments.getCurrentFolder());
         FileUtils.delete(thumbDir);
       } else {
-        return Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED;
+        arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED);
       }
     } catch (SecurityException e) {
       log.error("", e);
-      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED;
+      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED);
     }
 
-    return Constants.Errors.CKFINDER_CONNECTOR_ERROR_NONE;
   }
 
 }

@@ -31,18 +31,15 @@ import lombok.extern.slf4j.Slf4j;
  * Class to handle <code>RenameFolder</code> command.
  */
 @Slf4j
-public class RenameFolderCommand extends XMLCommand<RenameFolderArguments> implements IPostCommand {
+public class RenameFolderCommand extends OnSuccessXmlCommand<RenameFolderArguments> implements IPostCommand {
 
   public RenameFolderCommand() {
     super(RenameFolderArguments::new);
   }
 
   @Override
-  protected void createXMLChildNodes(int errorNum, Connector.Builder rootElement, RenameFolderArguments arguments, IConfiguration configuration) {
-    if (errorNum == Constants.Errors.CKFINDER_CONNECTOR_ERROR_NONE) {
-      createRenamedFolderNode(rootElement, arguments, configuration);
-    }
-
+  protected void createXMLChildNodesInternal(Connector.Builder rootElement, RenameFolderArguments arguments, IConfiguration configuration) {
+    createRenamedFolderNode(rootElement, arguments, configuration);
   }
 
   /**
@@ -59,23 +56,19 @@ public class RenameFolderCommand extends XMLCommand<RenameFolderArguments> imple
   }
 
   @Override
-  protected int getDataForXml(RenameFolderArguments arguments, IConfiguration configuration) {
+  protected void createXml(RenameFolderArguments arguments, IConfiguration configuration) throws ConnectorException {
 
-    try {
-      checkRequestPathValid(arguments.getNewFolderName());
-    } catch (ConnectorException e) {
-      return e.getErrorCode();
-    }
+    checkRequestPathValid(arguments.getNewFolderName());
 
     if (arguments.getType() == null) {
-      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE;
+      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE);
     }
 
     if (!configuration.getAccessControl().hasPermission(arguments.getType().getName(),
             arguments.getCurrentFolder(),
             arguments.getUserRole(),
             AccessControl.CKFINDER_CONNECTOR_ACL_FOLDER_RENAME)) {
-      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED;
+      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED);
     }
 
     if (configuration.isForceAscii()) {
@@ -84,37 +77,35 @@ public class RenameFolderCommand extends XMLCommand<RenameFolderArguments> imple
 
     if (FileUtils.isDirectoryHidden(arguments.getNewFolderName(), configuration)
             || !FileUtils.isFolderNameInvalid(arguments.getNewFolderName(), configuration)) {
-      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_NAME;
+      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_NAME);
     }
 
     if (arguments.getCurrentFolder().equals("/")) {
-      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST;
+      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
     }
 
     Path dir = Paths.get(arguments.getType().getPath(),
             arguments.getCurrentFolder());
     try {
       if (!Files.isDirectory(dir)) {
-        return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST;
+        arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
       }
       setNewFolder(arguments);
       Path newDir = Paths.get(arguments.getType().getPath(),
               arguments.getNewFolderPath());
       if (Files.exists(newDir)) {
-        return Constants.Errors.CKFINDER_CONNECTOR_ERROR_ALREADY_EXIST;
+        arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ALREADY_EXIST);
       }
       try {
         Files.move(dir, newDir);
         renameThumb(arguments, configuration);
       } catch (IOException ex) {
-        return Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED;
+        arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED);
       }
     } catch (SecurityException e) {
       log.error("", e);
-      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED;
+      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED);
     }
-
-    return Constants.Errors.CKFINDER_CONNECTOR_ERROR_NONE;
   }
 
   /**

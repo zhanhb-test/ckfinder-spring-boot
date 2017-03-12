@@ -58,7 +58,7 @@ public abstract class XMLCommand<T extends XMLArguments> extends Command<T> {
    */
   @Override
   @SuppressWarnings("FinalMethod")
-  final void execute(T arguments, HttpServletResponse response, IConfiguration configuration) throws IOException {
+  final void execute(T arguments, HttpServletResponse response, IConfiguration configuration) throws IOException, ConnectorException {
     createXMLResponse(arguments, getDataForXml(arguments, configuration), configuration);
     try (PrintWriter out = response.getWriter()) {
       XMLCreator.INSTANCE.writeTo(arguments.getConnector().build(), out);
@@ -101,8 +101,9 @@ public abstract class XMLCommand<T extends XMLArguments> extends Command<T> {
    * or
    * {@link com.github.zhanhb.ckfinder.connector.configuration.Constants.Errors#CKFINDER_CONNECTOR_ERROR_NONE}
    * if no error occurred.
+   * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
    */
-  protected abstract int getDataForXml(T arguments, IConfiguration configuration);
+  protected abstract int getDataForXml(T arguments, IConfiguration configuration) throws ConnectorException;
 
   /**
    * creates <code>CurrentFolder</code> element.

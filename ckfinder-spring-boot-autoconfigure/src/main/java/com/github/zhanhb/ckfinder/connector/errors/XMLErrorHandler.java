@@ -19,7 +19,6 @@ import com.github.zhanhb.ckfinder.connector.handlers.response.Error;
 import com.github.zhanhb.ckfinder.connector.utils.XMLCreator;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;

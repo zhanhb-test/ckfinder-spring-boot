@@ -17,7 +17,7 @@ import com.github.zhanhb.ckfinder.connector.data.BeforeExecuteCommandEventArgs;
 import com.github.zhanhb.ckfinder.connector.data.BeforeExecuteCommandEventHandler;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.arguments.ImageResizeInfoArguments;
-import com.github.zhanhb.ckfinder.connector.handlers.command.XMLCommand;
+import com.github.zhanhb.ckfinder.connector.handlers.command.OnSuccessXmlCommand;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.ImageInfo;
 import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
@@ -33,7 +33,7 @@ import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class ImageResizeInfoCommand extends XMLCommand<ImageResizeInfoArguments> implements BeforeExecuteCommandEventHandler {
+public class ImageResizeInfoCommand extends OnSuccessXmlCommand<ImageResizeInfoArguments> implements BeforeExecuteCommandEventHandler {
 
   public ImageResizeInfoCommand() {
     super(ImageResizeInfoArguments::new);
@@ -51,10 +51,8 @@ public class ImageResizeInfoCommand extends XMLCommand<ImageResizeInfoArguments>
   }
 
   @Override
-  protected void createXMLChildNodes(int errorNum, Connector.Builder rootElement, ImageResizeInfoArguments arguments, IConfiguration configuration) {
-    if (errorNum == Constants.Errors.CKFINDER_CONNECTOR_ERROR_NONE) {
-      createImageInfoNode(rootElement, arguments);
-    }
+  protected void createXMLChildNodesInternal(Connector.Builder rootElement, ImageResizeInfoArguments arguments, IConfiguration configuration) {
+    createImageInfoNode(rootElement, arguments);
   }
 
   private void createImageInfoNode(Connector.Builder rootElement, ImageResizeInfoArguments arguments) {
@@ -65,25 +63,25 @@ public class ImageResizeInfoCommand extends XMLCommand<ImageResizeInfoArguments>
   }
 
   @Override
-  protected int getDataForXml(ImageResizeInfoArguments arguments, IConfiguration configuration) {
+  protected void createXml(ImageResizeInfoArguments arguments, IConfiguration configuration) throws ConnectorException {
     if (arguments.getType() == null) {
-      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE;
+      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE);
     }
 
     if (!configuration.getAccessControl().hasPermission(arguments.getType().getName(),
             arguments.getCurrentFolder(), arguments.getUserRole(),
             AccessControl.CKFINDER_CONNECTOR_ACL_FILE_VIEW)) {
-      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED;
+      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED);
     }
 
     if (arguments.getFileName() == null || arguments.getFileName().isEmpty()
             || !FileUtils.isFileNameInvalid(arguments.getFileName())
             || FileUtils.isFileHidden(arguments.getFileName(), configuration)) {
-      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST;
+      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
     }
 
     if (FileUtils.checkFileExtension(arguments.getFileName(), arguments.getType()) == 1) {
-      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST;
+      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
     }
 
     Path imageFile = Paths.get(arguments.getType().getPath(),
@@ -92,7 +90,7 @@ public class ImageResizeInfoCommand extends XMLCommand<ImageResizeInfoArguments>
 
     try {
       if (!Files.isRegularFile(imageFile)) {
-        return Constants.Errors.CKFINDER_CONNECTOR_ERROR_FILE_NOT_FOUND;
+        arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_FILE_NOT_FOUND);
       }
 
       BufferedImage image;
@@ -103,10 +101,8 @@ public class ImageResizeInfoCommand extends XMLCommand<ImageResizeInfoArguments>
       arguments.setImageHeight(image.getHeight());
     } catch (SecurityException | IOException e) {
       log.error("", e);
-      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED;
+      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED);
     }
-
-    return Constants.Errors.CKFINDER_CONNECTOR_ERROR_NONE;
   }
 
   @Override

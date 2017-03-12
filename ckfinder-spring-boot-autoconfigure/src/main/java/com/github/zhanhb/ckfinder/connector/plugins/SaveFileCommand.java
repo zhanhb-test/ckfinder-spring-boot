@@ -17,7 +17,7 @@ import com.github.zhanhb.ckfinder.connector.data.BeforeExecuteCommandEventArgs;
 import com.github.zhanhb.ckfinder.connector.data.BeforeExecuteCommandEventHandler;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.arguments.SaveFileArguments;
-import com.github.zhanhb.ckfinder.connector.handlers.command.XMLCommand;
+import com.github.zhanhb.ckfinder.connector.handlers.command.OnSuccessXmlCommand;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
@@ -30,42 +30,42 @@ import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class SaveFileCommand extends XMLCommand<SaveFileArguments> implements BeforeExecuteCommandEventHandler {
+public class SaveFileCommand extends OnSuccessXmlCommand<SaveFileArguments> implements BeforeExecuteCommandEventHandler {
 
   public SaveFileCommand() {
     super(SaveFileArguments::new);
   }
 
   @Override
-  protected void createXMLChildNodes(int errorNum, Connector.Builder rootElement, SaveFileArguments arguments, IConfiguration configuration) {
+  protected void createXMLChildNodesInternal(Connector.Builder rootElement, SaveFileArguments arguments, IConfiguration configuration) {
   }
 
   @Override
-  protected int getDataForXml(SaveFileArguments arguments, IConfiguration configuration) {
+  protected void createXml(SaveFileArguments arguments, IConfiguration configuration) throws ConnectorException {
     if (arguments.getType() == null) {
-      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE;
+      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE);
     }
 
     if (!configuration.getAccessControl().hasPermission(arguments.getType().getName(),
             arguments.getCurrentFolder(), arguments.getUserRole(),
             AccessControl.CKFINDER_CONNECTOR_ACL_FILE_DELETE)) {
-      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED;
+      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED);
     }
 
     if (arguments.getFileName() == null || arguments.getFileName().isEmpty()) {
-      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_NAME;
+      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_NAME);
     }
 
     if (arguments.getFileContent() == null || arguments.getFileContent().isEmpty()) {
-      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST;
+      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
     }
 
     if (FileUtils.checkFileExtension(arguments.getFileName(), arguments.getType()) == 1) {
-      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_EXTENSION;
+      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_EXTENSION);
     }
 
     if (!FileUtils.isFileNameInvalid(arguments.getFileName())) {
-      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST;
+      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
     }
 
     Path sourceFile = Paths.get(arguments.getType().getPath(),
@@ -73,17 +73,15 @@ public class SaveFileCommand extends XMLCommand<SaveFileArguments> implements Be
 
     try {
       if (!Files.isRegularFile(sourceFile)) {
-        return Constants.Errors.CKFINDER_CONNECTOR_ERROR_FILE_NOT_FOUND;
+        arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_FILE_NOT_FOUND);
       }
       Files.write(sourceFile, arguments.getFileContent().getBytes("UTF-8"));
     } catch (FileNotFoundException e) {
-      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_FILE_NOT_FOUND;
+      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_FILE_NOT_FOUND);
     } catch (SecurityException | IOException e) {
       log.error("", e);
-      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED;
+      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED);
     }
-
-    return Constants.Errors.CKFINDER_CONNECTOR_ERROR_NONE;
   }
 
   @Override
