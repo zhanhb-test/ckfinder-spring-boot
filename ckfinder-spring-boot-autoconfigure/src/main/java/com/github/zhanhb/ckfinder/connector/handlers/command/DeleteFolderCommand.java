@@ -14,7 +14,7 @@ package com.github.zhanhb.ckfinder.connector.handlers.command;
 import com.github.zhanhb.ckfinder.connector.configuration.Constants;
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
-import com.github.zhanhb.ckfinder.connector.handlers.arguments.XMLArguments;
+import com.github.zhanhb.ckfinder.connector.handlers.arguments.ErrorListXMLArguments;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
@@ -27,14 +27,14 @@ import lombok.extern.slf4j.Slf4j;
  * Class to handle <code>DeleteFolder</code> command.
  */
 @Slf4j
-public class DeleteFolderCommand extends OnSuccessXmlCommand<XMLArguments> implements IPostCommand {
+public class DeleteFolderCommand extends XMLCommand<ErrorListXMLArguments> implements IPostCommand {
 
   public DeleteFolderCommand() {
-    super(XMLArguments::new);
+    super(ErrorListXMLArguments::new);
   }
 
   @Override
-  protected void createXMLChildNodesInternal(Connector.Builder rootElement, XMLArguments arguments, IConfiguration configuration) {
+  protected void createXMLChildNodes(Connector.Builder rootElement, ErrorListXMLArguments arguments, IConfiguration configuration) {
   }
 
   /**
@@ -43,7 +43,7 @@ public class DeleteFolderCommand extends OnSuccessXmlCommand<XMLArguments> imple
    * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
    */
   @Override
-  protected void createXml(XMLArguments arguments, IConfiguration configuration) throws ConnectorException {
+  protected void createXml(ErrorListXMLArguments arguments, IConfiguration configuration) throws ConnectorException {
     if (arguments.getType() == null) {
       arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE);
     }

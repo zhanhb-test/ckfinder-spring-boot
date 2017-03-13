@@ -30,7 +30,7 @@ public class QuickUploadCommand extends FileUploadCommand {
 
   @Override
   protected void handleOnUploadCompleteResponse(Writer writer, String errorMsg, FileUploadArguments arguments, IConfiguration configuration) throws IOException {
-    if (arguments.getResponseType() != null && arguments.getResponseType().equalsIgnoreCase("json")) {
+    if ("json".equalsIgnoreCase(arguments.getResponseType())) {
       handleJSONResponse(writer, errorMsg, null, arguments, configuration);
     } else {
       writer.write("<script type=\"text/javascript\">");
@@ -53,9 +53,9 @@ public class QuickUploadCommand extends FileUploadCommand {
   }
 
   @Override
-  protected void handleOnUploadCompleteCallFuncResponse(Writer writer, String errorMsg, String path, FileUploadArguments arguments, IConfiguration configuration)
-          throws IOException {
-    if (arguments.getResponseType() != null && arguments.getResponseType().equalsIgnoreCase("json")) {
+  protected void handleOnUploadCompleteCallFuncResponse(Writer writer, String errorMsg, String path,
+          FileUploadArguments arguments, IConfiguration configuration) throws IOException {
+    if ("json".equalsIgnoreCase(arguments.getResponseType())) {
       handleJSONResponse(writer, errorMsg, path, arguments, configuration);
     } else {
       writer.write("<script type=\"text/javascript\">");
@@ -76,7 +76,7 @@ public class QuickUploadCommand extends FileUploadCommand {
 
   @Override
   void setResponseHeader(HttpServletRequest request, HttpServletResponse response, FileUploadArguments arguments) {
-    if (arguments.getResponseType() != null && arguments.getResponseType().equalsIgnoreCase("json")) {
+    if ("json".equalsIgnoreCase(arguments.getResponseType())) {
       response.setContentType("application/json;charset=UTF-8");
     } else {
       response.setContentType("text/html;charset=UTF-8");

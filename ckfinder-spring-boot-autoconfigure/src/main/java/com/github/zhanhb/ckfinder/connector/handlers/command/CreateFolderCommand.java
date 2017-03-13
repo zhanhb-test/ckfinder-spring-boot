@@ -30,15 +30,10 @@ import lombok.extern.slf4j.Slf4j;
  * Class to handle <code>CreateFolder</code> command. Create subfolder.
  */
 @Slf4j
-public class CreateFolderCommand extends OnSuccessXmlCommand<CreateFolderArguments> implements IPostCommand {
+public class CreateFolderCommand extends XMLCommand<CreateFolderArguments> implements IPostCommand {
 
   public CreateFolderCommand() {
     super(CreateFolderArguments::new);
-  }
-
-  @Override
-  protected void createXMLChildNodesInternal(Connector.Builder rootElement, CreateFolderArguments arguments, IConfiguration configuration) {
-    createNewFolderElement(rootElement, arguments);
   }
 
   /**
@@ -46,7 +41,8 @@ public class CreateFolderCommand extends OnSuccessXmlCommand<CreateFolderArgumen
    *
    * @param rootElement XML root element.
    */
-  private void createNewFolderElement(Connector.Builder rootElement, CreateFolderArguments arguments) {
+  @Override
+  protected void createXMLChildNodes(Connector.Builder rootElement, CreateFolderArguments arguments, IConfiguration configuration) {
     rootElement.newFolder(NewFolder.builder()
             .name(arguments.getNewFolderName())
             .build());

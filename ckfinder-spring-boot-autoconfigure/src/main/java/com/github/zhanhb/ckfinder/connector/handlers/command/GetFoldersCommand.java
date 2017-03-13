@@ -34,14 +34,14 @@ import lombok.extern.slf4j.Slf4j;
  * location command.
  */
 @Slf4j
-public class GetFoldersCommand extends OnSuccessXmlCommand<GetFoldersArguments> {
+public class GetFoldersCommand extends XMLCommand<GetFoldersArguments> {
 
   public GetFoldersCommand() {
     super(GetFoldersArguments::new);
   }
 
   @Override
-  protected void createXMLChildNodesInternal(Connector.Builder rootElement, GetFoldersArguments arguments, IConfiguration configuration) {
+  protected void createXMLChildNodes(Connector.Builder rootElement, GetFoldersArguments arguments, IConfiguration configuration) {
     createFoldersData(rootElement, arguments, configuration);
   }
 
@@ -81,7 +81,6 @@ public class GetFoldersCommand extends OnSuccessXmlCommand<GetFoldersArguments> 
       arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED);
     }
     filterListByHiddenAndNotAllowed(arguments, configuration);
-    Collections.sort(arguments.getDirectories());
   }
 
   /**
@@ -92,6 +91,7 @@ public class GetFoldersCommand extends OnSuccessXmlCommand<GetFoldersArguments> 
             .filter(dir -> (configuration.getAccessControl().hasPermission(arguments.getType().getName(), arguments.getCurrentFolder() + dir, arguments.getUserRole(),
             AccessControl.CKFINDER_CONNECTOR_ACL_FOLDER_VIEW)
             && !FileUtils.isDirectoryHidden(dir, configuration)))
+            .sorted()
             .collect(Collectors.toList());
 
     arguments.getDirectories().clear();

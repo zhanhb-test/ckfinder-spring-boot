@@ -11,7 +11,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class MoveFilesArguments extends XMLArguments {
+public class MoveFilesArguments extends ErrorListXMLArguments {
 
   private List<FilePostParam> files;
   private int filesMoved;

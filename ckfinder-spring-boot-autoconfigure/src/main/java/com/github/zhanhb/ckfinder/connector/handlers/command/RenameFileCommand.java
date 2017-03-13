@@ -30,14 +30,14 @@ import lombok.extern.slf4j.Slf4j;
  * Class to handle <code>RenameFile</code> command.
  */
 @Slf4j
-public class RenameFileCommand extends XMLCommand<RenameFileArguments> implements IPostCommand {
+public class RenameFileCommand extends ErrorListXMLCommand<RenameFileArguments> implements IPostCommand {
 
   public RenameFileCommand() {
     super(RenameFileArguments::new);
   }
 
   @Override
-  protected void createXMLChildNodes(int errorNum, Connector.Builder rootElement, RenameFileArguments arguments, IConfiguration configuration) {
+  protected void createXMLChildNodes(Connector.Builder rootElement, RenameFileArguments arguments, IConfiguration configuration) {
     if (arguments.isAddRenameNode()) {
       createRenamedFileNode(rootElement, arguments);
     }

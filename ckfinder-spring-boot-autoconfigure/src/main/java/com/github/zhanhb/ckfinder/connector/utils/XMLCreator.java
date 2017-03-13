@@ -11,7 +11,7 @@
  */
 package com.github.zhanhb.ckfinder.connector.utils;
 
-import com.github.zhanhb.ckfinder.connector.handlers.arguments.XMLArguments;
+import com.github.zhanhb.ckfinder.connector.handlers.arguments.ErrorListXMLArguments;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.DetailError;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Errors;
@@ -43,7 +43,7 @@ public enum XMLCreator {
    * @param path current folder
    * @param type resource type
    */
-  public void appendErrorNodeChild(XMLArguments arguments, int errorCode, String name, String path, String type) {
+  public void appendErrorNodeChild(ErrorListXMLArguments arguments, int errorCode, String name, String path, String type) {
     arguments.getErrorList().add(DetailError.builder().type(type).name(name).folder(path).code(errorCode).build());
   }
 
@@ -53,7 +53,7 @@ public enum XMLCreator {
    * @param arguments
    * @return true if there are any errors.
    */
-  public boolean hasErrors(XMLArguments arguments) {
+  public boolean hasErrors(ErrorListXMLArguments arguments) {
     return !arguments.getErrorList().isEmpty();
   }
 
@@ -63,7 +63,7 @@ public enum XMLCreator {
    * @param arguments
    * @param rootElement XML root element
    */
-  public void addErrors(XMLArguments arguments, Connector.Builder rootElement) {
+  public void addErrors(ErrorListXMLArguments arguments, Connector.Builder rootElement) {
     List<DetailError> errorList = arguments.getErrorList();
     if (!errorList.isEmpty()) {
       rootElement.errors(Errors.builder().errors(errorList).build());

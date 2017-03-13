@@ -59,7 +59,8 @@ public abstract class XMLCommand<T extends XMLArguments> extends Command<T> {
   @Override
   @SuppressWarnings("FinalMethod")
   final void execute(T arguments, HttpServletResponse response, IConfiguration configuration) throws IOException, ConnectorException {
-    createXMLResponse(arguments, getDataForXml(arguments, configuration), configuration);
+    createXml(arguments, configuration);
+    createXMLResponse(arguments, configuration);
     try (PrintWriter out = response.getWriter()) {
       XMLCreator.INSTANCE.writeTo(arguments.getConnector().build(), out);
     }
@@ -71,39 +72,37 @@ public abstract class XMLCommand<T extends XMLArguments> extends Command<T> {
    * @param errorNum error code from method getDataForXml()
    * @throws ConnectorException to handle in error handler.
    */
-  private void createXMLResponse(T arguments, int errorNum, IConfiguration configuration) {
+  private void createXMLResponse(T arguments, IConfiguration configuration) {
     Connector.Builder rootElement = arguments.getConnector();
     if (arguments.getType() != null) {
       rootElement.resourceType(arguments.getType().getName());
     }
     createCurrentFolderNode(arguments, rootElement, configuration);
-    rootElement.error(Error.builder().number(errorNum).build());
-    createXMLChildNodes(errorNum, rootElement, arguments, configuration);
+    createErrorNode(rootElement, arguments);
+    createXMLChildNodes(rootElement, arguments, configuration);
+  }
+
+  protected void createErrorNode(Connector.Builder rootElement, T arguments) {
+    rootElement.error(Error.builder().number(0).build());
   }
 
   /**
    * abstract method to create XML nodes for commands.
    *
-   * @param errorNum error code
    * @param rootElement XML root node
    * @param arguments
    * @param configuration connector configuration
    */
-  protected abstract void createXMLChildNodes(int errorNum, Connector.Builder rootElement, T arguments, IConfiguration configuration);
+  protected abstract void createXMLChildNodes(Connector.Builder rootElement, T arguments, IConfiguration configuration);
 
   /**
    * gets all necessary data to create XML response.
    *
    * @param arguments
    * @param configuration connector configuration
-   * @return error code
-   * {@link com.github.zhanhb.ckfinder.connector.configuration.Constants.Errors}
-   * or
-   * {@link com.github.zhanhb.ckfinder.connector.configuration.Constants.Errors#CKFINDER_CONNECTOR_ERROR_NONE}
-   * if no error occurred.
    * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
    */
-  protected abstract int getDataForXml(T arguments, IConfiguration configuration) throws ConnectorException;
+  protected abstract void createXml(T arguments, IConfiguration configuration) throws ConnectorException;
 
   /**
    * creates <code>CurrentFolder</code> element.

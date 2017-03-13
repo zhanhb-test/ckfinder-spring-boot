@@ -35,31 +35,22 @@ import lombok.extern.slf4j.Slf4j;
  * Class to handle <code>CopyFiles</code> command.
  */
 @Slf4j
-public class CopyFilesCommand extends XMLCommand<CopyFilesArguments> implements IPostCommand {
+public class CopyFilesCommand extends ErrorListXMLCommand<CopyFilesArguments> implements IPostCommand {
 
   public CopyFilesCommand() {
     super(CopyFilesArguments::new);
   }
 
   @Override
-  protected void createXMLChildNodes(int errorNum, Connector.Builder rootElement, CopyFilesArguments arguments, IConfiguration configuration) {
+  protected void createXMLChildNodes(Connector.Builder rootElement, CopyFilesArguments arguments, IConfiguration configuration) {
     XMLCreator.INSTANCE.addErrors(arguments, rootElement);
 
     if (arguments.isAddCopyNode()) {
-      createCopyFielsNode(rootElement, arguments);
+      rootElement.copyFiles(CopyFiles.builder()
+              .copied(arguments.getFilesCopied())
+              .copiedTotal(arguments.getCopiedAll() + arguments.getFilesCopied())
+              .build());
     }
-  }
-
-  /**
-   * creates copy file XML node.
-   *
-   * @param rootElement XML root node.
-   */
-  private void createCopyFielsNode(Connector.Builder rootElement, CopyFilesArguments arguments) {
-    rootElement.copyFiles(CopyFiles.builder()
-            .copied(arguments.getFilesCopied())
-            .copiedTotal(arguments.getCopiedAll() + arguments.getFilesCopied())
-            .build());
   }
 
   @Override
@@ -238,9 +229,7 @@ public class CopyFilesCommand extends XMLCommand<CopyFilesArguments> implements 
    * @throws IOException when ioerror occurs
    */
   private boolean handleOverwrite(Path sourceFile, Path destFile) throws IOException {
-    return FileUtils.delete(destFile)
-            && FileUtils.copyFromSourceToDestFile(sourceFile, destFile,
-                    false);
+    return FileUtils.copyFromSourceToDestFile(sourceFile, destFile, false);
   }
 
   /**

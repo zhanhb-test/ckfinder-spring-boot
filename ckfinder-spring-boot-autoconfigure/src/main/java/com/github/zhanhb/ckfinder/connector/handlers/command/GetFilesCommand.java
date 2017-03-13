@@ -35,7 +35,7 @@ import lombok.extern.slf4j.Slf4j;
  * command.
  */
 @Slf4j
-public class GetFilesCommand extends OnSuccessXmlCommand<GetFilesArguments> {
+public class GetFilesCommand extends XMLCommand<GetFilesArguments> {
 
   /**
    * number of bytes in kilobyte.
@@ -63,7 +63,7 @@ public class GetFilesCommand extends OnSuccessXmlCommand<GetFilesArguments> {
   }
 
   @Override
-  protected void createXMLChildNodesInternal(Connector.Builder rootElement, GetFilesArguments arguments, IConfiguration configuration) {
+  protected void createXMLChildNodes(Connector.Builder rootElement, GetFilesArguments arguments, IConfiguration configuration) {
     createFilesData(rootElement, arguments, configuration);
   }
 

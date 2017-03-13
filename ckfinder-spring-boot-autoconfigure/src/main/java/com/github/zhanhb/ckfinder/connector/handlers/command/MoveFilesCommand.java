@@ -34,14 +34,14 @@ import lombok.extern.slf4j.Slf4j;
  * Class to handle <code>MoveFiles</code> command.
  */
 @Slf4j
-public class MoveFilesCommand extends XMLCommand<MoveFilesArguments> implements IPostCommand {
+public class MoveFilesCommand extends ErrorListXMLCommand<MoveFilesArguments> implements IPostCommand {
 
   public MoveFilesCommand() {
     super(MoveFilesArguments::new);
   }
 
   @Override
-  protected void createXMLChildNodes(int errorNum, Connector.Builder rootElement, MoveFilesArguments arguments, IConfiguration configuration) {
+  protected void createXMLChildNodes(Connector.Builder rootElement, MoveFilesArguments arguments, IConfiguration configuration) {
     XMLCreator.INSTANCE.addErrors(arguments, rootElement);
 
     if (arguments.isAddMoveNode()) {

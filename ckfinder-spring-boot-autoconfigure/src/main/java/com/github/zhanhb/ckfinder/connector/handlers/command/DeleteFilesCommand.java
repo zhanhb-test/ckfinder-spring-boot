@@ -33,14 +33,14 @@ import lombok.extern.slf4j.Slf4j;
  * Class used to handle <code>DeleteFiles</code> command.
  */
 @Slf4j
-public class DeleteFilesCommand extends XMLCommand<DeleteFilesArguments> implements IPostCommand {
+public class DeleteFilesCommand extends ErrorListXMLCommand<DeleteFilesArguments> implements IPostCommand {
 
   public DeleteFilesCommand() {
     super(DeleteFilesArguments::new);
   }
 
   @Override
-  protected void createXMLChildNodes(int errorNum, Connector.Builder rootElement, DeleteFilesArguments arguments, IConfiguration configuration) {
+  protected void createXMLChildNodes(Connector.Builder rootElement, DeleteFilesArguments arguments, IConfiguration configuration) {
     XMLCreator.INSTANCE.addErrors(arguments, rootElement);
 
     if (arguments.isAddDeleteNode()) {

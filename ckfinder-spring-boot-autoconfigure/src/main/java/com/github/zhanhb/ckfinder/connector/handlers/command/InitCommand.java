@@ -38,7 +38,7 @@ import lombok.extern.slf4j.Slf4j;
  * Class to handle <code>Init</code> command.
  */
 @Slf4j
-public class InitCommand extends OnSuccessXmlCommand<InitArgument> {
+public class InitCommand extends XMLCommand<InitArgument> {
 
   /**
    * chars taken to license key.
@@ -57,7 +57,7 @@ public class InitCommand extends OnSuccessXmlCommand<InitArgument> {
   }
 
   @Override
-  protected void createXMLChildNodesInternal(Connector.Builder rootElement, InitArgument arguments, IConfiguration configuration) {
+  protected void createXMLChildNodes(Connector.Builder rootElement, InitArgument arguments, IConfiguration configuration) {
     createConnectorData(rootElement, arguments, configuration);
     try {
       createResouceTypesData(rootElement, arguments, configuration);

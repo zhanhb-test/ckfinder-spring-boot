@@ -9,7 +9,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class RenameFileArguments extends XMLArguments {
+public class RenameFileArguments extends ErrorListXMLArguments {
 
   private String fileName;
   private String newFileName;

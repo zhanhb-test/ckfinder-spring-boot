@@ -17,7 +17,7 @@ import com.github.zhanhb.ckfinder.connector.data.BeforeExecuteCommandEventArgs;
 import com.github.zhanhb.ckfinder.connector.data.BeforeExecuteCommandEventHandler;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.arguments.ImageResizeInfoArguments;
-import com.github.zhanhb.ckfinder.connector.handlers.command.OnSuccessXmlCommand;
+import com.github.zhanhb.ckfinder.connector.handlers.command.XMLCommand;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.ImageInfo;
 import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
@@ -33,7 +33,7 @@ import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class ImageResizeInfoCommand extends OnSuccessXmlCommand<ImageResizeInfoArguments> implements BeforeExecuteCommandEventHandler {
+public class ImageResizeInfoCommand extends XMLCommand<ImageResizeInfoArguments> implements BeforeExecuteCommandEventHandler {
 
   public ImageResizeInfoCommand() {
     super(ImageResizeInfoArguments::new);
@@ -51,7 +51,7 @@ public class ImageResizeInfoCommand extends OnSuccessXmlCommand<ImageResizeInfoA
   }
 
   @Override
-  protected void createXMLChildNodesInternal(Connector.Builder rootElement, ImageResizeInfoArguments arguments, IConfiguration configuration) {
+  protected void createXMLChildNodes(Connector.Builder rootElement, ImageResizeInfoArguments arguments, IConfiguration configuration) {
     createImageInfoNode(rootElement, arguments);
   }
 

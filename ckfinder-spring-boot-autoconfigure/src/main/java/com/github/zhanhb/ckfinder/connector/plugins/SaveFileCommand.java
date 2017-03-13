@@ -17,7 +17,7 @@ import com.github.zhanhb.ckfinder.connector.data.BeforeExecuteCommandEventArgs;
 import com.github.zhanhb.ckfinder.connector.data.BeforeExecuteCommandEventHandler;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.arguments.SaveFileArguments;
-import com.github.zhanhb.ckfinder.connector.handlers.command.OnSuccessXmlCommand;
+import com.github.zhanhb.ckfinder.connector.handlers.command.XMLCommand;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
@@ -30,14 +30,14 @@ import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class SaveFileCommand extends OnSuccessXmlCommand<SaveFileArguments> implements BeforeExecuteCommandEventHandler {
+public class SaveFileCommand extends XMLCommand<SaveFileArguments> implements BeforeExecuteCommandEventHandler {
 
   public SaveFileCommand() {
     super(SaveFileArguments::new);
   }
 
   @Override
-  protected void createXMLChildNodesInternal(Connector.Builder rootElement, SaveFileArguments arguments, IConfiguration configuration) {
+  protected void createXMLChildNodes(Connector.Builder rootElement, SaveFileArguments arguments, IConfiguration configuration) {
   }
 
   @Override

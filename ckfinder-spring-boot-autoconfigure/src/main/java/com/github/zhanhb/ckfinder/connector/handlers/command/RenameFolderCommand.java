@@ -31,15 +31,10 @@ import lombok.extern.slf4j.Slf4j;
  * Class to handle <code>RenameFolder</code> command.
  */
 @Slf4j
-public class RenameFolderCommand extends OnSuccessXmlCommand<RenameFolderArguments> implements IPostCommand {
+public class RenameFolderCommand extends XMLCommand<RenameFolderArguments> implements IPostCommand {
 
   public RenameFolderCommand() {
     super(RenameFolderArguments::new);
-  }
-
-  @Override
-  protected void createXMLChildNodesInternal(Connector.Builder rootElement, RenameFolderArguments arguments, IConfiguration configuration) {
-    createRenamedFolderNode(rootElement, arguments, configuration);
   }
 
   /**
@@ -47,7 +42,8 @@ public class RenameFolderCommand extends OnSuccessXmlCommand<RenameFolderArgumen
    *
    * @param rootElement XML root element.
    */
-  private void createRenamedFolderNode(Connector.Builder rootElement, RenameFolderArguments arguments, IConfiguration configuration) {
+  @Override
+  protected void createXMLChildNodes(Connector.Builder rootElement, RenameFolderArguments arguments, IConfiguration configuration) {
     rootElement.renamedFolder(RenamedFolder.builder()
             .newName(arguments.getNewFolderName())
             .newPath(arguments.getNewFolderPath())
@@ -57,7 +53,6 @@ public class RenameFolderCommand extends OnSuccessXmlCommand<RenameFolderArgumen
 
   @Override
   protected void createXml(RenameFolderArguments arguments, IConfiguration configuration) throws ConnectorException {
-
     checkRequestPathValid(arguments.getNewFolderName());
 
     if (arguments.getType() == null) {
