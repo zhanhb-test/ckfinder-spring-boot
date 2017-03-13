@@ -11,6 +11,7 @@
  */
 package com.github.zhanhb.ckfinder.connector.plugins;
 
+import com.github.zhanhb.ckfinder.connector.configuration.CommandFactory;
 import com.github.zhanhb.ckfinder.connector.configuration.Events;
 import com.github.zhanhb.ckfinder.connector.configuration.Plugin;
 
@@ -22,7 +23,11 @@ public class FileEditor extends Plugin {
 
   @Override
   public void registerEventHandlers(Events.Builder events) {
-    events.beforeExecuteCommandEventHandler(new SaveFileCommand());
+  }
+
+  @Override
+  protected void registerCommandFactory(CommandFactory factory) {
+    factory.registerCommands(new SaveFileCommand());
   }
 
 }

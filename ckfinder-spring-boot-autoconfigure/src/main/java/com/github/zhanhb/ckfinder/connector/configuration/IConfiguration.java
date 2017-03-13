@@ -214,4 +214,10 @@ public interface IConfiguration {
    */
   public AccessControl getAccessControl();
 
+  /**
+   *
+   * @return the command factory
+   */
+  public CommandFactory getCommandFactory();
+
 }

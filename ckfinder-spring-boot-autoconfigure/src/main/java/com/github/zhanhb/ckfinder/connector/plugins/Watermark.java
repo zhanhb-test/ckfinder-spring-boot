@@ -11,6 +11,7 @@
  */
 package com.github.zhanhb.ckfinder.connector.plugins;
 
+import com.github.zhanhb.ckfinder.connector.configuration.CommandFactory;
 import com.github.zhanhb.ckfinder.connector.configuration.Events;
 import com.github.zhanhb.ckfinder.connector.configuration.Plugin;
 
@@ -26,6 +27,10 @@ public class Watermark extends Plugin {
   @Override
   public void registerEventHandlers(Events.Builder builder) {
     builder.afterFileUploadEventHandler(new WatermarkCommand(watermarkSettings));
+  }
+
+  @Override
+  protected void registerCommandFactory(CommandFactory factory) {
   }
 
 }

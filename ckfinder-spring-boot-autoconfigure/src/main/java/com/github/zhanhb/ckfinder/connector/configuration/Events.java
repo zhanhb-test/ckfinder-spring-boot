@@ -13,8 +13,6 @@ package com.github.zhanhb.ckfinder.connector.configuration;
 
 import com.github.zhanhb.ckfinder.connector.data.AfterFileUploadEventArgs;
 import com.github.zhanhb.ckfinder.connector.data.AfterFileUploadEventHandler;
-import com.github.zhanhb.ckfinder.connector.data.BeforeExecuteCommandEventArgs;
-import com.github.zhanhb.ckfinder.connector.data.BeforeExecuteCommandEventHandler;
 import com.github.zhanhb.ckfinder.connector.data.IEventHandler;
 import com.github.zhanhb.ckfinder.connector.data.InitCommandEventArgs;
 import com.github.zhanhb.ckfinder.connector.data.InitCommandEventHandler;
@@ -51,27 +49,10 @@ public class Events {
     return true;
   }
 
-  @Deprecated
-  @Singular
-  private final List<BeforeExecuteCommandEventHandler> beforeExecuteCommandEventHandlers;
   @Singular
   private final List<AfterFileUploadEventHandler> afterFileUploadEventHandlers;
   @Singular
   private final List<InitCommandEventHandler> initCommandEventHandlers;
-
-  /**
-   * run event handlers for selected event.
-   *
-   * @param args event execute arguments.
-   * @param configuration connector configuration
-   * @return false when end executing command.
-   * @throws ConnectorException when error occurs.
-   */
-  @Deprecated
-  public boolean runBeforeExecuteCommand(BeforeExecuteCommandEventArgs args, IConfiguration configuration)
-          throws ConnectorException {
-    return run(beforeExecuteCommandEventHandlers, args, configuration);
-  }
 
   public boolean runAfterFileUpload(AfterFileUploadEventArgs args, IConfiguration configuration)
           throws ConnectorException {

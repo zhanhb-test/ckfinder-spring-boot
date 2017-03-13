@@ -13,8 +13,6 @@ package com.github.zhanhb.ckfinder.connector.plugins;
 
 import com.github.zhanhb.ckfinder.connector.configuration.Constants;
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
-import com.github.zhanhb.ckfinder.connector.data.BeforeExecuteCommandEventArgs;
-import com.github.zhanhb.ckfinder.connector.data.BeforeExecuteCommandEventHandler;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.arguments.ImageResizeInfoArguments;
 import com.github.zhanhb.ckfinder.connector.handlers.command.XMLCommand;
@@ -33,21 +31,10 @@ import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class ImageResizeInfoCommand extends XMLCommand<ImageResizeInfoArguments> implements BeforeExecuteCommandEventHandler {
+public class ImageResizeInfoCommand extends XMLCommand<ImageResizeInfoArguments> {
 
   public ImageResizeInfoCommand() {
     super(ImageResizeInfoArguments::new);
-  }
-
-  @Override
-  public boolean runEventHandler(BeforeExecuteCommandEventArgs args, IConfiguration configuration)
-          throws ConnectorException, IOException {
-    log.debug("runEventHandler: {} {}", args, configuration);
-    if ("ImageResizeInfo".equals(args.getCommand())) {
-      this.runCommand(args.getRequest(), args.getResponse(), configuration);
-      return false;
-    }
-    return true;
   }
 
   @Override

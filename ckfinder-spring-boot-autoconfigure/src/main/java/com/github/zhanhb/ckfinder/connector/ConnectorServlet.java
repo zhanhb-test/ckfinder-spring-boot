@@ -11,11 +11,8 @@
  */
 package com.github.zhanhb.ckfinder.connector;
 
-import com.github.zhanhb.ckfinder.connector.configuration.CommandFactory;
 import com.github.zhanhb.ckfinder.connector.configuration.Constants;
-import com.github.zhanhb.ckfinder.connector.configuration.Events;
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
-import com.github.zhanhb.ckfinder.connector.data.BeforeExecuteCommandEventArgs;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.errors.ErrorHandler;
 import com.github.zhanhb.ckfinder.connector.errors.XMLErrorHandler;
@@ -41,7 +38,6 @@ public class ConnectorServlet extends HttpServlet {
   private static final long serialVersionUID = 2960665641425153638L;
 
   private final IConfiguration configuration;
-  private final CommandFactory commandFactory = new CommandFactory().enableDefaultCommands();
 
   /**
    * Handling get requests.
@@ -94,26 +90,21 @@ public class ConnectorServlet extends HttpServlet {
                 Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_COMMAND);
       }
 
-      BeforeExecuteCommandEventArgs args = new BeforeExecuteCommandEventArgs(commandName, request, response);
-
-      Events events = configuration.getEvents();
-      if (events == null || events.runBeforeExecuteCommand(args, configuration)) {
-        command = commandFactory.getCommand(commandName);
-        log.debug("{} {}", command, events);
-        if (command != null) {
-          // checks if command should go via POST request or it's a post request
-          // and it's not upload command
-          Class<?> commandClass = command.getClass();
-          if ((IPostCommand.class.isAssignableFrom(commandClass) || post)
-                  && !FileUploadCommand.class.isAssignableFrom(commandClass)) {
-            checkPostRequest(request);
-          }
-          command.runCommand(request, response, configuration);
-        } else {
-          throw new ConnectorException(
-                  Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_COMMAND);
+      command = configuration.getCommandFactory().getCommand(commandName);
+      if (command != null) {
+        // checks if command should go via POST request or it's a post request
+        // and it's not upload command
+        Class<?> commandClass = command.getClass();
+        if ((IPostCommand.class.isAssignableFrom(commandClass) || post)
+                && !FileUploadCommand.class.isAssignableFrom(commandClass)) {
+          checkPostRequest(request);
         }
+        command.runCommand(request, response, configuration);
+      } else {
+        throw new ConnectorException(
+                Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_COMMAND);
       }
+
     } catch (RuntimeException | Error e) {
       log.error("", e);
       handleError(new ConnectorException(

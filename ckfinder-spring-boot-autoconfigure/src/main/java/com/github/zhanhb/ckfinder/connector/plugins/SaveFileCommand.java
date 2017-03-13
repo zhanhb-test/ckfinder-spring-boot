@@ -13,8 +13,6 @@ package com.github.zhanhb.ckfinder.connector.plugins;
 
 import com.github.zhanhb.ckfinder.connector.configuration.Constants;
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
-import com.github.zhanhb.ckfinder.connector.data.BeforeExecuteCommandEventArgs;
-import com.github.zhanhb.ckfinder.connector.data.BeforeExecuteCommandEventHandler;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.arguments.SaveFileArguments;
 import com.github.zhanhb.ckfinder.connector.handlers.command.XMLCommand;
@@ -30,7 +28,7 @@ import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class SaveFileCommand extends XMLCommand<SaveFileArguments> implements BeforeExecuteCommandEventHandler {
+public class SaveFileCommand extends XMLCommand<SaveFileArguments> {
 
   public SaveFileCommand() {
     super(SaveFileArguments::new);
@@ -82,16 +80,6 @@ public class SaveFileCommand extends XMLCommand<SaveFileArguments> implements Be
       log.error("", e);
       arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED);
     }
-  }
-
-  @Override
-  public boolean runEventHandler(BeforeExecuteCommandEventArgs args, IConfiguration configuration)
-          throws ConnectorException, IOException {
-    if ("SaveFile".equals(args.getCommand())) {
-      this.runCommand(args.getRequest(), args.getResponse(), configuration);
-      return false;
-    }
-    return true;
   }
 
   @Override

@@ -27,8 +27,10 @@ import java.util.TreeMap;
 public class CommandFactory {
 
   private final Map<String, Command<?>> commands = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+  private boolean locked;
 
   public CommandFactory enableDefaultCommands() {
+    checkLock();
     return registerCommands(new InitCommand(),
             new GetFoldersCommand(),
             new GetFilesCommand(),
@@ -46,6 +48,7 @@ public class CommandFactory {
   }
 
   public CommandFactory registerCommands(Command<?>... commands) {
+    checkLock();
     Map<String, Command<?>> map = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
     for (Command<?> command : commands) {
       String className = command.getClass().getSimpleName();
@@ -62,6 +65,7 @@ public class CommandFactory {
   }
 
   public CommandFactory registerCommand(String name, Command<?> command) {
+    checkLock();
     return registerCommands(Collections.singletonMap(name, command));
   }
 
@@ -79,6 +83,16 @@ public class CommandFactory {
 
   public Command<?> getCommand(String commandName) {
     return commands.get(commandName);
+  }
+
+  private void checkLock() {
+    if (locked) {
+      throw new IllegalStateException();
+    }
+  }
+
+  void lock() {
+    this.locked = true;
   }
 
 }

@@ -20,6 +20,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import lombok.Builder;
+import lombok.NonNull;
 import lombok.Singular;
 import lombok.Value;
 
@@ -63,8 +64,12 @@ public class Configuration implements IConfiguration {
   @Singular
   private Set<String> defaultResourceTypes;
   private boolean disallowUnsafeCharacters;
+  @NonNull
   private Events events;
+  @NonNull
   private AccessControl accessControl;
+  @NonNull
+  private CommandFactory commandFactory;
 
   @Override
   public License getLicense(HttpServletRequest request) {
@@ -86,13 +91,16 @@ public class Configuration implements IConfiguration {
     }
 
     public Builder eventsFromPlugins(Collection<? extends Plugin> plugins) {
+      CommandFactory cf = new CommandFactory().enableDefaultCommands();
       Events.Builder eventsBuilder = Events.builder();
       for (Plugin plugin : plugins) {
         plugin.registerEventHandlers(eventsBuilder);
+        plugin.registerCommandFactory(cf);
       }
+      cf.lock();
       String pluginNames = plugins.stream().filter(plugin -> !plugin.isInternal())
               .map(plugin -> plugin.getName()).collect(Collectors.joining(","));
-      return events(eventsBuilder.build()).publicPluginNames(pluginNames);
+      return commandFactory(cf).events(eventsBuilder.build()).publicPluginNames(pluginNames);
     }
   }
 
