@@ -54,10 +54,11 @@ public class CopyFilesCommand extends ErrorListXMLCommand<CopyFilesArguments> im
   }
 
   @Override
-  protected int getDataForXml(CopyFilesArguments arguments, IConfiguration configuration) {
+  protected int getDataForXml(CopyFilesArguments arguments, IConfiguration configuration)
+          throws ConnectorException {
     ResourceType type = arguments.getType();
     if (type == null) {
-      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE;
+      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE);
     }
 
     if (!configuration.getAccessControl().hasPermission(type.getName(),
@@ -66,7 +67,7 @@ public class CopyFilesCommand extends ErrorListXMLCommand<CopyFilesArguments> im
             AccessControl.CKFINDER_CONNECTOR_ACL_FILE_RENAME
             | AccessControl.CKFINDER_CONNECTOR_ACL_FILE_DELETE
             | AccessControl.CKFINDER_CONNECTOR_ACL_FILE_UPLOAD)) {
-      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED;
+      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED);
     }
 
     try {

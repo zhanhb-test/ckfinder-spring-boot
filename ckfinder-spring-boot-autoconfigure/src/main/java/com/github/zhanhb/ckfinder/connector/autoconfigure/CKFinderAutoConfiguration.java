@@ -243,8 +243,7 @@ public class CKFinderAutoConfiguration {
         String url = type.getUrl() != null ? type.getUrl() : Constants.BASE_URL_PLACEHOLDER + "/" + typeName.toLowerCase();
         resourceTypeBuilder.url(url.replace(Constants.BASE_URL_PLACEHOLDER, baseUrl));
 
-        ResourceType resourceType = resourceTypeBuilder.build();
-        builder.type(typeName, resourceType);
+        builder.type(typeName, resourceTypeBuilder.build());
       }
     }
 

@@ -65,16 +65,18 @@ public class DeleteFilesCommand extends ErrorListXMLCommand<DeleteFilesArguments
    * @param arguments
    * @param configuration connector configuration
    * @return error code or 0 if action ended with success.
+   * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
    */
   @Override
-  protected int getDataForXml(DeleteFilesArguments arguments, IConfiguration configuration) {
+  protected int getDataForXml(DeleteFilesArguments arguments, IConfiguration configuration)
+          throws ConnectorException {
 
     arguments.setFilesDeleted(0);
 
     arguments.setAddDeleteNode(false);
 
     if (arguments.getType() == null) {
-      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE;
+      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE);
     }
 
     for (FilePostParam fileItem : arguments.getFiles()) {

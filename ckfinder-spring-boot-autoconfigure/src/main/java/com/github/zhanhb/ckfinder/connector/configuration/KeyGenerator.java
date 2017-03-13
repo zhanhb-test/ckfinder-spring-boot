@@ -29,15 +29,20 @@ public enum KeyGenerator {
     return index[ch - '1'];
   }
 
+  int r(int div, int rem, int lim) {
+    return nextInt((lim - rem + div - 1) / div) * div + rem;
+  }
+
   public String generateKey(boolean host, String licenseName, int len) {
     if (len < 26) {
       throw new IllegalArgumentException();
     }
     char[] licenseKey = new char[len];
+    int charsLength = chars.length;
 
     // Create a 34-character random license key
     for (int i = 0; i < len; i++) {
-      licenseKey[i] = chars[nextInt(chars.length)];
+      licenseKey[i] = chars[nextInt(charsLength)];
     }
 
     // Important characters: 0, 3, 12, 25
@@ -48,8 +53,7 @@ public enum KeyGenerator {
      * The letter:
      * The characters in the character set that have the sequence number when divided by 5 will be left 4(non host) or 1(host).
      */
-    int[] zeroCharsIndex = host ? new int[]{1, 6, 11, 16, 21, 26, 31} : new int[]{4, 9, 14, 19, 24, 29};
-    licenseKey[0] = chars[zeroCharsIndex[nextInt(zeroCharsIndex.length)]];
+    licenseKey[0] = chars[r(5, host ? 1 : 4, charsLength)];
 
     /*
      * ----------------------------------------------
@@ -83,8 +87,7 @@ public enum KeyGenerator {
      * Make the characters in the character set that have a sequence number
      * when divided by 8 will have a balance of 7.
      */
-    int[] twentyFiveChars = {7, 15, 23, 31};
-    licenseKey[25] = chars[twentyFiveChars[nextInt(twentyFiveChars.length)]];
+    licenseKey[25] = chars[r(8, 7, charsLength)];
 
     return new String(licenseKey);
   }

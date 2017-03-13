@@ -29,7 +29,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.LinkedHashSet;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -170,20 +172,17 @@ public class InitCommand extends XMLCommand<InitArgument> {
   private void createResouceTypesData(Connector.Builder rootElement, InitArgument arguments, IConfiguration configuration) throws IOException {
     //resurcetypes
     ResourceTypes.Builder resourceTypes = ResourceTypes.builder();
-    Set<String> types;
+    Collection<ResourceType> types;
     if (arguments.getType() != null) {
-      types = new LinkedHashSet<>();
-      types.add(arguments.getType().getName());
+      types = Collections.singleton(arguments.getType());
     } else {
       types = getTypes(configuration);
     }
 
-    for (String key : types) {
-      ResourceType resourceType = configuration.getTypes().get(key);
-      if (((arguments.getType() == null || arguments.getType().getName().equals(key)) && resourceType != null)
-              && configuration.getAccessControl().hasPermission(key, "/", arguments.getUserRole(),
+    for (ResourceType resourceType : types) {
+      String key = resourceType.getName();
+      if (configuration.getAccessControl().hasPermission(key, "/", arguments.getUserRole(),
                       AccessControl.CKFINDER_CONNECTOR_ACL_FOLDER_VIEW)) {
-
         com.github.zhanhb.ckfinder.connector.handlers.response.ResourceType.Builder childElement = com.github.zhanhb.ckfinder.connector.handlers.response.ResourceType.builder();
         childElement.name(resourceType.getName());
         childElement.acl(configuration.getAccessControl().getAcl(key, "/", arguments.getUserRole()));
@@ -206,11 +205,19 @@ public class InitCommand extends XMLCommand<InitArgument> {
    *
    * @return list of types names.
    */
-  private Set<String> getTypes(IConfiguration configuration) {
+  private Collection<ResourceType> getTypes(IConfiguration configuration) {
     if (configuration.getDefaultResourceTypes().size() > 0) {
-      return configuration.getDefaultResourceTypes();
+      Set<String> defaultResourceTypes = configuration.getDefaultResourceTypes();
+      ArrayList<ResourceType> arrayList = new ArrayList<>(defaultResourceTypes.size());
+      for (String key : defaultResourceTypes) {
+        ResourceType resourceType = configuration.getTypes().get(key);
+        if (resourceType != null) {
+          arrayList.add(resourceType);
+        }
+      }
+      return arrayList;
     } else {
-      return configuration.getTypes().keySet();
+      return configuration.getTypes().values();
     }
   }
 

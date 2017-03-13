@@ -62,18 +62,20 @@ public class RenameFileCommand extends ErrorListXMLCommand<RenameFileArguments> 
    * @param arguments
    * @param configuration connector configuration
    * @return error code or 0 if it's correct.
+   * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
    */
   @Override
-  protected int getDataForXml(RenameFileArguments arguments, IConfiguration configuration) {
+  protected int getDataForXml(RenameFileArguments arguments, IConfiguration configuration)
+          throws ConnectorException {
     log.trace("getDataForXml");
     if (arguments.getType() == null) {
-      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE;
+      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE);
     }
 
     if (!configuration.getAccessControl().hasPermission(arguments.getType().getName(),
             arguments.getCurrentFolder(), arguments.getUserRole(),
             AccessControl.CKFINDER_CONNECTOR_ACL_FILE_RENAME)) {
-      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED;
+      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED);
     }
 
     if (configuration.isForceAscii()) {

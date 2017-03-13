@@ -62,9 +62,10 @@ public class MoveFilesCommand extends ErrorListXMLCommand<MoveFilesArguments> im
   }
 
   @Override
-  protected int getDataForXml(MoveFilesArguments arguments, IConfiguration configuration) {
+  protected int getDataForXml(MoveFilesArguments arguments, IConfiguration configuration)
+          throws ConnectorException {
     if (arguments.getType() == null) {
-      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE;
+      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE);
     }
 
     if (!configuration.getAccessControl().hasPermission(arguments.getType().getName(),
@@ -73,7 +74,7 @@ public class MoveFilesCommand extends ErrorListXMLCommand<MoveFilesArguments> im
             AccessControl.CKFINDER_CONNECTOR_ACL_FILE_RENAME
             | AccessControl.CKFINDER_CONNECTOR_ACL_FILE_DELETE
             | AccessControl.CKFINDER_CONNECTOR_ACL_FILE_UPLOAD)) {
-      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED;
+      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED);
     }
 
     try {
