@@ -15,14 +15,17 @@ import com.github.zhanhb.ckfinder.connector.configuration.CommandFactoryBuilder;
 import com.github.zhanhb.ckfinder.connector.configuration.Events;
 import com.github.zhanhb.ckfinder.connector.configuration.Plugin;
 import java.util.Map;
+import java.util.Set;
+import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor
 public class ImageResize extends Plugin {
 
   private final Map<String, String> params;
 
-  public ImageResize(Map<String, String> params) {
-    super("imageresize", false);
-    this.params = params;
+  @Override
+  protected void registerPluginName(Set<String> names) {
+    names.add("imageresize");
   }
 
   @Override

@@ -17,6 +17,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import lombok.Builder;
@@ -93,12 +94,13 @@ public class Configuration implements IConfiguration {
     public Builder eventsFromPlugins(Collection<? extends Plugin> plugins) {
       CommandFactoryBuilder factory = new CommandFactoryBuilder().enableDefaultCommands();
       Events.Builder eventsBuilder = Events.builder();
+      Set<String> set = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
       for (Plugin plugin : plugins) {
         plugin.registerEventHandlers(eventsBuilder);
         plugin.registerCommands(factory);
+        plugin.registerPluginName(set);
       }
-      String pluginNames = plugins.stream().filter(plugin -> !plugin.isInternal())
-              .map(plugin -> plugin.getName()).collect(Collectors.joining(","));
+      String pluginNames = set.stream().collect(Collectors.joining(","));
       events(eventsBuilder.build());
       commandFactory(factory.build());
       publicPluginNames(pluginNames);

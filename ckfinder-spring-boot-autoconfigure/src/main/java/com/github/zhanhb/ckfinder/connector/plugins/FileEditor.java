@@ -14,11 +14,13 @@ package com.github.zhanhb.ckfinder.connector.plugins;
 import com.github.zhanhb.ckfinder.connector.configuration.CommandFactoryBuilder;
 import com.github.zhanhb.ckfinder.connector.configuration.Events;
 import com.github.zhanhb.ckfinder.connector.configuration.Plugin;
+import java.util.Set;
 
 public class FileEditor extends Plugin {
 
-  public FileEditor() {
-    super("fileeditor", false);
+  @Override
+  protected void registerPluginName(Set<String> names) {
+    names.add("fileeditor");
   }
 
   @Override
