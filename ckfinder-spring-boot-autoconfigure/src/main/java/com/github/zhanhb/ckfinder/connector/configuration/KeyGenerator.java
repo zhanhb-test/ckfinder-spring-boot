@@ -33,7 +33,7 @@ public enum KeyGenerator {
     return nextInt((lim - rem + div - 1) / div) * div + rem;
   }
 
-  public String generateKey(boolean host, String licenseName, int len) {
+  public String generateKey(String licenseName, int len, boolean host) {
     if (len < 26) {
       throw new IllegalArgumentException();
     }
@@ -90,6 +90,10 @@ public enum KeyGenerator {
     licenseKey[25] = chars[r(8, 7, charsLength)];
 
     return new String(licenseKey);
+  }
+
+  public String generateKey(String licenseName, boolean host) {
+    return generateKey(licenseName, 34, host);
   }
 
 }

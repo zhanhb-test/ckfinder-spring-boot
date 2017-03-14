@@ -142,7 +142,7 @@ public class CKFinderAutoConfiguration {
             break label;
           } else if (strategy == CKFinderProperties.LicenseStrategy.auth) {
             if (!StringUtils.isEmpty(license.getName()) && StringUtils.isEmpty(license.getKey())) {
-              licenseBuilder.key(KeyGenerator.INSTANCE.generateKey(false, license.getName(), 34));
+              licenseBuilder.key(KeyGenerator.INSTANCE.generateKey(license.getName(), false));
             }
           }
         }
