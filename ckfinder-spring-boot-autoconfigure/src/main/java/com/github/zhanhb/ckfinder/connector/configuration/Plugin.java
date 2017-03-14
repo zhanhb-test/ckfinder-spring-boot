@@ -32,6 +32,6 @@ public abstract class Plugin {
    */
   protected abstract void registerEventHandlers(Events.Builder eventHandler);
 
-  protected abstract void registerCommandFactory(CommandFactory factory);
+  protected abstract void registerCommands(CommandFactoryBuilder factory);
 
 }

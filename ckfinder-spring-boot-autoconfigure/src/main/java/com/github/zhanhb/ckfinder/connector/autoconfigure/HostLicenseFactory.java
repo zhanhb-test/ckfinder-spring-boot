@@ -22,15 +22,15 @@ class HostLicenseFactory implements LicenseFactory {
   }
 
   private String getKey(String name) {
-    int len = name.length();
-    if (len < keys.length()) {
+    int index = name.length();
+    if (index < keys.length()) {
       for (;;) {
-        String result = keys.get(len);
+        String result = keys.get(index);
         if (result != null) {
           return result;
         }
         result = generateKey(name);
-        if (keys.compareAndSet(name.length(), null, result)) {
+        if (keys.compareAndSet(index, null, result)) {
           return result;
         }
       }

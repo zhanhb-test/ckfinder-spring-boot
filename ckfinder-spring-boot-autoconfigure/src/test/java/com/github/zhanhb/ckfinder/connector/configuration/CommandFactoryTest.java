@@ -15,7 +15,7 @@ public class CommandFactoryTest {
    */
   @Test
   public void testEnableDefaultCommands() {
-    assertNotNull(new CommandFactory().enableDefaultCommands().getCommand("INIT"));
+    assertNotNull(new CommandFactoryBuilder().enableDefaultCommands().build().getCommand("INIT"));
   }
 
 }

@@ -91,16 +91,18 @@ public class Configuration implements IConfiguration {
     }
 
     public Builder eventsFromPlugins(Collection<? extends Plugin> plugins) {
-      CommandFactory cf = new CommandFactory().enableDefaultCommands();
+      CommandFactoryBuilder factory = new CommandFactoryBuilder().enableDefaultCommands();
       Events.Builder eventsBuilder = Events.builder();
       for (Plugin plugin : plugins) {
         plugin.registerEventHandlers(eventsBuilder);
-        plugin.registerCommandFactory(cf);
+        plugin.registerCommands(factory);
       }
-      cf.lock();
       String pluginNames = plugins.stream().filter(plugin -> !plugin.isInternal())
               .map(plugin -> plugin.getName()).collect(Collectors.joining(","));
-      return commandFactory(cf).events(eventsBuilder.build()).publicPluginNames(pluginNames);
+      events(eventsBuilder.build());
+      commandFactory(factory.build());
+      publicPluginNames(pluginNames);
+      return this;
     }
   }
 
