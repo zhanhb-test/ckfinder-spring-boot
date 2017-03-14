@@ -235,20 +235,16 @@ public class FileUploadCommand extends Command<FileUploadArguments> implements I
 
     if (!ImageUtils.isImageExtension(file)) {
       item.write(file.toString());
-      if (configuration.getEvents() != null) {
-        AfterFileUploadEventArgs args = new AfterFileUploadEventArgs(arguments.getCurrentFolder(), file);
-        configuration.getEvents().runAfterFileUpload(args, configuration);
-      }
+      AfterFileUploadEventArgs args = new AfterFileUploadEventArgs(arguments.getCurrentFolder(), file);
+      configuration.getEvents().runAfterFileUpload(args, configuration);
       return true;
     } else if (ImageUtils.checkImageSize(item, configuration)
             || configuration.isCheckSizeAfterScaling()) {
       ImageUtils.createTmpThumb(item, file, getFileItemName(item), configuration);
       if (!configuration.isCheckSizeAfterScaling()
               || FileUtils.isFileSizeInRange(arguments.getType(), Files.size(file))) {
-        if (configuration.getEvents() != null) {
-          AfterFileUploadEventArgs args = new AfterFileUploadEventArgs(arguments.getCurrentFolder(), file);
-          configuration.getEvents().runAfterFileUpload(args, configuration);
-        }
+        AfterFileUploadEventArgs args = new AfterFileUploadEventArgs(arguments.getCurrentFolder(), file);
+        configuration.getEvents().runAfterFileUpload(args, configuration);
         return true;
       } else {
         Files.deleteIfExists(file);

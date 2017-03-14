@@ -34,7 +34,7 @@ public class WatermarkCommand implements AfterFileUploadEventHandler {
   private final WatermarkSettings settings;
 
   @Override
-  public boolean runEventHandler(AfterFileUploadEventArgs args, IConfiguration configuration) {
+  public void runEventHandler(AfterFileUploadEventArgs args, IConfiguration configuration) {
     try {
       final Path originalFile = args.getFile();
       final WatermarkPosition position = new WatermarkPosition(settings.getMarginBottom(), settings.getMarginRight());
@@ -48,7 +48,6 @@ public class WatermarkCommand implements AfterFileUploadEventHandler {
       // only log error if watermark is not created
       log.error("", ex);
     }
-    return true;
   }
 
   /**

@@ -9,6 +9,6 @@ import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
 public interface InitCommandEventHandler extends IEventHandler<InitCommandEventArgs> {
 
   @Override
-  public boolean runEventHandler(InitCommandEventArgs args, IConfiguration configuration);
+  public void runEventHandler(InitCommandEventArgs args, IConfiguration configuration);
 
 }

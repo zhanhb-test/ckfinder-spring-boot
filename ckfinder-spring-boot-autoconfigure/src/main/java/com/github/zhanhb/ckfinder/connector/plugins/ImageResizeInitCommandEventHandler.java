@@ -27,7 +27,7 @@ public class ImageResizeInitCommandEventHandler implements InitCommandEventHandl
   private final Map<String, String> params;
 
   @Override
-  public boolean runEventHandler(InitCommandEventArgs args, IConfiguration configuration) {
+  public void runEventHandler(InitCommandEventArgs args, IConfiguration configuration) {
     log.debug("runEventHandler: {} {}", args, configuration);
     ImageResizeInfo.Builder builder = ImageResizeInfo.builder();
     for (Map.Entry<String, String> entry : params.entrySet()) {
@@ -38,7 +38,6 @@ public class ImageResizeInitCommandEventHandler implements InitCommandEventHandl
     args.getRootElement().pluginsInfos(
             PluginsInfos.builder().pluginsInfo(builder.build()).build()
     );
-    return false;
   }
 
 }

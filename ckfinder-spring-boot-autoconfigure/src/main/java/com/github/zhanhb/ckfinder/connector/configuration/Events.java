@@ -32,21 +32,18 @@ import lombok.extern.slf4j.Slf4j;
 public class Events {
 
   @SuppressWarnings({"BroadCatchBlock", "TooBroadCatch", "UseSpecificCatch"})
-  private static <T> boolean run(List<? extends IEventHandler<T>> handlers,
+  private static <T> void run(List<? extends IEventHandler<T>> handlers,
           T args, IConfiguration configuration) throws ConnectorException {
     log.trace("{}", handlers);
-    for (IEventHandler<T> eventHandler : handlers) {
-      try {
-        if (!eventHandler.runEventHandler(args, configuration)) {
-          return false;
-        }
-      } catch (ConnectorException ex) {
-        throw ex;
-      } catch (Exception e) {
-        throw new ConnectorException(e);
+    try {
+      for (IEventHandler<T> eventHandler : handlers) {
+        eventHandler.runEventHandler(args, configuration);
       }
+    } catch (ConnectorException ex) {
+      throw ex;
+    } catch (Exception e) {
+      throw new ConnectorException(e);
     }
-    return true;
   }
 
   @Singular
@@ -54,14 +51,14 @@ public class Events {
   @Singular
   private final List<InitCommandEventHandler> initCommandEventHandlers;
 
-  public boolean runAfterFileUpload(AfterFileUploadEventArgs args, IConfiguration configuration)
+  public void runAfterFileUpload(AfterFileUploadEventArgs args, IConfiguration configuration)
           throws ConnectorException {
-    return run(afterFileUploadEventHandlers, args, configuration);
+    run(afterFileUploadEventHandlers, args, configuration);
   }
 
-  public boolean runInitCommand(InitCommandEventArgs args, IConfiguration configuration) {
+  public void runInitCommand(InitCommandEventArgs args, IConfiguration configuration) {
     try {
-      return run(initCommandEventHandlers, args, configuration);
+      run(initCommandEventHandlers, args, configuration);
     } catch (ConnectorException ex) {
       // impossible
       throw new AssertionError(ex);
