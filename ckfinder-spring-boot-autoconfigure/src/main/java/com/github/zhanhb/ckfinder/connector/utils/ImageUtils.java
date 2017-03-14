@@ -105,9 +105,8 @@ public class ImageUtils {
    * @param conf connector configuration
    * @throws IOException when error occurs.
    */
-  public static void createTmpThumb(Part part,
-          Path file, String fileName, IConfiguration conf)
-          throws IOException {
+  public static void createTmpThumb(Part part, Path file, String fileName,
+          IConfiguration conf) throws IOException {
     BufferedImage image;
     try (InputStream stream = part.getInputStream()) {
       image = ImageIO.read(stream);
@@ -148,13 +147,10 @@ public class ImageUtils {
     try (InputStream is = Files.newInputStream(sourceFile)) {
       image = ImageIO.read(is);
     }
-    Dimension dimension = new Dimension(width, height);
-    if (image.getHeight() == dimension.height
-            && image.getWidth() == dimension.width) {
+    if (image.getHeight() == height && image.getWidth() == width) {
       writeUntouchedImage(sourceFile, destFile);
     } else {
-      resizeImage(image, dimension.width, dimension.height, quality,
-              destFile);
+      resizeImage(image, width, height, quality, destFile);
     }
   }
 
@@ -210,8 +206,8 @@ public class ImageUtils {
    * @return true if image size isn't bigger then biggest allowed.
    * @throws IOException when error occurs during reading image.
    */
-  public static boolean checkImageSize(Part part,
-          IConfiguration conf) throws IOException {
+  public static boolean checkImageSize(Part part, IConfiguration conf)
+          throws IOException {
     final int maxWidth;
     final int maxHeight;
     BufferedImage bi;

@@ -247,7 +247,7 @@ public class InitCommand extends XMLCommand<InitArgument> {
   }
 
   @Override
-  protected void createCurrentFolderNode(InitArgument arguments, Connector.Builder rootElement, IConfiguration configuration) {
+  protected void createCurrentFolderNode(InitArgument arguments, Connector.Builder rootElement, AccessControl accessControl) {
   }
 
   @Override

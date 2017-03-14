@@ -59,6 +59,8 @@ public enum XMLErrorHandler {
     connector.error(Error.builder()
             .number(errorNum)
             .value(connectorException.getMessage()).build());
+    response.setContentType("text/xml;charset=UTF-8");
+    response.setHeader("Cache-Control", "no-cache");
     try (PrintWriter out = response.getWriter()) {
       XMLCreator.INSTANCE.writeTo(connector.build(), out);
     }

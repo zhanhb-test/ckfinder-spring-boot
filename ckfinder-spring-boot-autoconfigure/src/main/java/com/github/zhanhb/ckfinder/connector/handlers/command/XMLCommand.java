@@ -17,6 +17,7 @@ import com.github.zhanhb.ckfinder.connector.handlers.arguments.XMLArguments;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.CurrentFolder;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Error;
+import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
 import com.github.zhanhb.ckfinder.connector.utils.XMLCreator;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -43,9 +44,8 @@ public abstract class XMLCommand<T extends XMLArguments> extends Command<T> {
    * @param arguments
    */
   @Override
-  public void setResponseHeader(HttpServletRequest request, HttpServletResponse response, T arguments) {
-    response.setContentType("text/xml;charset=UTF-8");
-    response.setHeader("Cache-Control", "no-cache");
+  @SuppressWarnings("NoopMethodInAbstractClass")
+  void setResponseHeader(HttpServletRequest request, HttpServletResponse response, T arguments) {
   }
 
   /**
@@ -58,28 +58,22 @@ public abstract class XMLCommand<T extends XMLArguments> extends Command<T> {
    */
   @Override
   @SuppressWarnings("FinalMethod")
-  final void execute(T arguments, HttpServletResponse response, IConfiguration configuration) throws IOException, ConnectorException {
+  final void execute(T arguments, HttpServletResponse response, IConfiguration configuration)
+          throws IOException, ConnectorException {
     createXml(arguments, configuration);
-    createXMLResponse(arguments, configuration);
-    try (PrintWriter out = response.getWriter()) {
-      XMLCreator.INSTANCE.writeTo(arguments.getConnector().build(), out);
-    }
-  }
-
-  /**
-   * abstract method to create XML response in command.
-   *
-   * @param errorNum error code from method getDataForXml()
-   * @throws ConnectorException to handle in error handler.
-   */
-  private void createXMLResponse(T arguments, IConfiguration configuration) {
     Connector.Builder rootElement = arguments.getConnector();
     if (arguments.getType() != null) {
       rootElement.resourceType(arguments.getType().getName());
     }
-    createCurrentFolderNode(arguments, rootElement, configuration);
+    createCurrentFolderNode(arguments, rootElement, configuration.getAccessControl());
     createErrorNode(rootElement, arguments);
     createXMLChildNodes(rootElement, arguments, configuration);
+
+    response.setContentType("text/xml;charset=UTF-8");
+    response.setHeader("Cache-Control", "no-cache");
+    try (PrintWriter out = response.getWriter()) {
+      XMLCreator.INSTANCE.writeTo(arguments.getConnector().build(), out);
+    }
   }
 
   protected void createErrorNode(Connector.Builder rootElement, T arguments) {
@@ -109,15 +103,15 @@ public abstract class XMLCommand<T extends XMLArguments> extends Command<T> {
    *
    * @param arguments
    * @param rootElement XML root node.
-   * @param configuration connector configuration
+   * @param accessControl
    */
-  protected void createCurrentFolderNode(T arguments, Connector.Builder rootElement, IConfiguration configuration) {
+  protected void createCurrentFolderNode(T arguments, Connector.Builder rootElement, AccessControl accessControl) {
     if (arguments.getType() != null && arguments.getCurrentFolder() != null) {
       rootElement.currentFolder(CurrentFolder.builder()
               .path(arguments.getCurrentFolder())
               .url(arguments.getType().getUrl()
                       + arguments.getCurrentFolder())
-              .acl(configuration.getAccessControl().getAcl(arguments.getType().getName(), arguments.getCurrentFolder(), arguments.getUserRole()))
+              .acl(accessControl.getAcl(arguments.getType().getName(), arguments.getCurrentFolder(), arguments.getUserRole()))
               .build());
     }
   }

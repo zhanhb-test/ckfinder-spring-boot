@@ -73,10 +73,10 @@ public abstract class Command<T extends Arguments> {
    */
   protected void initParams(T arguments, HttpServletRequest request,
           IConfiguration configuration) throws ConnectorException {
+    checkConnectorEnabled(configuration);
     setUserRole(arguments, request, configuration);
     String currentFolder = setCurrentFolder(arguments, request);
 
-    checkConnectorEnabled(configuration);
     checkRequestPathValid(currentFolder);
 
     if (FileUtils.isDirectoryHidden(currentFolder, configuration)) {

@@ -112,8 +112,8 @@ public class AccessControl {
   @RequiredArgsConstructor
   private static class CheckEntry {
 
-    final String role;
-    final String type;
+    private final String role;
+    private final String type;
 
   }
 

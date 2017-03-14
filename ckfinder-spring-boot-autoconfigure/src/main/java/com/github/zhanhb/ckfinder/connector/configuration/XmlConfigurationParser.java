@@ -601,6 +601,7 @@ public enum XmlConfigurationParser {
           break;
         case MARGIN_RIGHT:
           settings.marginRight(Integer.parseInt(value));
+          break;
       }
     }
     return settings.build();

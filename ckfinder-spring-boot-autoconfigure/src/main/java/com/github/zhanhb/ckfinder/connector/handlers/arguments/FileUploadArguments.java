@@ -49,10 +49,8 @@ public class FileUploadArguments extends Arguments {
   private String customErrorMsg;
 
   public FileUploadArguments() {
-    this.errorCode = 0;
     this.fileName = "";
     this.newFileName = "";
-    this.uploaded = false;
   }
 
 }
