@@ -38,19 +38,7 @@ public class ImageResizeInfoCommand extends BaseXmlCommand<ImageResizeInfoParame
   }
 
   @Override
-  protected void createXMLChildNodes(Connector.Builder rootElement, ImageResizeInfoParameter param, IConfiguration configuration) {
-    createImageInfoNode(rootElement, param);
-  }
-
-  private void createImageInfoNode(Connector.Builder rootElement, ImageResizeInfoParameter param) {
-    ImageInfo.Builder element = ImageInfo.builder();
-    element.width(param.getImageWidth())
-            .height(param.getImageHeight());
-    rootElement.imageInfo(element.build());
-  }
-
-  @Override
-  protected void createXml(ImageResizeInfoParameter param, IConfiguration configuration) throws ConnectorException {
+  protected void createXml(Connector.Builder rootElement, ImageResizeInfoParameter param, IConfiguration configuration) throws ConnectorException {
     if (param.getType() == null) {
       param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE);
     }
@@ -90,6 +78,14 @@ public class ImageResizeInfoCommand extends BaseXmlCommand<ImageResizeInfoParame
       log.error("", e);
       param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED);
     }
+    createImageInfoNode(rootElement, param);
+  }
+
+  private void createImageInfoNode(Connector.Builder rootElement, ImageResizeInfoParameter param) {
+    ImageInfo.Builder element = ImageInfo.builder();
+    element.width(param.getImageWidth())
+            .height(param.getImageHeight());
+    rootElement.imageInfo(element.build());
   }
 
   @Override

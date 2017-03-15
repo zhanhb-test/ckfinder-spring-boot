@@ -33,13 +33,12 @@ public abstract class BaseXmlCommand<T extends Parameter> extends XmlCommand<T> 
   final Connector buildConnector(T param, IConfiguration configuration)
           throws ConnectorException {
     Connector.Builder connector = Connector.builder();
-    createXml(param, configuration);
     if (param.getType() != null) {
       connector.resourceType(param.getType().getName());
     }
     createCurrentFolderNode(param, connector, configuration.getAccessControl());
     createErrorNode(connector, 0);
-    createXMLChildNodes(connector, param, configuration);
+    createXml(connector, param, configuration);
     return connector.build();
   }
 
@@ -49,16 +48,8 @@ public abstract class BaseXmlCommand<T extends Parameter> extends XmlCommand<T> 
    * @param rootElement XML root node
    * @param param
    * @param configuration connector configuration
-   */
-  protected abstract void createXMLChildNodes(Connector.Builder rootElement, T param, IConfiguration configuration);
-
-  /**
-   * gets all necessary data to create XML response.
-   *
-   * @param param
-   * @param configuration connector configuration
    * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
    */
-  protected abstract void createXml(T param, IConfiguration configuration) throws ConnectorException;
+  protected abstract void createXml(Connector.Builder rootElement, T param, IConfiguration configuration) throws ConnectorException;
 
 }

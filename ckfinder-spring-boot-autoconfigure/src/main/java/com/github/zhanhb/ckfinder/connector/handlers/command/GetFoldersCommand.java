@@ -40,20 +40,7 @@ public class GetFoldersCommand extends BaseXmlCommand<GetFoldersParameter> {
   }
 
   @Override
-  protected void createXMLChildNodes(Connector.Builder rootElement, GetFoldersParameter param, IConfiguration configuration) {
-    createFoldersData(rootElement, param, configuration);
-  }
-
-  /**
-   * gets data for response.
-   *
-   * @param param
-   * @param configuration connector configuration
-   * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
-   */
-  @Override
-  protected void createXml(GetFoldersParameter param, IConfiguration configuration) throws ConnectorException {
-
+  protected void createXml(Connector.Builder rootElement, GetFoldersParameter param, IConfiguration configuration) throws ConnectorException {
     if (param.getType() == null) {
       param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE);
     }
@@ -80,6 +67,7 @@ public class GetFoldersCommand extends BaseXmlCommand<GetFoldersParameter> {
       param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED);
     }
     filterListByHiddenAndNotAllowed(param, configuration);
+    createFoldersData(rootElement, param, configuration);
   }
 
   /**

@@ -63,19 +63,7 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
   }
 
   @Override
-  protected void createXMLChildNodes(Connector.Builder rootElement, GetFilesParameter param, IConfiguration configuration) {
-    createFilesData(rootElement, param, configuration);
-  }
-
-  /**
-   * gets data to XML response.
-   *
-   * @param param
-   * @param configuration
-   * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
-   */
-  @Override
-  protected void createXml(GetFilesParameter param, IConfiguration configuration) throws ConnectorException {
+  protected void createXml(Connector.Builder rootElement, GetFilesParameter param, IConfiguration configuration) throws ConnectorException {
     if (param.getType() == null) {
       param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE);
     }
@@ -101,6 +89,7 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
     }
     filterListByHiddenAndNotAllowed(param, configuration);
     Collections.sort(param.getFiles());
+    createFilesData(rootElement, param, configuration);
   }
 
   /**

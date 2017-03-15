@@ -40,24 +40,10 @@ public class CreateFolderCommand extends BaseXmlCommand<CreateFolderParameter> i
    * creates current folder XML node.
    *
    * @param rootElement XML root element.
-   */
-  @Override
-  protected void createXMLChildNodes(Connector.Builder rootElement, CreateFolderParameter param, IConfiguration configuration) {
-    rootElement.newFolder(NewFolder.builder()
-            .name(param.getNewFolderName())
-            .build());
-  }
-
-  /**
-   * gets data for xml. Not used in this handler.
-   *
-   * @param param
-   * @param configuration connector configuration
    * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
    */
   @Override
-  protected void createXml(CreateFolderParameter param, IConfiguration configuration)
-          throws ConnectorException {
+  protected void createXml(Connector.Builder rootElement, CreateFolderParameter param, IConfiguration configuration) throws ConnectorException {
     checkRequestPathValid(param.getNewFolderName());
 
     if (param.getType() == null) {
@@ -94,6 +80,9 @@ public class CreateFolderCommand extends BaseXmlCommand<CreateFolderParameter> i
       log.error("", e);
       param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED);
     }
+    rootElement.newFolder(NewFolder.builder()
+            .name(param.getNewFolderName())
+            .build());
   }
 
   /**

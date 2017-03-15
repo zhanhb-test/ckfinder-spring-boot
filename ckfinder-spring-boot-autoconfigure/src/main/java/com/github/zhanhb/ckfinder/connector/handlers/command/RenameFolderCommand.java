@@ -41,18 +41,10 @@ public class RenameFolderCommand extends BaseXmlCommand<RenameFolderParameter> i
    * creates XML node for renamed folder.
    *
    * @param rootElement XML root element.
+   * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
    */
   @Override
-  protected void createXMLChildNodes(Connector.Builder rootElement, RenameFolderParameter param, IConfiguration configuration) {
-    rootElement.renamedFolder(RenamedFolder.builder()
-            .newName(param.getNewFolderName())
-            .newPath(param.getNewFolderPath())
-            .newUrl(param.getType().getUrl() + param.getNewFolderPath())
-            .build());
-  }
-
-  @Override
-  protected void createXml(RenameFolderParameter param, IConfiguration configuration) throws ConnectorException {
+  protected void createXml(Connector.Builder rootElement, RenameFolderParameter param, IConfiguration configuration) throws ConnectorException {
     checkRequestPathValid(param.getNewFolderName());
 
     if (param.getType() == null) {
@@ -101,6 +93,11 @@ public class RenameFolderCommand extends BaseXmlCommand<RenameFolderParameter> i
       log.error("", e);
       param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED);
     }
+    rootElement.renamedFolder(RenamedFolder.builder()
+            .newName(param.getNewFolderName())
+            .newPath(param.getNewFolderPath())
+            .newUrl(param.getType().getUrl() + param.getNewFolderPath())
+            .build());
   }
 
   /**

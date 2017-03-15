@@ -44,11 +44,7 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> {
   }
 
   @Override
-  protected void createXMLChildNodes(Connector.Builder rootElement, ImageResizeParameter param, IConfiguration configuration) {
-  }
-
-  @Override
-  protected void createXml(ImageResizeParameter param, IConfiguration configuration) throws ConnectorException {
+  protected void createXml(Connector.Builder rootElement, ImageResizeParameter param, IConfiguration configuration) throws ConnectorException {
     if (param.getType() == null) {
       param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE);
     }

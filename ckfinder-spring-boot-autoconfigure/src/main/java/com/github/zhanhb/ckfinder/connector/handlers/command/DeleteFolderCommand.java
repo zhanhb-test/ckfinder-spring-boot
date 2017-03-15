@@ -34,16 +34,7 @@ public class DeleteFolderCommand extends BaseXmlCommand<ErrorListXMLParameter> i
   }
 
   @Override
-  protected void createXMLChildNodes(Connector.Builder rootElement, ErrorListXMLParameter param, IConfiguration configuration) {
-  }
-
-  /**
-   * @param param
-   * @param configuration connector configuration
-   * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
-   */
-  @Override
-  protected void createXml(ErrorListXMLParameter param, IConfiguration configuration) throws ConnectorException {
+  protected void createXml(Connector.Builder rootElement, ErrorListXMLParameter param, IConfiguration configuration) throws ConnectorException {
     if (param.getType() == null) {
       param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE);
     }

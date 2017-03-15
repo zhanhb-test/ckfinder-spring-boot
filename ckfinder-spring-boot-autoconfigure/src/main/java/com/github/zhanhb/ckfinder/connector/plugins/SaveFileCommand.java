@@ -35,11 +35,7 @@ public class SaveFileCommand extends BaseXmlCommand<SaveFileParameter> {
   }
 
   @Override
-  protected void createXMLChildNodes(Connector.Builder rootElement, SaveFileParameter param, IConfiguration configuration) {
-  }
-
-  @Override
-  protected void createXml(SaveFileParameter param, IConfiguration configuration) throws ConnectorException {
+  protected void createXml(Connector.Builder rootElement, SaveFileParameter param, IConfiguration configuration) throws ConnectorException {
     if (param.getType() == null) {
       param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE);
     }
