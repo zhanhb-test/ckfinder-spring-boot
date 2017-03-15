@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -255,10 +254,8 @@ public class CopyFilesCommand extends ErrorListXMLCommand<CopyFilesArguments> im
   }
 
   @Override
-  @SuppressWarnings("CollectionWithoutInitialCapacity")
   protected void initParams(CopyFilesArguments arguments, HttpServletRequest request, IConfiguration configuration) throws ConnectorException {
     super.initParams(arguments, request, configuration);
-    arguments.setFiles(new ArrayList<>());
     arguments.setCopiedAll(request.getParameter("copied") != null ? Integer.parseInt(request.getParameter("copied")) : 0);
 
     RequestFileHelper.addFilesListFromRequest(request, arguments.getFiles());

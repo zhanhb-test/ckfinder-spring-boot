@@ -24,7 +24,6 @@ import com.github.zhanhb.ckfinder.connector.utils.XMLCreator;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -162,10 +161,8 @@ public class DeleteFilesCommand extends ErrorListXMLCommand<DeleteFilesArguments
    * for command handler.
    */
   @Override
-  @SuppressWarnings("CollectionWithoutInitialCapacity")
   protected void initParams(DeleteFilesArguments arguments, HttpServletRequest request, IConfiguration configuration) throws ConnectorException {
     super.initParams(arguments, request, configuration);
-    arguments.setFiles(new ArrayList<>());
     RequestFileHelper.addFilesListFromRequest(request, arguments.getFiles());
   }
 
