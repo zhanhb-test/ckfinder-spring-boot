@@ -11,12 +11,7 @@
  */
 package com.github.zhanhb.ckfinder.connector.utils;
 
-import com.github.zhanhb.ckfinder.connector.handlers.arguments.ErrorListXMLArguments;
-import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
-import com.github.zhanhb.ckfinder.connector.handlers.response.DetailError;
-import com.github.zhanhb.ckfinder.connector.handlers.response.Errors;
 import java.io.Writer;
-import java.util.List;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 
@@ -31,42 +26,6 @@ public enum XMLCreator {
       JAXBContext.newInstance(obj.getClass()).createMarshaller().marshal(obj, writer);
     } catch (JAXBException e) {
       throw new IllegalStateException("fail to instance xml transformer", e);
-    }
-  }
-
-  /**
-   * save errors node to list.
-   *
-   * @param arguments
-   * @param errorCode error code
-   * @param name file name
-   * @param path current folder
-   * @param type resource type
-   */
-  public void appendErrorNodeChild(ErrorListXMLArguments arguments, int errorCode, String name, String path, String type) {
-    arguments.getErrorList().add(DetailError.builder().type(type).name(name).folder(path).code(errorCode).build());
-  }
-
-  /**
-   * checks if error list contains errors.
-   *
-   * @param arguments
-   * @return true if there are any errors.
-   */
-  public boolean hasErrors(ErrorListXMLArguments arguments) {
-    return !arguments.getErrorList().isEmpty();
-  }
-
-  /**
-   * add all error nodes from saved list to xml.
-   *
-   * @param arguments
-   * @param rootElement XML root element
-   */
-  public void addErrors(ErrorListXMLArguments arguments, Connector.Builder rootElement) {
-    List<DetailError> errorList = arguments.getErrorList();
-    if (!errorList.isEmpty()) {
-      rootElement.errors(Errors.builder().errors(errorList).build());
     }
   }
 
