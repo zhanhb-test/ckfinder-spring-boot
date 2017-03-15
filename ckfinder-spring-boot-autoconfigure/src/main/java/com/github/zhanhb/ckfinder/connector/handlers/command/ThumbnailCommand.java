@@ -47,17 +47,6 @@ public class ThumbnailCommand extends Command<ThumbnailArguments> {
     super(ThumbnailArguments::new);
   }
 
-  @Override
-  public void setResponseHeader(HttpServletRequest request, HttpServletResponse response, ThumbnailArguments arguments) {
-    response.setHeader("Cache-Control", "public");
-    String mimetype = getMimeTypeOfImage(request.getServletContext(), response, arguments);
-    if (mimetype != null) {
-      response.setContentType(mimetype);
-    }
-    response.addHeader("Content-Disposition",
-            ContentDisposition.getContentDisposition("attachment", arguments.getFileName()));
-  }
-
   /**
    * Gets mime type of image.
    *
@@ -84,9 +73,16 @@ public class ThumbnailCommand extends Command<ThumbnailArguments> {
 
   @Override
   @SuppressWarnings("FinalMethod")
-  final void execute(ThumbnailArguments arguments, HttpServletResponse response, IConfiguration configuration) throws ConnectorException {
+  final void execute(ThumbnailArguments arguments, HttpServletRequest request, HttpServletResponse response, IConfiguration configuration) throws ConnectorException {
     validate(arguments, configuration);
     createThumb(arguments, configuration);
+    response.setHeader("Cache-Control", "public");
+    String mimetype = getMimeTypeOfImage(request.getServletContext(), response, arguments);
+    if (mimetype != null) {
+      response.setContentType(mimetype);
+    }
+    response.addHeader("Content-Disposition",
+            ContentDisposition.getContentDisposition("attachment", arguments.getFileName()));
     if (setResponseHeadersAfterCreatingFile(response, arguments)) {
       try (ServletOutputStream out = response.getOutputStream()) {
         FileUtils.printFileContentToResponse(arguments.getThumbFile(), out);

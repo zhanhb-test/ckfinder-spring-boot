@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -75,7 +74,7 @@ public class QuickUploadCommand extends FileUploadCommand {
   }
 
   @Override
-  void setResponseHeader(HttpServletRequest request, HttpServletResponse response, FileUploadArguments arguments) {
+  void setContentType(FileUploadArguments arguments, HttpServletResponse response) {
     if ("json".equalsIgnoreCase(arguments.getResponseType())) {
       response.setContentType("application/json;charset=UTF-8");
     } else {

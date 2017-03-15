@@ -37,18 +37,6 @@ public abstract class XMLCommand<T extends XMLArguments> extends Command<T> {
   }
 
   /**
-   * sets response headers for XML response.
-   *
-   * @param request
-   * @param response response
-   * @param arguments
-   */
-  @Override
-  @SuppressWarnings("NoopMethodInAbstractClass")
-  void setResponseHeader(HttpServletRequest request, HttpServletResponse response, T arguments) {
-  }
-
-  /**
    * executes XML command. Creates XML response and writes it to response output
    * stream.
    *
@@ -58,7 +46,7 @@ public abstract class XMLCommand<T extends XMLArguments> extends Command<T> {
    */
   @Override
   @SuppressWarnings("FinalMethod")
-  final void execute(T arguments, HttpServletResponse response, IConfiguration configuration)
+  final void execute(T arguments, HttpServletRequest request, HttpServletResponse response, IConfiguration configuration)
           throws IOException, ConnectorException {
     createXml(arguments, configuration);
     Connector.Builder rootElement = arguments.getConnector();

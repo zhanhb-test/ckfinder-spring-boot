@@ -62,7 +62,7 @@ public class FileUploadCommand extends Command<FileUploadArguments> implements I
    */
   @Override
   @SuppressWarnings("FinalMethod")
-  final void execute(FileUploadArguments arguments, HttpServletResponse response, IConfiguration configuration) throws ConnectorException {
+  final void execute(FileUploadArguments arguments, HttpServletRequest request, HttpServletResponse response, IConfiguration configuration) throws ConnectorException {
     try {
       String errorMsg = arguments.getErrorCode() == Constants.Errors.CKFINDER_CONNECTOR_ERROR_NONE ? "" : (arguments.getErrorCode() == Constants.Errors.CKFINDER_CONNECTOR_ERROR_CUSTOM_ERROR ? arguments.getCustomErrorMsg()
               : ErrorUtils.INSTANCE.getErrorMsgByLangAndCode(arguments.getLangCode(), arguments.getErrorCode()));
@@ -75,6 +75,7 @@ public class FileUploadCommand extends Command<FileUploadArguments> implements I
       } else {
         path = arguments.getType().getUrl() + arguments.getCurrentFolder();
       }
+      setContentType(arguments, response);
       PrintWriter writer = response.getWriter();
       if ("txt".equals(arguments.getResponseType())) {
         writer.write(arguments.getNewFileName() + "|" + errorMsg);
@@ -363,18 +364,6 @@ public class FileUploadCommand extends Command<FileUploadArguments> implements I
   }
 
   /**
-   * set response headers. Not user in this command.
-   *
-   * @param request request
-   * @param response response
-   * @param arguments
-   */
-  @Override
-  void setResponseHeader(HttpServletRequest request, HttpServletResponse response, FileUploadArguments arguments) {
-    response.setContentType("text/html;charset=UTF-8");
-  }
-
-  /**
    * save if uploaded file item name is full file path not only file name.
    *
    * @param item file upload item
@@ -418,6 +407,10 @@ public class FileUploadCommand extends Command<FileUploadArguments> implements I
   private boolean isProtectedName(String nameWithoutExtension) {
     return Pattern.compile("^(AUX|COM\\d|CLOCK\\$|CON|NUL|PRN|LPT\\d)$",
             Pattern.CASE_INSENSITIVE).matcher(nameWithoutExtension).matches();
+  }
+
+  void setContentType(FileUploadArguments arguments, HttpServletResponse response) {
+    response.setContentType("text/html;charset=UTF-8");
   }
 
 }

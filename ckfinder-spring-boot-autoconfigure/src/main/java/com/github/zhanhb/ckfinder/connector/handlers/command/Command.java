@@ -59,8 +59,7 @@ public abstract class Command<T extends Arguments> {
     T arguments = argumentsSupplier.get();
     initParams(arguments, request, configuration);
 
-    setResponseHeader(request, response, arguments);
-    execute(arguments, response, configuration);
+    execute(arguments, request, response, configuration);
   }
 
   /**
@@ -157,16 +156,7 @@ public abstract class Command<T extends Arguments> {
    * @throws ConnectorException when error occurs
    * @throws java.io.IOException
    */
-  abstract void execute(T arguments, HttpServletResponse response, IConfiguration configuration) throws ConnectorException, IOException;
-
-  /**
-   * sets header in response.
-   *
-   * @param request servlet request
-   * @param response servlet response
-   * @param arguments
-   */
-  abstract void setResponseHeader(HttpServletRequest request, HttpServletResponse response, T arguments);
+  abstract void execute(T arguments, HttpServletRequest request, HttpServletResponse response, IConfiguration configuration) throws ConnectorException, IOException;
 
   /**
    * check request for security issue.

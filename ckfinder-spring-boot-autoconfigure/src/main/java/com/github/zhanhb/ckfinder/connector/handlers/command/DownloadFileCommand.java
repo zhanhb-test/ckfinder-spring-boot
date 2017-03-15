@@ -39,7 +39,7 @@ public class DownloadFileCommand extends Command<DownloadFileArguments> {
    * @throws ConnectorException when something went wrong during reading file.
    */
   @Override
-  void execute(DownloadFileArguments arguments, HttpServletResponse response, IConfiguration configuration)
+  void execute(DownloadFileArguments arguments, HttpServletRequest request, HttpServletResponse response, IConfiguration configuration)
           throws ConnectorException {
     if (arguments.getType() == null) {
       throw new ConnectorException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE);
@@ -54,6 +54,16 @@ public class DownloadFileCommand extends Command<DownloadFileArguments> {
       }
     }
 
+    String mimetype = request.getServletContext().getMimeType(arguments.getFileName());
+    if (mimetype != null) {
+      if (mimetype.startsWith("text/") || mimetype.endsWith("/javascript")
+              || mimetype.endsWith("/xml")) {
+        mimetype += ";charset=UTF-8";
+      }
+      response.setContentType(mimetype);
+    } else {
+      response.setContentType("application/octet-stream");
+    }
     response.setHeader("Content-Disposition",
             ContentDisposition.getContentDisposition("attachment",
                     arguments.getFileName()));
@@ -106,28 +116,6 @@ public class DownloadFileCommand extends Command<DownloadFileArguments> {
     super.initParams(arguments, request, configuration);
     // problem with showing filename when dialog window appear
     arguments.setFileName(request.getParameter("FileName"));
-  }
-
-  /**
-   * Sets response headers.
-   *
-   * @param request request
-   * @param response response
-   * @param arguments
-   */
-  @Override
-  public void setResponseHeader(HttpServletRequest request, HttpServletResponse response,
-          DownloadFileArguments arguments) {
-    String mimetype = request.getServletContext().getMimeType(arguments.getFileName());
-    if (mimetype != null) {
-      if (mimetype.startsWith("text/") || mimetype.endsWith("/javascript")
-              || mimetype.endsWith("/xml")) {
-        mimetype += ";charset=UTF-8";
-      }
-      response.setContentType(mimetype);
-    } else {
-      response.setContentType("application/octet-stream");
-    }
   }
 
 }
