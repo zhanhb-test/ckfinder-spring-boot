@@ -19,7 +19,7 @@ import com.github.zhanhb.ckfinder.connector.errors.XMLErrorHandler;
 import com.github.zhanhb.ckfinder.connector.handlers.command.Command;
 import com.github.zhanhb.ckfinder.connector.handlers.command.FileUploadCommand;
 import com.github.zhanhb.ckfinder.connector.handlers.command.IPostCommand;
-import com.github.zhanhb.ckfinder.connector.handlers.command.XMLCommand;
+import com.github.zhanhb.ckfinder.connector.handlers.command.XmlCommand;
 import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -143,7 +143,7 @@ public class ConnectorServlet extends HttpServlet {
   private void handleError(ConnectorException e, IConfiguration configuration,
           HttpServletRequest request, HttpServletResponse response,
           Command<?> command) throws IOException {
-    if (command == null || command instanceof XMLCommand) {
+    if (command == null || command instanceof XmlCommand) {
       XMLErrorHandler.INSTANCE.handleException(request, response, configuration, e);
     } else {
       ErrorHandler.INSTANCE.handleException(request, response, configuration, e);

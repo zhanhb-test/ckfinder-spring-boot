@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +33,7 @@ import lombok.extern.slf4j.Slf4j;
  * location command.
  */
 @Slf4j
-public class GetFoldersCommand extends XMLCommand<GetFoldersArguments> {
+public class GetFoldersCommand extends BaseXmlCommand<GetFoldersArguments> {
 
   public GetFoldersCommand() {
     super(GetFoldersArguments::new);

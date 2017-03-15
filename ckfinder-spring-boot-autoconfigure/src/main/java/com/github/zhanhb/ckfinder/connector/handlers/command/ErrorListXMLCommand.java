@@ -24,7 +24,7 @@ import java.util.function.Supplier;
  * @param <T>
  */
 @SuppressWarnings("FinalMethod")
-public abstract class ErrorListXMLCommand<T extends ErrorListXMLArguments> extends XMLCommand<T> {
+public abstract class ErrorListXMLCommand<T extends ErrorListXMLArguments> extends BaseXmlCommand<T> {
 
   public ErrorListXMLCommand(Supplier<T> argumentsSupplier) {
     super(argumentsSupplier);

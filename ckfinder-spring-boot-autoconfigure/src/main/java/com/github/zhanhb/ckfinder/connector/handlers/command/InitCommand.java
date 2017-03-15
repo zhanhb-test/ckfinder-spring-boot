@@ -20,6 +20,7 @@ import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.arguments.InitArgument;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.ConnectorInfo;
+import com.github.zhanhb.ckfinder.connector.handlers.response.Error;
 import com.github.zhanhb.ckfinder.connector.handlers.response.ResourceTypes;
 import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
@@ -40,7 +41,7 @@ import lombok.extern.slf4j.Slf4j;
  * Class to handle <code>Init</code> command.
  */
 @Slf4j
-public class InitCommand extends XMLCommand<InitArgument> {
+public class InitCommand extends XmlCommand<InitArgument> {
 
   /**
    * chars taken to license key.
@@ -55,11 +56,17 @@ public class InitCommand extends XMLCommand<InitArgument> {
   }
 
   @Override
-  protected void createXml(InitArgument arguments, IConfiguration configuration) throws ConnectorException {
+  Connector buildConnector(InitArgument arguments, IConfiguration configuration) {
+    Connector.Builder rootElement = Connector.builder();
+    if (arguments.getType() != null) {
+      rootElement.resourceType(arguments.getType().getName());
+    }
+    createErrorNode(rootElement);
+    createXMLChildNodes(rootElement, arguments, configuration);
+    return rootElement.build();
   }
 
-  @Override
-  protected void createXMLChildNodes(Connector.Builder rootElement, InitArgument arguments, IConfiguration configuration) {
+  private void createXMLChildNodes(Connector.Builder rootElement, InitArgument arguments, IConfiguration configuration) {
     createConnectorData(rootElement, arguments, configuration);
     try {
       createResouceTypesData(rootElement, arguments, configuration);
@@ -182,7 +189,7 @@ public class InitCommand extends XMLCommand<InitArgument> {
     for (ResourceType resourceType : types) {
       String key = resourceType.getName();
       if (configuration.getAccessControl().hasPermission(key, "/", arguments.getUserRole(),
-                      AccessControl.CKFINDER_CONNECTOR_ACL_FOLDER_VIEW)) {
+              AccessControl.CKFINDER_CONNECTOR_ACL_FOLDER_VIEW)) {
         com.github.zhanhb.ckfinder.connector.handlers.response.ResourceType.Builder childElement = com.github.zhanhb.ckfinder.connector.handlers.response.ResourceType.builder();
         childElement.name(resourceType.getName());
         childElement.acl(configuration.getAccessControl().getAcl(key, "/", arguments.getUserRole()));
@@ -247,14 +254,14 @@ public class InitCommand extends XMLCommand<InitArgument> {
   }
 
   @Override
-  protected void createCurrentFolderNode(InitArgument arguments, Connector.Builder rootElement, AccessControl accessControl) {
-  }
-
-  @Override
   protected void initParams(InitArgument arguments, HttpServletRequest request, IConfiguration configuration)
           throws ConnectorException {
     super.initParams(arguments, request, configuration);
     arguments.setRequest(request);
+  }
+
+  private void createErrorNode(Connector.Builder rootElement) {
+    rootElement.error(Error.builder().number(0).build());
   }
 
   @Deprecated

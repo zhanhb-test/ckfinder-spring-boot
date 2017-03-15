@@ -30,7 +30,7 @@ import lombok.extern.slf4j.Slf4j;
  * Class to handle <code>CreateFolder</code> command. Create subfolder.
  */
 @Slf4j
-public class CreateFolderCommand extends XMLCommand<CreateFolderArguments> implements IPostCommand {
+public class CreateFolderCommand extends BaseXmlCommand<CreateFolderArguments> implements IPostCommand {
 
   public CreateFolderCommand() {
     super(CreateFolderArguments::new);

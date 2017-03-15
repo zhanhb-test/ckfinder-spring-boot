@@ -10,7 +10,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class SaveFileArguments extends XMLArguments {
+public class SaveFileArguments extends Arguments {
 
   private String fileName;
   private String fileContent;

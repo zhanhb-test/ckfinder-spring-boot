@@ -10,7 +10,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class GetFilesArguments extends XMLArguments {
+public class GetFilesArguments extends Arguments {
 
   /**
    * list of files.

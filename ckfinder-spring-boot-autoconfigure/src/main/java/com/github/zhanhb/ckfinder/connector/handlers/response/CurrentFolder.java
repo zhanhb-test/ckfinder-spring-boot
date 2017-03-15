@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 
 /**
  *
- * @see com.github.zhanhb.ckfinder.connector.handlers.command.XMLCommand
+ * @see com.github.zhanhb.ckfinder.connector.handlers.command.XmlCommand
  * @author zhanhb
  */
 @AllArgsConstructor(access = AccessLevel.PACKAGE)

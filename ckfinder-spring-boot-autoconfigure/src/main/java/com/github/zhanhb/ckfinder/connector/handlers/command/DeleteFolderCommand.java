@@ -27,7 +27,7 @@ import lombok.extern.slf4j.Slf4j;
  * Class to handle <code>DeleteFolder</code> command.
  */
 @Slf4j
-public class DeleteFolderCommand extends XMLCommand<ErrorListXMLArguments> implements IPostCommand {
+public class DeleteFolderCommand extends BaseXmlCommand<ErrorListXMLArguments> implements IPostCommand {
 
   public DeleteFolderCommand() {
     super(ErrorListXMLArguments::new);

@@ -9,7 +9,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class CreateFolderArguments extends XMLArguments {
+public class CreateFolderArguments extends Arguments {
 
   /**
    * new folder name request param.

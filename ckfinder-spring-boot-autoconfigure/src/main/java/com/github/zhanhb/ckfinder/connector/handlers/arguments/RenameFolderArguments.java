@@ -9,7 +9,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class RenameFolderArguments extends XMLArguments {
+public class RenameFolderArguments extends Arguments {
 
   private String newFolderName;
   private String newFolderPath;

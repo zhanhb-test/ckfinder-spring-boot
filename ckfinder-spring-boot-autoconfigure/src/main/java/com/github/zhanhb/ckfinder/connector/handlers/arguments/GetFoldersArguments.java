@@ -10,7 +10,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class GetFoldersArguments extends XMLArguments {
+public class GetFoldersArguments extends Arguments {
 
   /**
    * list of subdirectories in directory.

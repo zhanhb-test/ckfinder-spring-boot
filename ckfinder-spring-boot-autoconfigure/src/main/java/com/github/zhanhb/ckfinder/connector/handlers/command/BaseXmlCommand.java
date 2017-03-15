@@ -13,55 +13,37 @@ package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
-import com.github.zhanhb.ckfinder.connector.handlers.arguments.XMLArguments;
+import com.github.zhanhb.ckfinder.connector.handlers.arguments.Arguments;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.CurrentFolder;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Error;
 import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
-import com.github.zhanhb.ckfinder.connector.utils.XMLCreator;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.function.Supplier;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * Base class to handle XML commands.
  *
  * @param <T>
  */
-public abstract class XMLCommand<T extends XMLArguments> extends Command<T> {
+public abstract class BaseXmlCommand<T extends Arguments> extends XmlCommand<T> {
 
-  public XMLCommand(Supplier<T> argumentsSupplier) {
+  public BaseXmlCommand(Supplier<T> argumentsSupplier) {
     super(argumentsSupplier);
   }
 
-  /**
-   * executes XML command. Creates XML response and writes it to response output
-   * stream.
-   *
-   * @param arguments
-   * @param configuration
-   * @throws java.io.IOException
-   */
   @Override
   @SuppressWarnings("FinalMethod")
-  final void execute(T arguments, HttpServletRequest request, HttpServletResponse response, IConfiguration configuration)
-          throws IOException, ConnectorException {
+  final Connector buildConnector(T arguments, IConfiguration configuration)
+          throws ConnectorException {
+    Connector.Builder connector = Connector.builder();
     createXml(arguments, configuration);
-    Connector.Builder rootElement = arguments.getConnector();
     if (arguments.getType() != null) {
-      rootElement.resourceType(arguments.getType().getName());
+      connector.resourceType(arguments.getType().getName());
     }
-    createCurrentFolderNode(arguments, rootElement, configuration.getAccessControl());
-    createErrorNode(rootElement, arguments);
-    createXMLChildNodes(rootElement, arguments, configuration);
-
-    response.setContentType("text/xml;charset=UTF-8");
-    response.setHeader("Cache-Control", "no-cache");
-    try (PrintWriter out = response.getWriter()) {
-      XMLCreator.INSTANCE.writeTo(arguments.getConnector().build(), out);
-    }
+    createCurrentFolderNode(arguments, connector, configuration.getAccessControl());
+    createErrorNode(connector, arguments);
+    createXMLChildNodes(connector, arguments, configuration);
+    return connector.build();
   }
 
   protected void createErrorNode(Connector.Builder rootElement, T arguments) {

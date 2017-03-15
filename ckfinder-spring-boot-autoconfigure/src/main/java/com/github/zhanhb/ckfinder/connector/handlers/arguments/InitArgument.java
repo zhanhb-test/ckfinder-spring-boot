@@ -10,7 +10,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class InitArgument extends XMLArguments {
+public class InitArgument extends Arguments {
 
   private HttpServletRequest request;
 

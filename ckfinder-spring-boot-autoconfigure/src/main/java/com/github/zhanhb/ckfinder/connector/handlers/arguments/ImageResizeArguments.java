@@ -11,7 +11,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class ImageResizeArguments extends XMLArguments {
+public class ImageResizeArguments extends Arguments {
 
   /**
    * file name

@@ -9,7 +9,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class ImageResizeInfoArguments extends XMLArguments {
+public class ImageResizeInfoArguments extends Arguments {
 
   private int imageWidth;
   private int imageHeight;

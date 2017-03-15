@@ -12,7 +12,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class ErrorListXMLArguments extends XMLArguments {
+public class ErrorListXMLArguments extends Arguments {
 
   private int errorNum;
 
