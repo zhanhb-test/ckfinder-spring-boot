@@ -5,6 +5,9 @@ import com.github.zhanhb.ckfinder.connector.configuration.ParameterFactory;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.Parameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
+import com.github.zhanhb.ckfinder.connector.handlers.response.CurrentFolder;
+import com.github.zhanhb.ckfinder.connector.handlers.response.Error;
+import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
 import com.github.zhanhb.ckfinder.connector.utils.XMLCreator;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -16,6 +19,7 @@ import javax.servlet.http.HttpServletResponse;
  * @author zhanhb
  * @param <T>
  */
+@SuppressWarnings("FinalMethod")
 public abstract class XmlCommand<T extends Parameter> extends Command<T> {
 
   protected XmlCommand(ParameterFactory<T> paramFactory) {
@@ -47,5 +51,27 @@ public abstract class XmlCommand<T extends Parameter> extends Command<T> {
 
   abstract Connector buildConnector(T param, IConfiguration configuration)
           throws ConnectorException;
+
+  final void createErrorNode(Connector.Builder rootElement, int code) {
+    rootElement.error(Error.builder().number(0).build());
+  }
+
+  /**
+   * creates <code>CurrentFolder</code> element.
+   *
+   * @param param
+   * @param rootElement XML root node.
+   * @param accessControl
+   */
+  final void createCurrentFolderNode(T param, Connector.Builder rootElement, AccessControl accessControl) {
+    if (param.getType() != null && param.getCurrentFolder() != null) {
+      rootElement.currentFolder(CurrentFolder.builder()
+              .path(param.getCurrentFolder())
+              .url(param.getType().getUrl()
+                      + param.getCurrentFolder())
+              .acl(accessControl.getAcl(param.getType().getName(), param.getCurrentFolder(), param.getUserRole()))
+              .build());
+    }
+  }
 
 }

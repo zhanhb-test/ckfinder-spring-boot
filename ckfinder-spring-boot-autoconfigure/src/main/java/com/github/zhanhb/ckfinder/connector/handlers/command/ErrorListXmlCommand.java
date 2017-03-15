@@ -16,7 +16,6 @@ import com.github.zhanhb.ckfinder.connector.configuration.ParameterFactory;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.ErrorListXMLParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
-import com.github.zhanhb.ckfinder.connector.handlers.response.Error;
 
 /**
  * Base class to handle XML commands with error list.
@@ -24,23 +23,36 @@ import com.github.zhanhb.ckfinder.connector.handlers.response.Error;
  * @param <T>
  */
 @SuppressWarnings("FinalMethod")
-public abstract class ErrorListXmlCommand<T extends ErrorListXMLParameter> extends BaseXmlCommand<T> {
+public abstract class ErrorListXmlCommand<T extends ErrorListXMLParameter> extends XmlCommand<T> {
 
   public ErrorListXmlCommand(ParameterFactory<T> paramFactory) {
     super(paramFactory);
   }
 
   @Override
-  protected final void createXml(T param, IConfiguration configuration) throws ConnectorException {
+  @SuppressWarnings("FinalMethod")
+  final Connector buildConnector(T param, IConfiguration configuration)
+          throws ConnectorException {
+    Connector.Builder connector = Connector.builder();
     int errorNum = getDataForXml(param, configuration);
-    param.setErrorNum(errorNum);
+    if (param.getType() != null) {
+      connector.resourceType(param.getType().getName());
+    }
+    createCurrentFolderNode(param, connector, configuration.getAccessControl());
+    createErrorNode(connector, errorNum);
+    param.addErrorsTo(connector);
+    addRestNodes(connector, param, configuration);
+    return connector.build();
   }
 
-  @Override
-  protected final void createErrorNode(Connector.Builder rootElement, T param) {
-    int errorNum = param.getErrorNum();
-    rootElement.error(Error.builder().number(errorNum).build());
-  }
+  /**
+   * abstract method to create XML nodes for commands.
+   *
+   * @param rootElement XML root node
+   * @param param
+   * @param configuration connector configuration
+   */
+  protected abstract void addRestNodes(Connector.Builder rootElement, T param, IConfiguration configuration);
 
   /**
    * gets all necessary data to create XML response.

@@ -20,7 +20,6 @@ import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.InitParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.ConnectorInfo;
-import com.github.zhanhb.ckfinder.connector.handlers.response.Error;
 import com.github.zhanhb.ckfinder.connector.handlers.response.ResourceTypes;
 import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
@@ -61,12 +60,7 @@ public class InitCommand extends XmlCommand<InitParameter> {
     if (param.getType() != null) {
       rootElement.resourceType(param.getType().getName());
     }
-    createErrorNode(rootElement);
-    createXMLChildNodes(rootElement, param, configuration);
-    return rootElement.build();
-  }
-
-  private void createXMLChildNodes(Connector.Builder rootElement, InitParameter param, IConfiguration configuration) {
+    createErrorNode(rootElement, 0);
     createConnectorData(rootElement, param, configuration);
     try {
       createResouceTypesData(rootElement, param, configuration);
@@ -74,6 +68,7 @@ public class InitCommand extends XmlCommand<InitParameter> {
       log.error("", e);
     }
     createPluginsData(rootElement, configuration);
+    return rootElement.build();
   }
 
   /**
@@ -258,10 +253,6 @@ public class InitCommand extends XmlCommand<InitParameter> {
           throws ConnectorException {
     super.initParams(param, request, configuration);
     param.setRequest(request);
-  }
-
-  private void createErrorNode(Connector.Builder rootElement) {
-    rootElement.error(Error.builder().number(0).build());
   }
 
   @Deprecated

@@ -5,18 +5,12 @@ import com.github.zhanhb.ckfinder.connector.handlers.response.DetailError;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Errors;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.Getter;
-import lombok.Setter;
 
 /**
  *
  * @author zhanhb
  */
 public class ErrorListXMLParameter extends Parameter {
-
-  @Getter
-  @Setter
-  private int errorNum;
 
   /**
    *

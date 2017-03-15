@@ -16,9 +16,6 @@ import com.github.zhanhb.ckfinder.connector.configuration.ParameterFactory;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.Parameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
-import com.github.zhanhb.ckfinder.connector.handlers.response.CurrentFolder;
-import com.github.zhanhb.ckfinder.connector.handlers.response.Error;
-import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
 
 /**
  * Base class to handle XML commands.
@@ -41,13 +38,9 @@ public abstract class BaseXmlCommand<T extends Parameter> extends XmlCommand<T> 
       connector.resourceType(param.getType().getName());
     }
     createCurrentFolderNode(param, connector, configuration.getAccessControl());
-    createErrorNode(connector, param);
+    createErrorNode(connector, 0);
     createXMLChildNodes(connector, param, configuration);
     return connector.build();
-  }
-
-  protected void createErrorNode(Connector.Builder rootElement, T param) {
-    rootElement.error(Error.builder().number(0).build());
   }
 
   /**
@@ -67,23 +60,5 @@ public abstract class BaseXmlCommand<T extends Parameter> extends XmlCommand<T> 
    * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
    */
   protected abstract void createXml(T param, IConfiguration configuration) throws ConnectorException;
-
-  /**
-   * creates <code>CurrentFolder</code> element.
-   *
-   * @param param
-   * @param rootElement XML root node.
-   * @param accessControl
-   */
-  protected void createCurrentFolderNode(T param, Connector.Builder rootElement, AccessControl accessControl) {
-    if (param.getType() != null && param.getCurrentFolder() != null) {
-      rootElement.currentFolder(CurrentFolder.builder()
-              .path(param.getCurrentFolder())
-              .url(param.getType().getUrl()
-                      + param.getCurrentFolder())
-              .acl(accessControl.getAcl(param.getType().getName(), param.getCurrentFolder(), param.getUserRole()))
-              .build());
-    }
-  }
 
 }

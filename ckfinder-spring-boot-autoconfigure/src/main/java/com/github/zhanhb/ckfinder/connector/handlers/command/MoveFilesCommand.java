@@ -39,9 +39,7 @@ public class MoveFilesCommand extends ErrorListXmlCommand<MoveFilesParameter> im
   }
 
   @Override
-  protected void createXMLChildNodes(Connector.Builder rootElement, MoveFilesParameter param, IConfiguration configuration) {
-    param.addErrorsTo(rootElement);
-
+  protected void addRestNodes(Connector.Builder rootElement, MoveFilesParameter param, IConfiguration configuration) {
     if (param.isAddMoveNode()) {
       createMoveFielsNode(rootElement, param);
     }

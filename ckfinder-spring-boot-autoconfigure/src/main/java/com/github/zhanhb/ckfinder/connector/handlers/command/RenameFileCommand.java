@@ -37,7 +37,7 @@ public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> 
   }
 
   @Override
-  protected void createXMLChildNodes(Connector.Builder rootElement, RenameFileParameter param, IConfiguration configuration) {
+  protected void addRestNodes(Connector.Builder rootElement, RenameFileParameter param, IConfiguration configuration) {
     if (param.isAddRenameNode()) {
       createRenamedFileNode(rootElement, param);
     }

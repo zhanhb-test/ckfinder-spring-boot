@@ -38,9 +38,7 @@ public class DeleteFilesCommand extends ErrorListXmlCommand<DeleteFilesParameter
   }
 
   @Override
-  protected void createXMLChildNodes(Connector.Builder rootElement, DeleteFilesParameter param, IConfiguration configuration) {
-    param.addErrorsTo(rootElement);
-
+  protected void addRestNodes(Connector.Builder rootElement, DeleteFilesParameter param, IConfiguration configuration) {
     if (param.isAddDeleteNode()) {
       createDeleteFielsNode(rootElement, param);
     }

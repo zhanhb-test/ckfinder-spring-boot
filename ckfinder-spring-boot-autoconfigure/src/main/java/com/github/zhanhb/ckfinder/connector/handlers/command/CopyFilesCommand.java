@@ -40,9 +40,7 @@ public class CopyFilesCommand extends ErrorListXmlCommand<CopyFilesParameter> im
   }
 
   @Override
-  protected void createXMLChildNodes(Connector.Builder rootElement, CopyFilesParameter param, IConfiguration configuration) {
-    param.addErrorsTo(rootElement);
-
+  protected void addRestNodes(Connector.Builder rootElement, CopyFilesParameter param, IConfiguration configuration) {
     if (param.isAddCopyNode()) {
       rootElement.copyFiles(CopyFiles.builder()
               .copied(param.getFilesCopied())
