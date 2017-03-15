@@ -13,7 +13,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @SuppressWarnings("CollectionWithoutInitialCapacity")
-public class CopyFilesParameter extends ErrorListXMLParameter {
+public class CopyFilesParameter extends ErrorListXmlParameter {
 
   private final List<FilePostParam> files = new ArrayList<>();
   private int filesCopied;

@@ -10,7 +10,7 @@ import java.util.List;
  *
  * @author zhanhb
  */
-public class ErrorListXMLParameter extends Parameter {
+public class ErrorListXmlParameter extends Parameter {
 
   /**
    *
