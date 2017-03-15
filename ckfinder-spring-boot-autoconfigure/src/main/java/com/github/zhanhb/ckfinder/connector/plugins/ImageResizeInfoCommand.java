@@ -14,8 +14,8 @@ package com.github.zhanhb.ckfinder.connector.plugins;
 import com.github.zhanhb.ckfinder.connector.configuration.Constants;
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
-import com.github.zhanhb.ckfinder.connector.handlers.arguments.ImageResizeInfoArguments;
 import com.github.zhanhb.ckfinder.connector.handlers.command.BaseXmlCommand;
+import com.github.zhanhb.ckfinder.connector.handlers.parameter.ImageResizeInfoParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.ImageInfo;
 import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
@@ -31,76 +31,76 @@ import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class ImageResizeInfoCommand extends BaseXmlCommand<ImageResizeInfoArguments> {
+public class ImageResizeInfoCommand extends BaseXmlCommand<ImageResizeInfoParameter> {
 
   public ImageResizeInfoCommand() {
-    super(ImageResizeInfoArguments::new);
+    super(ImageResizeInfoParameter::new);
   }
 
   @Override
-  protected void createXMLChildNodes(Connector.Builder rootElement, ImageResizeInfoArguments arguments, IConfiguration configuration) {
-    createImageInfoNode(rootElement, arguments);
+  protected void createXMLChildNodes(Connector.Builder rootElement, ImageResizeInfoParameter param, IConfiguration configuration) {
+    createImageInfoNode(rootElement, param);
   }
 
-  private void createImageInfoNode(Connector.Builder rootElement, ImageResizeInfoArguments arguments) {
+  private void createImageInfoNode(Connector.Builder rootElement, ImageResizeInfoParameter param) {
     ImageInfo.Builder element = ImageInfo.builder();
-    element.width(arguments.getImageWidth())
-            .height(arguments.getImageHeight());
+    element.width(param.getImageWidth())
+            .height(param.getImageHeight());
     rootElement.imageInfo(element.build());
   }
 
   @Override
-  protected void createXml(ImageResizeInfoArguments arguments, IConfiguration configuration) throws ConnectorException {
-    if (arguments.getType() == null) {
-      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE);
+  protected void createXml(ImageResizeInfoParameter param, IConfiguration configuration) throws ConnectorException {
+    if (param.getType() == null) {
+      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE);
     }
 
-    if (!configuration.getAccessControl().hasPermission(arguments.getType().getName(),
-            arguments.getCurrentFolder(), arguments.getUserRole(),
+    if (!configuration.getAccessControl().hasPermission(param.getType().getName(),
+            param.getCurrentFolder(), param.getUserRole(),
             AccessControl.CKFINDER_CONNECTOR_ACL_FILE_VIEW)) {
-      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED);
+      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED);
     }
 
-    if (arguments.getFileName() == null || arguments.getFileName().isEmpty()
-            || !FileUtils.isFileNameInvalid(arguments.getFileName())
-            || FileUtils.isFileHidden(arguments.getFileName(), configuration)) {
-      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
+    if (param.getFileName() == null || param.getFileName().isEmpty()
+            || !FileUtils.isFileNameInvalid(param.getFileName())
+            || FileUtils.isFileHidden(param.getFileName(), configuration)) {
+      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
     }
 
-    if (!FileUtils.isFileExtensionAllwed(arguments.getFileName(), arguments.getType())) {
-      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
+    if (!FileUtils.isFileExtensionAllwed(param.getFileName(), param.getType())) {
+      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
     }
 
-    Path imageFile = Paths.get(arguments.getType().getPath(),
-            arguments.getCurrentFolder(),
-            arguments.getFileName());
+    Path imageFile = Paths.get(param.getType().getPath(),
+            param.getCurrentFolder(),
+            param.getFileName());
 
     try {
       if (!Files.isRegularFile(imageFile)) {
-        arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_FILE_NOT_FOUND);
+        param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_FILE_NOT_FOUND);
       }
 
       BufferedImage image;
       try (InputStream is = Files.newInputStream(imageFile)) {
         image = ImageIO.read(is);
       }
-      arguments.setImageWidth(image.getWidth());
-      arguments.setImageHeight(image.getHeight());
+      param.setImageWidth(image.getWidth());
+      param.setImageHeight(image.getHeight());
     } catch (SecurityException | IOException e) {
       log.error("", e);
-      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED);
+      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED);
     }
   }
 
   @Override
-  protected void initParams(ImageResizeInfoArguments arguments, HttpServletRequest request, IConfiguration configuration)
+  protected void initParams(ImageResizeInfoParameter param, HttpServletRequest request, IConfiguration configuration)
           throws ConnectorException {
-    super.initParams(arguments, request, configuration);
-    arguments.setImageHeight(0);
-    arguments.setImageWidth(0);
-    arguments.setCurrentFolder(request.getParameter("currentFolder"));
-    arguments.setType(configuration.getTypes().get(request.getParameter("type")));
-    arguments.setFileName(request.getParameter("fileName"));
+    super.initParams(param, request, configuration);
+    param.setImageHeight(0);
+    param.setImageWidth(0);
+    param.setCurrentFolder(request.getParameter("currentFolder"));
+    param.setType(configuration.getTypes().get(request.getParameter("type")));
+    param.setFileName(request.getParameter("fileName"));
   }
 
 }

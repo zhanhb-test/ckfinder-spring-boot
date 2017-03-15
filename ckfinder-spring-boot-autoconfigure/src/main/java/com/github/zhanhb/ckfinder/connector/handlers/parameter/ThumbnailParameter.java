@@ -1,4 +1,4 @@
-package com.github.zhanhb.ckfinder.connector.handlers.arguments;
+package com.github.zhanhb.ckfinder.connector.handlers.parameter;
 
 import java.nio.file.Path;
 import lombok.Getter;
@@ -10,7 +10,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class ThumbnailArguments extends Arguments {
+public class ThumbnailParameter extends Parameter {
 
   /**
    * File name.

@@ -34,9 +34,9 @@ public class WatermarkCommand implements AfterFileUploadEventHandler {
   private final WatermarkSettings settings;
 
   @Override
-  public void runEventHandler(AfterFileUploadEventArgs args, IConfiguration configuration) {
+  public void runEventHandler(AfterFileUploadEventArgs param, IConfiguration configuration) {
     try {
-      final Path originalFile = args.getFile();
+      final Path originalFile = param.getFile();
       final WatermarkPosition position = new WatermarkPosition(settings.getMarginBottom(), settings.getMarginRight());
 
       Thumbnails.of(originalFile.toFile())

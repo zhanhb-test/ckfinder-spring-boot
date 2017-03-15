@@ -10,6 +10,6 @@ import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 public interface AfterFileUploadEventHandler extends IEventHandler<AfterFileUploadEventArgs> {
 
   @Override
-  public void runEventHandler(AfterFileUploadEventArgs args, IConfiguration configuration) throws ConnectorException;
+  public void runEventHandler(AfterFileUploadEventArgs param, IConfiguration configuration) throws ConnectorException;
 
 }

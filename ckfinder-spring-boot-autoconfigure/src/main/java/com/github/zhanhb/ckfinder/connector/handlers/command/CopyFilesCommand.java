@@ -16,7 +16,7 @@ import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
 import com.github.zhanhb.ckfinder.connector.data.FilePostParam;
 import com.github.zhanhb.ckfinder.connector.data.ResourceType;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
-import com.github.zhanhb.ckfinder.connector.handlers.arguments.CopyFilesArguments;
+import com.github.zhanhb.ckfinder.connector.handlers.parameter.CopyFilesParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.CopyFiles;
 import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
@@ -33,43 +33,43 @@ import lombok.extern.slf4j.Slf4j;
  * Class to handle <code>CopyFiles</code> command.
  */
 @Slf4j
-public class CopyFilesCommand extends ErrorListXMLCommand<CopyFilesArguments> implements IPostCommand {
+public class CopyFilesCommand extends ErrorListXMLCommand<CopyFilesParameter> implements IPostCommand {
 
   public CopyFilesCommand() {
-    super(CopyFilesArguments::new);
+    super(CopyFilesParameter::new);
   }
 
   @Override
-  protected void createXMLChildNodes(Connector.Builder rootElement, CopyFilesArguments arguments, IConfiguration configuration) {
-    arguments.addErrorsTo(rootElement);
+  protected void createXMLChildNodes(Connector.Builder rootElement, CopyFilesParameter param, IConfiguration configuration) {
+    param.addErrorsTo(rootElement);
 
-    if (arguments.isAddCopyNode()) {
+    if (param.isAddCopyNode()) {
       rootElement.copyFiles(CopyFiles.builder()
-              .copied(arguments.getFilesCopied())
-              .copiedTotal(arguments.getCopiedAll() + arguments.getFilesCopied())
+              .copied(param.getFilesCopied())
+              .copiedTotal(param.getCopiedAll() + param.getFilesCopied())
               .build());
     }
   }
 
   @Override
-  protected int getDataForXml(CopyFilesArguments arguments, IConfiguration configuration)
+  protected int getDataForXml(CopyFilesParameter param, IConfiguration configuration)
           throws ConnectorException {
-    ResourceType type = arguments.getType();
+    ResourceType type = param.getType();
     if (type == null) {
-      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE);
+      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE);
     }
 
     if (!configuration.getAccessControl().hasPermission(type.getName(),
-            arguments.getCurrentFolder(),
-            arguments.getUserRole(),
+            param.getCurrentFolder(),
+            param.getUserRole(),
             AccessControl.CKFINDER_CONNECTOR_ACL_FILE_RENAME
             | AccessControl.CKFINDER_CONNECTOR_ACL_FILE_DELETE
             | AccessControl.CKFINDER_CONNECTOR_ACL_FILE_UPLOAD)) {
-      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED);
+      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED);
     }
 
     try {
-      return copyFiles(arguments, configuration, type);
+      return copyFiles(param, configuration, type);
     } catch (Exception e) {
       log.error("", e);
     }
@@ -82,10 +82,10 @@ public class CopyFilesCommand extends ErrorListXMLCommand<CopyFilesArguments> im
    *
    * @return error code
    */
-  private int copyFiles(CopyFilesArguments arguments, IConfiguration configuration, ResourceType type) {
-    arguments.setFilesCopied(0);
-    arguments.setAddCopyNode(false);
-    for (FilePostParam file : arguments.getFiles()) {
+  private int copyFiles(CopyFilesParameter param, IConfiguration configuration, ResourceType type) {
+    param.setFilesCopied(0);
+    param.setAddCopyNode(false);
+    for (FilePostParam file : param.getFiles()) {
 
       if (!FileUtils.isFileNameInvalid(file.getName())) {
         return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST;
@@ -103,7 +103,7 @@ public class CopyFilesCommand extends ErrorListXMLCommand<CopyFilesArguments> im
       }
       if (!FileUtils.isFileExtensionAllwed(file.getName(),
               type)) {
-        arguments.appendErrorNodeChild(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_EXTENSION,
+        param.appendErrorNodeChild(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_EXTENSION,
                 file.getName(), file.getFolder(), file.getType());
         continue;
       }
@@ -112,7 +112,7 @@ public class CopyFilesCommand extends ErrorListXMLCommand<CopyFilesArguments> im
       if (!type.getName().equals(file.getType())) {
         if (!FileUtils.isFileExtensionAllwed(file.getName(),
                 configuration.getTypes().get(file.getType()))) {
-          arguments.appendErrorNodeChild(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_EXTENSION,
+          param.appendErrorNodeChild(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_EXTENSION,
                   file.getName(), file.getFolder(), file.getType());
           continue;
         }
@@ -125,7 +125,7 @@ public class CopyFilesCommand extends ErrorListXMLCommand<CopyFilesArguments> im
         return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST;
       }
 
-      if (!configuration.getAccessControl().hasPermission(file.getType(), file.getFolder(), arguments.getUserRole(),
+      if (!configuration.getAccessControl().hasPermission(file.getType(), file.getFolder(), param.getUserRole(),
               AccessControl.CKFINDER_CONNECTOR_ACL_FILE_VIEW)) {
         return Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED;
       }
@@ -133,58 +133,58 @@ public class CopyFilesCommand extends ErrorListXMLCommand<CopyFilesArguments> im
       Path sourceFile = Paths.get(configuration.getTypes().get(file.getType()).getPath(),
               file.getFolder(), file.getName());
       Path destFile = Paths.get(type.getPath(),
-              arguments.getCurrentFolder(), file.getName());
+              param.getCurrentFolder(), file.getName());
 
       try {
         if (!Files.isRegularFile(sourceFile)) {
-          arguments.appendErrorNodeChild(Constants.Errors.CKFINDER_CONNECTOR_ERROR_FILE_NOT_FOUND,
+          param.appendErrorNodeChild(Constants.Errors.CKFINDER_CONNECTOR_ERROR_FILE_NOT_FOUND,
                   file.getName(), file.getFolder(), file.getType());
           continue;
         }
         if (!type.getName().equals(file.getType())) {
           long maxSize = type.getMaxSize();
           if (maxSize != 0 && maxSize < Files.size(sourceFile)) {
-            arguments.appendErrorNodeChild(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UPLOADED_TOO_BIG,
+            param.appendErrorNodeChild(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UPLOADED_TOO_BIG,
                     file.getName(), file.getFolder(), file.getType());
             continue;
           }
         }
         if (sourceFile.equals(destFile)) {
-          arguments.appendErrorNodeChild(Constants.Errors.CKFINDER_CONNECTOR_ERROR_SOURCE_AND_TARGET_PATH_EQUAL,
+          param.appendErrorNodeChild(Constants.Errors.CKFINDER_CONNECTOR_ERROR_SOURCE_AND_TARGET_PATH_EQUAL,
                   file.getName(), file.getFolder(), file.getType());
         } else if (Files.exists(destFile)) {
           if (file.getOptions() != null
                   && file.getOptions().contains("overwrite")) {
             if (!handleOverwrite(sourceFile, destFile)) {
-              arguments.appendErrorNodeChild(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED,
+              param.appendErrorNodeChild(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED,
                       file.getName(), file.getFolder(), file.getType());
             } else {
-              arguments.filesCopiedPlus();
+              param.filesCopiedPlus();
             }
           } else if (file.getOptions() != null && file.getOptions().contains("autorename")) {
             if (!handleAutoRename(sourceFile, destFile)) {
-              arguments.appendErrorNodeChild(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED,
+              param.appendErrorNodeChild(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED,
                       file.getName(), file.getFolder(), file.getType());
             } else {
-              arguments.filesCopiedPlus();
+              param.filesCopiedPlus();
             }
           } else {
-            arguments.appendErrorNodeChild(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ALREADY_EXIST,
+            param.appendErrorNodeChild(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ALREADY_EXIST,
                     file.getName(), file.getFolder(), file.getType());
           }
         } else if (FileUtils.copyFromSourceToDestFile(sourceFile, destFile,
                 false)) {
-          arguments.filesCopiedPlus();
-          copyThumb(file, arguments, configuration);
+          param.filesCopiedPlus();
+          copyThumb(file, param, configuration);
         }
       } catch (SecurityException | IOException e) {
         log.error("", e);
-        arguments.appendErrorNodeChild(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED,
+        param.appendErrorNodeChild(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED,
                 file.getName(), file.getFolder(), file.getType());
       }
     }
-    arguments.setAddCopyNode(true);
-    if (arguments.hasErrors()) {
+    param.setAddCopyNode(true);
+    if (param.hasErrors()) {
       return Constants.Errors.CKFINDER_CONNECTOR_ERROR_COPY_FAILED;
     } else {
       return Constants.Errors.CKFINDER_CONNECTOR_ERROR_NONE;
@@ -237,11 +237,11 @@ public class CopyFilesCommand extends ErrorListXMLCommand<CopyFilesArguments> im
    * @param file file to copy.
    * @throws IOException when ioerror occurs
    */
-  private void copyThumb(FilePostParam file, CopyFilesArguments arguments, IConfiguration configuration) throws IOException {
+  private void copyThumb(FilePostParam file, CopyFilesParameter param, IConfiguration configuration) throws IOException {
     Path sourceThumbFile = Paths.get(configuration.getThumbsPath(),
             file.getType(), file.getFolder(), file.getName());
     Path destThumbFile = Paths.get(configuration.getThumbsPath(),
-            arguments.getType().getName(), arguments.getCurrentFolder(),
+            param.getType().getName(), param.getCurrentFolder(),
             file.getName());
 
     log.debug("copy thumb from '{}' to '{}'", sourceThumbFile, destThumbFile);
@@ -253,11 +253,11 @@ public class CopyFilesCommand extends ErrorListXMLCommand<CopyFilesArguments> im
   }
 
   @Override
-  protected void initParams(CopyFilesArguments arguments, HttpServletRequest request, IConfiguration configuration) throws ConnectorException {
-    super.initParams(arguments, request, configuration);
-    arguments.setCopiedAll(request.getParameter("copied") != null ? Integer.parseInt(request.getParameter("copied")) : 0);
+  protected void initParams(CopyFilesParameter param, HttpServletRequest request, IConfiguration configuration) throws ConnectorException {
+    super.initParams(param, request, configuration);
+    param.setCopiedAll(request.getParameter("copied") != null ? Integer.parseInt(request.getParameter("copied")) : 0);
 
-    RequestFileHelper.addFilesListFromRequest(request, arguments.getFiles());
+    RequestFileHelper.addFilesListFromRequest(request, param.getFiles());
   }
 
 }

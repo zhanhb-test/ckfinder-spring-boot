@@ -14,7 +14,7 @@ package com.github.zhanhb.ckfinder.connector.handlers.command;
 import com.github.zhanhb.ckfinder.connector.configuration.Constants;
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
-import com.github.zhanhb.ckfinder.connector.handlers.arguments.DownloadFileArguments;
+import com.github.zhanhb.ckfinder.connector.handlers.parameter.DownloadFileParameter;
 import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import java.io.IOException;
@@ -27,10 +27,10 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * Class to handle <code>DownloadFile</code> command.
  */
-public class DownloadFileCommand extends Command<DownloadFileArguments> {
+public class DownloadFileCommand extends Command<DownloadFileParameter> {
 
   public DownloadFileCommand() {
-    super(DownloadFileArguments::new);
+    super(DownloadFileParameter::new);
   }
 
   /**
@@ -39,13 +39,13 @@ public class DownloadFileCommand extends Command<DownloadFileArguments> {
    * @throws ConnectorException when something went wrong during reading file.
    */
   @Override
-  void execute(DownloadFileArguments arguments, HttpServletRequest request, HttpServletResponse response, IConfiguration configuration)
+  void execute(DownloadFileParameter param, HttpServletRequest request, HttpServletResponse response, IConfiguration configuration)
           throws ConnectorException {
-    if (arguments.getType() == null) {
+    if (param.getType() == null) {
       throw new ConnectorException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE);
     }
 
-    Path file = Paths.get(arguments.getType().getPath(), arguments.getCurrentFolder(), arguments.getFileName());
+    Path file = Paths.get(param.getType().getPath(), param.getCurrentFolder(), param.getFileName());
 
     if (file != null) {
       try {
@@ -54,7 +54,7 @@ public class DownloadFileCommand extends Command<DownloadFileArguments> {
       }
     }
 
-    String mimetype = request.getServletContext().getMimeType(arguments.getFileName());
+    String mimetype = request.getServletContext().getMimeType(param.getFileName());
     if (mimetype != null) {
       if (mimetype.startsWith("text/") || mimetype.endsWith("/javascript")
               || mimetype.endsWith("/xml")) {
@@ -66,32 +66,32 @@ public class DownloadFileCommand extends Command<DownloadFileArguments> {
     }
     response.setHeader("Content-Disposition",
             ContentDisposition.getContentDisposition("attachment",
-                    arguments.getFileName()));
+                    param.getFileName()));
 
     response.setHeader("Cache-Control", "cache, must-revalidate");
     response.setHeader("Pragma", "public");
     response.setHeader("Expires", "0");
 
-    if (!configuration.getAccessControl().hasPermission(arguments.getType().getName(),
-            arguments.getCurrentFolder(), arguments.getUserRole(),
+    if (!configuration.getAccessControl().hasPermission(param.getType().getName(),
+            param.getCurrentFolder(), param.getUserRole(),
             AccessControl.CKFINDER_CONNECTOR_ACL_FILE_VIEW)) {
-      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED);
+      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED);
     }
 
-    if (!FileUtils.isFileNameInvalid(arguments.getFileName())
-            || !FileUtils.isFileExtensionAllwed(arguments.getFileName(),
-                    arguments.getType())) {
-      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
+    if (!FileUtils.isFileNameInvalid(param.getFileName())
+            || !FileUtils.isFileExtensionAllwed(param.getFileName(),
+                    param.getType())) {
+      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
     }
 
-    if (FileUtils.isDirectoryHidden(arguments.getCurrentFolder(), configuration)) {
-      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
+    if (FileUtils.isDirectoryHidden(param.getCurrentFolder(), configuration)) {
+      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
     }
     try {
       if (!Files.exists(file)
               || !Files.isRegularFile(file)
-              || FileUtils.isFileHidden(arguments.getFileName(), configuration)) {
-        arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_FILE_NOT_FOUND);
+              || FileUtils.isFileHidden(param.getFileName(), configuration)) {
+        param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_FILE_NOT_FOUND);
       }
 
       FileUtils.printFileContentToResponse(file, response.getOutputStream());
@@ -105,17 +105,17 @@ public class DownloadFileCommand extends Command<DownloadFileArguments> {
   /**
    * inits params for download file command.
    *
-   * @param arguments
+   * @param param
    * @param request request
    * @param configuration connector configuration
    * @throws ConnectorException when error occurs.
    */
   @Override
-  protected void initParams(DownloadFileArguments arguments, HttpServletRequest request, IConfiguration configuration)
+  protected void initParams(DownloadFileParameter param, HttpServletRequest request, IConfiguration configuration)
           throws ConnectorException {
-    super.initParams(arguments, request, configuration);
+    super.initParams(param, request, configuration);
     // problem with showing filename when dialog window appear
-    arguments.setFileName(request.getParameter("FileName"));
+    param.setFileName(request.getParameter("FileName"));
   }
 
 }

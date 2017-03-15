@@ -13,7 +13,7 @@ package com.github.zhanhb.ckfinder.connector.errors;
 
 import com.github.zhanhb.ckfinder.connector.configuration.Constants;
 import com.github.zhanhb.ckfinder.connector.data.ResourceType;
-import com.github.zhanhb.ckfinder.connector.handlers.arguments.Arguments;
+import com.github.zhanhb.ckfinder.connector.handlers.parameter.Parameter;
 import java.util.Objects;
 import lombok.Getter;
 
@@ -34,13 +34,13 @@ public class ConnectorException extends Exception {
   /**
    * standard constructor.
    *
-   * @param arguments the arguments
+   * @param param the parameters
    * @param errorCode error code number
    */
-  public ConnectorException(Arguments arguments, int errorCode) {
+  public ConnectorException(Parameter param, int errorCode) {
     this.errorCode = errorCode;
-    this.currentFolder = Objects.requireNonNull(arguments.getCurrentFolder());
-    this.type = Objects.requireNonNull(arguments.getType());
+    this.currentFolder = Objects.requireNonNull(param.getCurrentFolder());
+    this.type = Objects.requireNonNull(param.getType());
   }
 
   /**

@@ -1,4 +1,4 @@
-package com.github.zhanhb.ckfinder.connector.handlers.arguments;
+package com.github.zhanhb.ckfinder.connector.handlers.parameter;
 
 import com.github.zhanhb.ckfinder.connector.data.FilePostParam;
 import java.util.ArrayList;
@@ -13,15 +13,15 @@ import lombok.Setter;
 @Getter
 @Setter
 @SuppressWarnings("CollectionWithoutInitialCapacity")
-public class MoveFilesArguments extends ErrorListXMLArguments {
+public class CopyFilesParameter extends ErrorListXMLParameter {
 
   private final List<FilePostParam> files = new ArrayList<>();
-  private int filesMoved;
-  private int movedAll;
-  private boolean addMoveNode;
+  private int filesCopied;
+  private int copiedAll;
+  private boolean addCopyNode;
 
-  public void filesMovedPlus() {
-    filesMoved++;
+  public void filesCopiedPlus() {
+    filesCopied++;
   }
 
 }

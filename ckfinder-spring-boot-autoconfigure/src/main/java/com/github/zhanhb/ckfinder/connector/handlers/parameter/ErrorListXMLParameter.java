@@ -1,4 +1,4 @@
-package com.github.zhanhb.ckfinder.connector.handlers.arguments;
+package com.github.zhanhb.ckfinder.connector.handlers.parameter;
 
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.DetailError;
@@ -12,7 +12,7 @@ import lombok.Setter;
  *
  * @author zhanhb
  */
-public class ErrorListXMLArguments extends Arguments {
+public class ErrorListXMLParameter extends Parameter {
 
   @Getter
   @Setter

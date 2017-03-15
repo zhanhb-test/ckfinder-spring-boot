@@ -14,7 +14,7 @@ package com.github.zhanhb.ckfinder.connector.handlers.command;
 import com.github.zhanhb.ckfinder.connector.configuration.Constants;
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
-import com.github.zhanhb.ckfinder.connector.handlers.arguments.ErrorListXMLArguments;
+import com.github.zhanhb.ckfinder.connector.handlers.parameter.ErrorListXMLParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
@@ -27,58 +27,58 @@ import lombok.extern.slf4j.Slf4j;
  * Class to handle <code>DeleteFolder</code> command.
  */
 @Slf4j
-public class DeleteFolderCommand extends BaseXmlCommand<ErrorListXMLArguments> implements IPostCommand {
+public class DeleteFolderCommand extends BaseXmlCommand<ErrorListXMLParameter> implements IPostCommand {
 
   public DeleteFolderCommand() {
-    super(ErrorListXMLArguments::new);
+    super(ErrorListXMLParameter::new);
   }
 
   @Override
-  protected void createXMLChildNodes(Connector.Builder rootElement, ErrorListXMLArguments arguments, IConfiguration configuration) {
+  protected void createXMLChildNodes(Connector.Builder rootElement, ErrorListXMLParameter param, IConfiguration configuration) {
   }
 
   /**
-   * @param arguments
+   * @param param
    * @param configuration connector configuration
    * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
    */
   @Override
-  protected void createXml(ErrorListXMLArguments arguments, IConfiguration configuration) throws ConnectorException {
-    if (arguments.getType() == null) {
-      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE);
+  protected void createXml(ErrorListXMLParameter param, IConfiguration configuration) throws ConnectorException {
+    if (param.getType() == null) {
+      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE);
     }
 
-    if (!configuration.getAccessControl().hasPermission(arguments.getType().getName(),
-            arguments.getCurrentFolder(),
-            arguments.getUserRole(),
+    if (!configuration.getAccessControl().hasPermission(param.getType().getName(),
+            param.getCurrentFolder(),
+            param.getUserRole(),
             AccessControl.CKFINDER_CONNECTOR_ACL_FOLDER_DELETE)) {
-      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED);
+      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED);
     }
-    if (arguments.getCurrentFolder().equals("/")) {
-      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
-    }
-
-    if (FileUtils.isDirectoryHidden(arguments.getCurrentFolder(), configuration)) {
-      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
+    if (param.getCurrentFolder().equals("/")) {
+      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
     }
 
-    Path dir = Paths.get(arguments.getType().getPath(), arguments.getCurrentFolder());
+    if (FileUtils.isDirectoryHidden(param.getCurrentFolder(), configuration)) {
+      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
+    }
+
+    Path dir = Paths.get(param.getType().getPath(), param.getCurrentFolder());
 
     try {
       if (!Files.isDirectory(dir)) {
-        arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_FOLDER_NOT_FOUND);
+        param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_FOLDER_NOT_FOUND);
       }
 
       if (FileUtils.delete(dir)) {
         Path thumbDir = Paths.get(configuration.getThumbsPath(),
-                arguments.getType().getName(), arguments.getCurrentFolder());
+                param.getType().getName(), param.getCurrentFolder());
         FileUtils.delete(thumbDir);
       } else {
-        arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED);
+        param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED);
       }
     } catch (SecurityException e) {
       log.error("", e);
-      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED);
+      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED);
     }
 
   }

@@ -27,15 +27,15 @@ public class ImageResizeInitCommandEventHandler implements InitCommandEventHandl
   private final Map<String, String> params;
 
   @Override
-  public void runEventHandler(InitCommandEventArgs args, IConfiguration configuration) {
-    log.debug("runEventHandler: {} {}", args, configuration);
+  public void runEventHandler(InitCommandEventArgs param, IConfiguration configuration) {
+    log.debug("runEventHandler: {} {}", param, configuration);
     ImageResizeInfo.Builder builder = ImageResizeInfo.builder();
     for (Map.Entry<String, String> entry : params.entrySet()) {
       String key = entry.getKey();
       String value = entry.getValue();
       builder.attr(key, value);
     }
-    args.getRootElement().pluginsInfos(
+    param.getRootElement().pluginsInfos(
             PluginsInfos.builder().pluginsInfo(builder.build()).build()
     );
   }

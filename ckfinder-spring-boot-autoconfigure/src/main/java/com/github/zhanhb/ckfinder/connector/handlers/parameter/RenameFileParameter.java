@@ -1,4 +1,4 @@
-package com.github.zhanhb.ckfinder.connector.handlers.arguments;
+package com.github.zhanhb.ckfinder.connector.handlers.parameter;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -9,7 +9,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class RenameFileArguments extends ErrorListXMLArguments {
+public class RenameFileParameter extends ErrorListXMLParameter {
 
   private String fileName;
   private String newFileName;

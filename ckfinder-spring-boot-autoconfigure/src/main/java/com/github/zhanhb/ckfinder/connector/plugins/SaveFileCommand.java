@@ -14,8 +14,8 @@ package com.github.zhanhb.ckfinder.connector.plugins;
 import com.github.zhanhb.ckfinder.connector.configuration.Constants;
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
-import com.github.zhanhb.ckfinder.connector.handlers.arguments.SaveFileArguments;
 import com.github.zhanhb.ckfinder.connector.handlers.command.BaseXmlCommand;
+import com.github.zhanhb.ckfinder.connector.handlers.parameter.SaveFileParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
@@ -28,69 +28,69 @@ import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class SaveFileCommand extends BaseXmlCommand<SaveFileArguments> {
+public class SaveFileCommand extends BaseXmlCommand<SaveFileParameter> {
 
   public SaveFileCommand() {
-    super(SaveFileArguments::new);
+    super(SaveFileParameter::new);
   }
 
   @Override
-  protected void createXMLChildNodes(Connector.Builder rootElement, SaveFileArguments arguments, IConfiguration configuration) {
+  protected void createXMLChildNodes(Connector.Builder rootElement, SaveFileParameter param, IConfiguration configuration) {
   }
 
   @Override
-  protected void createXml(SaveFileArguments arguments, IConfiguration configuration) throws ConnectorException {
-    if (arguments.getType() == null) {
-      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE);
+  protected void createXml(SaveFileParameter param, IConfiguration configuration) throws ConnectorException {
+    if (param.getType() == null) {
+      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE);
     }
 
-    if (!configuration.getAccessControl().hasPermission(arguments.getType().getName(),
-            arguments.getCurrentFolder(), arguments.getUserRole(),
+    if (!configuration.getAccessControl().hasPermission(param.getType().getName(),
+            param.getCurrentFolder(), param.getUserRole(),
             AccessControl.CKFINDER_CONNECTOR_ACL_FILE_DELETE)) {
-      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED);
+      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED);
     }
 
-    if (arguments.getFileName() == null || arguments.getFileName().isEmpty()) {
-      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_NAME);
+    if (param.getFileName() == null || param.getFileName().isEmpty()) {
+      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_NAME);
     }
 
-    if (arguments.getFileContent() == null || arguments.getFileContent().isEmpty()) {
-      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
+    if (param.getFileContent() == null || param.getFileContent().isEmpty()) {
+      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
     }
 
-    if (!FileUtils.isFileExtensionAllwed(arguments.getFileName(), arguments.getType())) {
-      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_EXTENSION);
+    if (!FileUtils.isFileExtensionAllwed(param.getFileName(), param.getType())) {
+      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_EXTENSION);
     }
 
-    if (!FileUtils.isFileNameInvalid(arguments.getFileName())) {
-      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
+    if (!FileUtils.isFileNameInvalid(param.getFileName())) {
+      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
     }
 
-    Path sourceFile = Paths.get(arguments.getType().getPath(),
-            arguments.getCurrentFolder(), arguments.getFileName());
+    Path sourceFile = Paths.get(param.getType().getPath(),
+            param.getCurrentFolder(), param.getFileName());
 
     try {
       if (!Files.isRegularFile(sourceFile)) {
-        arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_FILE_NOT_FOUND);
+        param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_FILE_NOT_FOUND);
       }
-      Files.write(sourceFile, arguments.getFileContent().getBytes("UTF-8"));
+      Files.write(sourceFile, param.getFileContent().getBytes("UTF-8"));
     } catch (FileNotFoundException e) {
-      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_FILE_NOT_FOUND);
+      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_FILE_NOT_FOUND);
     } catch (SecurityException | IOException e) {
       log.error("", e);
-      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED);
+      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED);
     }
   }
 
   @Override
-  protected void initParams(SaveFileArguments arguments, HttpServletRequest request, IConfiguration configuration)
+  protected void initParams(SaveFileParameter param, HttpServletRequest request, IConfiguration configuration)
           throws ConnectorException {
-    super.initParams(arguments, request, configuration);
-    arguments.setCurrentFolder(request.getParameter("currentFolder"));
-    arguments.setType(configuration.getTypes().get(request.getParameter("type")));
-    arguments.setFileContent(request.getParameter("content"));
-    arguments.setFileName(request.getParameter("fileName"));
-    arguments.setRequest(request);
+    super.initParams(param, request, configuration);
+    param.setCurrentFolder(request.getParameter("currentFolder"));
+    param.setType(configuration.getTypes().get(request.getParameter("type")));
+    param.setFileContent(request.getParameter("content"));
+    param.setFileName(request.getParameter("fileName"));
+    param.setRequest(request);
   }
 
 }

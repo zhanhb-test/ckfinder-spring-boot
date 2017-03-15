@@ -2,7 +2,7 @@ package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
-import com.github.zhanhb.ckfinder.connector.handlers.arguments.Arguments;
+import com.github.zhanhb.ckfinder.connector.handlers.parameter.Parameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.utils.XMLCreator;
 import java.io.IOException;
@@ -16,25 +16,25 @@ import javax.servlet.http.HttpServletResponse;
  * @author zhanhb
  * @param <T>
  */
-public abstract class XmlCommand<T extends Arguments> extends Command<T> {
+public abstract class XmlCommand<T extends Parameter> extends Command<T> {
 
-  protected XmlCommand(Supplier<T> supplier) {
-    super(supplier);
+  protected XmlCommand(Supplier<T> paramFactory) {
+    super(paramFactory);
   }
 
   /**
    * executes XML command. Creates XML response and writes it to response output
    * stream.
    *
-   * @param arguments
+   * @param param
    * @param configuration
    * @throws java.io.IOException
    */
   @Override
   @SuppressWarnings("FinalMethod")
-  final void execute(T arguments, HttpServletRequest request, HttpServletResponse response, IConfiguration configuration)
+  final void execute(T param, HttpServletRequest request, HttpServletResponse response, IConfiguration configuration)
           throws IOException, ConnectorException {
-    Connector connector = buildConnector(arguments, configuration);
+    Connector connector = buildConnector(param, configuration);
 
     response.setContentType("text/xml;charset=UTF-8");
     response.setHeader("Cache-Control", "no-cache");
@@ -43,7 +43,7 @@ public abstract class XmlCommand<T extends Arguments> extends Command<T> {
     }
   }
 
-  abstract Connector buildConnector(T arguments, IConfiguration configuration)
+  abstract Connector buildConnector(T param, IConfiguration configuration)
           throws ConnectorException;
 
 }

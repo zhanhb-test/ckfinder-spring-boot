@@ -25,12 +25,12 @@ public interface IEventHandler<T> {
   /**
    * execute event handler.
    *
-   * @param args params for event handler.
+   * @param param params for event handler.
    * @param configuration connector configuration
    * @throws ConnectorException when error occurs.
    * @throws java.io.IOException
    */
-  public void runEventHandler(T args, IConfiguration configuration)
+  public void runEventHandler(T param, IConfiguration configuration)
           throws ConnectorException, IOException;
 
 }

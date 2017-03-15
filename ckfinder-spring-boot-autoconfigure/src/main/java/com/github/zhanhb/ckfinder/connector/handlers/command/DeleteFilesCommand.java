@@ -15,7 +15,7 @@ import com.github.zhanhb.ckfinder.connector.configuration.Constants;
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
 import com.github.zhanhb.ckfinder.connector.data.FilePostParam;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
-import com.github.zhanhb.ckfinder.connector.handlers.arguments.DeleteFilesArguments;
+import com.github.zhanhb.ckfinder.connector.handlers.parameter.DeleteFilesParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.DeleteFiles;
 import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
@@ -31,18 +31,18 @@ import lombok.extern.slf4j.Slf4j;
  * Class used to handle <code>DeleteFiles</code> command.
  */
 @Slf4j
-public class DeleteFilesCommand extends ErrorListXMLCommand<DeleteFilesArguments> implements IPostCommand {
+public class DeleteFilesCommand extends ErrorListXMLCommand<DeleteFilesParameter> implements IPostCommand {
 
   public DeleteFilesCommand() {
-    super(DeleteFilesArguments::new);
+    super(DeleteFilesParameter::new);
   }
 
   @Override
-  protected void createXMLChildNodes(Connector.Builder rootElement, DeleteFilesArguments arguments, IConfiguration configuration) {
-    arguments.addErrorsTo(rootElement);
+  protected void createXMLChildNodes(Connector.Builder rootElement, DeleteFilesParameter param, IConfiguration configuration) {
+    param.addErrorsTo(rootElement);
 
-    if (arguments.isAddDeleteNode()) {
-      createDeleteFielsNode(rootElement, arguments);
+    if (param.isAddDeleteNode()) {
+      createDeleteFielsNode(rootElement, param);
     }
   }
 
@@ -51,33 +51,33 @@ public class DeleteFilesCommand extends ErrorListXMLCommand<DeleteFilesArguments
    *
    * @param rootElement root element in XML response
    */
-  private void createDeleteFielsNode(Connector.Builder rootElement, DeleteFilesArguments arguments) {
+  private void createDeleteFielsNode(Connector.Builder rootElement, DeleteFilesParameter param) {
     rootElement.deleteFiles(DeleteFiles.builder()
-            .deleted(arguments.getFilesDeleted())
+            .deleted(param.getFilesDeleted())
             .build());
   }
 
   /**
    * Prepares data for XML response.
    *
-   * @param arguments
+   * @param param
    * @param configuration connector configuration
    * @return error code or 0 if action ended with success.
    * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
    */
   @Override
-  protected int getDataForXml(DeleteFilesArguments arguments, IConfiguration configuration)
+  protected int getDataForXml(DeleteFilesParameter param, IConfiguration configuration)
           throws ConnectorException {
 
-    arguments.setFilesDeleted(0);
+    param.setFilesDeleted(0);
 
-    arguments.setAddDeleteNode(false);
+    param.setAddDeleteNode(false);
 
-    if (arguments.getType() == null) {
-      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE);
+    if (param.getType() == null) {
+      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE);
     }
 
-    for (FilePostParam fileItem : arguments.getFiles()) {
+    for (FilePostParam fileItem : param.getFiles()) {
       if (!FileUtils.isFileNameInvalid(fileItem.getName())) {
         return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST;
       }
@@ -105,7 +105,7 @@ public class DeleteFilesCommand extends ErrorListXMLCommand<DeleteFilesArguments
 
       }
 
-      if (!configuration.getAccessControl().hasPermission(fileItem.getType(), fileItem.getFolder(), arguments.getUserRole(),
+      if (!configuration.getAccessControl().hasPermission(fileItem.getType(), fileItem.getFolder(), param.getUserRole(),
               AccessControl.CKFINDER_CONNECTOR_ACL_FILE_DELETE)) {
         return Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED;
       }
@@ -113,9 +113,9 @@ public class DeleteFilesCommand extends ErrorListXMLCommand<DeleteFilesArguments
       Path file = Paths.get(configuration.getTypes().get(fileItem.getType()).getPath(), fileItem.getFolder(), fileItem.getName());
 
       try {
-        arguments.setAddDeleteNode(true);
+        param.setAddDeleteNode(true);
         if (!Files.exists(file)) {
-          arguments.appendErrorNodeChild(Constants.Errors.CKFINDER_CONNECTOR_ERROR_FILE_NOT_FOUND,
+          param.appendErrorNodeChild(Constants.Errors.CKFINDER_CONNECTOR_ERROR_FILE_NOT_FOUND,
                   fileItem.getName(), fileItem.getFolder(), fileItem.getType());
           continue;
         }
@@ -123,8 +123,8 @@ public class DeleteFilesCommand extends ErrorListXMLCommand<DeleteFilesArguments
         log.debug("prepare delete file '{}'", file);
         if (FileUtils.delete(file)) {
           Path thumbFile = Paths.get(configuration.getThumbsPath(),
-                  fileItem.getType(), arguments.getCurrentFolder(), fileItem.getName());
-          arguments.filesDeletedPlus();
+                  fileItem.getType(), param.getCurrentFolder(), fileItem.getName());
+          param.filesDeletedPlus();
 
           try {
             log.debug("prepare delete thumb file '{}'", thumbFile);
@@ -134,7 +134,7 @@ public class DeleteFilesCommand extends ErrorListXMLCommand<DeleteFilesArguments
             // No errors if we are not able to delete the thumb.
           }
         } else { //If access is denied, report error and try to delete rest of files.
-          arguments.appendErrorNodeChild(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED,
+          param.appendErrorNodeChild(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED,
                   fileItem.getName(), fileItem.getFolder(), fileItem.getType());
         }
       } catch (SecurityException e) {
@@ -143,7 +143,7 @@ public class DeleteFilesCommand extends ErrorListXMLCommand<DeleteFilesArguments
 
       }
     }
-    if (arguments.hasErrors()) {
+    if (param.hasErrors()) {
       return Constants.Errors.CKFINDER_CONNECTOR_ERROR_DELETE_FAILED;
     } else {
       return Constants.Errors.CKFINDER_CONNECTOR_ERROR_NONE;
@@ -153,16 +153,16 @@ public class DeleteFilesCommand extends ErrorListXMLCommand<DeleteFilesArguments
   /**
    * Initializes parameters for command handler.
    *
-   * @param arguments
+   * @param param
    * @param request current response object
    * @param configuration connector configuration object
    * @throws ConnectorException when initialization parameters can't be loaded
    * for command handler.
    */
   @Override
-  protected void initParams(DeleteFilesArguments arguments, HttpServletRequest request, IConfiguration configuration) throws ConnectorException {
-    super.initParams(arguments, request, configuration);
-    RequestFileHelper.addFilesListFromRequest(request, arguments.getFiles());
+  protected void initParams(DeleteFilesParameter param, HttpServletRequest request, IConfiguration configuration) throws ConnectorException {
+    super.initParams(param, request, configuration);
+    RequestFileHelper.addFilesListFromRequest(request, param.getFiles());
   }
 
 }

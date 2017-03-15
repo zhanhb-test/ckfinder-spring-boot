@@ -14,7 +14,7 @@ package com.github.zhanhb.ckfinder.connector.handlers.command;
 import com.github.zhanhb.ckfinder.connector.configuration.Constants;
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
-import com.github.zhanhb.ckfinder.connector.handlers.arguments.RenameFolderArguments;
+import com.github.zhanhb.ckfinder.connector.handlers.parameter.RenameFolderParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.RenamedFolder;
 import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
@@ -31,10 +31,10 @@ import lombok.extern.slf4j.Slf4j;
  * Class to handle <code>RenameFolder</code> command.
  */
 @Slf4j
-public class RenameFolderCommand extends BaseXmlCommand<RenameFolderArguments> implements IPostCommand {
+public class RenameFolderCommand extends BaseXmlCommand<RenameFolderParameter> implements IPostCommand {
 
   public RenameFolderCommand() {
-    super(RenameFolderArguments::new);
+    super(RenameFolderParameter::new);
   }
 
   /**
@@ -43,74 +43,74 @@ public class RenameFolderCommand extends BaseXmlCommand<RenameFolderArguments> i
    * @param rootElement XML root element.
    */
   @Override
-  protected void createXMLChildNodes(Connector.Builder rootElement, RenameFolderArguments arguments, IConfiguration configuration) {
+  protected void createXMLChildNodes(Connector.Builder rootElement, RenameFolderParameter param, IConfiguration configuration) {
     rootElement.renamedFolder(RenamedFolder.builder()
-            .newName(arguments.getNewFolderName())
-            .newPath(arguments.getNewFolderPath())
-            .newUrl(arguments.getType().getUrl() + arguments.getNewFolderPath())
+            .newName(param.getNewFolderName())
+            .newPath(param.getNewFolderPath())
+            .newUrl(param.getType().getUrl() + param.getNewFolderPath())
             .build());
   }
 
   @Override
-  protected void createXml(RenameFolderArguments arguments, IConfiguration configuration) throws ConnectorException {
-    checkRequestPathValid(arguments.getNewFolderName());
+  protected void createXml(RenameFolderParameter param, IConfiguration configuration) throws ConnectorException {
+    checkRequestPathValid(param.getNewFolderName());
 
-    if (arguments.getType() == null) {
-      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE);
+    if (param.getType() == null) {
+      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE);
     }
 
-    if (!configuration.getAccessControl().hasPermission(arguments.getType().getName(),
-            arguments.getCurrentFolder(),
-            arguments.getUserRole(),
+    if (!configuration.getAccessControl().hasPermission(param.getType().getName(),
+            param.getCurrentFolder(),
+            param.getUserRole(),
             AccessControl.CKFINDER_CONNECTOR_ACL_FOLDER_RENAME)) {
-      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED);
+      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED);
     }
 
     if (configuration.isForceAscii()) {
-      arguments.setNewFolderName(FileUtils.convertToASCII(arguments.getNewFolderName()));
+      param.setNewFolderName(FileUtils.convertToASCII(param.getNewFolderName()));
     }
 
-    if (FileUtils.isDirectoryHidden(arguments.getNewFolderName(), configuration)
-            || !FileUtils.isFolderNameInvalid(arguments.getNewFolderName(), configuration)) {
-      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_NAME);
+    if (FileUtils.isDirectoryHidden(param.getNewFolderName(), configuration)
+            || !FileUtils.isFolderNameInvalid(param.getNewFolderName(), configuration)) {
+      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_NAME);
     }
 
-    if (arguments.getCurrentFolder().equals("/")) {
-      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
+    if (param.getCurrentFolder().equals("/")) {
+      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
     }
 
-    Path dir = Paths.get(arguments.getType().getPath(),
-            arguments.getCurrentFolder());
+    Path dir = Paths.get(param.getType().getPath(),
+            param.getCurrentFolder());
     try {
       if (!Files.isDirectory(dir)) {
-        arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
+        param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
       }
-      setNewFolder(arguments);
-      Path newDir = Paths.get(arguments.getType().getPath(),
-              arguments.getNewFolderPath());
+      setNewFolder(param);
+      Path newDir = Paths.get(param.getType().getPath(),
+              param.getNewFolderPath());
       if (Files.exists(newDir)) {
-        arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ALREADY_EXIST);
+        param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ALREADY_EXIST);
       }
       try {
         Files.move(dir, newDir);
-        renameThumb(arguments, configuration);
+        renameThumb(param, configuration);
       } catch (IOException ex) {
-        arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED);
+        param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED);
       }
     } catch (SecurityException e) {
       log.error("", e);
-      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED);
+      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED);
     }
   }
 
   /**
    * renames thumb folder.
    */
-  private void renameThumb(RenameFolderArguments arguments, IConfiguration configuration) throws IOException {
+  private void renameThumb(RenameFolderParameter param, IConfiguration configuration) throws IOException {
     Path thumbDir = Paths.get(configuration.getThumbsPath(),
-            arguments.getType().getName(), arguments.getCurrentFolder());
+            param.getType().getName(), param.getCurrentFolder());
     Path newThumbDir = Paths.get(configuration.getThumbsPath(),
-            arguments.getType().getName(), arguments.getNewFolderPath());
+            param.getType().getName(), param.getNewFolderPath());
     try {
       Files.move(thumbDir, newThumbDir);
     } catch (IOException ex) {
@@ -120,24 +120,24 @@ public class RenameFolderCommand extends BaseXmlCommand<RenameFolderArguments> i
   /**
    * sets new folder name.
    */
-  private void setNewFolder(RenameFolderArguments arguments) {
-    String tmp1 = arguments.getCurrentFolder().substring(0,
-            arguments.getCurrentFolder().lastIndexOf('/'));
-    arguments.setNewFolderPath(tmp1.substring(0,
-            tmp1.lastIndexOf('/') + 1).concat(arguments.getNewFolderName()));
-    arguments.setNewFolderPath(PathUtils.addSlashToEnd(arguments.getNewFolderPath()));
+  private void setNewFolder(RenameFolderParameter param) {
+    String tmp1 = param.getCurrentFolder().substring(0,
+            param.getCurrentFolder().lastIndexOf('/'));
+    param.setNewFolderPath(tmp1.substring(0,
+            tmp1.lastIndexOf('/') + 1).concat(param.getNewFolderName()));
+    param.setNewFolderPath(PathUtils.addSlashToEnd(param.getNewFolderPath()));
   }
 
   /**
-   * @param arguments
+   * @param param
    * @param request request
    * @param configuration connector conf
    * @throws ConnectorException when error occurs.
    */
   @Override
-  protected void initParams(RenameFolderArguments arguments, HttpServletRequest request, IConfiguration configuration) throws ConnectorException {
-    super.initParams(arguments, request, configuration);
-    arguments.setNewFolderName(request.getParameter("NewFolderName"));
+  protected void initParams(RenameFolderParameter param, HttpServletRequest request, IConfiguration configuration) throws ConnectorException {
+    super.initParams(param, request, configuration);
+    param.setNewFolderName(request.getParameter("NewFolderName"));
   }
 
 }

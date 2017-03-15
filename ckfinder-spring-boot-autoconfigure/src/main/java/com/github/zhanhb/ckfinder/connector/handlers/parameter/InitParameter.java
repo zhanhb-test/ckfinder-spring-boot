@@ -1,4 +1,4 @@
-package com.github.zhanhb.ckfinder.connector.handlers.arguments;
+package com.github.zhanhb.ckfinder.connector.handlers.parameter;
 
 import javax.servlet.http.HttpServletRequest;
 import lombok.Getter;
@@ -10,10 +10,8 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class SaveFileArguments extends Arguments {
+public class InitParameter extends Parameter {
 
-  private String fileName;
-  private String fileContent;
   private HttpServletRequest request;
 
 }

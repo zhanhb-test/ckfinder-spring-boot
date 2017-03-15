@@ -1,4 +1,4 @@
-package com.github.zhanhb.ckfinder.connector.handlers.arguments;
+package com.github.zhanhb.ckfinder.connector.handlers.parameter;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -9,7 +9,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class FileUploadArguments extends Arguments {
+public class FileUploadParameter extends Parameter {
 
   /**
    * Uploading file name request.
@@ -48,7 +48,7 @@ public class FileUploadArguments extends Arguments {
    */
   private String customErrorMsg;
 
-  public FileUploadArguments() {
+  public FileUploadParameter() {
     this.fileName = "";
     this.newFileName = "";
   }

@@ -17,7 +17,7 @@ import com.github.zhanhb.ckfinder.connector.configuration.License;
 import com.github.zhanhb.ckfinder.connector.data.InitCommandEventArgs;
 import com.github.zhanhb.ckfinder.connector.data.ResourceType;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
-import com.github.zhanhb.ckfinder.connector.handlers.arguments.InitArgument;
+import com.github.zhanhb.ckfinder.connector.handlers.parameter.InitParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.ConnectorInfo;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Error;
@@ -41,7 +41,7 @@ import lombok.extern.slf4j.Slf4j;
  * Class to handle <code>Init</code> command.
  */
 @Slf4j
-public class InitCommand extends XmlCommand<InitArgument> {
+public class InitCommand extends XmlCommand<InitParameter> {
 
   /**
    * chars taken to license key.
@@ -52,24 +52,24 @@ public class InitCommand extends XmlCommand<InitArgument> {
   private static final char[] hexChars = "0123456789abcdef".toCharArray();
 
   public InitCommand() {
-    super(InitArgument::new);
+    super(InitParameter::new);
   }
 
   @Override
-  Connector buildConnector(InitArgument arguments, IConfiguration configuration) {
+  Connector buildConnector(InitParameter param, IConfiguration configuration) {
     Connector.Builder rootElement = Connector.builder();
-    if (arguments.getType() != null) {
-      rootElement.resourceType(arguments.getType().getName());
+    if (param.getType() != null) {
+      rootElement.resourceType(param.getType().getName());
     }
     createErrorNode(rootElement);
-    createXMLChildNodes(rootElement, arguments, configuration);
+    createXMLChildNodes(rootElement, param, configuration);
     return rootElement.build();
   }
 
-  private void createXMLChildNodes(Connector.Builder rootElement, InitArgument arguments, IConfiguration configuration) {
-    createConnectorData(rootElement, arguments, configuration);
+  private void createXMLChildNodes(Connector.Builder rootElement, InitParameter param, IConfiguration configuration) {
+    createConnectorData(rootElement, param, configuration);
     try {
-      createResouceTypesData(rootElement, arguments, configuration);
+      createResouceTypesData(rootElement, param, configuration);
     } catch (Exception e) {
       log.error("", e);
     }
@@ -81,11 +81,11 @@ public class InitCommand extends XmlCommand<InitArgument> {
    *
    * @param rootElement root element in XML
    */
-  private void createConnectorData(Connector.Builder rootElement, InitArgument arguments, IConfiguration configuration) {
+  private void createConnectorData(Connector.Builder rootElement, InitParameter param, IConfiguration configuration) {
     // connector info
     ConnectorInfo.Builder element = ConnectorInfo.builder();
     element.enabled(configuration.isEnabled());
-    License license = configuration.getLicense(arguments.getRequest());
+    License license = configuration.getLicense(param.getRequest());
     element.licenseName(getLicenseName(license));
     element.licenseKey(createLicenseKey(license.getKey()));
     element.thumbsEnabled(configuration.isThumbsEnabled());
@@ -176,30 +176,30 @@ public class InitCommand extends XmlCommand<InitArgument> {
    * @throws Exception when error occurs
    */
   @SuppressWarnings("CollectionWithoutInitialCapacity")
-  private void createResouceTypesData(Connector.Builder rootElement, InitArgument arguments, IConfiguration configuration) throws IOException {
+  private void createResouceTypesData(Connector.Builder rootElement, InitParameter param, IConfiguration configuration) throws IOException {
     //resurcetypes
     ResourceTypes.Builder resourceTypes = ResourceTypes.builder();
     Collection<ResourceType> types;
-    if (arguments.getType() != null) {
-      types = Collections.singleton(arguments.getType());
+    if (param.getType() != null) {
+      types = Collections.singleton(param.getType());
     } else {
       types = getTypes(configuration);
     }
 
     for (ResourceType resourceType : types) {
       String key = resourceType.getName();
-      if (configuration.getAccessControl().hasPermission(key, "/", arguments.getUserRole(),
+      if (configuration.getAccessControl().hasPermission(key, "/", param.getUserRole(),
               AccessControl.CKFINDER_CONNECTOR_ACL_FOLDER_VIEW)) {
         com.github.zhanhb.ckfinder.connector.handlers.response.ResourceType.Builder childElement = com.github.zhanhb.ckfinder.connector.handlers.response.ResourceType.builder();
         childElement.name(resourceType.getName());
-        childElement.acl(configuration.getAccessControl().getAcl(key, "/", arguments.getUserRole()));
+        childElement.acl(configuration.getAccessControl().getAcl(key, "/", param.getUserRole()));
         childElement.hash(randomHash(resourceType.getPath()));
         childElement.allowedExtensions(resourceType.getAllowedExtensions());
         childElement.deniedExtensions(resourceType.getDeniedExtensions());
         childElement.url(PathUtils.addSlashToEnd(resourceType.getUrl()));
         long maxSize = resourceType.getMaxSize();
         childElement.maxSize(maxSize > 0 ? maxSize : 0);
-        boolean hasChildren = FileUtils.hasChildren(configuration.getAccessControl(), "/", Paths.get(PathUtils.escape(resourceType.getPath())), configuration, resourceType.getName(), arguments.getUserRole());
+        boolean hasChildren = FileUtils.hasChildren(configuration.getAccessControl(), "/", Paths.get(PathUtils.escape(resourceType.getPath())), configuration, resourceType.getName(), param.getUserRole());
         childElement.hasChildren(hasChildren);
         resourceTypes.resourceType(childElement.build());
       }
@@ -254,10 +254,10 @@ public class InitCommand extends XmlCommand<InitArgument> {
   }
 
   @Override
-  protected void initParams(InitArgument arguments, HttpServletRequest request, IConfiguration configuration)
+  protected void initParams(InitParameter param, HttpServletRequest request, IConfiguration configuration)
           throws ConnectorException {
-    super.initParams(arguments, request, configuration);
-    arguments.setRequest(request);
+    super.initParams(param, request, configuration);
+    param.setRequest(request);
   }
 
   private void createErrorNode(Connector.Builder rootElement) {
@@ -266,7 +266,7 @@ public class InitCommand extends XmlCommand<InitArgument> {
 
   @Deprecated
   @Override
-  String setCurrentFolder(InitArgument arguments, HttpServletRequest request) {
+  String setCurrentFolder(InitParameter param, HttpServletRequest request) {
     return null;
   }
 

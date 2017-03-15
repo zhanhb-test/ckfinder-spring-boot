@@ -1,4 +1,4 @@
-package com.github.zhanhb.ckfinder.connector.handlers.arguments;
+package com.github.zhanhb.ckfinder.connector.handlers.parameter;
 
 import com.github.zhanhb.ckfinder.connector.data.FilePostParam;
 import java.util.ArrayList;
@@ -13,7 +13,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @SuppressWarnings("CollectionWithoutInitialCapacity")
-public class DeleteFilesArguments extends ErrorListXMLArguments {
+public class DeleteFilesParameter extends ErrorListXMLParameter {
 
   private List<FilePostParam> files = new ArrayList<>();
   private int filesDeleted;

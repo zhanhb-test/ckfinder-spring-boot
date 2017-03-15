@@ -13,7 +13,7 @@ package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
-import com.github.zhanhb.ckfinder.connector.handlers.arguments.ErrorListXMLArguments;
+import com.github.zhanhb.ckfinder.connector.handlers.parameter.ErrorListXMLParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Error;
 import java.util.function.Supplier;
@@ -24,28 +24,28 @@ import java.util.function.Supplier;
  * @param <T>
  */
 @SuppressWarnings("FinalMethod")
-public abstract class ErrorListXMLCommand<T extends ErrorListXMLArguments> extends BaseXmlCommand<T> {
+public abstract class ErrorListXMLCommand<T extends ErrorListXMLParameter> extends BaseXmlCommand<T> {
 
-  public ErrorListXMLCommand(Supplier<T> argumentsSupplier) {
-    super(argumentsSupplier);
+  public ErrorListXMLCommand(Supplier<T> paramFactory) {
+    super(paramFactory);
   }
 
   @Override
-  protected final void createXml(T arguments, IConfiguration configuration) throws ConnectorException {
-    int errorNum = getDataForXml(arguments, configuration);
-    arguments.setErrorNum(errorNum);
+  protected final void createXml(T param, IConfiguration configuration) throws ConnectorException {
+    int errorNum = getDataForXml(param, configuration);
+    param.setErrorNum(errorNum);
   }
 
   @Override
-  protected final void createErrorNode(Connector.Builder rootElement, T arguments) {
-    int errorNum = arguments.getErrorNum();
+  protected final void createErrorNode(Connector.Builder rootElement, T param) {
+    int errorNum = param.getErrorNum();
     rootElement.error(Error.builder().number(errorNum).build());
   }
 
   /**
    * gets all necessary data to create XML response.
    *
-   * @param arguments
+   * @param param
    * @param configuration connector configuration
    * @return error code
    * {@link com.github.zhanhb.ckfinder.connector.configuration.Constants.Errors}
@@ -54,6 +54,6 @@ public abstract class ErrorListXMLCommand<T extends ErrorListXMLArguments> exten
    * if no error occurred.
    * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
    */
-  protected abstract int getDataForXml(T arguments, IConfiguration configuration) throws ConnectorException;
+  protected abstract int getDataForXml(T param, IConfiguration configuration) throws ConnectorException;
 
 }

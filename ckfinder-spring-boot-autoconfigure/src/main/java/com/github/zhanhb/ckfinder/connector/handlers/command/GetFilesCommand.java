@@ -14,7 +14,7 @@ package com.github.zhanhb.ckfinder.connector.handlers.command;
 import com.github.zhanhb.ckfinder.connector.configuration.Constants;
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
-import com.github.zhanhb.ckfinder.connector.handlers.arguments.GetFilesArguments;
+import com.github.zhanhb.ckfinder.connector.handlers.parameter.GetFilesParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.File;
 import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
@@ -35,7 +35,7 @@ import lombok.extern.slf4j.Slf4j;
  * command.
  */
 @Slf4j
-public class GetFilesCommand extends BaseXmlCommand<GetFilesArguments> {
+public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
 
   /**
    * number of bytes in kilobyte.
@@ -43,78 +43,78 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesArguments> {
   private static final float BYTES = 1024f;
 
   public GetFilesCommand() {
-    super(GetFilesArguments::new);
+    super(GetFilesParameter::new);
   }
 
   /**
    * initializing parameters for command handler.
    *
-   * @param arguments
+   * @param param
    * @param request request
    * @param configuration connector configuration
    * @throws ConnectorException when error occurs
    */
   @Override
-  protected void initParams(GetFilesArguments arguments, HttpServletRequest request, IConfiguration configuration)
+  protected void initParams(GetFilesParameter param, HttpServletRequest request, IConfiguration configuration)
           throws ConnectorException {
-    super.initParams(arguments, request, configuration);
+    super.initParams(param, request, configuration);
 
-    arguments.setShowThumbs(request.getParameter("showThumbs"));
+    param.setShowThumbs(request.getParameter("showThumbs"));
   }
 
   @Override
-  protected void createXMLChildNodes(Connector.Builder rootElement, GetFilesArguments arguments, IConfiguration configuration) {
-    createFilesData(rootElement, arguments, configuration);
+  protected void createXMLChildNodes(Connector.Builder rootElement, GetFilesParameter param, IConfiguration configuration) {
+    createFilesData(rootElement, param, configuration);
   }
 
   /**
    * gets data to XML response.
    *
-   * @param arguments
+   * @param param
    * @param configuration
    * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
    */
   @Override
-  protected void createXml(GetFilesArguments arguments, IConfiguration configuration) throws ConnectorException {
-    if (arguments.getType() == null) {
-      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE);
+  protected void createXml(GetFilesParameter param, IConfiguration configuration) throws ConnectorException {
+    if (param.getType() == null) {
+      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE);
     }
 
-    arguments.setFullCurrentPath(Paths.get(arguments.getType().getPath(),
-            arguments.getCurrentFolder()).toString());
+    param.setFullCurrentPath(Paths.get(param.getType().getPath(),
+            param.getCurrentFolder()).toString());
 
-    if (!configuration.getAccessControl().hasPermission(arguments.getType().getName(),
-            arguments.getCurrentFolder(), arguments.getUserRole(),
+    if (!configuration.getAccessControl().hasPermission(param.getType().getName(),
+            param.getCurrentFolder(), param.getUserRole(),
             AccessControl.CKFINDER_CONNECTOR_ACL_FILE_VIEW)) {
-      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED);
+      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED);
     }
 
-    Path dir = Paths.get(arguments.getFullCurrentPath());
+    Path dir = Paths.get(param.getFullCurrentPath());
     try {
       if (!Files.exists(dir)) {
-        arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_FOLDER_NOT_FOUND);
+        param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_FOLDER_NOT_FOUND);
       }
-      arguments.setFiles(FileUtils.findChildrensList(dir, false));
+      param.setFiles(FileUtils.findChildrensList(dir, false));
     } catch (IOException | SecurityException e) {
       log.error("", e);
-      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED);
+      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED);
     }
-    filterListByHiddenAndNotAllowed(arguments, configuration);
-    Collections.sort(arguments.getFiles());
+    filterListByHiddenAndNotAllowed(param, configuration);
+    Collections.sort(param.getFiles());
   }
 
   /**
    *
    *
    */
-  private void filterListByHiddenAndNotAllowed(GetFilesArguments arguments, IConfiguration configuration) {
-    List<String> tmpFiles = arguments.getFiles().stream()
-            .filter(file -> (FileUtils.isFileExtensionAllwed(file, arguments.getType())
+  private void filterListByHiddenAndNotAllowed(GetFilesParameter param, IConfiguration configuration) {
+    List<String> tmpFiles = param.getFiles().stream()
+            .filter(file -> (FileUtils.isFileExtensionAllwed(file, param.getType())
             && !FileUtils.isFileHidden(file, configuration)))
             .collect(Collectors.toList());
 
-    arguments.getFiles().clear();
-    arguments.getFiles().addAll(tmpFiles);
+    param.getFiles().clear();
+    param.getFiles().addAll(tmpFiles);
 
   }
 
@@ -123,18 +123,18 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesArguments> {
    *
    * @param rootElement root element from XML.
    */
-  private void createFilesData(Connector.Builder rootElement, GetFilesArguments arguments, IConfiguration configuration) {
+  private void createFilesData(Connector.Builder rootElement, GetFilesParameter param, IConfiguration configuration) {
     com.github.zhanhb.ckfinder.connector.handlers.response.Files.Builder files = com.github.zhanhb.ckfinder.connector.handlers.response.Files.builder();
-    for (String filePath : arguments.getFiles()) {
-      Path file = Paths.get(arguments.getFullCurrentPath(), filePath);
+    for (String filePath : param.getFiles()) {
+      Path file = Paths.get(param.getFullCurrentPath(), filePath);
       if (Files.exists(file)) {
         try {
           File.Builder builder = File.builder()
                   .name(filePath)
                   .date(FileUtils.parseLastModifDate(file))
                   .size(getSize(file));
-          if (ImageUtils.isImageExtension(file) && isAddThumbsAttr(arguments, configuration)) {
-            String attr = createThumbAttr(file, arguments, configuration);
+          if (ImageUtils.isImageExtension(file) && isAddThumbsAttr(param, configuration)) {
+            String attr = createThumbAttr(file, param, configuration);
             if (!attr.isEmpty()) {
               builder.thumb(attr);
             }
@@ -153,13 +153,13 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesArguments> {
    * @param file file to check if has thumb.
    * @return thumb attribute values
    */
-  private String createThumbAttr(Path file, GetFilesArguments arguments, IConfiguration configuration) {
+  private String createThumbAttr(Path file, GetFilesParameter param, IConfiguration configuration) {
     Path thumbFile = Paths.get(configuration.getThumbsPath(),
-            arguments.getType().getName(), arguments.getCurrentFolder(),
+            param.getType().getName(), param.getCurrentFolder(),
             file.getFileName().toString());
     if (Files.exists(thumbFile)) {
       return file.getFileName().toString();
-    } else if (isShowThumbs(arguments)) {
+    } else if (isShowThumbs(param)) {
       return "?".concat(file.getFileName().toString());
     } else {
       return "";
@@ -186,10 +186,10 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesArguments> {
    *
    * @return true if show thumbs
    */
-  private boolean isAddThumbsAttr(GetFilesArguments arguments, IConfiguration configuration) {
+  private boolean isAddThumbsAttr(GetFilesParameter param, IConfiguration configuration) {
     return configuration.isThumbsEnabled()
             && (configuration.isThumbsDirectAccess()
-            || isShowThumbs(arguments));
+            || isShowThumbs(param));
   }
 
   /**
@@ -197,8 +197,8 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesArguments> {
    *
    * @return true if is set.
    */
-  private boolean isShowThumbs(GetFilesArguments arguments) {
-    return (arguments.getShowThumbs() != null && arguments.getShowThumbs().equals("1"));
+  private boolean isShowThumbs(GetFilesParameter param) {
+    return "1".equals(param.getShowThumbs());
   }
 
 }

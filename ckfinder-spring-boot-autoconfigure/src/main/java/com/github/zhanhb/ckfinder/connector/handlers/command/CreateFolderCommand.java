@@ -14,7 +14,7 @@ package com.github.zhanhb.ckfinder.connector.handlers.command;
 import com.github.zhanhb.ckfinder.connector.configuration.Constants;
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
-import com.github.zhanhb.ckfinder.connector.handlers.arguments.CreateFolderArguments;
+import com.github.zhanhb.ckfinder.connector.handlers.parameter.CreateFolderParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.NewFolder;
 import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
@@ -30,10 +30,10 @@ import lombok.extern.slf4j.Slf4j;
  * Class to handle <code>CreateFolder</code> command. Create subfolder.
  */
 @Slf4j
-public class CreateFolderCommand extends BaseXmlCommand<CreateFolderArguments> implements IPostCommand {
+public class CreateFolderCommand extends BaseXmlCommand<CreateFolderParameter> implements IPostCommand {
 
   public CreateFolderCommand() {
-    super(CreateFolderArguments::new);
+    super(CreateFolderParameter::new);
   }
 
   /**
@@ -42,56 +42,57 @@ public class CreateFolderCommand extends BaseXmlCommand<CreateFolderArguments> i
    * @param rootElement XML root element.
    */
   @Override
-  protected void createXMLChildNodes(Connector.Builder rootElement, CreateFolderArguments arguments, IConfiguration configuration) {
+  protected void createXMLChildNodes(Connector.Builder rootElement, CreateFolderParameter param, IConfiguration configuration) {
     rootElement.newFolder(NewFolder.builder()
-            .name(arguments.getNewFolderName())
+            .name(param.getNewFolderName())
             .build());
   }
 
   /**
    * gets data for xml. Not used in this handler.
    *
-   * @param arguments
+   * @param param
    * @param configuration connector configuration
    * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
    */
   @Override
-  protected void createXml(CreateFolderArguments arguments, IConfiguration configuration) throws ConnectorException {
-    checkRequestPathValid(arguments.getNewFolderName());
+  protected void createXml(CreateFolderParameter param, IConfiguration configuration)
+          throws ConnectorException {
+    checkRequestPathValid(param.getNewFolderName());
 
-    if (arguments.getType() == null) {
-      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE);
+    if (param.getType() == null) {
+      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE);
     }
 
-    if (!configuration.getAccessControl().hasPermission(arguments.getType().getName(),
-            arguments.getCurrentFolder(), arguments.getUserRole(),
+    if (!configuration.getAccessControl().hasPermission(param.getType().getName(),
+            param.getCurrentFolder(), param.getUserRole(),
             AccessControl.CKFINDER_CONNECTOR_ACL_FOLDER_CREATE)) {
-      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED);
+      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED);
     }
 
     if (configuration.isForceAscii()) {
-      arguments.setNewFolderName(FileUtils.convertToASCII(arguments.getNewFolderName()));
+      param.setNewFolderName(FileUtils.convertToASCII(param.getNewFolderName()));
     }
 
-    if (!FileUtils.isFolderNameInvalid(arguments.getNewFolderName(), configuration)) {
-      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_NAME);
+    if (!FileUtils.isFolderNameInvalid(param.getNewFolderName(), configuration)) {
+      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_NAME);
     }
-    if (FileUtils.isDirectoryHidden(arguments.getCurrentFolder(), configuration)) {
-      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
+    if (FileUtils.isDirectoryHidden(param.getCurrentFolder(), configuration)) {
+      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
     }
-    if (FileUtils.isDirectoryHidden(arguments.getNewFolderName(), configuration)) {
-      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_NAME);
+    if (FileUtils.isDirectoryHidden(param.getNewFolderName(), configuration)) {
+      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_NAME);
     }
 
     try {
-      if (createFolder(arguments)) {
+      if (createFolder(param)) {
       } else {
-        arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED);
+        param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED);
       }
 
     } catch (SecurityException e) {
       log.error("", e);
-      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED);
+      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED);
     }
   }
 
@@ -102,11 +103,11 @@ public class CreateFolderCommand extends BaseXmlCommand<CreateFolderArguments> i
    * @return true if folder is created correctly
    * @throws ConnectorException when error occurs or dir exists
    */
-  private boolean createFolder(CreateFolderArguments arguments) throws ConnectorException {
-    Path dir = Paths.get(arguments.getType().getPath(),
-            arguments.getCurrentFolder(), arguments.getNewFolderName());
+  private boolean createFolder(CreateFolderParameter param) throws ConnectorException {
+    Path dir = Paths.get(param.getType().getPath(),
+            param.getCurrentFolder(), param.getNewFolderName());
     if (Files.exists(dir)) {
-      arguments.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ALREADY_EXIST);
+      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ALREADY_EXIST);
     }
     try {
       Files.createDirectories(dir);
@@ -117,10 +118,10 @@ public class CreateFolderCommand extends BaseXmlCommand<CreateFolderArguments> i
   }
 
   @Override
-  protected void initParams(CreateFolderArguments arguments, HttpServletRequest request, IConfiguration configuration)
+  protected void initParams(CreateFolderParameter param, HttpServletRequest request, IConfiguration configuration)
           throws ConnectorException {
-    super.initParams(arguments, request, configuration);
-    arguments.setNewFolderName(request.getParameter("NewFolderName"));
+    super.initParams(param, request, configuration);
+    param.setNewFolderName(request.getParameter("NewFolderName"));
   }
 
 }

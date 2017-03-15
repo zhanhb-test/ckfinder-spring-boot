@@ -1,4 +1,4 @@
-package com.github.zhanhb.ckfinder.connector.handlers.arguments;
+package com.github.zhanhb.ckfinder.connector.handlers.parameter;
 
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
@@ -11,7 +11,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class ImageResizeArguments extends Arguments {
+public class ImageResizeParameter extends Parameter {
 
   /**
    * file name
