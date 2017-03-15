@@ -12,13 +12,13 @@
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
+import com.github.zhanhb.ckfinder.connector.configuration.ParameterFactory;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.Parameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.CurrentFolder;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Error;
 import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
-import java.util.function.Supplier;
 
 /**
  * Base class to handle XML commands.
@@ -27,7 +27,7 @@ import java.util.function.Supplier;
  */
 public abstract class BaseXmlCommand<T extends Parameter> extends XmlCommand<T> {
 
-  public BaseXmlCommand(Supplier<T> paramFactory) {
+  protected BaseXmlCommand(ParameterFactory<T> paramFactory) {
     super(paramFactory);
   }
 

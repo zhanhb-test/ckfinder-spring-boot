@@ -1,13 +1,13 @@
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
+import com.github.zhanhb.ckfinder.connector.configuration.ParameterFactory;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.Parameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.utils.XMLCreator;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.function.Supplier;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -18,7 +18,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 public abstract class XmlCommand<T extends Parameter> extends Command<T> {
 
-  protected XmlCommand(Supplier<T> paramFactory) {
+  protected XmlCommand(ParameterFactory<T> paramFactory) {
     super(paramFactory);
   }
 
@@ -27,13 +27,15 @@ public abstract class XmlCommand<T extends Parameter> extends Command<T> {
    * stream.
    *
    * @param param
+   * @param request
+   * @param response
    * @param configuration
    * @throws java.io.IOException
    */
   @Override
   @SuppressWarnings("FinalMethod")
-  final void execute(T param, HttpServletRequest request, HttpServletResponse response, IConfiguration configuration)
-          throws IOException, ConnectorException {
+  final void execute(T param, HttpServletRequest request, HttpServletResponse response,
+          IConfiguration configuration) throws IOException, ConnectorException {
     Connector connector = buildConnector(param, configuration);
 
     response.setContentType("text/xml;charset=UTF-8");

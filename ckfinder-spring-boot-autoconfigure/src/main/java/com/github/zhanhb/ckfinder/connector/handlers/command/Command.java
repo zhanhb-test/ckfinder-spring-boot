@@ -13,6 +13,7 @@ package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.configuration.Constants;
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
+import com.github.zhanhb.ckfinder.connector.configuration.ParameterFactory;
 import com.github.zhanhb.ckfinder.connector.data.ResourceType;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.Parameter;
@@ -22,7 +23,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -39,7 +39,7 @@ import lombok.RequiredArgsConstructor;
 public abstract class Command<T extends Parameter> {
 
   @NonNull
-  private final Supplier<? extends T> paramFactory;
+  private final ParameterFactory<T> paramFactory;
 
   /**
    * Runs command. Initialize, sets response and execute command.
@@ -54,7 +54,7 @@ public abstract class Command<T extends Parameter> {
   public final void runCommand(HttpServletRequest request,
           HttpServletResponse response, IConfiguration configuration)
           throws ConnectorException, IOException {
-    T param = paramFactory.get();
+    T param = paramFactory.newParameter();
     initParams(param, request, configuration);
 
     execute(param, request, response, configuration);

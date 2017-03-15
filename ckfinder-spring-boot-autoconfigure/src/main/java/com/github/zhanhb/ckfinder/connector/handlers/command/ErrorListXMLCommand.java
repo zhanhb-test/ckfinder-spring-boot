@@ -12,11 +12,11 @@
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
+import com.github.zhanhb.ckfinder.connector.configuration.ParameterFactory;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.ErrorListXMLParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Error;
-import java.util.function.Supplier;
 
 /**
  * Base class to handle XML commands with error list.
@@ -26,7 +26,7 @@ import java.util.function.Supplier;
 @SuppressWarnings("FinalMethod")
 public abstract class ErrorListXMLCommand<T extends ErrorListXMLParameter> extends BaseXmlCommand<T> {
 
-  public ErrorListXMLCommand(Supplier<T> paramFactory) {
+  public ErrorListXMLCommand(ParameterFactory<T> paramFactory) {
     super(paramFactory);
   }
 
