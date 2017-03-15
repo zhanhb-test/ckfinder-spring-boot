@@ -549,8 +549,9 @@ public enum XmlConfigurationParser {
    */
   private void setPlugins(Configuration.Builder builder, Node childNode, ResourceLoader resourceLoader) {
     NodeList nodeList = childNode.getChildNodes();
-    List<Plugin> plugins = new ArrayList<>(4);
-    for (int i = 0, j = nodeList.getLength(); i < j; i++) {
+    int length = nodeList.getLength();
+    List<Plugin> plugins = new ArrayList<>(length);
+    for (int i = 0; i < length; i++) {
       Node childChildNode = nodeList.item(i);
       if ("plugin".equals(childChildNode.getNodeName())) {
         PluginInfo pluginInfo = createPluginFromNode(childChildNode);

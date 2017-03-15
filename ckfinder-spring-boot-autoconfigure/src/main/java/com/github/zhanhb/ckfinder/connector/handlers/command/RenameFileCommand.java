@@ -30,7 +30,7 @@ import lombok.extern.slf4j.Slf4j;
  * Class to handle <code>RenameFile</code> command.
  */
 @Slf4j
-public class RenameFileCommand extends ErrorListXMLCommand<RenameFileParameter> implements IPostCommand {
+public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> implements IPostCommand {
 
   public RenameFileCommand() {
     super(RenameFileParameter::new);

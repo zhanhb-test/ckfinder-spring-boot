@@ -24,9 +24,9 @@ import com.github.zhanhb.ckfinder.connector.handlers.response.Error;
  * @param <T>
  */
 @SuppressWarnings("FinalMethod")
-public abstract class ErrorListXMLCommand<T extends ErrorListXMLParameter> extends BaseXmlCommand<T> {
+public abstract class ErrorListXmlCommand<T extends ErrorListXMLParameter> extends BaseXmlCommand<T> {
 
-  public ErrorListXMLCommand(ParameterFactory<T> paramFactory) {
+  public ErrorListXmlCommand(ParameterFactory<T> paramFactory) {
     super(paramFactory);
   }
 

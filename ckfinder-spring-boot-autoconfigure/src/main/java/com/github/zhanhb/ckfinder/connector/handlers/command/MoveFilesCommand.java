@@ -32,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
  * Class to handle <code>MoveFiles</code> command.
  */
 @Slf4j
-public class MoveFilesCommand extends ErrorListXMLCommand<MoveFilesParameter> implements IPostCommand {
+public class MoveFilesCommand extends ErrorListXmlCommand<MoveFilesParameter> implements IPostCommand {
 
   public MoveFilesCommand() {
     super(MoveFilesParameter::new);

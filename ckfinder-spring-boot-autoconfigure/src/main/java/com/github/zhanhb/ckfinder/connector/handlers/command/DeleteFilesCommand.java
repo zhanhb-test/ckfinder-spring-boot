@@ -31,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
  * Class used to handle <code>DeleteFiles</code> command.
  */
 @Slf4j
-public class DeleteFilesCommand extends ErrorListXMLCommand<DeleteFilesParameter> implements IPostCommand {
+public class DeleteFilesCommand extends ErrorListXmlCommand<DeleteFilesParameter> implements IPostCommand {
 
   public DeleteFilesCommand() {
     super(DeleteFilesParameter::new);

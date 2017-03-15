@@ -45,7 +45,7 @@ ckfinder:
     file-delete: true
   thumbs:
     enabled: true
-    url: '%BASE_URL%_thumbs/'
+    url: '%BASE_URL%_thumbs'
     directory: '%BASE_DIR%/_thumbs'
     direct-access: false
     max-height: 100
@@ -64,10 +64,12 @@ ckfinder:
     margin-bottom: 0
     quality: 0.1
     transparency: 0.1
-    source: classpath:/com/github/zhanhb/ckfinder/connector/logo.gif
+    source: classpath:/path/to/the/watermark/logo.gif
   image-resize:
     enabled: true
     params:
       smallThumb: 90x90
       mediumThumb: 120x120
       largeThumb: 180x180
+  zip:
+    enabled: false

@@ -33,7 +33,7 @@ import lombok.extern.slf4j.Slf4j;
  * Class to handle <code>CopyFiles</code> command.
  */
 @Slf4j
-public class CopyFilesCommand extends ErrorListXMLCommand<CopyFilesParameter> implements IPostCommand {
+public class CopyFilesCommand extends ErrorListXmlCommand<CopyFilesParameter> implements IPostCommand {
 
   public CopyFilesCommand() {
     super(CopyFilesParameter::new);
