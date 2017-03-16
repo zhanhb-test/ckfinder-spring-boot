@@ -1,8 +1,8 @@
 package com.github.zhanhb.ckfinder.connector.autoconfigure;
 
-import com.github.zhanhb.ckfinder.connector.configuration.KeyGenerator;
 import com.github.zhanhb.ckfinder.connector.configuration.License;
 import com.github.zhanhb.ckfinder.connector.configuration.LicenseFactory;
+import com.github.zhanhb.ckfinder.connector.utils.KeyGenerator;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 import javax.servlet.http.HttpServletRequest;
 

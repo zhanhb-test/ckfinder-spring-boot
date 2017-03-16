@@ -1,4 +1,4 @@
-package com.github.zhanhb.ckfinder.connector.configuration;
+package com.github.zhanhb.ckfinder.connector.utils;
 
 import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
