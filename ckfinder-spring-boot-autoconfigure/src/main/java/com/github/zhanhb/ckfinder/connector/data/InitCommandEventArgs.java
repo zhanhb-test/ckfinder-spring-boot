@@ -11,21 +11,20 @@
  */
 package com.github.zhanhb.ckfinder.connector.data;
 
+import com.github.zhanhb.ckfinder.connector.configuration.PluginRegister;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 /**
- * Event data for
- * {@link com.github.zhanhb.ckfinder.connector.configuration.Events.Builder#initCommandEventHandler(com.github.zhanhb.ckfinder.connector.data.InitCommandEventHandler) }
- * event.
+ * Event data for {@link PluginRegister#addPluginInfoRegister} event.
  */
 @Getter
 @RequiredArgsConstructor
 @ToString
 public class InitCommandEventArgs {
 
-  private final Connector.Builder rootElement;
+  private final Connector.Builder connector;
 
 }

@@ -12,27 +12,19 @@
 package com.github.zhanhb.ckfinder.connector.plugins;
 
 import com.github.zhanhb.ckfinder.connector.configuration.CommandFactoryBuilder;
-import com.github.zhanhb.ckfinder.connector.configuration.Events;
 import com.github.zhanhb.ckfinder.connector.configuration.Plugin;
-import java.util.Set;
-import lombok.RequiredArgsConstructor;
+import com.github.zhanhb.ckfinder.connector.configuration.PluginRegister;
 
-@RequiredArgsConstructor
-public class Watermark extends Plugin {
-
-  private final WatermarkSettings watermarkSettings;
+public class FileEditorPlugin extends Plugin {
 
   @Override
-  protected void registerPluginName(Set<String> names) {
-  }
-
-  @Override
-  public void registerEventHandlers(Events.Builder builder) {
-    builder.afterFileUploadEventHandler(new WatermarkCommand(watermarkSettings));
+  public void register(PluginRegister register) {
+    register.addName("fileeditor");
   }
 
   @Override
   protected void registerCommands(CommandFactoryBuilder factory) {
+    factory.registerCommands(new SaveFileCommand());
   }
 
 }

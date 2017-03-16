@@ -12,31 +12,22 @@
 package com.github.zhanhb.ckfinder.connector.plugins;
 
 import com.github.zhanhb.ckfinder.connector.configuration.CommandFactoryBuilder;
-import com.github.zhanhb.ckfinder.connector.configuration.Events;
 import com.github.zhanhb.ckfinder.connector.configuration.Plugin;
-import java.util.Map;
-import java.util.Set;
+import com.github.zhanhb.ckfinder.connector.configuration.PluginRegister;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class ImageResize extends Plugin {
+public class WatermarkPlugin extends Plugin {
 
-  private final Map<String, String> params;
-
-  @Override
-  protected void registerPluginName(Set<String> names) {
-    names.add("imageresize");
-  }
+  private final WatermarkSettings watermarkSettings;
 
   @Override
-  public void registerEventHandlers(Events.Builder builder) {
-    builder.initCommandEventHandler(new ImageResizeInitCommandEventHandler(params));
+  public void register(PluginRegister register) {
+    register.addFileUploadListener(new WatermarkProcessor(watermarkSettings));
   }
 
   @Override
   protected void registerCommands(CommandFactoryBuilder factory) {
-    factory.registerCommands(new ImageResizeCommand(params),
-            new ImageResizeInfoCommand());
   }
 
 }

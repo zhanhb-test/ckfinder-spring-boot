@@ -78,7 +78,7 @@ public class CommandFactoryBuilder {
     return this;
   }
 
-  public CommandFactory build() {
+  CommandFactory build() {
     return new CommandFactory(new TreeMap<>(commands));
   }
 

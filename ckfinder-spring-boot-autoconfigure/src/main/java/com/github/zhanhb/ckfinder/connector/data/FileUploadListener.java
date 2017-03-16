@@ -7,9 +7,8 @@ import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
  *
  * @author zhanhb
  */
-public interface AfterFileUploadEventHandler extends IEventHandler<AfterFileUploadEventArgs> {
+public interface FileUploadListener {
 
-  @Override
-  public void runEventHandler(AfterFileUploadEventArgs param, IConfiguration configuration) throws ConnectorException;
+  public void onFileUploadComplete(FileUploadEvent param, IConfiguration configuration) throws ConnectorException;
 
 }

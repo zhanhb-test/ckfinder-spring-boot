@@ -13,7 +13,7 @@ package com.github.zhanhb.ckfinder.connector.plugins;
 
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
 import com.github.zhanhb.ckfinder.connector.data.InitCommandEventArgs;
-import com.github.zhanhb.ckfinder.connector.data.InitCommandEventHandler;
+import com.github.zhanhb.ckfinder.connector.data.PluginInfoRegister;
 import com.github.zhanhb.ckfinder.connector.handlers.response.ImageResizeInfo;
 import com.github.zhanhb.ckfinder.connector.handlers.response.PluginsInfos;
 import java.util.Map;
@@ -22,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RequiredArgsConstructor
-public class ImageResizeInitCommandEventHandler implements InitCommandEventHandler {
+public class ImageResizeRegister implements PluginInfoRegister {
 
   private final Map<String, String> params;
 
@@ -35,7 +35,7 @@ public class ImageResizeInitCommandEventHandler implements InitCommandEventHandl
       String value = entry.getValue();
       builder.attr(key, value);
     }
-    param.getRootElement().pluginsInfos(
+    param.getConnector().pluginsInfos(
             PluginsInfos.builder().pluginsInfo(builder.build()).build()
     );
   }

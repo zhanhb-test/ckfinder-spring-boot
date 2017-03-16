@@ -4,9 +4,9 @@ import com.github.zhanhb.ckfinder.connector.data.AccessControlLevel;
 import com.github.zhanhb.ckfinder.connector.data.PluginInfo;
 import com.github.zhanhb.ckfinder.connector.data.ResourceType;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
-import com.github.zhanhb.ckfinder.connector.plugins.FileEditor;
-import com.github.zhanhb.ckfinder.connector.plugins.ImageResize;
-import com.github.zhanhb.ckfinder.connector.plugins.Watermark;
+import com.github.zhanhb.ckfinder.connector.plugins.FileEditorPlugin;
+import com.github.zhanhb.ckfinder.connector.plugins.ImageResizePlugin;
+import com.github.zhanhb.ckfinder.connector.plugins.WatermarkPlugin;
 import com.github.zhanhb.ckfinder.connector.plugins.WatermarkSettings;
 import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
@@ -560,14 +560,14 @@ public enum XmlConfigurationParser {
           Plugin plugin;
           switch (name) {
             case "imageresize":
-              plugin = new ImageResize(pluginInfo.getParams());
+              plugin = new ImageResizePlugin(pluginInfo.getParams());
               break;
             case "watermark":
               WatermarkSettings watermarkSettings = checkPluginInfo(pluginInfo, resourceLoader);
-              plugin = new Watermark(watermarkSettings);
+              plugin = new WatermarkPlugin(watermarkSettings);
               break;
             case "fileeditor":
-              plugin = new FileEditor();
+              plugin = new FileEditorPlugin();
               break;
             default:
               continue;

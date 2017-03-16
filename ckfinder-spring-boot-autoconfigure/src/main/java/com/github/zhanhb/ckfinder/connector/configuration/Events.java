@@ -11,33 +11,35 @@
  */
 package com.github.zhanhb.ckfinder.connector.configuration;
 
-import com.github.zhanhb.ckfinder.connector.data.AfterFileUploadEventArgs;
-import com.github.zhanhb.ckfinder.connector.data.AfterFileUploadEventHandler;
-import com.github.zhanhb.ckfinder.connector.data.IEventHandler;
+import com.github.zhanhb.ckfinder.connector.data.FileUploadEvent;
+import com.github.zhanhb.ckfinder.connector.data.FileUploadListener;
 import com.github.zhanhb.ckfinder.connector.data.InitCommandEventArgs;
-import com.github.zhanhb.ckfinder.connector.data.InitCommandEventHandler;
+import com.github.zhanhb.ckfinder.connector.data.PluginInfoRegister;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import java.util.List;
-import lombok.Builder;
-import lombok.Singular;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
 /**
  * Provides support for event handlers.
  */
-@Builder(builderClassName = "Builder")
 @Slf4j
 @ToString
+@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 public class Events {
 
+  private final List<FileUploadListener> fileUploadListeners;
+  private final List<PluginInfoRegister> initCommandEventHandlers;
+
   @SuppressWarnings({"BroadCatchBlock", "TooBroadCatch", "UseSpecificCatch"})
-  private static <T> void run(List<? extends IEventHandler<T>> handlers,
-          T args, IConfiguration configuration) throws ConnectorException {
-    log.trace("{}", handlers);
+  public void fireOnFileUpload(FileUploadEvent args, IConfiguration configuration)
+          throws ConnectorException {
+    log.trace("{}", fileUploadListeners);
     try {
-      for (IEventHandler<T> eventHandler : handlers) {
-        eventHandler.runEventHandler(args, configuration);
+      for (FileUploadListener eventHandler : fileUploadListeners) {
+        eventHandler.onFileUploadComplete(args, configuration);
       }
     } catch (ConnectorException ex) {
       throw ex;
@@ -46,22 +48,10 @@ public class Events {
     }
   }
 
-  @Singular
-  private final List<AfterFileUploadEventHandler> afterFileUploadEventHandlers;
-  @Singular
-  private final List<InitCommandEventHandler> initCommandEventHandlers;
-
-  public void runAfterFileUpload(AfterFileUploadEventArgs args, IConfiguration configuration)
-          throws ConnectorException {
-    run(afterFileUploadEventHandlers, args, configuration);
-  }
-
   public void runInitCommand(InitCommandEventArgs args, IConfiguration configuration) {
-    try {
-      run(initCommandEventHandlers, args, configuration);
-    } catch (ConnectorException ex) {
-      // impossible
-      throw new AssertionError(ex);
+    log.trace("{}", initCommandEventHandlers);
+    for (PluginInfoRegister pluginInfoRegister : initCommandEventHandlers) {
+      pluginInfoRegister.runEventHandler(args, configuration);
     }
   }
 

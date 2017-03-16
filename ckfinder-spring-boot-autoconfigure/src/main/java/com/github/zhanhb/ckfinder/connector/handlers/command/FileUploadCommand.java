@@ -13,7 +13,7 @@ package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.configuration.Constants;
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
-import com.github.zhanhb.ckfinder.connector.data.AfterFileUploadEventArgs;
+import com.github.zhanhb.ckfinder.connector.data.FileUploadEvent;
 import com.github.zhanhb.ckfinder.connector.data.ResourceType;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.errors.ErrorUtils;
@@ -236,16 +236,16 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
 
     if (!ImageUtils.isImageExtension(file)) {
       item.write(file.toString());
-      AfterFileUploadEventArgs args = new AfterFileUploadEventArgs(param.getCurrentFolder(), file);
-      configuration.getEvents().runAfterFileUpload(args, configuration);
+      FileUploadEvent args = new FileUploadEvent(param.getCurrentFolder(), file);
+      configuration.getEvents().fireOnFileUpload(args, configuration);
       return true;
     } else if (ImageUtils.checkImageSize(item, configuration)
             || configuration.isCheckSizeAfterScaling()) {
       ImageUtils.createTmpThumb(item, file, getFileItemName(item), configuration);
       if (!configuration.isCheckSizeAfterScaling()
               || FileUtils.isFileSizeInRange(param.getType(), Files.size(file))) {
-        AfterFileUploadEventArgs args = new AfterFileUploadEventArgs(param.getCurrentFolder(), file);
-        configuration.getEvents().runAfterFileUpload(args, configuration);
+        FileUploadEvent args = new FileUploadEvent(param.getCurrentFolder(), file);
+        configuration.getEvents().fireOnFileUpload(args, configuration);
         return true;
       } else {
         Files.deleteIfExists(file);

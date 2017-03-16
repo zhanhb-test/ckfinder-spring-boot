@@ -12,24 +12,26 @@
 package com.github.zhanhb.ckfinder.connector.plugins;
 
 import com.github.zhanhb.ckfinder.connector.configuration.CommandFactoryBuilder;
-import com.github.zhanhb.ckfinder.connector.configuration.Events;
 import com.github.zhanhb.ckfinder.connector.configuration.Plugin;
-import java.util.Set;
+import com.github.zhanhb.ckfinder.connector.configuration.PluginRegister;
+import java.util.Map;
+import lombok.RequiredArgsConstructor;
 
-public class FileEditor extends Plugin {
+@RequiredArgsConstructor
+public class ImageResizePlugin extends Plugin {
+
+  private final Map<String, String> params;
 
   @Override
-  protected void registerPluginName(Set<String> names) {
-    names.add("fileeditor");
-  }
-
-  @Override
-  public void registerEventHandlers(Events.Builder events) {
+  public void register(PluginRegister register) {
+    register.addName("imageresize");
+    register.addPluginInfoRegister(new ImageResizeRegister(params));
   }
 
   @Override
   protected void registerCommands(CommandFactoryBuilder factory) {
-    factory.registerCommands(new SaveFileCommand());
+    factory.registerCommands(new ImageResizeCommand(params),
+            new ImageResizeInfoCommand());
   }
 
 }

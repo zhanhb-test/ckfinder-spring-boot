@@ -11,9 +11,9 @@ import com.github.zhanhb.ckfinder.connector.configuration.Plugin;
 import com.github.zhanhb.ckfinder.connector.data.AccessControlLevel;
 import com.github.zhanhb.ckfinder.connector.data.PluginInfo;
 import com.github.zhanhb.ckfinder.connector.data.ResourceType;
-import com.github.zhanhb.ckfinder.connector.plugins.FileEditor;
-import com.github.zhanhb.ckfinder.connector.plugins.ImageResize;
-import com.github.zhanhb.ckfinder.connector.plugins.Watermark;
+import com.github.zhanhb.ckfinder.connector.plugins.FileEditorPlugin;
+import com.github.zhanhb.ckfinder.connector.plugins.ImageResizePlugin;
+import com.github.zhanhb.ckfinder.connector.plugins.WatermarkPlugin;
 import com.github.zhanhb.ckfinder.connector.plugins.WatermarkSettings;
 import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
 import java.io.IOException;
@@ -265,19 +265,19 @@ public class CKFinderAutoConfiguration {
   }
 
   @Configuration
-  @ConditionalOnMissingBean(FileEditor.class)
+  @ConditionalOnMissingBean(FileEditorPlugin.class)
   @ConditionalOnProperty(prefix = CKFinderProperties.CKFINDER_PREFIX + ".file-editor", name = "enabled", havingValue = "true", matchIfMissing = true)
   public static class DefaultFileEditorConfiguration {
 
     @Bean
-    public FileEditor fileEditor() {
-      return new FileEditor();
+    public FileEditorPlugin fileEditorPlugin() {
+      return new FileEditorPlugin();
     }
 
   }
 
   @Configuration
-  @ConditionalOnMissingBean(ImageResize.class)
+  @ConditionalOnMissingBean(ImageResizePlugin.class)
   @ConditionalOnProperty(prefix = CKFinderProperties.CKFINDER_PREFIX + ".image-resize", name = "enabled", havingValue = "true", matchIfMissing = true)
   public static class DefaultImageResizeConfiguration {
 
@@ -285,20 +285,20 @@ public class CKFinderAutoConfiguration {
     private CKFinderProperties properties;
 
     @Bean
-    public ImageResize imageResize() {
+    public ImageResizePlugin imageResizePlugin() {
       CKFinderProperties.ImageResize imageResize = properties.getImageResize();
       Map<String, String> params = imageResize.getParams();
       PluginInfo.Builder pluginInfoBuilder = PluginInfo.builder();
       if (params != null) {
         pluginInfoBuilder.params(params);
       }
-      return new ImageResize(pluginInfoBuilder.build().getParams());
+      return new ImageResizePlugin(pluginInfoBuilder.build().getParams());
     }
 
   }
 
   @Configuration
-  @ConditionalOnMissingBean(Watermark.class)
+  @ConditionalOnMissingBean(WatermarkPlugin.class)
   @ConditionalOnProperty(prefix = CKFinderProperties.CKFINDER_PREFIX + ".watermark", name = "enabled", havingValue = "true", matchIfMissing = false)
   public static class DefaultWatermarkConfiguration {
 
@@ -308,7 +308,7 @@ public class CKFinderAutoConfiguration {
     private ResourceLoader resourceLoader;
 
     @Bean
-    public Watermark watermark() {
+    public WatermarkPlugin watermark() {
       CKFinderProperties.Watermark watermark = properties.getWatermark();
       WatermarkSettings.Builder builder = WatermarkSettings.builder();
       String source = watermark.getSource();
@@ -330,7 +330,7 @@ public class CKFinderAutoConfiguration {
       if (watermark.getTransparency() != null) {
         builder.transparency(watermark.getTransparency());
       }
-      return new Watermark(builder.build());
+      return new WatermarkPlugin(builder.build());
     }
   }
 

@@ -6,9 +6,8 @@ import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
  *
  * @author zhanhb
  */
-public interface InitCommandEventHandler extends IEventHandler<InitCommandEventArgs> {
+public interface PluginInfoRegister {
 
-  @Override
   public void runEventHandler(InitCommandEventArgs param, IConfiguration configuration);
 
 }

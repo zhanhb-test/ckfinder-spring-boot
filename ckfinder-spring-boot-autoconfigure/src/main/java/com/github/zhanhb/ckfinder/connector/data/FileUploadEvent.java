@@ -11,20 +11,19 @@
  */
 package com.github.zhanhb.ckfinder.connector.data;
 
+import com.github.zhanhb.ckfinder.connector.configuration.PluginRegister;
 import java.nio.file.Path;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 /**
- * Event data for
- * {@link com.github.zhanhb.ckfinder.connector.configuration.Events.Builder#afterFileUploadEventHandler(com.github.zhanhb.ckfinder.connector.data.AfterFileUploadEventHandler) }
- * event.
+ * Event data for {@link PluginRegister#addFileUploadListener} event.
  */
 @Getter
 @RequiredArgsConstructor
 @ToString
-public class AfterFileUploadEventArgs {
+public class FileUploadEvent {
 
   private final String currentFolder;
   private final Path file;

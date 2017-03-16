@@ -11,21 +11,12 @@
  */
 package com.github.zhanhb.ckfinder.connector.configuration;
 
-import java.util.Set;
-
 /**
  * Base class for plugins.
  */
 public abstract class Plugin {
 
-  protected abstract void registerPluginName(Set<String> names);
-
-  /**
-   * register event handlers for plugin.
-   *
-   * @param eventHandler available event handlers.
-   */
-  protected abstract void registerEventHandlers(Events.Builder eventHandler);
+  protected abstract void register(PluginRegister register);
 
   protected abstract void registerCommands(CommandFactoryBuilder factory);
 

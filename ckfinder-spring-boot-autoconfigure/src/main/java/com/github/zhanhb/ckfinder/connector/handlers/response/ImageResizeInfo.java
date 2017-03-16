@@ -14,7 +14,7 @@ import lombok.Singular;
 
 /**
  *
- * @see com.github.zhanhb.ckfinder.connector.plugins.ImageResize
+ * @see com.github.zhanhb.ckfinder.connector.plugins.ImageResizePlugin
  * @author zhanhb
  */
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
