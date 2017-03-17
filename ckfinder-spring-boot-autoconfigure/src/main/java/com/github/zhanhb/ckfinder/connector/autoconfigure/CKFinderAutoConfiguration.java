@@ -1,5 +1,6 @@
 package com.github.zhanhb.ckfinder.connector.autoconfigure;
 
+import com.github.zhanhb.ckfinder.connector.ConnectorServlet;
 import com.github.zhanhb.ckfinder.connector.configuration.Constants;
 import com.github.zhanhb.ckfinder.connector.configuration.DefaultPathBuilder;
 import com.github.zhanhb.ckfinder.connector.configuration.FixLicenseFactory;
@@ -24,12 +25,14 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Collectors;
+import javax.servlet.MultipartConfigElement;
 import javax.servlet.ServletContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -332,6 +335,22 @@ public class CKFinderAutoConfiguration {
       }
       return new WatermarkPlugin(builder.build());
     }
+  }
+
+  @Configuration
+  @ConditionalOnMissingBean(name = "connectorServlet")
+  @ConditionalOnProperty(prefix = CKFinderProperties.CKFINDER_PREFIX + ".servlet", name = "enabled", havingValue = "true", matchIfMissing = true)
+  public static class DefaultConnectorServletConfiguration {
+
+    @Bean
+    public ServletRegistrationBean connectorServlet(CKFinderProperties properties, MultipartConfigElement multipartConfigElement,
+            IConfiguration configuration) {
+      ConnectorServlet servlet = new ConnectorServlet(configuration);
+      ServletRegistrationBean servletRegistrationBean = new ServletRegistrationBean(servlet, false, properties.getServlet().getPath());
+      servletRegistrationBean.setMultipartConfig(multipartConfigElement);
+      return servletRegistrationBean;
+    }
+
   }
 
 }

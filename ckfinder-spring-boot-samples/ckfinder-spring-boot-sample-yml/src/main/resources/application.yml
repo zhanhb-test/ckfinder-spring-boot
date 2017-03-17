@@ -71,5 +71,5 @@ ckfinder:
       smallThumb: 90x90
       mediumThumb: 120x120
       largeThumb: 180x180
-  zip:
-    enabled: false
+  servlet:
+    enabled: true

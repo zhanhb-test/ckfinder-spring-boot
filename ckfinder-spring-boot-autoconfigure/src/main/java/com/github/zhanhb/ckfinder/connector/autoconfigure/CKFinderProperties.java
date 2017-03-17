@@ -4,6 +4,7 @@ import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.util.Assert;
 
 /**
  *
@@ -37,6 +38,7 @@ public class CKFinderProperties {
   private String[] hideFiles;
   private Watermark watermark = new Watermark();
   private ImageResize imageResize = new ImageResize();
+  private Servlet servlet = new Servlet();
 
   @Getter
   @Setter
@@ -125,6 +127,21 @@ public class CKFinderProperties {
     private Float quality;
     private Integer marginBottom;
     private Integer marginRight;
+
+  }
+
+  @Getter
+  @Setter
+  public static class Servlet {
+
+    private boolean enabled = true;
+    private String path = "/ckfinder/core/connector/java/connector.java";
+
+    public void setPath(String path) {
+      Assert.notNull(path, "Path must not be null");
+      Assert.isTrue(path.startsWith("/"), "Path must start with /");
+      this.path = path;
+    }
 
   }
 
