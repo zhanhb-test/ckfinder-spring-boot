@@ -24,6 +24,6 @@ public class FilePostParam {
   private final String folder;
   private final String name;
   private final String options;
-  private final String type;
+  private final ResourceType type;
 
 }

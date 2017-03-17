@@ -101,7 +101,7 @@ public class MoveFilesCommand extends ErrorListXmlCommand<MoveFilesParameter> im
         return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST;
       }
 
-      if (configuration.getTypes().get(file.getType()) == null) {
+      if (file.getType() == null) {
         return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST;
       }
 
@@ -110,15 +110,14 @@ public class MoveFilesCommand extends ErrorListXmlCommand<MoveFilesParameter> im
       }
       if (!FileUtils.isFileExtensionAllwed(file.getName(), param.getType())) {
         param.appendErrorNodeChild(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_EXTENSION,
-                file.getName(), file.getFolder(), file.getType());
+                file.getName(), file.getFolder(), file.getType().getName());
         continue;
       }
 
-      if (!param.getType().getName().equals(file.getType())) {
-        if (!FileUtils.isFileExtensionAllwed(file.getName(),
-                configuration.getTypes().get(file.getType()))) {
+      if (!param.getType().getName().equals(file.getType().getName())) {
+        if (!FileUtils.isFileExtensionAllwed(file.getName(), file.getType())) {
           param.appendErrorNodeChild(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_EXTENSION,
-                  file.getName(), file.getFolder(), file.getType());
+                  file.getName(), file.getFolder(), file.getType().getName());
           continue;
         }
       }
@@ -131,42 +130,42 @@ public class MoveFilesCommand extends ErrorListXmlCommand<MoveFilesParameter> im
         return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST;
       }
 
-      if (!configuration.getAccessControl().hasPermission(file.getType(), file.getFolder(),
+      if (!configuration.getAccessControl().hasPermission(file.getType().getName(), file.getFolder(),
               param.getUserRole(),
               AccessControl.CKFINDER_CONNECTOR_ACL_FILE_VIEW)) {
         return Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED;
       }
-      Path sourceFile = Paths.get(configuration.getTypes().get(file.getType()).getPath(),
+      Path sourceFile = Paths.get(file.getType().getPath(),
               file.getFolder(), file.getName());
       Path destFile = Paths.get(param.getType().getPath(),
               param.getCurrentFolder(), file.getName());
 
-      Path sourceThumb = Paths.get(configuration.getThumbsPath(), file.getType(),
+      Path sourceThumb = Paths.get(configuration.getThumbsPath(), file.getType().getName(),
               file.getFolder(), file.getName());
       try {
         if (!Files.isRegularFile(sourceFile)) {
           param.appendErrorNodeChild(Constants.Errors.CKFINDER_CONNECTOR_ERROR_FILE_NOT_FOUND,
-                  file.getName(), file.getFolder(), file.getType());
+                  file.getName(), file.getFolder(), file.getType().getName());
           continue;
         }
-        if (!param.getType().getName().equals(file.getType())) {
+        if (!param.getType().getName().equals(file.getType().getName())) {
           long maxSize = param.getType().getMaxSize();
           if (maxSize != 0 && maxSize < Files.size(sourceFile)) {
             param.appendErrorNodeChild(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UPLOADED_TOO_BIG,
-                    file.getName(), file.getFolder(), file.getType());
+                    file.getName(), file.getFolder(), file.getType().getName());
             continue;
           }
         }
         if (sourceFile.equals(destFile)) {
           param.appendErrorNodeChild(Constants.Errors.CKFINDER_CONNECTOR_ERROR_SOURCE_AND_TARGET_PATH_EQUAL,
-                  file.getName(), file.getFolder(), file.getType());
+                  file.getName(), file.getFolder(), file.getType().getName());
         } else if (Files.exists(destFile)) {
           if (file.getOptions() != null
                   && file.getOptions().contains("overwrite")) {
             if (!handleOverwrite(sourceFile, destFile)) {
               param.appendErrorNodeChild(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED,
                       file.getName(), file.getFolder(),
-                      file.getType());
+                      file.getType().getName());
             } else {
               param.filesMovedPlus();
               FileUtils.delete(sourceThumb);
@@ -176,14 +175,14 @@ public class MoveFilesCommand extends ErrorListXmlCommand<MoveFilesParameter> im
             if (!handleAutoRename(sourceFile, destFile)) {
               param.appendErrorNodeChild(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED,
                       file.getName(), file.getFolder(),
-                      file.getType());
+                      file.getType().getName());
             } else {
               param.filesMovedPlus();
               FileUtils.delete(sourceThumb);
             }
           } else {
             param.appendErrorNodeChild(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ALREADY_EXIST,
-                    file.getName(), file.getFolder(), file.getType());
+                    file.getName(), file.getFolder(), file.getType().getName());
           }
         } else if (FileUtils.copyFromSourceToDestFile(sourceFile, destFile,
                 true)) {
@@ -193,7 +192,7 @@ public class MoveFilesCommand extends ErrorListXmlCommand<MoveFilesParameter> im
       } catch (SecurityException | IOException e) {
         log.error("", e);
         param.appendErrorNodeChild(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED,
-                file.getName(), file.getFolder(), file.getType());
+                file.getName(), file.getFolder(), file.getType().getName());
       }
 
     }
@@ -256,7 +255,7 @@ public class MoveFilesCommand extends ErrorListXmlCommand<MoveFilesParameter> im
    */
   private void moveThumb(FilePostParam file, MoveFilesParameter param, IConfiguration configuration) throws IOException {
     Path sourceThumbFile = Paths.get(configuration.getThumbsPath(),
-            file.getType(), file.getFolder(), file.getName());
+            file.getType().getName(), file.getFolder(), file.getName());
     Path destThumbFile = Paths.get(configuration.getThumbsPath(),
             param.getType().getName(), param.getCurrentFolder(), file.getName()
     );
@@ -270,7 +269,7 @@ public class MoveFilesCommand extends ErrorListXmlCommand<MoveFilesParameter> im
           throws ConnectorException {
     super.initParams(param, request, configuration);
     param.setMovedAll(request.getParameter("moved") != null ? Integer.parseInt(request.getParameter("moved")) : 0);
-    RequestFileHelper.addFilesListFromRequest(request, param.getFiles());
+    RequestFileHelper.addFilesListFromRequest(request, param.getFiles(), configuration);
   }
 
 }

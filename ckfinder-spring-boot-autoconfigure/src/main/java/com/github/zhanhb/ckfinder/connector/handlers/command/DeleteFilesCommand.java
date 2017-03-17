@@ -80,7 +80,7 @@ public class DeleteFilesCommand extends ErrorListXmlCommand<DeleteFilesParameter
         return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST;
       }
 
-      if (configuration.getTypes().get(fileItem.getType()) == null) {
+      if (fileItem.getType() == null) {
         return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST;
       }
 
@@ -98,30 +98,30 @@ public class DeleteFilesCommand extends ErrorListXmlCommand<DeleteFilesParameter
         return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST;
       }
 
-      if (!FileUtils.isFileExtensionAllwed(fileItem.getName(), configuration.getTypes().get(fileItem.getType()))) {
+      if (!FileUtils.isFileExtensionAllwed(fileItem.getName(), fileItem.getType())) {
         return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST;
 
       }
 
-      if (!configuration.getAccessControl().hasPermission(fileItem.getType(), fileItem.getFolder(), param.getUserRole(),
+      if (!configuration.getAccessControl().hasPermission(fileItem.getType().getName(), fileItem.getFolder(), param.getUserRole(),
               AccessControl.CKFINDER_CONNECTOR_ACL_FILE_DELETE)) {
         return Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED;
       }
 
-      Path file = Paths.get(configuration.getTypes().get(fileItem.getType()).getPath(), fileItem.getFolder(), fileItem.getName());
+      Path file = Paths.get(fileItem.getType().getPath(), fileItem.getFolder(), fileItem.getName());
 
       try {
         param.setAddDeleteNode(true);
         if (!Files.exists(file)) {
           param.appendErrorNodeChild(Constants.Errors.CKFINDER_CONNECTOR_ERROR_FILE_NOT_FOUND,
-                  fileItem.getName(), fileItem.getFolder(), fileItem.getType());
+                  fileItem.getName(), fileItem.getFolder(), fileItem.getType().getName());
           continue;
         }
 
         log.debug("prepare delete file '{}'", file);
         if (FileUtils.delete(file)) {
           Path thumbFile = Paths.get(configuration.getThumbsPath(),
-                  fileItem.getType(), param.getCurrentFolder(), fileItem.getName());
+                  fileItem.getType().getName(), param.getCurrentFolder(), fileItem.getName());
           param.filesDeletedPlus();
 
           try {
@@ -133,7 +133,7 @@ public class DeleteFilesCommand extends ErrorListXmlCommand<DeleteFilesParameter
           }
         } else { //If access is denied, report error and try to delete rest of files.
           param.appendErrorNodeChild(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED,
-                  fileItem.getName(), fileItem.getFolder(), fileItem.getType());
+                  fileItem.getName(), fileItem.getFolder(), fileItem.getType().getName());
         }
       } catch (SecurityException e) {
         log.error("", e);
@@ -160,7 +160,7 @@ public class DeleteFilesCommand extends ErrorListXmlCommand<DeleteFilesParameter
   @Override
   protected void initParams(DeleteFilesParameter param, HttpServletRequest request, IConfiguration configuration) throws ConnectorException {
     super.initParams(param, request, configuration);
-    RequestFileHelper.addFilesListFromRequest(request, param.getFiles());
+    RequestFileHelper.addFilesListFromRequest(request, param.getFiles(), configuration);
   }
 
 }
