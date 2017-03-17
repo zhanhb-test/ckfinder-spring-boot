@@ -8,3 +8,4 @@ pom.xml.releaseBackup
 .settings/
 .classpath
 *.original~
+nbproject/
