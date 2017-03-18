@@ -30,11 +30,14 @@ import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.Part;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.multipart.MultipartException;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.multipart.MultipartResolver;
+import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 
 /**
  * Class to handle <code>FileUpload</code> command.
@@ -48,11 +51,14 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
    */
   private static final Pattern UNSAFE_FILE_NAME_PATTERN = Pattern.compile("[:*?|/]");
 
+  private final MultipartResolver multipartResolver;
+
   /**
    * default constructor.
    */
   public FileUploadCommand() {
     super(FileUploadParameter::new);
+    multipartResolver = new StandardServletMultipartResolver();
   }
 
   /**
@@ -143,7 +149,7 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
   }
 
   /**
-   * initializing parametrs for command handler.
+   * initializing parameters for command handler.
    *
    * @param param
    * @param request request
@@ -190,32 +196,37 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
    */
   private boolean fileUpload(HttpServletRequest request, FileUploadParameter param, IConfiguration configuration) {
     try {
-      Collection<Part> parts = request.getParts();
-      for (Part part : parts) {
-        String path = Paths.get(param.getType().getPath(),
-                param.getCurrentFolder()).toString();
-        param.setFileName(getFileItemName(part));
-        if (validateUploadItem(part, path, param, configuration)) {
-          return saveTemporaryFile(path, part, param, configuration);
+      boolean multipart = multipartResolver.isMultipart(request);
+      if (multipart) {
+        log.debug("prepare resolveMultipart");
+        MultipartHttpServletRequest resolveMultipart = multipartResolver.resolveMultipart(request);
+        log.debug("finish resolveMultipart");
+        try {
+          Collection<MultipartFile> parts = resolveMultipart.getFileMap().values();
+          for (MultipartFile part : parts) {
+            String path = Paths.get(param.getType().getPath(),
+                    param.getCurrentFolder()).toString();
+            param.setFileName(getFileItemName(part));
+            return validateUploadItem(part, path, param, configuration)
+                    && saveTemporaryFile(path, part, param, configuration);
+          }
+        } finally {
+          multipartResolver.cleanupMultipart(resolveMultipart);
         }
       }
-      return false;
+      throw new ConnectorException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_CUSTOM_ERROR, "No file provided in the request.");
     } catch (ConnectorException e) {
       param.setErrorCode(e.getErrorCode());
       if (param.getErrorCode() == Constants.Errors.CKFINDER_CONNECTOR_ERROR_CUSTOM_ERROR) {
         param.setCustomErrorMsg(e.getMessage());
       }
       return false;
-    } catch (IOException | ServletException | RuntimeException e) {
-      String message = e.getMessage();
-      if (message != null
-              && (message.toLowerCase().contains("sizelimit")
-              || message.contains("size limit"))) {
-        log.info("", e);
-        param.setErrorCode(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UPLOADED_TOO_BIG);
-        return false;
-      }
-      log.error("", e);
+    } catch (MultipartException e) {
+      log.debug("catch MultipartException", e);
+      param.setErrorCode(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UPLOADED_TOO_BIG);
+      return false;
+    } catch (IOException e) {
+      log.debug("catch IOException", e);
       param.setErrorCode(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED);
       return false;
     }
@@ -230,12 +241,12 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
    * @return result of saving, true if saved correctly
    * @throws Exception when error occurs.
    */
-  private boolean saveTemporaryFile(String path, Part item, FileUploadParameter param, IConfiguration configuration)
+  private boolean saveTemporaryFile(String path, MultipartFile item, FileUploadParameter param, IConfiguration configuration)
           throws IOException, ConnectorException {
     Path file = Paths.get(path, param.getNewFileName());
 
     if (!ImageUtils.isImageExtension(file)) {
-      item.write(file.toString());
+      item.transferTo(file.toFile());
       FileUploadEvent args = new FileUploadEvent(param.getCurrentFolder(), file);
       configuration.getEvents().fireOnFileUpload(args, configuration);
       return true;
@@ -295,9 +306,9 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
    * @param path file path
    * @return true if validation
    */
-  private boolean validateUploadItem(Part item, String path, FileUploadParameter param, IConfiguration configuration) {
+  private boolean validateUploadItem(MultipartFile item, String path, FileUploadParameter param, IConfiguration configuration) {
 
-    if (item.getSubmittedFileName() != null && item.getSubmittedFileName().length() > 0) {
+    if (item.getOriginalFilename() != null && item.getOriginalFilename().length() > 0) {
       param.setFileName(getFileItemName(item));
     } else {
       param.setErrorCode(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UPLOADED_INVALID);
@@ -369,9 +380,9 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
    * @param item file upload item
    * @return file name of uploaded item
    */
-  private String getFileItemName(Part item) {
+  private String getFileItemName(MultipartFile item) {
     Pattern p = Pattern.compile("[^\\\\/]+$");
-    Matcher m = p.matcher(item.getSubmittedFileName());
+    Matcher m = p.matcher(item.getOriginalFilename());
 
     return (m.find()) ? m.group(0) : "";
   }
@@ -391,10 +402,7 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
         Path currDir = Paths.get(configuration.getTypes().get(tmpType).getPath(),
                 param.getCurrentFolder());
         if (!Files.isDirectory(currDir)) {
-          throw new ConnectorException(
-                  Constants.Errors.CKFINDER_CONNECTOR_ERROR_FOLDER_NOT_FOUND);
-        } else {
-          return true;
+          throw new ConnectorException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_FOLDER_NOT_FOUND);
         }
       }
       return true;

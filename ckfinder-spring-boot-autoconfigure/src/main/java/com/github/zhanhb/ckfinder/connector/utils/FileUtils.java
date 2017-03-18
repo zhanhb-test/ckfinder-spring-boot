@@ -31,7 +31,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import javax.annotation.Nullable;
-import javax.servlet.http.Part;
+import org.springframework.core.io.InputStreamSource;
 
 /**
  * Utils for files.
@@ -399,7 +399,7 @@ public class FileUtils {
    * @return true if detected.
    * @throws IOException when io error occurs.
    */
-  public static boolean hasHtmlContent(Part item) throws IOException {
+  public static boolean hasHtmlContent(InputStreamSource item) throws IOException {
     byte[] buff = new byte[MAX_BUFFER_SIZE];
     try (InputStream is = item.getInputStream()) {
       is.read(buff, 0, MAX_BUFFER_SIZE);

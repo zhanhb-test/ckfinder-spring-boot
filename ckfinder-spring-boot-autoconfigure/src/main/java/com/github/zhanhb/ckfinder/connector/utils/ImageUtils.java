@@ -22,9 +22,9 @@ import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.List;
 import javax.imageio.ImageIO;
-import javax.servlet.http.Part;
 import lombok.extern.slf4j.Slf4j;
 import net.coobird.thumbnailator.Thumbnails;
+import org.springframework.core.io.InputStreamSource;
 
 /**
  * Utils to operate on images.
@@ -105,7 +105,7 @@ public class ImageUtils {
    * @param conf connector configuration
    * @throws IOException when error occurs.
    */
-  public static void createTmpThumb(Part part, Path file, String fileName,
+  public static void createTmpThumb(InputStreamSource part, Path file, String fileName,
           IConfiguration conf) throws IOException {
     BufferedImage image;
     try (InputStream stream = part.getInputStream()) {
@@ -206,7 +206,7 @@ public class ImageUtils {
    * @return true if image size isn't bigger then biggest allowed.
    * @throws IOException when error occurs during reading image.
    */
-  public static boolean checkImageSize(Part part, IConfiguration conf)
+  public static boolean checkImageSize(InputStreamSource part, IConfiguration conf)
           throws IOException {
     final int maxWidth;
     final int maxHeight;
@@ -232,7 +232,7 @@ public class ImageUtils {
    * @param item file upload item
    * @return true if file is image.
    */
-  public static boolean isValid(Part item) {
+  public static boolean isValid(InputStreamSource item) {
     BufferedImage bi;
     try (InputStream is = item.getInputStream()) {
       bi = ImageIO.read(is);
