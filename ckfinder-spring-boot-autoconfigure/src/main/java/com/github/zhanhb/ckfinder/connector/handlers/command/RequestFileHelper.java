@@ -18,6 +18,8 @@ class RequestFileHelper {
    * get file list to copy from request.
    *
    * @param request request
+   * @param files
+   * @param configuration
    */
   static void addFilesListFromRequest(HttpServletRequest request, List<FilePostParam> files,
           IConfiguration configuration) {

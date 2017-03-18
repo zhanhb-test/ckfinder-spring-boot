@@ -8,6 +8,6 @@ import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
  */
 public interface PluginInfoRegister {
 
-  public void runEventHandler(InitCommandEventArgs param, IConfiguration configuration);
+  public void runEventHandler(InitCommandEvent event, IConfiguration configuration);
 
 }

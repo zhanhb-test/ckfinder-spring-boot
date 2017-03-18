@@ -71,9 +71,10 @@ public class ImageUtils {
    * @param orginFile origin image file.
    * @param file file to save thumb
    * @param conf connector configuration
+   * @return 
    * @throws IOException when error occurs.
    */
-  public static void createThumb(Path orginFile, Path file, IConfiguration conf)
+  public static boolean createThumb(Path orginFile, Path file, IConfiguration conf)
           throws IOException {
     BufferedImage image;
     try (InputStream is = Files.newInputStream(orginFile)) {
@@ -90,9 +91,11 @@ public class ImageUtils {
         resizeImage(image, dimension.width, dimension.height,
                 conf.getThumbsQuality(), file);
       }
+      return true;
     } else {
       log.error("Wrong image file");
     }
+    return false;
   }
 
   /**
@@ -221,7 +224,7 @@ public class ImageUtils {
     }
     if (bi != null) {
       log.debug("image size: {} {}", bi.getWidth(), bi.getHeight());
-      return (bi.getHeight() <= maxHeight && bi.getWidth() <= maxWidth);
+      return bi.getHeight() <= maxHeight && bi.getWidth() <= maxWidth;
     }
     return false;
   }

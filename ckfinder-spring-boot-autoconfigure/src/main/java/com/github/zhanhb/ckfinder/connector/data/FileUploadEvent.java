@@ -13,19 +13,26 @@ package com.github.zhanhb.ckfinder.connector.data;
 
 import com.github.zhanhb.ckfinder.connector.configuration.PluginRegister;
 import java.nio.file.Path;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.ToString;
 
 /**
  * Event data for {@link PluginRegister#addFileUploadListener} event.
  */
-@Getter
-@RequiredArgsConstructor
-@ToString
 public class FileUploadEvent {
 
   private final String currentFolder;
   private final Path file;
+
+  public FileUploadEvent(String currentFolder, Path path) {
+    this.currentFolder = currentFolder;
+    this.file = path;
+  }
+
+  public String getCurrentFolder() {
+    return currentFolder;
+  }
+
+  public Path getFile() {
+    return file;
+  }
 
 }

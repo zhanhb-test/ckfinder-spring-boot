@@ -11,7 +11,7 @@
  */
 package com.github.zhanhb.ckfinder.connector.plugins;
 
-import com.github.zhanhb.ckfinder.connector.configuration.Constants;
+import com.github.zhanhb.ckfinder.connector.configuration.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.command.BaseXmlCommand;
@@ -19,8 +19,8 @@ import com.github.zhanhb.ckfinder.connector.handlers.parameter.SaveFileParameter
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -37,29 +37,29 @@ public class SaveFileCommand extends BaseXmlCommand<SaveFileParameter> {
   @Override
   protected void createXml(Connector.Builder rootElement, SaveFileParameter param, IConfiguration configuration) throws ConnectorException {
     if (param.getType() == null) {
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE);
+      throw new ConnectorException(ConnectorError.INVALID_TYPE);
     }
 
     if (!configuration.getAccessControl().hasPermission(param.getType().getName(),
             param.getCurrentFolder(), param.getUserRole(),
-            AccessControl.CKFINDER_CONNECTOR_ACL_FILE_DELETE)) {
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED);
+            AccessControl.FILE_DELETE)) {
+      param.throwException(ConnectorError.UNAUTHORIZED);
     }
 
     if (param.getFileName() == null || param.getFileName().isEmpty()) {
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_NAME);
+      param.throwException(ConnectorError.INVALID_NAME);
     }
 
     if (param.getFileContent() == null || param.getFileContent().isEmpty()) {
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
+      param.throwException(ConnectorError.INVALID_REQUEST);
     }
 
-    if (!FileUtils.isFileExtensionAllwed(param.getFileName(), param.getType())) {
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_EXTENSION);
+    if (!FileUtils.isFileExtensionAllowed(param.getFileName(), param.getType())) {
+      param.throwException(ConnectorError.INVALID_EXTENSION);
     }
 
-    if (!FileUtils.isFileNameInvalid(param.getFileName())) {
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
+    if (!FileUtils.isFileNameValid(param.getFileName())) {
+      param.throwException(ConnectorError.INVALID_REQUEST);
     }
 
     Path sourceFile = Paths.get(param.getType().getPath(),
@@ -67,14 +67,12 @@ public class SaveFileCommand extends BaseXmlCommand<SaveFileParameter> {
 
     try {
       if (!Files.isRegularFile(sourceFile)) {
-        param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_FILE_NOT_FOUND);
+        param.throwException(ConnectorError.FILE_NOT_FOUND);
       }
-      Files.write(sourceFile, param.getFileContent().getBytes("UTF-8"));
-    } catch (FileNotFoundException e) {
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_FILE_NOT_FOUND);
+      Files.write(sourceFile, param.getFileContent().getBytes(StandardCharsets.UTF_8));
     } catch (SecurityException | IOException e) {
       log.error("", e);
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED);
+      param.throwException(ConnectorError.ACCESS_DENIED);
     }
   }
 

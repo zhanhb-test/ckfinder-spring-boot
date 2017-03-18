@@ -11,33 +11,37 @@
  */
 package com.github.zhanhb.ckfinder.connector;
 
-import com.github.zhanhb.ckfinder.connector.configuration.Constants;
+import com.github.zhanhb.ckfinder.connector.configuration.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
-import com.github.zhanhb.ckfinder.connector.errors.ErrorHandler;
-import com.github.zhanhb.ckfinder.connector.errors.XMLErrorHandler;
+import com.github.zhanhb.ckfinder.connector.errors.ExceptionHandler;
+import com.github.zhanhb.ckfinder.connector.errors.FallbackExceptionHandler;
+import com.github.zhanhb.ckfinder.connector.errors.XmlExceptionHandler;
 import com.github.zhanhb.ckfinder.connector.handlers.command.Command;
 import com.github.zhanhb.ckfinder.connector.handlers.command.FileUploadCommand;
 import com.github.zhanhb.ckfinder.connector.handlers.command.IPostCommand;
 import com.github.zhanhb.ckfinder.connector.handlers.command.XmlCommand;
 import java.io.IOException;
+import java.util.Objects;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
  * Main connector servlet for handling CKFinder requests.
  */
-@RequiredArgsConstructor
 @Slf4j
 public class ConnectorServlet extends HttpServlet {
 
   private static final long serialVersionUID = 2960665641425153638L;
 
   private final IConfiguration configuration;
+
+  public ConnectorServlet(IConfiguration configuration) {
+    this.configuration = Objects.requireNonNull(configuration);
+  }
 
   /**
    * Handling get requests.
@@ -76,43 +80,44 @@ public class ConnectorServlet extends HttpServlet {
    * @param response response
    * @param post if it's post command.
    * @throws ServletException when error occurs.
+   * @throws java.io.IOException
    */
   private void processRequest(HttpServletRequest request,
           HttpServletResponse response, boolean post)
           throws ServletException, IOException {
     request.setCharacterEncoding("UTF-8");
     String commandName = request.getParameter("command");
-    Command<?> command = null;
+    ExceptionHandler handler = XmlExceptionHandler.INSTANCE;
 
     try {
       if (commandName == null || commandName.isEmpty()) {
-        throw new ConnectorException(
-                Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_COMMAND);
+        throw new ConnectorException(ConnectorError.INVALID_COMMAND);
       }
 
-      command = configuration.getCommandFactory().getCommand(commandName);
-      if (command != null) {
-        // checks if command should go via POST request or it's a post request
-        // and it's not upload command
-        Class<?> commandClass = command.getClass();
-        if ((IPostCommand.class.isAssignableFrom(commandClass) || post)
-                && !FileUploadCommand.class.isAssignableFrom(commandClass)) {
-          checkPostRequest(request);
-        }
-        command.runCommand(request, response, configuration);
-      } else {
-        throw new ConnectorException(
-                Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_COMMAND);
+      Command<?> command = configuration.getCommandFactory().getCommand(commandName);
+      if (command == null) {
+        throw new ConnectorException(ConnectorError.INVALID_COMMAND);
       }
-
-    } catch (RuntimeException | Error e) {
+      if (command instanceof ExceptionHandler) {
+        handler = (ExceptionHandler) command;
+      } else if (!(command instanceof XmlCommand)) {
+        handler = FallbackExceptionHandler.INSTANCE;
+      }
+      // checks if command should go via POST request or it's a post request
+      // and it's not upload command
+      Class<?> commandClass = command.getClass();
+      if ((IPostCommand.class.isAssignableFrom(commandClass) || post)
+              && !FileUploadCommand.class.isAssignableFrom(commandClass)) {
+        checkPostRequest(request);
+      }
+      command.runCommand(request, response, configuration);
+    } catch (RuntimeException e) {
       log.error("", e);
-      handleError(new ConnectorException(
-              Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_COMMAND),
-              configuration, request, response, command);
+      handleException(new ConnectorException(ConnectorError.INVALID_COMMAND),
+              configuration, request, response, handler);
     } catch (ConnectorException e) {
       log.error("", e);
-      handleError(e, configuration, request, response, command);
+      handleException(e, configuration, request, response, handler);
     }
   }
 
@@ -125,8 +130,7 @@ public class ConnectorServlet extends HttpServlet {
   private void checkPostRequest(HttpServletRequest request)
           throws ConnectorException {
     if (!"true".equals(request.getParameter("CKFinderCommand"))) {
-      throw new ConnectorException(
-              Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
+      throw new ConnectorException(ConnectorError.INVALID_REQUEST);
     }
   }
 
@@ -137,17 +141,13 @@ public class ConnectorServlet extends HttpServlet {
    * @param request request
    * @param response response
    * @param configuration connector configuration
-   * @throws ServletException when error handling fails.
-   * @param command current command
+   * @param handler exception handler
+   * @throws java.io.IOException
    */
-  private void handleError(ConnectorException e, IConfiguration configuration,
+  private void handleException(ConnectorException e, IConfiguration configuration,
           HttpServletRequest request, HttpServletResponse response,
-          Command<?> command) throws IOException {
-    if (command == null || command instanceof XmlCommand) {
-      XMLErrorHandler.INSTANCE.handleException(request, response, configuration, e);
-    } else {
-      ErrorHandler.INSTANCE.handleException(request, response, configuration, e);
-    }
+          ExceptionHandler handler) throws IOException {
+    handler.handleException(request, response, configuration, e);
   }
 
 }

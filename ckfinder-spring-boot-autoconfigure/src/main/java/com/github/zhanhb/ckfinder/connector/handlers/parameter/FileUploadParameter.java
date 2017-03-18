@@ -1,5 +1,6 @@
 package com.github.zhanhb.ckfinder.connector.handlers.parameter;
 
+import com.github.zhanhb.ckfinder.connector.configuration.ConnectorError;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -42,7 +43,7 @@ public class FileUploadParameter extends Parameter {
   /**
    * Error code number.
    */
-  private int errorCode;
+  private ConnectorError errorCode;
   /**
    * Custom error message.
    */

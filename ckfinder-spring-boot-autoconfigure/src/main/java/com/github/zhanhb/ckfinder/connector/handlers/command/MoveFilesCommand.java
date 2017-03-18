@@ -11,6 +11,7 @@
  */
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
+import com.github.zhanhb.ckfinder.connector.configuration.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.configuration.Constants;
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
 import com.github.zhanhb.ckfinder.connector.data.FilePostParam;
@@ -49,6 +50,7 @@ public class MoveFilesCommand extends ErrorListXmlCommand<MoveFilesParameter> im
    * creates move file XML node.
    *
    * @param rootElement XML root element.
+   * @param param
    */
   private void createMoveFielsNode(Connector.Builder rootElement, MoveFilesParameter param) {
     rootElement.moveFiles(MoveFiles.builder()
@@ -58,82 +60,77 @@ public class MoveFilesCommand extends ErrorListXmlCommand<MoveFilesParameter> im
   }
 
   @Override
-  protected int getDataForXml(MoveFilesParameter param, IConfiguration configuration)
+  protected ConnectorError getDataForXml(MoveFilesParameter param, IConfiguration configuration)
           throws ConnectorException {
     if (param.getType() == null) {
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE);
+      throw new ConnectorException(ConnectorError.INVALID_TYPE);
     }
 
     if (!configuration.getAccessControl().hasPermission(param.getType().getName(),
             param.getCurrentFolder(),
             param.getUserRole(),
-            AccessControl.CKFINDER_CONNECTOR_ACL_FILE_RENAME
-            | AccessControl.CKFINDER_CONNECTOR_ACL_FILE_DELETE
-            | AccessControl.CKFINDER_CONNECTOR_ACL_FILE_UPLOAD)) {
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED);
+            AccessControl.FILE_RENAME
+            | AccessControl.FILE_DELETE
+            | AccessControl.FILE_UPLOAD)) {
+      param.throwException(ConnectorError.UNAUTHORIZED);
     }
 
-    try {
-      return moveFiles(param, configuration);
-    } catch (Exception e) {
-      log.error("", e);
-    }
-    //this code should never be reached
-    return Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNKNOWN;
-
+    return moveFiles(param, configuration);
   }
 
   /**
    * move files.
    *
+   * @param param
+   * @param configuration
    * @return error code.
    */
-  private int moveFiles(MoveFilesParameter param, IConfiguration configuration) {
+  private ConnectorError moveFiles(MoveFilesParameter param, IConfiguration configuration) {
     param.setFilesMoved(0);
     param.setAddMoveNode(false);
     for (FilePostParam file : param.getFiles()) {
 
-      if (!FileUtils.isFileNameInvalid(file.getName())) {
-        return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST;
+      if (!FileUtils.isFileNameValid(file.getName())) {
+        return ConnectorError.INVALID_REQUEST;
       }
       if (Pattern.compile(Constants.INVALID_PATH_REGEX).matcher(
               file.getFolder()).find()) {
-        return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST;
+        return ConnectorError.INVALID_REQUEST;
       }
 
       if (file.getType() == null) {
-        return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST;
+        return ConnectorError.INVALID_REQUEST;
       }
 
       if (file.getFolder() == null || file.getFolder().isEmpty()) {
-        return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST;
+        return ConnectorError.INVALID_REQUEST;
       }
-      if (!FileUtils.isFileExtensionAllwed(file.getName(), param.getType())) {
-        param.appendErrorNodeChild(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_EXTENSION,
+      if (!FileUtils.isFileExtensionAllowed(file.getName(), param.getType())) {
+        param.appendErrorNodeChild(ConnectorError.INVALID_EXTENSION,
                 file.getName(), file.getFolder(), file.getType().getName());
         continue;
       }
 
-      if (!param.getType().getName().equals(file.getType().getName())) {
-        if (!FileUtils.isFileExtensionAllwed(file.getName(), file.getType())) {
-          param.appendErrorNodeChild(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_EXTENSION,
+      if (param.getType() != file.getType()) {
+        if (!FileUtils.isFileExtensionAllowed(file.getName(), file.getType())) {
+          param.appendErrorNodeChild(ConnectorError.INVALID_EXTENSION,
                   file.getName(), file.getFolder(), file.getType().getName());
           continue;
         }
       }
 
       if (FileUtils.isFileHidden(file.getName(), configuration)) {
-        return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST;
+        return ConnectorError.INVALID_REQUEST;
       }
 
       if (FileUtils.isDirectoryHidden(file.getFolder(), configuration)) {
-        return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST;
+        return ConnectorError.INVALID_REQUEST;
       }
 
       if (!configuration.getAccessControl().hasPermission(file.getType().getName(), file.getFolder(),
               param.getUserRole(),
-              AccessControl.CKFINDER_CONNECTOR_ACL_FILE_VIEW)) {
-        return Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED;
+              AccessControl.FILE_VIEW)) {
+        return ConnectorError.UNAUTHORIZED;
       }
       Path sourceFile = Paths.get(file.getType().getPath(),
               file.getFolder(), file.getName());
@@ -144,36 +141,37 @@ public class MoveFilesCommand extends ErrorListXmlCommand<MoveFilesParameter> im
               file.getFolder(), file.getName());
       try {
         if (!Files.isRegularFile(sourceFile)) {
-          param.appendErrorNodeChild(Constants.Errors.CKFINDER_CONNECTOR_ERROR_FILE_NOT_FOUND,
+          param.appendErrorNodeChild(ConnectorError.FILE_NOT_FOUND,
                   file.getName(), file.getFolder(), file.getType().getName());
           continue;
         }
-        if (!param.getType().getName().equals(file.getType().getName())) {
+        if (param.getType() != file.getType()) {
           long maxSize = param.getType().getMaxSize();
           if (maxSize != 0 && maxSize < Files.size(sourceFile)) {
-            param.appendErrorNodeChild(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UPLOADED_TOO_BIG,
+            param.appendErrorNodeChild(ConnectorError.UPLOADED_TOO_BIG,
                     file.getName(), file.getFolder(), file.getType().getName());
             continue;
           }
+          // fail through
         }
         if (sourceFile.equals(destFile)) {
-          param.appendErrorNodeChild(Constants.Errors.CKFINDER_CONNECTOR_ERROR_SOURCE_AND_TARGET_PATH_EQUAL,
+          param.appendErrorNodeChild(ConnectorError.SOURCE_AND_TARGET_PATH_EQUAL,
                   file.getName(), file.getFolder(), file.getType().getName());
-        } else if (Files.exists(destFile)) {
-          if (file.getOptions() != null
-                  && file.getOptions().contains("overwrite")) {
+          continue;
+        }
+        if (Files.exists(destFile)) {
+          if (file.getOptions() != null && file.getOptions().contains("overwrite")) {
             if (!handleOverwrite(sourceFile, destFile)) {
-              param.appendErrorNodeChild(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED,
+              param.appendErrorNodeChild(ConnectorError.ACCESS_DENIED,
                       file.getName(), file.getFolder(),
                       file.getType().getName());
             } else {
               param.filesMovedPlus();
               FileUtils.delete(sourceThumb);
             }
-          } else if (file.getOptions() != null
-                  && file.getOptions().contains("autorename")) {
+          } else if (file.getOptions() != null && file.getOptions().contains("autorename")) {
             if (!handleAutoRename(sourceFile, destFile)) {
-              param.appendErrorNodeChild(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED,
+              param.appendErrorNodeChild(ConnectorError.ACCESS_DENIED,
                       file.getName(), file.getFolder(),
                       file.getType().getName());
             } else {
@@ -181,26 +179,25 @@ public class MoveFilesCommand extends ErrorListXmlCommand<MoveFilesParameter> im
               FileUtils.delete(sourceThumb);
             }
           } else {
-            param.appendErrorNodeChild(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ALREADY_EXIST,
+            param.appendErrorNodeChild(ConnectorError.ALREADY_EXIST,
                     file.getName(), file.getFolder(), file.getType().getName());
           }
-        } else if (FileUtils.copyFromSourceToDestFile(sourceFile, destFile,
-                true)) {
+        } else if (FileUtils.copyFromSourceToDestFile(sourceFile, destFile, true)) {
           param.filesMovedPlus();
           moveThumb(file, param, configuration);
         }
       } catch (SecurityException | IOException e) {
         log.error("", e);
-        param.appendErrorNodeChild(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED,
+        param.appendErrorNodeChild(ConnectorError.ACCESS_DENIED,
                 file.getName(), file.getFolder(), file.getType().getName());
       }
 
     }
     param.setAddMoveNode(true);
-    if (param.hasErrors()) {
-      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_MOVE_FAILED;
+    if (param.hasError()) {
+      return ConnectorError.MOVE_FAILED;
     } else {
-      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_NONE;
+      return null;
     }
   }
 
@@ -226,8 +223,8 @@ public class MoveFilesCommand extends ErrorListXmlCommand<MoveFilesParameter> im
         // can't be in one if=, because when error in
         // copy file occurs then it will be infinity loop
         log.debug("prepare move file '{}' to '{}'", sourceFile, newDestFile);
-        return (FileUtils.copyFromSourceToDestFile(sourceFile,
-                newDestFile, true));
+        return FileUtils.copyFromSourceToDestFile(sourceFile,
+                newDestFile, true);
       }
     }
   }
@@ -251,6 +248,8 @@ public class MoveFilesCommand extends ErrorListXmlCommand<MoveFilesParameter> im
    * move thumb file.
    *
    * @param file file to move.
+   * @param param
+   * @param configuration
    * @throws IOException when ioerror occurs
    */
   private void moveThumb(FilePostParam file, MoveFilesParameter param, IConfiguration configuration) throws IOException {

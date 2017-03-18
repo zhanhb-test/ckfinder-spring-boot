@@ -11,7 +11,7 @@
  */
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
-import com.github.zhanhb.ckfinder.connector.configuration.Constants;
+import com.github.zhanhb.ckfinder.connector.configuration.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.ErrorListXmlParameter;
@@ -36,28 +36,28 @@ public class DeleteFolderCommand extends BaseXmlCommand<ErrorListXmlParameter> i
   @Override
   protected void createXml(Connector.Builder rootElement, ErrorListXmlParameter param, IConfiguration configuration) throws ConnectorException {
     if (param.getType() == null) {
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE);
+      throw new ConnectorException(ConnectorError.INVALID_TYPE);
     }
 
     if (!configuration.getAccessControl().hasPermission(param.getType().getName(),
             param.getCurrentFolder(),
             param.getUserRole(),
-            AccessControl.CKFINDER_CONNECTOR_ACL_FOLDER_DELETE)) {
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED);
+            AccessControl.FOLDER_DELETE)) {
+      param.throwException(ConnectorError.UNAUTHORIZED);
     }
     if (param.getCurrentFolder().equals("/")) {
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
+      param.throwException(ConnectorError.INVALID_REQUEST);
     }
 
     if (FileUtils.isDirectoryHidden(param.getCurrentFolder(), configuration)) {
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
+      param.throwException(ConnectorError.INVALID_REQUEST);
     }
 
     Path dir = Paths.get(param.getType().getPath(), param.getCurrentFolder());
 
     try {
       if (!Files.isDirectory(dir)) {
-        param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_FOLDER_NOT_FOUND);
+        param.throwException(ConnectorError.FOLDER_NOT_FOUND);
       }
 
       if (FileUtils.delete(dir)) {
@@ -65,11 +65,11 @@ public class DeleteFolderCommand extends BaseXmlCommand<ErrorListXmlParameter> i
                 param.getType().getName(), param.getCurrentFolder());
         FileUtils.delete(thumbDir);
       } else {
-        param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED);
+        param.throwException(ConnectorError.ACCESS_DENIED);
       }
     } catch (SecurityException e) {
       log.error("", e);
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED);
+      param.throwException(ConnectorError.ACCESS_DENIED);
     }
 
   }

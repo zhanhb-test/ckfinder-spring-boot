@@ -18,7 +18,7 @@ import javax.xml.bind.JAXBException;
 /**
  * Class to create XML document.
  */
-public enum XMLCreator {
+public enum XmlCreator {
   INSTANCE;
 
   public void writeTo(Object obj, Writer writer) {

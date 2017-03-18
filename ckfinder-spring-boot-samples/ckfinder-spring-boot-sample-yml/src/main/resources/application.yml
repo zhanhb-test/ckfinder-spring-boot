@@ -57,8 +57,8 @@ ckfinder:
   secure-image-uploads: true
   html-extensions: html,htm,xml,js
   force-ascii: false
-  hide-folders: '.*,CVS'
-  hide-files: '.*'
+  hidden-folders: '.*,CVS'
+  hidden-files: '.*'
   watermark:
     enabled: false
     margin-bottom: 0

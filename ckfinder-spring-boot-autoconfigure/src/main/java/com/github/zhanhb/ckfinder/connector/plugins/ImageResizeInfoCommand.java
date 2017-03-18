@@ -11,7 +11,7 @@
  */
 package com.github.zhanhb.ckfinder.connector.plugins;
 
-import com.github.zhanhb.ckfinder.connector.configuration.Constants;
+import com.github.zhanhb.ckfinder.connector.configuration.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.command.BaseXmlCommand;
@@ -40,23 +40,23 @@ public class ImageResizeInfoCommand extends BaseXmlCommand<ImageResizeInfoParame
   @Override
   protected void createXml(Connector.Builder rootElement, ImageResizeInfoParameter param, IConfiguration configuration) throws ConnectorException {
     if (param.getType() == null) {
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE);
+      throw new ConnectorException(ConnectorError.INVALID_TYPE);
     }
 
     if (!configuration.getAccessControl().hasPermission(param.getType().getName(),
             param.getCurrentFolder(), param.getUserRole(),
-            AccessControl.CKFINDER_CONNECTOR_ACL_FILE_VIEW)) {
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED);
+            AccessControl.FILE_VIEW)) {
+      param.throwException(ConnectorError.UNAUTHORIZED);
     }
 
     if (param.getFileName() == null || param.getFileName().isEmpty()
-            || !FileUtils.isFileNameInvalid(param.getFileName())
+            || !FileUtils.isFileNameValid(param.getFileName())
             || FileUtils.isFileHidden(param.getFileName(), configuration)) {
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
+      param.throwException(ConnectorError.INVALID_REQUEST);
     }
 
-    if (!FileUtils.isFileExtensionAllwed(param.getFileName(), param.getType())) {
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
+    if (!FileUtils.isFileExtensionAllowed(param.getFileName(), param.getType())) {
+      param.throwException(ConnectorError.INVALID_REQUEST);
     }
 
     Path imageFile = Paths.get(param.getType().getPath(),
@@ -65,7 +65,7 @@ public class ImageResizeInfoCommand extends BaseXmlCommand<ImageResizeInfoParame
 
     try {
       if (!Files.isRegularFile(imageFile)) {
-        param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_FILE_NOT_FOUND);
+        param.throwException(ConnectorError.FILE_NOT_FOUND);
       }
 
       BufferedImage image;
@@ -76,7 +76,7 @@ public class ImageResizeInfoCommand extends BaseXmlCommand<ImageResizeInfoParame
       param.setImageHeight(image.getHeight());
     } catch (SecurityException | IOException e) {
       log.error("", e);
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED);
+      param.throwException(ConnectorError.ACCESS_DENIED);
     }
     createImageInfoNode(rootElement, param);
   }

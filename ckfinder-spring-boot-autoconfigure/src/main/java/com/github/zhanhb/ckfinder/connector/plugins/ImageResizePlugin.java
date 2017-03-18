@@ -11,7 +11,6 @@
  */
 package com.github.zhanhb.ckfinder.connector.plugins;
 
-import com.github.zhanhb.ckfinder.connector.configuration.CommandFactoryBuilder;
 import com.github.zhanhb.ckfinder.connector.configuration.Plugin;
 import com.github.zhanhb.ckfinder.connector.configuration.PluginRegister;
 import java.util.Map;
@@ -23,14 +22,10 @@ public class ImageResizePlugin extends Plugin {
   private final Map<String, String> params;
 
   @Override
-  public void register(PluginRegister register) {
-    register.addName("imageresize");
-    register.addPluginInfoRegister(new ImageResizeRegister(params));
-  }
-
-  @Override
-  protected void registerCommands(CommandFactoryBuilder factory) {
-    factory.registerCommands(new ImageResizeCommand(params),
+  public void regist(PluginRegister register) {
+    register.addName("imageresize")
+            .addPluginInfoRegister(new ImageResizeRegister(params))
+            .registCommands(new ImageResizeCommand(params),
             new ImageResizeInfoCommand());
   }
 

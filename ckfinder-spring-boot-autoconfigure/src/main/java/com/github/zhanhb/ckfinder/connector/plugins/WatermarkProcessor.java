@@ -32,9 +32,9 @@ public class WatermarkProcessor implements FileUploadListener {
   private final WatermarkSettings settings;
 
   @Override
-  public void onFileUploadComplete(FileUploadEvent param, IConfiguration configuration) {
+  public void onFileUploadComplete(FileUploadEvent event, IConfiguration configuration) {
     try {
-      final Path originalFile = param.getFile();
+      final Path originalFile = event.getFile();
       final WatermarkPosition position = new WatermarkPosition(settings.getMarginBottom(), settings.getMarginRight());
       BufferedImage watermark = getWatermakImage(settings);
       if (watermark != null) {

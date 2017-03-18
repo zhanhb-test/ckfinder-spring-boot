@@ -13,14 +13,12 @@ package com.github.zhanhb.ckfinder.connector.configuration;
 
 import lombok.Builder;
 import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * Path builder that creates default values of baseDir and baseURL.
  */
 @Builder(builderClassName = "Builder")
 @Getter
-@Slf4j
 public class DefaultPathBuilder implements IBasePathBuilder {
 
   private final String baseDir;

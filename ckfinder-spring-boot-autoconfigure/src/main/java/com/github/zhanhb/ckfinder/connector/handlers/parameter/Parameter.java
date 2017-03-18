@@ -1,5 +1,6 @@
 package com.github.zhanhb.ckfinder.connector.handlers.parameter;
 
+import com.github.zhanhb.ckfinder.connector.configuration.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.data.ResourceType;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import lombok.Getter;
@@ -11,13 +12,13 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public abstract class Parameter {
+public class Parameter {
 
   private String userRole;
   private String currentFolder;
   private ResourceType type;
 
-  public void throwException(int code) throws ConnectorException {
+  public void throwException(ConnectorError code) throws ConnectorException {
     throw new ConnectorException(this, code);
   }
 

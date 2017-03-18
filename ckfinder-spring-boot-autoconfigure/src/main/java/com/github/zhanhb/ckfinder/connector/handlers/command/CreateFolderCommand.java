@@ -11,7 +11,7 @@
  */
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
-import com.github.zhanhb.ckfinder.connector.configuration.Constants;
+import com.github.zhanhb.ckfinder.connector.configuration.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.CreateFolderParameter;
@@ -47,38 +47,36 @@ public class CreateFolderCommand extends BaseXmlCommand<CreateFolderParameter> i
     checkRequestPathValid(param.getNewFolderName());
 
     if (param.getType() == null) {
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE);
+      throw new ConnectorException(ConnectorError.INVALID_TYPE);
     }
 
     if (!configuration.getAccessControl().hasPermission(param.getType().getName(),
             param.getCurrentFolder(), param.getUserRole(),
-            AccessControl.CKFINDER_CONNECTOR_ACL_FOLDER_CREATE)) {
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED);
+            AccessControl.FOLDER_CREATE)) {
+      param.throwException(ConnectorError.UNAUTHORIZED);
     }
 
     if (configuration.isForceAscii()) {
-      param.setNewFolderName(FileUtils.convertToASCII(param.getNewFolderName()));
+      param.setNewFolderName(FileUtils.convertToAscii(param.getNewFolderName()));
     }
 
-    if (!FileUtils.isFolderNameInvalid(param.getNewFolderName(), configuration)) {
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_NAME);
+    if (!FileUtils.isFolderNameValid(param.getNewFolderName(), configuration)) {
+      param.throwException(ConnectorError.INVALID_NAME);
     }
     if (FileUtils.isDirectoryHidden(param.getCurrentFolder(), configuration)) {
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
+      param.throwException(ConnectorError.INVALID_REQUEST);
     }
     if (FileUtils.isDirectoryHidden(param.getNewFolderName(), configuration)) {
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_NAME);
+      param.throwException(ConnectorError.INVALID_NAME);
     }
 
     try {
-      if (createFolder(param)) {
-      } else {
-        param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED);
+      if (!createFolder(param)) {
+        param.throwException(ConnectorError.UNAUTHORIZED);
       }
-
     } catch (SecurityException e) {
       log.error("", e);
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED);
+      param.throwException(ConnectorError.ACCESS_DENIED);
     }
     rootElement.newFolder(NewFolder.builder()
             .name(param.getNewFolderName())
@@ -89,6 +87,7 @@ public class CreateFolderCommand extends BaseXmlCommand<CreateFolderParameter> i
    * creates folder. throws Exception when security problem occurs or folder
    * already exists
    *
+   * @param param
    * @return true if folder is created correctly
    * @throws ConnectorException when error occurs or dir exists
    */
@@ -96,7 +95,7 @@ public class CreateFolderCommand extends BaseXmlCommand<CreateFolderParameter> i
     Path dir = Paths.get(param.getType().getPath(),
             param.getCurrentFolder(), param.getNewFolderName());
     if (Files.exists(dir)) {
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ALREADY_EXIST);
+      param.throwException(ConnectorError.ALREADY_EXIST);
     }
     try {
       Files.createDirectories(dir);

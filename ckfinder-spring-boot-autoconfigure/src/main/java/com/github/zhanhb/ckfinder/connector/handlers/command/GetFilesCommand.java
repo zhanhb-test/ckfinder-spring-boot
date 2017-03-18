@@ -11,7 +11,7 @@
  */
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
-import com.github.zhanhb.ckfinder.connector.configuration.Constants;
+import com.github.zhanhb.ckfinder.connector.configuration.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.GetFilesParameter;
@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
@@ -65,7 +64,7 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
   @Override
   protected void createXml(Connector.Builder rootElement, GetFilesParameter param, IConfiguration configuration) throws ConnectorException {
     if (param.getType() == null) {
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE);
+      throw new ConnectorException(ConnectorError.INVALID_TYPE);
     }
 
     param.setFullCurrentPath(Paths.get(param.getType().getPath(),
@@ -73,32 +72,33 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
 
     if (!configuration.getAccessControl().hasPermission(param.getType().getName(),
             param.getCurrentFolder(), param.getUserRole(),
-            AccessControl.CKFINDER_CONNECTOR_ACL_FILE_VIEW)) {
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED);
+            AccessControl.FILE_VIEW)) {
+      param.throwException(ConnectorError.UNAUTHORIZED);
     }
 
     Path dir = Paths.get(param.getFullCurrentPath());
     try {
-      if (!Files.exists(dir)) {
-        param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_FOLDER_NOT_FOUND);
+      if (!Files.isDirectory(dir)) {
+        param.throwException(ConnectorError.FOLDER_NOT_FOUND);
       }
       param.setFiles(FileUtils.findChildrensList(dir, false));
     } catch (IOException | SecurityException e) {
       log.error("", e);
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED);
+      param.throwException(ConnectorError.ACCESS_DENIED);
     }
     filterListByHiddenAndNotAllowed(param, configuration);
-    Collections.sort(param.getFiles());
     createFilesData(rootElement, param, configuration);
   }
 
   /**
    *
    *
+   * @param param
+   * @param configuration
    */
   private void filterListByHiddenAndNotAllowed(GetFilesParameter param, IConfiguration configuration) {
     List<String> tmpFiles = param.getFiles().stream()
-            .filter(file -> (FileUtils.isFileExtensionAllwed(file, param.getType())
+            .filter(file -> (FileUtils.isFileExtensionAllowed(file, param.getType())
             && !FileUtils.isFileHidden(file, configuration)))
             .collect(Collectors.toList());
 
@@ -111,6 +111,8 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
    * creates files data node in response XML.
    *
    * @param rootElement root element from XML.
+   * @param param
+   * @param configuration
    */
   private void createFilesData(Connector.Builder rootElement, GetFilesParameter param, IConfiguration configuration) {
     com.github.zhanhb.ckfinder.connector.handlers.response.Files.Builder files = com.github.zhanhb.ckfinder.connector.handlers.response.Files.builder();
@@ -140,6 +142,8 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
    * gets thumb attribute value.
    *
    * @param file file to check if has thumb.
+   * @param param
+   * @param configuration
    * @return thumb attribute values
    */
   private String createThumbAttr(Path file, GetFilesParameter param, IConfiguration configuration) {
@@ -160,6 +164,7 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
    *
    * @param file file
    * @return file size
+   * @throws java.io.IOException
    */
   private String getSize(Path file) throws IOException {
     long size = Files.size(file);
@@ -173,6 +178,8 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
   /**
    * Check if show thumbs or not (add attr to file node with thumb file name).
    *
+   * @param param
+   * @param configuration
    * @return true if show thumbs
    */
   private boolean isAddThumbsAttr(GetFilesParameter param, IConfiguration configuration) {
@@ -184,6 +191,7 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
   /**
    * checks show thumb request attribute.
    *
+   * @param param
    * @return true if is set.
    */
   private boolean isShowThumbs(GetFilesParameter param) {

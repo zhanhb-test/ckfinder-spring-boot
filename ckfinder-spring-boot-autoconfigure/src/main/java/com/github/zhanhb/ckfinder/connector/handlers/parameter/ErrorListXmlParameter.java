@@ -1,10 +1,9 @@
 package com.github.zhanhb.ckfinder.connector.handlers.parameter;
 
+import com.github.zhanhb.ckfinder.connector.configuration.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.DetailError;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Errors;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  *
@@ -16,18 +15,20 @@ public class ErrorListXmlParameter extends Parameter {
    *
    * errors list.
    */
-  private final List<DetailError> errorList = new ArrayList<>(4);
+  private final Errors.Builder errorsBuilder = Errors.builder();
+  private boolean hasError;
 
   /**
    * save errors node to list.
    *
    * @param errorCode error code
    * @param name file name
-   * @param path current folder
+   * @param folder current folder
    * @param type resource type
    */
-  public void appendErrorNodeChild(int errorCode, String name, String path, String type) {
-    errorList.add(DetailError.builder().type(type).name(name).folder(path).code(errorCode).build());
+  public void appendErrorNodeChild(ConnectorError errorCode, String name, String folder, String type) {
+    errorsBuilder.error(DetailError.builder().type(type).name(name).folder(folder).code(errorCode.getCode()).build());
+    hasError = true;
   }
 
   /**
@@ -35,8 +36,8 @@ public class ErrorListXmlParameter extends Parameter {
    *
    * @return true if there are any errors.
    */
-  public boolean hasErrors() {
-    return errorList.isEmpty();
+  public boolean hasError() {
+    return hasError;
   }
 
   /**
@@ -45,8 +46,8 @@ public class ErrorListXmlParameter extends Parameter {
    * @param rootElement XML root element
    */
   public void addErrorsTo(Connector.Builder rootElement) {
-    if (!errorList.isEmpty()) {
-      rootElement.errors(Errors.builder().errors(errorList).build());
+    if (hasError) {
+      rootElement.errors(errorsBuilder.build());
     }
   }
 

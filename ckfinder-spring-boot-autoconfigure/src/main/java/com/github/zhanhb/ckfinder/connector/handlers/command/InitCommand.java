@@ -11,10 +11,9 @@
  */
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
-import com.github.zhanhb.ckfinder.connector.configuration.Constants;
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
 import com.github.zhanhb.ckfinder.connector.configuration.License;
-import com.github.zhanhb.ckfinder.connector.data.InitCommandEventArgs;
+import com.github.zhanhb.ckfinder.connector.data.InitCommandEvent;
 import com.github.zhanhb.ckfinder.connector.data.ResourceType;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.InitParameter;
@@ -23,6 +22,7 @@ import com.github.zhanhb.ckfinder.connector.handlers.response.ConnectorInfo;
 import com.github.zhanhb.ckfinder.connector.handlers.response.ResourceTypes;
 import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
+import com.github.zhanhb.ckfinder.connector.utils.KeyGenerator;
 import com.github.zhanhb.ckfinder.connector.utils.PathUtils;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -75,6 +75,8 @@ public class InitCommand extends XmlCommand<InitParameter> {
    * Creates connector node in XML.
    *
    * @param rootElement root element in XML
+   * @param param
+   * @param configuration
    */
   private void createConnectorData(Connector.Builder rootElement, InitParameter param, IConfiguration configuration) {
     // connector info
@@ -103,6 +105,7 @@ public class InitCommand extends XmlCommand<InitParameter> {
   /**
    * gets plugins names.
    *
+   * @param configuration
    * @return plugins names.
    */
   private String getPlugins(IConfiguration configuration) {
@@ -112,11 +115,12 @@ public class InitCommand extends XmlCommand<InitParameter> {
   /**
    * checks license key.
    *
+   * @param license
    * @return license name if key is ok, or empty string if not.
    */
   private String getLicenseName(License license) {
     if (validateLicenseKey(license.getKey())) {
-      int index = Constants.CKFINDER_CHARS.indexOf(license.getKey().charAt(0))
+      int index = KeyGenerator.INSTANCE.indexOf(license.getKey().charAt(0))
               % LICENSE_CHAR_NR;
       if (index == 1 || index == 4) {
         return license.getName();
@@ -156,11 +160,12 @@ public class InitCommand extends XmlCommand<InitParameter> {
    * Creates plugins node in XML.
    *
    * @param rootElement root element in XML
+   * @param configuration
    */
   private void createPluginsData(Connector.Builder rootElement, IConfiguration configuration) {
     if (configuration.getEvents() != null) {
-      InitCommandEventArgs args = new InitCommandEventArgs(rootElement);
-      configuration.getEvents().runInitCommand(args, configuration);
+      InitCommandEvent event = new InitCommandEvent(rootElement);
+      configuration.getEvents().runInitCommand(event, configuration);
     }
   }
 
@@ -168,7 +173,9 @@ public class InitCommand extends XmlCommand<InitParameter> {
    * Creates plugins node in XML.
    *
    * @param rootElement root element in XML
-   * @throws Exception when error occurs
+   * @param param
+   * @param configuration
+   * @throws java.io.IOException
    */
   @SuppressWarnings("CollectionWithoutInitialCapacity")
   private void createResouceTypesData(Connector.Builder rootElement, InitParameter param, IConfiguration configuration) throws IOException {
@@ -184,7 +191,7 @@ public class InitCommand extends XmlCommand<InitParameter> {
     for (ResourceType resourceType : types) {
       String key = resourceType.getName();
       if (configuration.getAccessControl().hasPermission(key, "/", param.getUserRole(),
-              AccessControl.CKFINDER_CONNECTOR_ACL_FOLDER_VIEW)) {
+              AccessControl.FOLDER_VIEW)) {
         com.github.zhanhb.ckfinder.connector.handlers.response.ResourceType.Builder childElement = com.github.zhanhb.ckfinder.connector.handlers.response.ResourceType.builder();
         childElement.name(resourceType.getName());
         childElement.acl(configuration.getAccessControl().getAcl(key, "/", param.getUserRole()));
@@ -205,6 +212,7 @@ public class InitCommand extends XmlCommand<InitParameter> {
   /**
    * gets list of types names.
    *
+   * @param configuration
    * @return list of types names.
    */
   private Collection<ResourceType> getTypes(IConfiguration configuration) {
@@ -257,7 +265,7 @@ public class InitCommand extends XmlCommand<InitParameter> {
 
   @Deprecated
   @Override
-  String setCurrentFolder(InitParameter param, HttpServletRequest request) {
+  String getCurrentFolder(HttpServletRequest request) {
     return null;
   }
 

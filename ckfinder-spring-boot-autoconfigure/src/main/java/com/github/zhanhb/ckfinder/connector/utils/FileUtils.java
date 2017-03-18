@@ -16,7 +16,6 @@ import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
 import com.github.zhanhb.ckfinder.connector.data.ResourceType;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -52,22 +51,23 @@ public class FileUtils {
   private static final URLEncoder CONTENT_DISPOSITION = new URLEncoder("!#$&-.^_`|~");
 
   /**
-   * Gets list of children folder or files for dir, according to searchDirs
+   * Gets list of children folder or files for dir, according to searchDirectory
    * param.
    *
    * @param dir folder to search.
-   * @param searchDirs if true method return list of folders, otherwise list of
-   * files.
+   * @param searchDirectory if true method return list of folders, otherwise
+   * list of files.
    * @return list of files or subdirectories in selected directory
    * @throws java.io.IOException
    */
-  public static List<String> findChildrensList(Path dir, boolean searchDirs)
+  public static List<String> findChildrensList(Path dir, boolean searchDirectory)
           throws IOException {
-    DirectoryStream.Filter<Path> filter = searchDirs ? Files::isDirectory : Files::isRegularFile;
+    DirectoryStream.Filter<Path> filter = searchDirectory ? Files::isDirectory : Files::isRegularFile;
     try (DirectoryStream<Path> ds = Files.newDirectoryStream(dir, filter)) {
       return StreamSupport.stream(ds.spliterator(), false)
               .map(Path::getFileName)
               .map(Object::toString)
+              .sorted()
               .collect(Collectors.toList());
     }
   }
@@ -144,18 +144,6 @@ public class FileUtils {
   }
 
   /**
-   * Print file content to outputstream.
-   *
-   * @param file file to be printed.
-   * @param out outputstream.
-   * @throws IOException when io error occurs.
-   */
-  public static void printFileContentToResponse(Path file, OutputStream out)
-          throws IOException {
-    Files.copy(file, out);
-  }
-
-  /**
    *
    * @param sourceFile source file
    * @param destFile destination file
@@ -172,7 +160,6 @@ public class FileUtils {
       Files.copy(sourceFile, destFile, StandardCopyOption.REPLACE_EXISTING);
     }
     return true;
-
   }
 
   /**
@@ -255,7 +242,7 @@ public class FileUtils {
     try {
       DeleteHelper.delete(file);
       return true;
-    } catch (IOException ex) {
+    } catch (IOException | SecurityException ex) {
       return false;
     }
   }
@@ -266,11 +253,11 @@ public class FileUtils {
    * @param fileName file name
    * @return true if file name is correct
    */
-  public static boolean isFileNameInvalid(String fileName) {
+  public static boolean isFileNameValid(String fileName) {
     return !(fileName == null || fileName.isEmpty()
             || fileName.charAt(fileName.length() - 1) == '.'
             || fileName.contains("..")
-            || isFileNameCharacterInvalid(fileName));
+            || hasInvalidCharacter(fileName));
   }
 
   /**
@@ -279,7 +266,7 @@ public class FileUtils {
    * @param fileName file name
    * @return true if it does contain disallowed characters.
    */
-  private static boolean isFileNameCharacterInvalid(String fileName) {
+  private static boolean hasInvalidCharacter(String fileName) {
     return INVALID_FILENAME_PATTERN.matcher(fileName).find();
   }
 
@@ -290,7 +277,7 @@ public class FileUtils {
    * @param type resource type
    * @return 0 if ok, 1 if not ok, 2 if rename required
    */
-  public static boolean isFileExtensionAllwed(String fileName, ResourceType type) {
+  public static boolean isFileExtensionAllowed(String fileName, ResourceType type) {
     if (type == null || fileName == null) {
       return false;
     }
@@ -340,7 +327,7 @@ public class FileUtils {
    * @param fileName file name
    * @return encoded file name
    */
-  public static String convertToASCII(String fileName) {
+  public static String convertToAscii(String fileName) {
     return Utf8AccentsHolder.convert(fileName);
   }
 
@@ -373,7 +360,7 @@ public class FileUtils {
    */
   public static boolean isFileSizeInRange(ResourceType type, long fileSize) {
     final long maxSize = type.getMaxSize();
-    return (maxSize == 0 || maxSize > fileSize);
+    return maxSize == 0 || maxSize > fileSize;
   }
 
   /**
@@ -463,14 +450,12 @@ public class FileUtils {
           Path dir, IConfiguration configuration, String resourceType,
           String currentUserRole) {
     try (DirectoryStream<Path> list = Files.newDirectoryStream(dir, Files::isDirectory)) {
-      if (list != null) {
-        for (Path path : list) {
-          String subDirName = path.getFileName().toString();
-          if (!FileUtils.isDirectoryHidden(subDirName, configuration)
-                  && accessControl.hasPermission(resourceType,
-                          dirPath + subDirName, currentUserRole, AccessControl.CKFINDER_CONNECTOR_ACL_FOLDER_VIEW)) {
-            return true;
-          }
+      for (Path path : list) {
+        String subDirName = path.getFileName().toString();
+        if (!FileUtils.isDirectoryHidden(subDirName, configuration)
+                && accessControl.hasPermission(resourceType,
+                        dirPath + subDirName, currentUserRole, AccessControl.FOLDER_VIEW)) {
+          return true;
         }
       }
     } catch (IOException ex) {
@@ -522,15 +507,15 @@ public class FileUtils {
     return CONTENT_DISPOSITION.encode(fileName);
   }
 
-  public static boolean isFolderNameInvalid(String folderName, IConfiguration configuration) {
+  public static boolean isFolderNameValid(String folderName, IConfiguration configuration) {
     return !((configuration.isDisallowUnsafeCharacters()
             && (folderName.contains(".") || folderName.contains(";")))
-            || FileUtils.isFileNameCharacterInvalid(folderName));
+            || FileUtils.hasInvalidCharacter(folderName));
   }
 
   public static boolean isFileNameInvalid(String fileName, IConfiguration configuration) {
     return !((configuration.isDisallowUnsafeCharacters() && fileName.contains(";"))
-            || !FileUtils.isFileNameInvalid(fileName));
+            || !FileUtils.isFileNameValid(fileName));
   }
 
   public static String backupWithBackSlash(String fileName, String toReplace) {

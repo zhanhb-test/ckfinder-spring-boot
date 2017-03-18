@@ -13,18 +13,20 @@ package com.github.zhanhb.ckfinder.connector.data;
 
 import com.github.zhanhb.ckfinder.connector.configuration.PluginRegister;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.ToString;
 
 /**
  * Event data for {@link PluginRegister#addPluginInfoRegister} event.
  */
-@Getter
-@RequiredArgsConstructor
-@ToString
-public class InitCommandEventArgs {
+public class InitCommandEvent {
 
   private final Connector.Builder connector;
+
+  public InitCommandEvent(Connector.Builder connector) {
+    this.connector = connector;
+  }
+
+  public Connector.Builder getConnector() {
+    return connector;
+  }
 
 }

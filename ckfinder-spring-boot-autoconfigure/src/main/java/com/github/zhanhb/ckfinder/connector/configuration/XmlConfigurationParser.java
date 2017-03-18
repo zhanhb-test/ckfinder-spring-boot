@@ -10,6 +10,7 @@ import com.github.zhanhb.ckfinder.connector.plugins.WatermarkPlugin;
 import com.github.zhanhb.ckfinder.connector.plugins.WatermarkSettings;
 import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
+import com.github.zhanhb.ckfinder.connector.utils.InMemoryAccessController;
 import com.github.zhanhb.ckfinder.connector.utils.PathUtils;
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,7 +24,6 @@ import java.util.StringTokenizer;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.w3c.dom.Document;
@@ -48,7 +48,6 @@ import static com.github.zhanhb.ckfinder.connector.plugins.WatermarkSettings.TRA
  *
  * @author zhanhb
  */
-@Slf4j
 public enum XmlConfigurationParser {
   INSTANCE;
 
@@ -80,7 +79,15 @@ public enum XmlConfigurationParser {
   /**
    * Initializes configuration from XML file.
    *
-   * @throws Exception when error occurs.
+   * @param builder
+   * @param basePathBuilder
+   * @param resourceLoader
+   * @param baseFolder
+   * @param xmlFilePath
+   * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
+   * @throws java.io.IOException
+   * @throws org.xml.sax.SAXException
+   * @throws javax.xml.parsers.ParserConfigurationException
    */
   private void init(Configuration.Builder builder, ResourceLoader resourceLoader,
           String xmlFilePath, String baseFolder, IBasePathBuilder basePathBuilder)
@@ -196,6 +203,9 @@ public enum XmlConfigurationParser {
   /**
    * Returns XML node contents or empty String instead of null if XML node is
    * empty.
+   *
+   * @param childNode
+   * @return
    */
   private String nullNodeToString(Node childNode) {
     String textContent = childNode.getTextContent();
@@ -205,13 +215,15 @@ public enum XmlConfigurationParser {
   /**
    * Gets absolute path to XML configuration file.
    *
+   * @param resourceLoader
+   * @param xmlFilePath
    * @return absolute path to XML configuration file
    * @throws ConnectorException when absolute path cannot be obtained.
    */
   private Resource getFullConfigPath(ResourceLoader resourceLoader, String xmlFilePath) throws ConnectorException {
     Resource resource = resourceLoader.getResource(xmlFilePath);
     if (!resource.exists()) {
-      throw new ConnectorException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_FILE_NOT_FOUND,
+      throw new ConnectorException(ConnectorError.FILE_NOT_FOUND,
               "Configuration file could not be found under specified location.");
     }
     return resource;
@@ -245,6 +257,7 @@ public enum XmlConfigurationParser {
   /**
    * Sets hidden files list defined in XML configuration.
    *
+   * @param builder
    * @param childNodes list of files nodes.
    */
   private void setHiddenFiles(Configuration.Builder builder, NodeList childNodes) {
@@ -262,6 +275,7 @@ public enum XmlConfigurationParser {
   /**
    * Sets hidden folders list defined in XML configuration.
    *
+   * @param builder
    * @param childNodes list of folder nodes.
    */
   private void setHiddenFolders(Configuration.Builder builder, NodeList childNodes) {
@@ -279,10 +293,11 @@ public enum XmlConfigurationParser {
   /**
    * Sets ACL configuration as a list of access control levels.
    *
+   * @param builder
    * @param childNodes nodes with ACL configuration.
    */
   private void setACLs(Configuration.Builder builder, NodeList childNodes) {
-    AccessControl accessControl = new AccessControl();
+    InMemoryAccessController accessControl = new InMemoryAccessController();
     for (int i = 0, j = childNodes.getLength(); i < j; i++) {
       Node childNode = childNodes.item(i);
       if (childNode.getNodeName().equals("accessControl")) {
@@ -323,35 +338,35 @@ public enum XmlConfigurationParser {
           break;
         case "folderView":
           bool = Boolean.parseBoolean(nullNodeToString(childChildNode));
-          index = AccessControl.CKFINDER_CONNECTOR_ACL_FOLDER_VIEW;
+          index = AccessControl.FOLDER_VIEW;
           break;
         case "folderCreate":
           bool = Boolean.parseBoolean(nullNodeToString(childChildNode));
-          index = AccessControl.CKFINDER_CONNECTOR_ACL_FOLDER_CREATE;
+          index = AccessControl.FOLDER_CREATE;
           break;
         case "folderRename":
           bool = Boolean.parseBoolean(nullNodeToString(childChildNode));
-          index = AccessControl.CKFINDER_CONNECTOR_ACL_FOLDER_RENAME;
+          index = AccessControl.FOLDER_RENAME;
           break;
         case "folderDelete":
           bool = Boolean.parseBoolean(nullNodeToString(childChildNode));
-          index = AccessControl.CKFINDER_CONNECTOR_ACL_FOLDER_DELETE;
+          index = AccessControl.FOLDER_DELETE;
           break;
         case "fileView":
           bool = Boolean.parseBoolean(nullNodeToString(childChildNode));
-          index = AccessControl.CKFINDER_CONNECTOR_ACL_FILE_VIEW;
+          index = AccessControl.FILE_VIEW;
           break;
         case "fileUpload":
           bool = Boolean.parseBoolean(nullNodeToString(childChildNode));
-          index = AccessControl.CKFINDER_CONNECTOR_ACL_FILE_UPLOAD;
+          index = AccessControl.FILE_UPLOAD;
           break;
         case "fileRename":
           bool = Boolean.parseBoolean(nullNodeToString(childChildNode));
-          index = AccessControl.CKFINDER_CONNECTOR_ACL_FILE_RENAME;
+          index = AccessControl.FILE_RENAME;
           break;
         case "fileDelete":
           bool = Boolean.parseBoolean(nullNodeToString(childChildNode));
-          index = AccessControl.CKFINDER_CONNECTOR_ACL_FILE_DELETE;
+          index = AccessControl.FILE_DELETE;
           break;
       }
       if (index != 0) {
@@ -381,7 +396,12 @@ public enum XmlConfigurationParser {
   /**
    * creates thumb configuration from XML.
    *
+   * @param builder
    * @param childNodes list of thumb XML nodes
+   * @param basePathBuilder
+   * @param baseFolder
+   * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
+   * @throws java.io.IOException
    */
   private void setThumbs(Configuration.Builder builder, NodeList childNodes, String baseFolder, IBasePathBuilder basePathBuilder) throws ConnectorException, IOException {
     for (int i = 0, j = childNodes.getLength(); i < j; i++) {
@@ -398,10 +418,9 @@ public enum XmlConfigurationParser {
           String thumbsDir = nullNodeToString(childNode);
           Path file = Paths.get(thumbsDir.replace(Constants.BASE_DIR_PLACEHOLDER, baseFolder));
           if (file == null) {
-            throw new ConnectorException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_FOLDER_NOT_FOUND,
+            throw new ConnectorException(ConnectorError.FOLDER_NOT_FOUND,
                     "Thumbs directory could not be created using specified path.");
           }
-          log.debug("{}", file);
           Files.createDirectories(file);
           builder.thumbsPath(file.toAbsolutePath().toString());
 
@@ -439,7 +458,11 @@ public enum XmlConfigurationParser {
    * Creates resource types configuration from XML configuration file (from XML
    * element 'types').
    *
+   * @param builder
    * @param doc XML document.
+   * @param basePathBuilder
+   * @throws java.io.IOException
+   * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
    */
   private void setTypes(Configuration.Builder builder, Document doc, IBasePathBuilder basePathBuilder)
           throws IOException, ConnectorException {
@@ -461,7 +484,10 @@ public enum XmlConfigurationParser {
    *
    * @param typeName name of type.
    * @param childNodes type XML child nodes.
+   * @param basePathBuilder
    * @return resource type
+   * @throws java.io.IOException
+   * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
    */
   private ResourceType createTypeFromXml(String typeName,
           NodeList childNodes, IBasePathBuilder basePathBuilder) throws IOException, ConnectorException {
@@ -507,7 +533,7 @@ public enum XmlConfigurationParser {
     }
     Path p = Paths.get(path);
     if (p == null) {
-      throw new ConnectorException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_FOLDER_NOT_FOUND,
+      throw new ConnectorException(ConnectorError.FOLDER_NOT_FOUND,
               "Resource directory could not be created using specified path.");
     }
 
@@ -519,6 +545,7 @@ public enum XmlConfigurationParser {
   /**
    * parses max size value from config (ex. 16M to number of bytes).
    *
+   * @param maxSize
    * @return number of bytes in max size.
    */
   private long parseMaxSize(String maxSize) {
@@ -545,7 +572,9 @@ public enum XmlConfigurationParser {
   /**
    * Sets plugins list from XML configuration file.
    *
+   * @param builder
    * @param childNode child of XML node 'plugins'.
+   * @param resourceLoader
    */
   private void setPlugins(Configuration.Builder builder, Node childNode, ResourceLoader resourceLoader) {
     NodeList nodeList = childNode.getChildNodes();
@@ -664,7 +693,7 @@ public enum XmlConfigurationParser {
     if (!Files.exists(baseDir)) {
       FileUtils.createPath(baseDir, false);
     }
-    return PathUtils.addSlashToEnd(baseFolder);
+    return baseFolder;
   }
 
 }

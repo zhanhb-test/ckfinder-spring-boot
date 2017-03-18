@@ -11,7 +11,7 @@
  */
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
-import com.github.zhanhb.ckfinder.connector.configuration.Constants;
+import com.github.zhanhb.ckfinder.connector.configuration.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.RenameFolderParameter;
@@ -48,50 +48,50 @@ public class RenameFolderCommand extends BaseXmlCommand<RenameFolderParameter> i
     checkRequestPathValid(param.getNewFolderName());
 
     if (param.getType() == null) {
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE);
+      throw new ConnectorException(ConnectorError.INVALID_TYPE);
     }
 
     if (!configuration.getAccessControl().hasPermission(param.getType().getName(),
             param.getCurrentFolder(),
             param.getUserRole(),
-            AccessControl.CKFINDER_CONNECTOR_ACL_FOLDER_RENAME)) {
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED);
+            AccessControl.FOLDER_RENAME)) {
+      param.throwException(ConnectorError.UNAUTHORIZED);
     }
 
     if (configuration.isForceAscii()) {
-      param.setNewFolderName(FileUtils.convertToASCII(param.getNewFolderName()));
+      param.setNewFolderName(FileUtils.convertToAscii(param.getNewFolderName()));
     }
 
     if (FileUtils.isDirectoryHidden(param.getNewFolderName(), configuration)
-            || !FileUtils.isFolderNameInvalid(param.getNewFolderName(), configuration)) {
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_NAME);
+            || !FileUtils.isFolderNameValid(param.getNewFolderName(), configuration)) {
+      param.throwException(ConnectorError.INVALID_NAME);
     }
 
     if (param.getCurrentFolder().equals("/")) {
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
+      param.throwException(ConnectorError.INVALID_REQUEST);
     }
 
     Path dir = Paths.get(param.getType().getPath(),
             param.getCurrentFolder());
     try {
       if (!Files.isDirectory(dir)) {
-        param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
+        param.throwException(ConnectorError.INVALID_REQUEST);
       }
       setNewFolder(param);
       Path newDir = Paths.get(param.getType().getPath(),
               param.getNewFolderPath());
       if (Files.exists(newDir)) {
-        param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ALREADY_EXIST);
+        param.throwException(ConnectorError.ALREADY_EXIST);
       }
       try {
         Files.move(dir, newDir);
         renameThumb(param, configuration);
       } catch (IOException ex) {
-        param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED);
+        param.throwException(ConnectorError.ACCESS_DENIED);
       }
     } catch (SecurityException e) {
       log.error("", e);
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED);
+      param.throwException(ConnectorError.ACCESS_DENIED);
     }
     rootElement.renamedFolder(RenamedFolder.builder()
             .newName(param.getNewFolderName())
@@ -102,6 +102,10 @@ public class RenameFolderCommand extends BaseXmlCommand<RenameFolderParameter> i
 
   /**
    * renames thumb folder.
+   *
+   * @param param
+   * @param configuration
+   * @throws java.io.IOException
    */
   private void renameThumb(RenameFolderParameter param, IConfiguration configuration) throws IOException {
     Path thumbDir = Paths.get(configuration.getThumbsPath(),
@@ -116,6 +120,8 @@ public class RenameFolderCommand extends BaseXmlCommand<RenameFolderParameter> i
 
   /**
    * sets new folder name.
+   *
+   * @param param
    */
   private void setNewFolder(RenameFolderParameter param) {
     String tmp1 = param.getCurrentFolder().substring(0,

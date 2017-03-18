@@ -11,7 +11,7 @@
  */
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
-import com.github.zhanhb.ckfinder.connector.configuration.Constants;
+import com.github.zhanhb.ckfinder.connector.configuration.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
 import com.github.zhanhb.ckfinder.connector.data.FileUploadEvent;
 import com.github.zhanhb.ckfinder.connector.data.ResourceType;
@@ -64,14 +64,23 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
   /**
    * Executes file upload command.
    *
+   * @param param
+   * @param request
+   * @param response
+   * @param configuration
    * @throws ConnectorException when error occurs.
    */
   @Override
   @SuppressWarnings("FinalMethod")
-  final void execute(FileUploadParameter param, HttpServletRequest request, HttpServletResponse response, IConfiguration configuration) throws ConnectorException {
+  final void execute(FileUploadParameter param, HttpServletRequest request,
+          HttpServletResponse response, IConfiguration configuration) throws ConnectorException, IOException {
+    if (param.getErrorCode() == null) {
+      param.setUploaded(uploadFile(request, param, configuration));
+    }
+
     try {
-      String errorMsg = param.getErrorCode() == Constants.Errors.CKFINDER_CONNECTOR_ERROR_NONE ? "" : (param.getErrorCode() == Constants.Errors.CKFINDER_CONNECTOR_ERROR_CUSTOM_ERROR ? param.getCustomErrorMsg()
-              : ErrorUtils.INSTANCE.getErrorMsgByLangAndCode(param.getLangCode(), param.getErrorCode()));
+      String errorMsg = param.getErrorCode() == null ? "":  param.getErrorCode() == ConnectorError.CUSTOM_ERROR ? param.getCustomErrorMsg()
+              : ErrorUtils.INSTANCE.getErrorMsgByLangAndCode(param.getLangCode(), param.getErrorCode().getCode());
       errorMsg = errorMsg.replace("%1", param.getNewFileName());
       String path = "";
 
@@ -86,14 +95,14 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
       if ("txt".equals(param.getResponseType())) {
         writer.write(param.getNewFileName() + "|" + errorMsg);
       } else if (checkFuncNum(param)) {
-        handleOnUploadCompleteCallFuncResponse(writer, errorMsg, path, param, configuration);
+        handleOnUploadCompleteCallFuncResponse(writer, errorMsg, path, param);
       } else {
-        handleOnUploadCompleteResponse(writer, errorMsg, param, configuration);
+        handleOnUploadCompleteResponse(writer, errorMsg, param);
       }
       writer.flush();
     } catch (IOException | SecurityException e) {
       throw new ConnectorException(
-              Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED, e);
+              ConnectorError.ACCESS_DENIED, e);
     }
   }
 
@@ -114,18 +123,15 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
    * @param errorMsg error message
    * @param path path
    * @param param
-   * @param configuration connector configuration
    * @throws IOException when error occurs.
    */
-  protected void handleOnUploadCompleteCallFuncResponse(Writer out, String errorMsg, String path, FileUploadParameter param, IConfiguration configuration) throws IOException {
+  protected void handleOnUploadCompleteCallFuncResponse(Writer out, String errorMsg, String path, FileUploadParameter param) throws IOException {
     param.setCkFinderFuncNum(param.getCkFinderFuncNum().replaceAll("[^\\d]", ""));
-    out.write("<script type=\"text/javascript\">");
-    out.write("window.parent.CKFinder.tools.callFunction("
+    out.write("<script type=\"text/javascript\">window.parent.CKFinder.tools.callFunction("
             + param.getCkFinderFuncNum() + ", '"
             + path
             + FileUtils.backupWithBackSlash(param.getNewFileName(), "'")
-            + "', '" + errorMsg + "');");
-    out.write("</script>");
+            + "', '" + errorMsg + "');</script>");
   }
 
   /**
@@ -133,19 +139,13 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
    * @param writer out put stream
    * @param errorMsg error message
    * @param param
-   * @param configuration connector configuration
    * @throws IOException when error occurs
    */
-  protected void handleOnUploadCompleteResponse(Writer writer, String errorMsg, FileUploadParameter param, IConfiguration configuration) throws IOException {
-    writer.write("<script type=\"text/javascript\">");
-    writer.write("window.parent.OnUploadCompleted(");
-    writer.write("'" + FileUtils.backupWithBackSlash(param.getNewFileName(), "'") + "'");
-    writer.write(", '"
+  protected void handleOnUploadCompleteResponse(Writer writer, String errorMsg, FileUploadParameter param) throws IOException {
+    writer.write("<script type=\"text/javascript\">window.parent.OnUploadCompleted('" + FileUtils.backupWithBackSlash(param.getNewFileName(), "'") + "', '"
             + (param.getErrorCode()
-            != Constants.Errors.CKFINDER_CONNECTOR_ERROR_NONE ? errorMsg
-                    : "") + "'");
-    writer.write(");");
-    writer.write("</script>");
+            != null ? errorMsg
+                    : "") + "');</script>");
   }
 
   /**
@@ -166,24 +166,21 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
     param.setCkEditorFuncNum(request.getParameter("CKEditorFuncNum"));
     param.setResponseType(request.getParameter("response_type") != null ? request.getParameter("response_type") : request.getParameter("responseType"));
     param.setLangCode(request.getParameter("langCode"));
-
-    if (param.getErrorCode() == Constants.Errors.CKFINDER_CONNECTOR_ERROR_NONE) {
-      param.setUploaded(uploadFile(request, param, configuration));
-    }
-
   }
 
   /**
    * uploads file and saves to file.
    *
    * @param request request
+   * @param param
+   * @param configuration
    * @return true if uploaded correctly.
    */
   private boolean uploadFile(HttpServletRequest request, FileUploadParameter param, IConfiguration configuration) {
     if (!configuration.getAccessControl().hasPermission(param.getType().getName(),
             param.getCurrentFolder(), param.getUserRole(),
-            AccessControl.CKFINDER_CONNECTOR_ACL_FILE_UPLOAD)) {
-      param.setErrorCode(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED);
+            AccessControl.FILE_UPLOAD)) {
+      param.setErrorCode(ConnectorError.UNAUTHORIZED);
       return false;
     }
     return fileUpload(request, param, configuration);
@@ -192,6 +189,8 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
   /**
    *
    * @param request http request
+   * @param param
+   * @param configuration
    * @return true if uploaded correctly
    */
   private boolean fileUpload(HttpServletRequest request, FileUploadParameter param, IConfiguration configuration) {
@@ -214,23 +213,22 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
           multipartResolver.cleanupMultipart(resolveMultipart);
         }
       }
-      throw new ConnectorException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_CUSTOM_ERROR, "No file provided in the request.");
+      throw new ConnectorException(ConnectorError.CUSTOM_ERROR, "No file provided in the request.");
     } catch (ConnectorException e) {
       param.setErrorCode(e.getErrorCode());
-      if (param.getErrorCode() == Constants.Errors.CKFINDER_CONNECTOR_ERROR_CUSTOM_ERROR) {
+      if (param.getErrorCode() == ConnectorError.CUSTOM_ERROR) {
         param.setCustomErrorMsg(e.getMessage());
       }
       return false;
     } catch (MultipartException e) {
       log.debug("catch MultipartException", e);
-      param.setErrorCode(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UPLOADED_TOO_BIG);
+      param.setErrorCode(ConnectorError.UPLOADED_TOO_BIG);
       return false;
     } catch (IOException e) {
       log.debug("catch IOException", e);
-      param.setErrorCode(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED);
+      param.setErrorCode(ConnectorError.ACCESS_DENIED);
       return false;
     }
-
   }
 
   /**
@@ -238,8 +236,11 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
    *
    * @param path path to save file
    * @param item file upload item
+   * @param param
+   * @param configuration
    * @return result of saving, true if saved correctly
-   * @throws Exception when error occurs.
+   * @throws java.io.IOException
+   * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
    */
   private boolean saveTemporaryFile(String path, MultipartFile item, FileUploadParameter param, IConfiguration configuration)
           throws IOException, ConnectorException {
@@ -260,11 +261,11 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
         return true;
       } else {
         Files.deleteIfExists(file);
-        param.setErrorCode(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UPLOADED_TOO_BIG);
+        param.setErrorCode(ConnectorError.UPLOADED_TOO_BIG);
         return false;
       }
     } else {
-      param.setErrorCode(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UPLOADED_TOO_BIG);
+      param.setErrorCode(ConnectorError.UPLOADED_TOO_BIG);
       return false;
     }
   }
@@ -274,6 +275,7 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
    *
    * @param path folder
    * @param name file name
+   * @param param
    * @return new file name.
    */
   private String getFinalFileName(String path, String name, FileUploadParameter param) {
@@ -293,7 +295,7 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
         param.setNewFileName(sb.toString());
         sb.setLength(len);
         file = Paths.get(path, param.getNewFileName());
-        param.setErrorCode(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UPLOADED_FILE_RENAMED);
+        param.setErrorCode(ConnectorError.UPLOADED_FILE_RENAMED);
       } while (Files.exists(file));
     }
     return param.getNewFileName();
@@ -304,6 +306,8 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
    *
    * @param item uploaded item.
    * @param path file path
+   * @param param
+   * @param configuration
    * @return true if validation
    */
   private boolean validateUploadItem(MultipartFile item, String path, FileUploadParameter param, IConfiguration configuration) {
@@ -311,7 +315,7 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
     if (item.getOriginalFilename() != null && item.getOriginalFilename().length() > 0) {
       param.setFileName(getFileItemName(item));
     } else {
-      param.setErrorCode(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UPLOADED_INVALID);
+      param.setErrorCode(ConnectorError.UPLOADED_INVALID);
       return false;
     }
     param.setNewFileName(param.getFileName());
@@ -322,24 +326,24 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
       param.setNewFileName(param.getNewFileName().replace(';', '_'));
     }
     if (configuration.isForceAscii()) {
-      param.setNewFileName(FileUtils.convertToASCII(param.getNewFileName()));
+      param.setNewFileName(FileUtils.convertToAscii(param.getNewFileName()));
     }
     if (!param.getNewFileName().equals(param.getFileName())) {
-      param.setErrorCode(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UPLOADED_INVALID_NAME_RENAMED);
+      param.setErrorCode(ConnectorError.UPLOADED_INVALID_NAME_RENAMED);
     }
 
     if (FileUtils.isDirectoryHidden(param.getCurrentFolder(), configuration)) {
-      param.setErrorCode(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
+      param.setErrorCode(ConnectorError.INVALID_REQUEST);
       return false;
     }
-    if (!FileUtils.isFileNameInvalid(param.getNewFileName())
+    if (!FileUtils.isFileNameValid(param.getNewFileName())
             || FileUtils.isFileHidden(param.getNewFileName(), configuration)) {
-      param.setErrorCode(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_NAME);
+      param.setErrorCode(ConnectorError.INVALID_NAME);
       return false;
     }
     final ResourceType resourceType = param.getType();
-    if (!FileUtils.isFileExtensionAllwed(param.getNewFileName(), resourceType)) {
-      param.setErrorCode(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_EXTENSION);
+    if (!FileUtils.isFileExtensionAllowed(param.getNewFileName(), resourceType)) {
+      param.setErrorCode(ConnectorError.INVALID_EXTENSION);
       return false;
     }
     if (configuration.isCheckDoubleFileExtensions()) {
@@ -350,24 +354,24 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
       Path file = Paths.get(path, getFinalFileName(path, param.getNewFileName(), param));
       if (!(ImageUtils.isImageExtension(file) && configuration.isCheckSizeAfterScaling())
               && !FileUtils.isFileSizeInRange(resourceType, item.getSize())) {
-        param.setErrorCode(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UPLOADED_TOO_BIG);
+        param.setErrorCode(ConnectorError.UPLOADED_TOO_BIG);
         return false;
       }
 
       if (configuration.isSecureImageUploads() && ImageUtils.isImageExtension(file)
               && !ImageUtils.isValid(item)) {
-        param.setErrorCode(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UPLOADED_CORRUPT);
+        param.setErrorCode(ConnectorError.UPLOADED_CORRUPT);
         return false;
       }
 
       if (!FileUtils.isExtensionHtml(file.getFileName().toString(), configuration)
               && FileUtils.hasHtmlContent(item)) {
-        param.setErrorCode(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UPLOADED_WRONG_HTML_FILE);
+        param.setErrorCode(ConnectorError.UPLOADED_WRONG_HTML_FILE);
         return false;
       }
     } catch (SecurityException | IOException e) {
       log.error("", e);
-      param.setErrorCode(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED);
+      param.setErrorCode(ConnectorError.ACCESS_DENIED);
       return false;
     }
 
@@ -383,8 +387,7 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
   private String getFileItemName(MultipartFile item) {
     Pattern p = Pattern.compile("[^\\\\/]+$");
     Matcher m = p.matcher(item.getOriginalFilename());
-
-    return (m.find()) ? m.group(0) : "";
+    return m.find() ? m.group() : "";
   }
 
   @Deprecated
@@ -402,7 +405,7 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
         Path currDir = Paths.get(configuration.getTypes().get(tmpType).getPath(),
                 param.getCurrentFolder());
         if (!Files.isDirectory(currDir)) {
-          throw new ConnectorException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_FOLDER_NOT_FOUND);
+          throw new ConnectorException(ConnectorError.FOLDER_NOT_FOUND);
         }
       }
       return true;

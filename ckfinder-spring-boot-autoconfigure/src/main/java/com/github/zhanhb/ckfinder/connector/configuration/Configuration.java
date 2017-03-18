@@ -90,14 +90,12 @@ public class Configuration implements IConfiguration {
     }
 
     public Builder eventsFromPlugins(Collection<? extends Plugin> plugins) {
-      CommandFactoryBuilder factory = new CommandFactoryBuilder().enableDefaultCommands();
       PluginRegister register = new PluginRegister();
       for (Plugin plugin : plugins) {
-        plugin.register(register);
-        plugin.registerCommands(factory);
+        plugin.regist(register);
       }
       events(register.buildEvents());
-      commandFactory(factory.build());
+      commandFactory(register.buildCommandFactory());
       publicPluginNames(register.getNames());
       return this;
     }

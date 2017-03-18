@@ -12,7 +12,7 @@
 package com.github.zhanhb.ckfinder.connector.plugins;
 
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
-import com.github.zhanhb.ckfinder.connector.data.InitCommandEventArgs;
+import com.github.zhanhb.ckfinder.connector.data.InitCommandEvent;
 import com.github.zhanhb.ckfinder.connector.data.PluginInfoRegister;
 import com.github.zhanhb.ckfinder.connector.handlers.response.ImageResizeInfo;
 import com.github.zhanhb.ckfinder.connector.handlers.response.PluginsInfos;
@@ -27,15 +27,15 @@ public class ImageResizeRegister implements PluginInfoRegister {
   private final Map<String, String> params;
 
   @Override
-  public void runEventHandler(InitCommandEventArgs param, IConfiguration configuration) {
-    log.debug("runEventHandler: {} {}", param, configuration);
+  public void runEventHandler(InitCommandEvent event, IConfiguration configuration) {
+    log.debug("runEventHandler: {} {}", event, configuration);
     ImageResizeInfo.Builder builder = ImageResizeInfo.builder();
     for (Map.Entry<String, String> entry : params.entrySet()) {
       String key = entry.getKey();
       String value = entry.getValue();
       builder.attr(key, value);
     }
-    param.getConnector().pluginsInfos(
+    event.getConnector().pluginsInfos(
             PluginsInfos.builder().pluginsInfo(builder.build()).build()
     );
   }

@@ -8,7 +8,7 @@ import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.CurrentFolder;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Error;
 import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
-import com.github.zhanhb.ckfinder.connector.utils.XMLCreator;
+import com.github.zhanhb.ckfinder.connector.utils.XmlCreator;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.servlet.http.HttpServletRequest;
@@ -35,6 +35,7 @@ public abstract class XmlCommand<T extends Parameter> extends Command<T> {
    * @param response
    * @param configuration
    * @throws java.io.IOException
+   * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
    */
   @Override
   @SuppressWarnings("FinalMethod")
@@ -45,7 +46,7 @@ public abstract class XmlCommand<T extends Parameter> extends Command<T> {
     response.setContentType("text/xml;charset=UTF-8");
     response.setHeader("Cache-Control", "no-cache");
     try (PrintWriter out = response.getWriter()) {
-      XMLCreator.INSTANCE.writeTo(connector, out);
+      XmlCreator.INSTANCE.writeTo(connector, out);
     }
   }
 
@@ -53,7 +54,7 @@ public abstract class XmlCommand<T extends Parameter> extends Command<T> {
           throws ConnectorException;
 
   final void createErrorNode(Connector.Builder rootElement, int code) {
-    rootElement.error(Error.builder().number(0).build());
+    rootElement.error(Error.builder().number(code).build());
   }
 
   /**

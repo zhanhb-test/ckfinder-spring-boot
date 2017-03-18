@@ -11,20 +11,15 @@
  */
 package com.github.zhanhb.ckfinder.connector.plugins;
 
-import com.github.zhanhb.ckfinder.connector.configuration.CommandFactoryBuilder;
 import com.github.zhanhb.ckfinder.connector.configuration.Plugin;
 import com.github.zhanhb.ckfinder.connector.configuration.PluginRegister;
 
 public class FileEditorPlugin extends Plugin {
 
   @Override
-  public void register(PluginRegister register) {
-    register.addName("fileeditor");
-  }
-
-  @Override
-  protected void registerCommands(CommandFactoryBuilder factory) {
-    factory.registerCommands(new SaveFileCommand());
+  public void regist(PluginRegister register) {
+    register.addName("fileeditor")
+            .registCommands(new SaveFileCommand());
   }
 
 }

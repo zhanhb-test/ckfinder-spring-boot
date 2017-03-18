@@ -18,24 +18,24 @@ public class CKFinderProperties {
 
   public static final String CKFINDER_PREFIX = "ckfinder";
 
-  private Boolean enabled;
+  private boolean enabled = true;
   private String baseDir;
   private String baseUrl;
   private License license = new License();
   private Image image = new Image();
-  private String[] defaultResourceTypes;
+  private String[] defaultResourceTypes = {};
   private Map<String, Type> types;
-  private String userRoleSessionVar;
+  private String userRoleSessionVar = "CKFinder_UserRole";
   private AccessControl[] accessControls;
   private Thumbs thumbs = new Thumbs();
-  private Boolean disallowUnsafeCharacters;
-  private Boolean checkDoubleExtension;
-  private Boolean checkSizeAfterScaling;
-  private Boolean secureImageUploads;
-  private String[] htmlExtensions;
-  private Boolean forceAscii;
-  private String[] hideFolders;
-  private String[] hideFiles;
+  private boolean disallowUnsafeCharacters = false;
+  private boolean checkDoubleExtension = true;
+  private boolean checkSizeAfterScaling = true;
+  private boolean secureImageUploads = true;
+  private String[] htmlExtensions = {"html", "htm", "xml", "js"};
+  private boolean forceAscii = false;
+  private String[] hiddenFolders = {".*", "CVS"};
+  private String[] hiddenFiles = {".*"};
   private Watermark watermark = new Watermark();
   private ImageResize imageResize = new ImageResize();
   private Servlet servlet = new Servlet();
@@ -58,9 +58,9 @@ public class CKFinderProperties {
   @Setter
   public static class Image {
 
-    private Integer width;
-    private Integer height;
-    private Float quality;
+    private int width = 500;
+    private int height = 400;
+    private float quality = 0.8f;
 
   }
 
@@ -80,13 +80,13 @@ public class CKFinderProperties {
   @Setter
   public static class Thumbs {
 
-    private Boolean enabled;
-    private String url;
-    private String directory;
-    private Boolean directAccess;
-    private Integer maxHeight;
-    private Integer maxWidth;
-    private Float quality;
+    private boolean enabled = true;
+    private String url = "%BASE_URL%_thumbs";
+    private String directory = "%BASE_DIR%/_thumbs";
+    private boolean directAccess = false;
+    private int maxHeight = 100;
+    private int maxWidth = 100;
+    private float quality = 0.8f;
 
   }
 
@@ -112,16 +112,20 @@ public class CKFinderProperties {
   @Setter
   public static class ImageResize {
 
-    private Boolean enabled;
-    private Map<String, String> params;
+    private boolean enabled = true;
+    private Map<ImageResizeParamKey, String> params;
 
+  }
+
+  public static enum ImageResizeParamKey {
+    smallThumb, mediumThumb, largeThumb
   }
 
   @Getter
   @Setter
   public static class Watermark {
 
-    private Boolean enabled;
+    private boolean enabled = false;
     private String source;
     private Float transparency;
     private Float quality;

@@ -11,6 +11,7 @@
  */
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
+import com.github.zhanhb.ckfinder.connector.configuration.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.configuration.Constants;
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
 import com.github.zhanhb.ckfinder.connector.configuration.ParameterFactory;
@@ -23,23 +24,24 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Objects;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 
 /**
  * Base class for all command handlers.
  *
  * @param <T> parameter type
  */
-@RequiredArgsConstructor
 public abstract class Command<T extends Parameter> {
 
-  @NonNull
   private final ParameterFactory<T> paramFactory;
+
+  protected Command(ParameterFactory<T> paramFactory) {
+    this.paramFactory = Objects.requireNonNull(paramFactory);
+  }
 
   /**
    * Runs command. Initialize, sets response and execute command.
@@ -72,13 +74,13 @@ public abstract class Command<T extends Parameter> {
           IConfiguration configuration) throws ConnectorException {
     checkConnectorEnabled(configuration);
     setUserRole(param, request, configuration);
-    String currentFolder = setCurrentFolder(param, request);
+    String currentFolder = getCurrentFolder(request);
+    param.setCurrentFolder(currentFolder);
 
     checkRequestPathValid(currentFolder);
 
     if (FileUtils.isDirectoryHidden(currentFolder, configuration)) {
-      throw new ConnectorException(
-              Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
+      throw new ConnectorException(ConnectorError.INVALID_REQUEST);
     }
 
     if (currentFolder == null || isCurrFolderExists(param, request, configuration)) {
@@ -89,13 +91,12 @@ public abstract class Command<T extends Parameter> {
   /**
    * check if connector is enabled and checks authentication.
    *
-   * @return true if connector is enabled and user is authenticated
+   * @param configuration
    * @throws ConnectorException when connector is disabled
    */
   private void checkConnectorEnabled(IConfiguration configuration) throws ConnectorException {
     if (!configuration.isEnabled()) {
-      throw new ConnectorException(
-              Constants.Errors.CKFINDER_CONNECTOR_ERROR_CONNECTOR_DISABLED);
+      throw new ConnectorException(ConnectorError.CONNECTOR_DISABLED);
     }
   }
 
@@ -121,10 +122,7 @@ public abstract class Command<T extends Parameter> {
       Path currDir = Paths.get(configuration.getTypes().get(tmpType).getPath(),
               param.getCurrentFolder());
       if (!Files.isDirectory(currDir)) {
-        throw new ConnectorException(
-                Constants.Errors.CKFINDER_CONNECTOR_ERROR_FOLDER_NOT_FOUND);
-      } else {
-        return true;
+        throw new ConnectorException(ConnectorError.FOLDER_NOT_FOUND);
       }
     }
     return true;
@@ -142,15 +140,17 @@ public abstract class Command<T extends Parameter> {
   protected final void checkTypeExists(String type, IConfiguration configuration) throws ConnectorException {
     ResourceType testType = configuration.getTypes().get(type);
     if (testType == null) {
-      throw new ConnectorException(
-              Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE);
+      throw new ConnectorException(ConnectorError.INVALID_TYPE);
     }
   }
 
   /**
    * executes command and writes to response.
    *
+   * @param param
    * @param response
+   * @param request
+   * @param configuration
    * @throws ConnectorException when error occurs
    * @throws java.io.IOException
    */
@@ -160,7 +160,6 @@ public abstract class Command<T extends Parameter> {
    * check request for security issue.
    *
    * @param reqParam request param
-   * @return true if validation passed
    * @throws ConnectorException if validation error occurs.
    */
   @Deprecated
@@ -168,8 +167,7 @@ public abstract class Command<T extends Parameter> {
   final void checkRequestPathValid(String reqParam) throws ConnectorException {
     if (reqParam != null && !reqParam.isEmpty()
             && Pattern.compile(Constants.INVALID_PATH_REGEX).matcher(reqParam).find()) {
-      throw new ConnectorException(
-              Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_NAME);
+      throw new ConnectorException(ConnectorError.INVALID_NAME);
     }
   }
 
@@ -182,20 +180,18 @@ public abstract class Command<T extends Parameter> {
   /**
    * gets current folder request param or sets default value if it's not set.
    *
-   * @param param
    * @param request request
    * @return
    */
-  String setCurrentFolder(T param, HttpServletRequest request) {
-    String currFolder = request.getParameter("currentFolder");
-    if (currFolder != null && !currFolder.isEmpty()) {
-      currFolder = PathUtils.addSlashToBeginning(PathUtils.addSlashToEnd(currFolder));
+  String getCurrentFolder(HttpServletRequest request) {
+    String currentFolder = request.getParameter("currentFolder");
+    if (currentFolder != null && !currentFolder.isEmpty()) {
+      currentFolder = PathUtils.addSlashToBeginning(PathUtils.addSlashToEnd(currentFolder));
     } else {
-      currFolder = "/";
+      currentFolder = "/";
     }
-    currFolder = PathUtils.escape(currFolder);
-    param.setCurrentFolder(currFolder);
-    return currFolder;
+    currentFolder = PathUtils.escape(currentFolder);
+    return currentFolder;
   }
 
 }

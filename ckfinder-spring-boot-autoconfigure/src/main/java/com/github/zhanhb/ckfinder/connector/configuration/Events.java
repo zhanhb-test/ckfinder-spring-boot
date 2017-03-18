@@ -13,25 +13,25 @@ package com.github.zhanhb.ckfinder.connector.configuration;
 
 import com.github.zhanhb.ckfinder.connector.data.FileUploadEvent;
 import com.github.zhanhb.ckfinder.connector.data.FileUploadListener;
-import com.github.zhanhb.ckfinder.connector.data.InitCommandEventArgs;
+import com.github.zhanhb.ckfinder.connector.data.InitCommandEvent;
 import com.github.zhanhb.ckfinder.connector.data.PluginInfoRegister;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import java.util.List;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
 /**
  * Provides support for event handlers.
  */
 @Slf4j
-@ToString
-@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 public class Events {
 
   private final List<FileUploadListener> fileUploadListeners;
-  private final List<PluginInfoRegister> initCommandEventHandlers;
+  private final List<PluginInfoRegister> pluginInfoRegisters;
+
+  Events(List<FileUploadListener> fileUploadListeners, List<PluginInfoRegister> pluginInfoRegisters) {
+    this.fileUploadListeners = fileUploadListeners;
+    this.pluginInfoRegisters = pluginInfoRegisters;
+  }
 
   @SuppressWarnings({"BroadCatchBlock", "TooBroadCatch", "UseSpecificCatch"})
   public void fireOnFileUpload(FileUploadEvent args, IConfiguration configuration)
@@ -48,10 +48,10 @@ public class Events {
     }
   }
 
-  public void runInitCommand(InitCommandEventArgs args, IConfiguration configuration) {
-    log.trace("{}", initCommandEventHandlers);
-    for (PluginInfoRegister pluginInfoRegister : initCommandEventHandlers) {
-      pluginInfoRegister.runEventHandler(args, configuration);
+  public void runInitCommand(InitCommandEvent event, IConfiguration configuration) {
+    log.trace("{}", pluginInfoRegisters);
+    for (PluginInfoRegister pluginInfoRegister : pluginInfoRegisters) {
+      pluginInfoRegister.runEventHandler(event, configuration);
     }
   }
 

@@ -11,7 +11,7 @@
  */
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
-import com.github.zhanhb.ckfinder.connector.configuration.Constants;
+import com.github.zhanhb.ckfinder.connector.configuration.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.ThumbnailParameter;
@@ -52,6 +52,7 @@ public class ThumbnailCommand extends Command<ThumbnailParameter> {
    *
    * @param sc the {@code ServletContext} object.
    * @param response currect response object
+   * @param param
    * @return mime type of the image.
    */
   private String getMimeTypeOfImage(ServletContext sc,
@@ -60,7 +61,7 @@ public class ThumbnailCommand extends Command<ThumbnailParameter> {
     if (fileName != null && fileName.length() != 0) {
       String fileExtension = FileUtils.getFileExtension(fileName);
       if (fileExtension != null) {
-        String tempFileName = fileName.substring(0, fileName.lastIndexOf(46) + 1).concat(fileExtension.toLowerCase());
+        String tempFileName = fileName.substring(0, fileName.lastIndexOf('.') + 1).concat(fileExtension.toLowerCase());
         String mimeType = sc.getMimeType(tempFileName);
         if (mimeType != null && mimeType.length() != 0) {
           return mimeType;
@@ -73,7 +74,7 @@ public class ThumbnailCommand extends Command<ThumbnailParameter> {
 
   @Override
   @SuppressWarnings("FinalMethod")
-  final void execute(ThumbnailParameter param, HttpServletRequest request, HttpServletResponse response, IConfiguration configuration) throws ConnectorException {
+  final void execute(ThumbnailParameter param, HttpServletRequest request, HttpServletResponse response, IConfiguration configuration) throws ConnectorException, IOException {
     validate(param, configuration);
     createThumb(param, configuration);
     response.setHeader("Cache-Control", "public");
@@ -85,14 +86,10 @@ public class ThumbnailCommand extends Command<ThumbnailParameter> {
             ContentDisposition.getContentDisposition("attachment", param.getFileName()));
     if (setResponseHeadersAfterCreatingFile(response, param)) {
       try (ServletOutputStream out = response.getOutputStream()) {
-        FileUtils.printFileContentToResponse(param.getThumbFile(), out);
+        Files.copy(param.getThumbFile(), out);
       } catch (IOException e) {
         log.error("", e);
-        try {
-          response.sendError(HttpServletResponse.SC_FORBIDDEN);
-        } catch (IOException e1) {
-          throw new ConnectorException(e1);
-        }
+        response.sendError(HttpServletResponse.SC_FORBIDDEN);
       }
     } else {
       response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
@@ -115,29 +112,31 @@ public class ThumbnailCommand extends Command<ThumbnailParameter> {
   /**
    * Validates thumbnail file properties and current user access rights.
    *
+   * @param param
+   * @param configuration
    * @throws ConnectorException when validation fails.
    */
   private void validate(ThumbnailParameter param, IConfiguration configuration) throws ConnectorException {
     if (!configuration.isThumbsEnabled()) {
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_THUMBNAILS_DISABLED);
+      param.throwException(ConnectorError.THUMBNAILS_DISABLED);
     }
 
     if (param.getType() == null) {
-      throw new ConnectorException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE);
+      throw new ConnectorException(ConnectorError.INVALID_TYPE);
     }
 
     if (!configuration.getAccessControl().hasPermission(param.getType().getName(),
             param.getCurrentFolder(), param.getUserRole(),
-            AccessControl.CKFINDER_CONNECTOR_ACL_FILE_VIEW)) {
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED);
+            AccessControl.FILE_VIEW)) {
+      param.throwException(ConnectorError.UNAUTHORIZED);
     }
 
-    if (!FileUtils.isFileNameInvalid(param.getFileName())) {
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
+    if (!FileUtils.isFileNameValid(param.getFileName())) {
+      param.throwException(ConnectorError.INVALID_REQUEST);
     }
 
     if (FileUtils.isFileHidden(param.getFileName(), configuration)) {
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_FILE_NOT_FOUND);
+      param.throwException(ConnectorError.FILE_NOT_FOUND);
     }
 
     log.debug("configuration thumbsPath: {}", configuration.getThumbsPath());
@@ -145,15 +144,14 @@ public class ThumbnailCommand extends Command<ThumbnailParameter> {
     log.debug("typeThumbDir: {}", fullCurrentDir);
 
     try {
-      String fullCurrentPath = fullCurrentDir.toAbsolutePath().toString();
+      String fullCurrentPath = fullCurrentDir.toString();
       log.debug(fullCurrentPath);
       param.setFullCurrentPath(fullCurrentPath);
       if (!Files.exists(fullCurrentDir)) {
         Files.createDirectories(fullCurrentDir);
       }
     } catch (IOException | SecurityException e) {
-      throw new ConnectorException(
-              Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED, e);
+      throw new ConnectorException(ConnectorError.ACCESS_DENIED, e);
     }
 
   }
@@ -162,6 +160,8 @@ public class ThumbnailCommand extends Command<ThumbnailParameter> {
    * Creates thumbnail file if thumbnails are enabled and thumb file doesn't
    * exists.
    *
+   * @param param
+   * @param configuration
    * @throws ConnectorException when thumbnail creation fails.
    */
   @SuppressWarnings({"BroadCatchBlock", "TooBroadCatch"})
@@ -177,24 +177,24 @@ public class ThumbnailCommand extends Command<ThumbnailParameter> {
                 param.getCurrentFolder(), param.getFileName());
         log.debug("orginFile: {}", orginFile);
         if (!Files.exists(orginFile)) {
-          param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_FILE_NOT_FOUND);
+          param.throwException(ConnectorError.FILE_NOT_FOUND);
         }
         try {
-          ImageUtils.createThumb(orginFile, thumbFile, configuration);
-        } catch (Exception e) {
+          boolean success = ImageUtils.createThumb(orginFile, thumbFile, configuration);
+          if (!success) {
+            param.throwException(ConnectorError.FILE_NOT_FOUND);
+          }
+        } catch (IOException e) {
           try {
             Files.deleteIfExists(thumbFile);
           } catch (IOException ex) {
             e.addSuppressed(ex);
           }
-          throw new ConnectorException(
-                  Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED,
-                  e);
+          throw new ConnectorException(ConnectorError.ACCESS_DENIED, e);
         }
       }
     } catch (SecurityException e) {
-      throw new ConnectorException(
-              Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED, e);
+      throw new ConnectorException(ConnectorError.ACCESS_DENIED, e);
     }
 
   }
@@ -202,6 +202,8 @@ public class ThumbnailCommand extends Command<ThumbnailParameter> {
   /**
    * Fills in response headers after creating file.
    *
+   * @param response
+   * @param param
    * @return true if continue returning thumb or false if break and send
    * response code.
    * @throws ConnectorException when access is denied.
@@ -226,8 +228,7 @@ public class ThumbnailCommand extends Command<ThumbnailParameter> {
 
       return true;
     } catch (IOException | SecurityException e) {
-      throw new ConnectorException(
-              Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED, e);
+      throw new ConnectorException(ConnectorError.ACCESS_DENIED, e);
     }
   }
 

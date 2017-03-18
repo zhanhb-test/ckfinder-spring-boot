@@ -11,7 +11,7 @@
  */
 package com.github.zhanhb.ckfinder.connector.plugins;
 
-import com.github.zhanhb.ckfinder.connector.configuration.Constants;
+import com.github.zhanhb.ckfinder.connector.configuration.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.command.BaseXmlCommand;
@@ -46,27 +46,27 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> {
   @Override
   protected void createXml(Connector.Builder rootElement, ImageResizeParameter param, IConfiguration configuration) throws ConnectorException {
     if (param.getType() == null) {
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE);
+      throw new ConnectorException(ConnectorError.INVALID_TYPE);
     }
 
     if (!configuration.getAccessControl().hasPermission(param.getType().getName(),
             param.getCurrentFolder(), param.getUserRole(),
-            AccessControl.CKFINDER_CONNECTOR_ACL_FILE_DELETE
-            | AccessControl.CKFINDER_CONNECTOR_ACL_FILE_UPLOAD)) {
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED);
+            AccessControl.FILE_DELETE
+            | AccessControl.FILE_UPLOAD)) {
+      param.throwException(ConnectorError.UNAUTHORIZED);
     }
 
     if (param.getFileName() == null || param.getFileName().isEmpty()) {
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_NAME);
+      param.throwException(ConnectorError.INVALID_NAME);
     }
 
-    if (!FileUtils.isFileNameInvalid(param.getFileName())
+    if (!FileUtils.isFileNameValid(param.getFileName())
             || FileUtils.isFileHidden(param.getFileName(), configuration)) {
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
+      param.throwException(ConnectorError.INVALID_REQUEST);
     }
 
-    if (!FileUtils.isFileExtensionAllwed(param.getFileName(), param.getType())) {
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
+    if (!FileUtils.isFileExtensionAllowed(param.getFileName(), param.getType())) {
+      param.throwException(ConnectorError.INVALID_REQUEST);
     }
 
     Path file = Paths.get(param.getType().getPath(),
@@ -74,23 +74,23 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> {
             param.getFileName());
     try {
       if (!Files.isRegularFile(file)) {
-        param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_FILE_NOT_FOUND);
+        param.throwException(ConnectorError.FILE_NOT_FOUND);
       }
 
       if (param.isWrongReqSizesParams()) {
-        param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
+        param.throwException(ConnectorError.INVALID_REQUEST);
       }
 
       if (param.getWidth() != null && param.getHeight() != null) {
 
-        if (!FileUtils.isFileNameInvalid(param.getNewFileName())
+        if (!FileUtils.isFileNameValid(param.getNewFileName())
                 && FileUtils.isFileHidden(param.getNewFileName(), configuration)) {
-          param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_NAME);
+          param.throwException(ConnectorError.INVALID_NAME);
         }
 
-        if (!FileUtils.isFileExtensionAllwed(param.getNewFileName(),
+        if (!FileUtils.isFileExtensionAllowed(param.getNewFileName(),
                 param.getType())) {
-          param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_EXTENSION);
+          param.throwException(ConnectorError.INVALID_EXTENSION);
         }
 
         Path thumbFile = Paths.get(param.getType().getPath(),
@@ -98,16 +98,16 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> {
                 param.getNewFileName());
 
         if (Files.exists(thumbFile) && !Files.isWritable(thumbFile)) {
-          param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED);
+          param.throwException(ConnectorError.ACCESS_DENIED);
         }
         if (!"1".equals(param.getOverwrite()) && Files.exists(thumbFile)) {
-          param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ALREADY_EXIST);
+          param.throwException(ConnectorError.ALREADY_EXIST);
         }
         int maxImageHeight = configuration.getImgHeight();
         int maxImageWidth = configuration.getImgWidth();
         if ((maxImageWidth > 0 && param.getWidth() > maxImageWidth)
                 || (maxImageHeight > 0 && param.getHeight() > maxImageHeight)) {
-          param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
+          param.throwException(ConnectorError.INVALID_REQUEST);
         }
 
         try {
@@ -116,7 +116,7 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> {
 
         } catch (IOException e) {
           log.error("", e);
-          param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED);
+          param.throwException(ConnectorError.ACCESS_DENIED);
         }
       }
 
@@ -137,7 +137,7 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> {
                         Integer.parseInt(params[1]), configuration.getImgQuality());
               } catch (IOException e) {
                 log.error("", e);
-                param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED);
+                param.throwException(ConnectorError.ACCESS_DENIED);
               }
             }
           }
@@ -145,7 +145,7 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> {
       }
     } catch (SecurityException e) {
       log.error("", e);
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED);
+      param.throwException(ConnectorError.ACCESS_DENIED);
     }
   }
 

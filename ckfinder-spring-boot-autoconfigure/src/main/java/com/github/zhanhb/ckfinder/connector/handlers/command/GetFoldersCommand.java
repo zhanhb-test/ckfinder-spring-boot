@@ -11,10 +11,10 @@
  */
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
-import com.github.zhanhb.ckfinder.connector.configuration.Constants;
+import com.github.zhanhb.ckfinder.connector.configuration.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
-import com.github.zhanhb.ckfinder.connector.handlers.parameter.GetFoldersParameter;
+import com.github.zhanhb.ckfinder.connector.handlers.parameter.Parameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Folder;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Folders;
@@ -25,7 +25,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -33,67 +32,67 @@ import lombok.extern.slf4j.Slf4j;
  * location command.
  */
 @Slf4j
-public class GetFoldersCommand extends BaseXmlCommand<GetFoldersParameter> {
+public class GetFoldersCommand extends BaseXmlCommand<Parameter> {
 
   public GetFoldersCommand() {
-    super(GetFoldersParameter::new);
+    super(Parameter::new);
   }
 
   @Override
-  protected void createXml(Connector.Builder rootElement, GetFoldersParameter param, IConfiguration configuration) throws ConnectorException {
+  protected void createXml(Connector.Builder rootElement, Parameter param, IConfiguration configuration) throws ConnectorException {
     if (param.getType() == null) {
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE);
+      throw new ConnectorException(ConnectorError.INVALID_TYPE);
     }
 
     if (!configuration.getAccessControl().hasPermission(param.getType().getName(),
             param.getCurrentFolder(), param.getUserRole(),
-            AccessControl.CKFINDER_CONNECTOR_ACL_FOLDER_VIEW)) {
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED);
+            AccessControl.FOLDER_VIEW)) {
+      param.throwException(ConnectorError.UNAUTHORIZED);
     }
     if (FileUtils.isDirectoryHidden(param.getCurrentFolder(), configuration)) {
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
+      param.throwException(ConnectorError.INVALID_REQUEST);
     }
 
     Path dir = Paths.get(param.getType().getPath(),
             param.getCurrentFolder());
     try {
-      if (!Files.exists(dir)) {
-        param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_FOLDER_NOT_FOUND);
+      if (!Files.isDirectory(dir)) {
+        param.throwException(ConnectorError.FOLDER_NOT_FOUND);
       }
 
-      param.setDirectories(FileUtils.findChildrensList(dir, true));
+      List<String> directories = FileUtils.findChildrensList(dir, true);
+      filterListByHiddenAndNotAllowed(directories, param, configuration);
+      createFoldersData(rootElement, param, configuration, directories);
     } catch (IOException | SecurityException e) {
       log.error("", e);
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED);
+      param.throwException(ConnectorError.ACCESS_DENIED);
     }
-    filterListByHiddenAndNotAllowed(param, configuration);
-    createFoldersData(rootElement, param, configuration);
   }
 
   /**
    * filters list and check if every element is not hidden and have correct ACL.
+   *
+   * @param directories
+   * @param configuration
+   * @param param
    */
-  private void filterListByHiddenAndNotAllowed(GetFoldersParameter param, IConfiguration configuration) {
-    List<String> tmpDirs = param.getDirectories().stream()
-            .filter(dir -> (configuration.getAccessControl().hasPermission(param.getType().getName(), param.getCurrentFolder() + dir, param.getUserRole(),
-            AccessControl.CKFINDER_CONNECTOR_ACL_FOLDER_VIEW)
-            && !FileUtils.isDirectoryHidden(dir, configuration)))
-            .sorted()
-            .collect(Collectors.toList());
-
-    param.getDirectories().clear();
-    param.getDirectories().addAll(tmpDirs);
-
+  private void filterListByHiddenAndNotAllowed(List<String> directories, Parameter param, IConfiguration configuration) {
+    directories.removeIf(dir -> !configuration.getAccessControl().hasPermission(param.getType().getName(), param.getCurrentFolder() + dir, param.getUserRole(),
+            AccessControl.FOLDER_VIEW)
+            || FileUtils.isDirectoryHidden(dir, configuration));
   }
 
   /**
    * creates folder data node in XML document.
    *
    * @param rootElement root element in XML document
+   * @param param
+   * @param directories
+   * @param configuration
    */
-  private void createFoldersData(Connector.Builder rootElement, GetFoldersParameter param, IConfiguration configuration) {
+  private void createFoldersData(Connector.Builder rootElement, Parameter param, IConfiguration configuration, List<String> directories) {
     Folders.Builder folders = Folders.builder();
-    for (String dirPath : param.getDirectories()) {
+    for (String dirPath : directories) {
       Path dir = Paths.get(param.getType().getPath(),
               param.getCurrentFolder(), dirPath);
       if (Files.exists(dir)) {

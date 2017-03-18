@@ -28,8 +28,8 @@ public interface IConfiguration {
   int DEFAULT_THUMB_MAX_WIDTH = 100;
   int DEFAULT_THUMB_MAX_HEIGHT = 100;
   float DEFAULT_IMG_QUALITY = 0.8f;
-  String DEFAULT_THUMBS_URL = "_thumbs/";
-  String DEFAULT_THUMBS_DIR = "%BASE_DIR%/_thumbs/";
+  String DEFAULT_THUMBS_URL = "_thumbs";
+  String DEFAULT_THUMBS_DIR = "%BASE_DIR%/_thumbs";
   String DEFAULT_BASE_URL = "/userfiles";
 
   /**

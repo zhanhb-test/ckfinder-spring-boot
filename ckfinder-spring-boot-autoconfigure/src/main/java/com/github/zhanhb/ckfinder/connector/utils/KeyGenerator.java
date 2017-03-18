@@ -25,8 +25,12 @@ public enum KeyGenerator {
     return ThreadLocalRandom.current().nextInt(n);
   }
 
-  private int indexOf(char ch) {
-    return index[ch - '1'];
+  public int indexOf(char ch) {
+    try {
+      return index[ch - '1'];
+    } catch (IndexOutOfBoundsException ex) {
+      return -1;
+    }
   }
 
   int r(int div, int rem, int lim) {

@@ -11,7 +11,7 @@
  */
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
-import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
+import com.github.zhanhb.ckfinder.connector.configuration.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.FileUploadParameter;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import com.google.gson.Gson;
@@ -28,43 +28,36 @@ import javax.servlet.http.HttpServletResponse;
 public class QuickUploadCommand extends FileUploadCommand {
 
   @Override
-  protected void handleOnUploadCompleteResponse(Writer writer, String errorMsg, FileUploadParameter param, IConfiguration configuration) throws IOException {
+  protected void handleOnUploadCompleteResponse(Writer writer, String errorMsg, FileUploadParameter param) throws IOException {
     if ("json".equalsIgnoreCase(param.getResponseType())) {
-      handleJSONResponse(writer, errorMsg, null, param, configuration);
+      handleJSONResponse(writer, errorMsg, null, param);
     } else {
-      writer.write("<script type=\"text/javascript\">");
-      writer.write("window.parent.OnUploadCompleted(");
-      writer.write("" + param.getErrorCode() + ", ");
+      ConnectorError errorCode = param.getErrorCode();
+      int errorNum = errorCode != null ? errorCode.getCode() : 0;
+      writer.write("<script type=\"text/javascript\">window.parent.OnUploadCompleted(" + errorNum + ", ");
       if (param.isUploaded()) {
         writer.write("'" + param.getType().getUrl()
                 + param.getCurrentFolder()
                 + FileUtils.backupWithBackSlash(FileUtils.encodeURIComponent(param.getNewFileName()), "'")
-                + "', ");
-        writer.write("'" + FileUtils.backupWithBackSlash(param.getNewFileName(), "'")
+                + "', '" + FileUtils.backupWithBackSlash(param.getNewFileName(), "'")
                 + "', ");
       } else {
         writer.write("'', '', ");
       }
-      writer.write("''");
-      writer.write(");");
-      writer.write("</script>");
+      writer.write("'');</script>");
     }
   }
 
   @Override
-  protected void handleOnUploadCompleteCallFuncResponse(Writer writer, String errorMsg, String path,
-          FileUploadParameter param, IConfiguration configuration) throws IOException {
+  protected void handleOnUploadCompleteCallFuncResponse(Writer writer, String errorMsg, String path, FileUploadParameter param) throws IOException {
     if ("json".equalsIgnoreCase(param.getResponseType())) {
-      handleJSONResponse(writer, errorMsg, path, param, configuration);
+      handleJSONResponse(writer, errorMsg, path, param);
     } else {
-      writer.write("<script type=\"text/javascript\">");
-      param.setCkEditorFuncNum(param.getCkEditorFuncNum().replaceAll("[^\\d]", ""));
-      writer.write(("window.parent.CKEDITOR.tools.callFunction("
-              + param.getCkEditorFuncNum() + ", '"
+      param.setCkEditorFuncNum(param.getCkEditorFuncNum().replaceAll("\\D", ""));
+      writer.write("<script type=\"text/javascript\">window.parent.CKEDITOR.tools.callFunction(" + param.getCkEditorFuncNum() + ", '"
               + path
               + FileUtils.backupWithBackSlash(FileUtils.encodeURIComponent(param.getNewFileName()), "'")
-              + "', '" + errorMsg + "');"));
-      writer.write("</script>");
+              + "', '" + errorMsg + "');</script>");
     }
   }
 
@@ -90,9 +83,10 @@ public class QuickUploadCommand extends FileUploadCommand {
    * @param errorMsg string representing error message which indicates that
    * there was an error during upload or uploaded file was renamed
    * @param path path to uploaded file
+   * @param param
+   * @throws java.io.IOException
    */
-  private void handleJSONResponse(Writer writer, String errorMsg, String path, FileUploadParameter param, IConfiguration configuration) throws IOException {
-
+  private void handleJSONResponse(Writer writer, String errorMsg, String path, FileUploadParameter param) throws IOException {
     Gson gson = new GsonBuilder().serializeNulls().create();
     Map<String, Object> jsonObj = new HashMap<>(6);
 
@@ -114,7 +108,8 @@ public class QuickUploadCommand extends FileUploadCommand {
 
     if (errorMsg != null && !errorMsg.isEmpty()) {
       Map<String, Object> jsonErrObj = new HashMap<>(3);
-      jsonErrObj.put("number", param.getErrorCode());
+      ConnectorError error = param.getErrorCode();
+      jsonErrObj.put("number", error != null ? error.getCode() : 0);
       jsonErrObj.put("message", errorMsg);
       jsonObj.put("error", jsonErrObj);
     }

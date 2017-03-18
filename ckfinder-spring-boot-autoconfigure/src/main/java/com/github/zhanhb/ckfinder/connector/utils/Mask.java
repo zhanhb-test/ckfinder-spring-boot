@@ -3,7 +3,6 @@ package com.github.zhanhb.ckfinder.connector.utils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import lombok.Getter;
 
 /**
  *
@@ -12,7 +11,6 @@ import lombok.Getter;
 public class Mask {
 
   private final Mask parent;
-  @Getter
   private final String path;
   private int effectiveValue;
   private Integer value;
@@ -22,6 +20,10 @@ public class Mask {
     this.path = path;
     this.parent = parent;
     this.effectiveValue = effectiveValue;
+  }
+
+  public String getPath() {
+    return path;
   }
 
   Mask getChildByName(final String childPath) {

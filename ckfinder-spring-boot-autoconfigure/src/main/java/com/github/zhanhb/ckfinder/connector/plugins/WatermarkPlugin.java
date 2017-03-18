@@ -11,7 +11,6 @@
  */
 package com.github.zhanhb.ckfinder.connector.plugins;
 
-import com.github.zhanhb.ckfinder.connector.configuration.CommandFactoryBuilder;
 import com.github.zhanhb.ckfinder.connector.configuration.Plugin;
 import com.github.zhanhb.ckfinder.connector.configuration.PluginRegister;
 import lombok.RequiredArgsConstructor;
@@ -22,12 +21,8 @@ public class WatermarkPlugin extends Plugin {
   private final WatermarkSettings watermarkSettings;
 
   @Override
-  public void register(PluginRegister register) {
+  public void regist(PluginRegister register) {
     register.addFileUploadListener(new WatermarkProcessor(watermarkSettings));
-  }
-
-  @Override
-  protected void registerCommands(CommandFactoryBuilder factory) {
   }
 
 }

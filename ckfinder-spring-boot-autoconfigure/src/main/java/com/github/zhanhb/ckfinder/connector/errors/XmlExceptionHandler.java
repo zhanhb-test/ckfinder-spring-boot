@@ -16,7 +16,7 @@ import com.github.zhanhb.ckfinder.connector.data.ResourceType;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.CurrentFolder;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Error;
-import com.github.zhanhb.ckfinder.connector.utils.XMLCreator;
+import com.github.zhanhb.ckfinder.connector.utils.XmlCreator;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.servlet.http.HttpServletRequest;
@@ -27,10 +27,11 @@ import org.springframework.util.StringUtils;
 /**
  * Class to handle errors from commands returning XML response.
  */
-public enum XMLErrorHandler {
+public enum XmlExceptionHandler implements ExceptionHandler {
 
   INSTANCE;
 
+  @Override
   public void handleException(HttpServletRequest request,
           HttpServletResponse response, IConfiguration configuration,
           ConnectorException connectorException) throws IOException {
@@ -43,7 +44,7 @@ public enum XMLErrorHandler {
 
     response.setContentType("text/xml;charset=UTF-8");
     response.setHeader("Cache-Control", "no-cache");
-    int errorNum = connectorException.getErrorCode();
+    int errorNum = connectorException.getErrorCode().getCode();
 
     if (type != null) {
       String typeName = type.getName();
@@ -62,7 +63,7 @@ public enum XMLErrorHandler {
     response.setContentType("text/xml;charset=UTF-8");
     response.setHeader("Cache-Control", "no-cache");
     try (PrintWriter out = response.getWriter()) {
-      XMLCreator.INSTANCE.writeTo(connector.build(), out);
+      XmlCreator.INSTANCE.writeTo(connector.build(), out);
     }
   }
 

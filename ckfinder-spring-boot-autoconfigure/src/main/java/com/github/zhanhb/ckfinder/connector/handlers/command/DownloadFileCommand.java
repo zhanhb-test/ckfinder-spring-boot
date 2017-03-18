@@ -11,7 +11,7 @@
  */
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
-import com.github.zhanhb.ckfinder.connector.configuration.Constants;
+import com.github.zhanhb.ckfinder.connector.configuration.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.DownloadFileParameter;
@@ -36,13 +36,15 @@ public class DownloadFileCommand extends Command<DownloadFileParameter> {
   /**
    * executes the download file command. Writes file to response.
    *
+   * @param param
+   * @param request
    * @throws ConnectorException when something went wrong during reading file.
    */
   @Override
   void execute(DownloadFileParameter param, HttpServletRequest request, HttpServletResponse response, IConfiguration configuration)
           throws ConnectorException {
     if (param.getType() == null) {
-      throw new ConnectorException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE);
+      throw new ConnectorException(ConnectorError.INVALID_TYPE);
     }
 
     Path file = Paths.get(param.getType().getPath(), param.getCurrentFolder(), param.getFileName());
@@ -74,30 +76,28 @@ public class DownloadFileCommand extends Command<DownloadFileParameter> {
 
     if (!configuration.getAccessControl().hasPermission(param.getType().getName(),
             param.getCurrentFolder(), param.getUserRole(),
-            AccessControl.CKFINDER_CONNECTOR_ACL_FILE_VIEW)) {
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED);
+            AccessControl.FILE_VIEW)) {
+      param.throwException(ConnectorError.UNAUTHORIZED);
     }
 
-    if (!FileUtils.isFileNameInvalid(param.getFileName())
-            || !FileUtils.isFileExtensionAllwed(param.getFileName(),
+    if (!FileUtils.isFileNameValid(param.getFileName())
+            || !FileUtils.isFileExtensionAllowed(param.getFileName(),
                     param.getType())) {
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
+      param.throwException(ConnectorError.INVALID_REQUEST);
     }
 
     if (FileUtils.isDirectoryHidden(param.getCurrentFolder(), configuration)) {
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST);
+      param.throwException(ConnectorError.INVALID_REQUEST);
     }
     try {
-      if (!Files.exists(file)
-              || !Files.isRegularFile(file)
+      if (!Files.isRegularFile(file)
               || FileUtils.isFileHidden(param.getFileName(), configuration)) {
-        param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_FILE_NOT_FOUND);
+        param.throwException(ConnectorError.FILE_NOT_FOUND);
       }
 
-      FileUtils.printFileContentToResponse(file, response.getOutputStream());
+      Files.copy(file, response.getOutputStream());
     } catch (IOException e) {
-      throw new ConnectorException(
-              Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED, e);
+      throw new ConnectorException(ConnectorError.ACCESS_DENIED, e);
     }
 
   }

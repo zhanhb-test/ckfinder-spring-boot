@@ -11,7 +11,7 @@
  */
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
-import com.github.zhanhb.ckfinder.connector.configuration.Constants;
+import com.github.zhanhb.ckfinder.connector.configuration.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.RenameFileParameter;
@@ -20,7 +20,9 @@ import com.github.zhanhb.ckfinder.connector.handlers.response.RenamedFile;
 import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import javax.servlet.http.HttpServletRequest;
@@ -47,6 +49,7 @@ public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> 
    * create rename file XML node.
    *
    * @param rootElement XML root node
+   * @param param
    */
   private void createRenamedFileNode(Connector.Builder rootElement, RenameFileParameter param) {
     RenamedFile.Builder element = RenamedFile.builder().name(param.getFileName());
@@ -65,21 +68,21 @@ public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> 
    * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
    */
   @Override
-  protected int getDataForXml(RenameFileParameter param, IConfiguration configuration)
+  protected ConnectorError getDataForXml(RenameFileParameter param, IConfiguration configuration)
           throws ConnectorException {
     log.trace("getDataForXml");
     if (param.getType() == null) {
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_TYPE);
+      throw new ConnectorException(ConnectorError.INVALID_TYPE);
     }
 
     if (!configuration.getAccessControl().hasPermission(param.getType().getName(),
             param.getCurrentFolder(), param.getUserRole(),
-            AccessControl.CKFINDER_CONNECTOR_ACL_FILE_RENAME)) {
-      param.throwException(Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNAUTHORIZED);
+            AccessControl.FILE_RENAME)) {
+      param.throwException(ConnectorError.UNAUTHORIZED);
     }
 
     if (configuration.isForceAscii()) {
-      param.setNewFileName(FileUtils.convertToASCII(param.getNewFileName()));
+      param.setNewFileName(FileUtils.convertToAscii(param.getNewFileName()));
     }
 
     if (param.getFileName() != null && !param.getFileName().isEmpty()
@@ -87,28 +90,27 @@ public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> 
       param.setAddRenameNode(true);
     }
 
-    if (!FileUtils.isFileExtensionAllwed(param.getNewFileName(),
-            param.getType())) {
-      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_EXTENSION;
+    if (!FileUtils.isFileExtensionAllowed(param.getNewFileName(), param.getType())) {
+      return ConnectorError.INVALID_EXTENSION;
     }
     if (configuration.isCheckDoubleFileExtensions()) {
       param.setNewFileName(FileUtils.renameFileWithBadExt(param.getType(),
               param.getNewFileName()));
     }
 
-    if (!FileUtils.isFileNameInvalid(param.getFileName())
+    if (!FileUtils.isFileNameValid(param.getFileName())
             || FileUtils.isFileHidden(param.getFileName(), configuration)) {
-      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST;
+      return ConnectorError.INVALID_REQUEST;
     }
 
     if (!FileUtils.isFileNameInvalid(param.getNewFileName(), configuration)
             || FileUtils.isFileHidden(param.getNewFileName(), configuration)) {
-      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_NAME;
+      return ConnectorError.INVALID_NAME;
     }
 
-    if (!FileUtils.isFileExtensionAllwed(param.getFileName(),
+    if (!FileUtils.isFileExtensionAllowed(param.getFileName(),
             param.getType())) {
-      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_INVALID_REQUEST;
+      return ConnectorError.INVALID_REQUEST;
     }
 
     String dirPath = param.getType().getPath();
@@ -116,33 +118,31 @@ public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> 
     Path newFile = Paths.get(dirPath, param.getCurrentFolder(), param.getNewFileName());
 
     try {
-      if (!Files.exists(file)) {
-        return Constants.Errors.CKFINDER_CONNECTOR_ERROR_FILE_NOT_FOUND;
-      }
-
-      if (Files.exists(newFile)) {
-        return Constants.Errors.CKFINDER_CONNECTOR_ERROR_ALREADY_EXIST;
-      }
-
-      try {
-        Files.move(file, newFile);
-        param.setRenamed(true);
-        renameThumb(param, configuration);
-        return Constants.Errors.CKFINDER_CONNECTOR_ERROR_NONE;
-      } catch (IOException ex) {
-        param.setRenamed(false);
-        log.error("IOException", ex);
-        return Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED;
-      }
+      Files.move(file, newFile);
+      param.setRenamed(true);
+      renameThumb(param, configuration);
+      return null;
+    } catch (NoSuchFileException ex) {
+      return ConnectorError.FILE_NOT_FOUND;
+    } catch (FileAlreadyExistsException ex) {
+      return ConnectorError.ALREADY_EXIST;
+    } catch (IOException ex) {
+      param.setRenamed(false);
+      log.error("IOException", ex);
+      return ConnectorError.ACCESS_DENIED;
     } catch (SecurityException e) {
       log.error("", e);
-      return Constants.Errors.CKFINDER_CONNECTOR_ERROR_ACCESS_DENIED;
+      return ConnectorError.ACCESS_DENIED;
     }
 
   }
 
   /**
    * rename thumb file.
+   *
+   * @param param
+   * @param configuration
+   * @throws java.io.IOException
    */
   private void renameThumb(RenameFileParameter param, IConfiguration configuration) throws IOException {
     Path thumbFile = Paths.get(configuration.getThumbsPath(),

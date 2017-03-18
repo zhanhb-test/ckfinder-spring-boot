@@ -16,9 +16,12 @@ import com.github.zhanhb.ckfinder.connector.plugins.ImageResizePlugin;
 import com.github.zhanhb.ckfinder.connector.plugins.WatermarkPlugin;
 import com.github.zhanhb.ckfinder.connector.plugins.WatermarkSettings;
 import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
+import com.github.zhanhb.ckfinder.connector.utils.InMemoryAccessController;
 import com.github.zhanhb.ckfinder.connector.utils.KeyGenerator;
+import com.github.zhanhb.ckfinder.connector.utils.PathUtils;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
@@ -27,7 +30,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.ServletContext;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -53,36 +56,47 @@ public class CKFinderAutoConfiguration {
 
   @Configuration
   @ConditionalOnMissingBean(IBasePathBuilder.class)
-  public static class DefaultBasePathBuilderConfiguration {
-
-    @Autowired
-    private ApplicationContext applicationContext;
+  public static class DefaultBasePathBuilderConfigurer {
 
     @Bean
-    public DefaultPathBuilder defaultPathBuilder() {
+    public DefaultPathBuilder defaultPathBuilder(ApplicationContext applicationContext, CKFinderProperties properties) {
       ServletContext servletContext = applicationContext.getBean(ServletContext.class);
-      String baseDir = servletContext.getRealPath(IConfiguration.DEFAULT_BASE_URL);
-      return DefaultPathBuilder.builder()
-              .baseDir(baseDir)
-              .baseUrl(IConfiguration.DEFAULT_BASE_URL)
-              .build();
+      String baseUrl = properties.getBaseUrl();
+      if (StringUtils.isEmpty(baseUrl)) {
+        baseUrl = IConfiguration.DEFAULT_BASE_URL;
+      }
+      baseUrl = PathUtils.addSlashToBeginning(PathUtils.addSlashToEnd(baseUrl));
+      String baseDir = properties.getBaseDir();
+      if (StringUtils.isEmpty(baseDir)) {
+        baseDir = baseUrl.replaceAll("^/+", "");
+      }
+      try {
+        Path path = Paths.get(baseDir);
+        baseDir = path.toString();
+        if (!path.isAbsolute()) {
+          baseDir = servletContext.getRealPath(baseDir);
+          if (baseDir == null) {
+            baseDir = path.toString();
+          }
+        }
+      } catch (IllegalArgumentException ex) {
+      }
+      return DefaultPathBuilder.builder().baseDir(baseDir).baseUrl(servletContext.getContextPath() + PathUtils.addSlashToEnd(baseUrl)).build();
     }
+
   }
 
   @Configuration
   @ConditionalOnMissingBean(AccessControl.class)
-  public static class DefaultAccessControlConfiguration {
+  public static class DefaultAccessControlConfigurer {
 
     private static int calc(int old, boolean condition, int mask) {
       return condition ? old | mask : old & ~mask;
     }
 
-    @Autowired
-    private CKFinderProperties properties;
-
     @Bean
-    public AccessControl defaultAccessControl() {
-      AccessControl accessControl = new AccessControl();
+    public InMemoryAccessController defaultAccessControl(CKFinderProperties properties) {
+      InMemoryAccessController accessControl = new InMemoryAccessController();
       CKFinderProperties.AccessControl[] accessControls = properties.getAccessControls();
       if (accessControls != null) {
         for (CKFinderProperties.AccessControl ac : accessControls) {
@@ -90,14 +104,14 @@ public class CKFinderAutoConfiguration {
           String resourceType = ac.getResourceType();
           String folder = ac.getFolder();
           int mask = 0;
-          mask = calc(mask, ac.isFileDelete(), AccessControl.CKFINDER_CONNECTOR_ACL_FILE_DELETE);
-          mask = calc(mask, ac.isFileRename(), AccessControl.CKFINDER_CONNECTOR_ACL_FILE_RENAME);
-          mask = calc(mask, ac.isFileUpload(), AccessControl.CKFINDER_CONNECTOR_ACL_FILE_UPLOAD);
-          mask = calc(mask, ac.isFileView(), AccessControl.CKFINDER_CONNECTOR_ACL_FILE_VIEW);
-          mask = calc(mask, ac.isFolderCreate(), AccessControl.CKFINDER_CONNECTOR_ACL_FOLDER_CREATE);
-          mask = calc(mask, ac.isFolderDelete(), AccessControl.CKFINDER_CONNECTOR_ACL_FOLDER_DELETE);
-          mask = calc(mask, ac.isFolderRename(), AccessControl.CKFINDER_CONNECTOR_ACL_FOLDER_RENAME);
-          mask = calc(mask, ac.isFolderView(), AccessControl.CKFINDER_CONNECTOR_ACL_FOLDER_VIEW);
+          mask = calc(mask, ac.isFileDelete(), AccessControl.FILE_DELETE);
+          mask = calc(mask, ac.isFileRename(), AccessControl.FILE_RENAME);
+          mask = calc(mask, ac.isFileUpload(), AccessControl.FILE_UPLOAD);
+          mask = calc(mask, ac.isFileView(), AccessControl.FILE_VIEW);
+          mask = calc(mask, ac.isFolderCreate(), AccessControl.FOLDER_CREATE);
+          mask = calc(mask, ac.isFolderDelete(), AccessControl.FOLDER_DELETE);
+          mask = calc(mask, ac.isFolderRename(), AccessControl.FOLDER_RENAME);
+          mask = calc(mask, ac.isFolderView(), AccessControl.FOLDER_VIEW);
 
           AccessControlLevel accessControlLevel = AccessControlLevel
                   .builder().role(role).resourceType(resourceType).folder(folder)
@@ -112,27 +126,20 @@ public class CKFinderAutoConfiguration {
 
   @Configuration
   @ConditionalOnMissingBean(IConfiguration.class)
-  public static class DefaultConfigurationConfiguration {
+  public static class DefaultConfigurationConfigurer {
 
     private static String toString(String[] array) {
       return Arrays.stream(array).collect(Collectors.joining(","));
     }
 
-    @Autowired
-    private CKFinderProperties properties;
-    @Autowired
-    private IBasePathBuilder basePathBuilder;
-    @Autowired
-    private AccessControl defaultAccessControl;
-    @Autowired(required = false)
-    private final Collection<Plugin> plugins = Collections.emptyList();
-
     @Bean
-    public IConfiguration configuration() throws IOException {
+    public IConfiguration ckfinderConfiguration(CKFinderProperties properties,
+            IBasePathBuilder basePathBuilder,
+            AccessControl defaultAccessControl,
+            ObjectProvider<Collection<Plugin>> pluginsProvider) throws IOException {
+      Collection<Plugin> plugins = pluginsProvider.getIfAvailable();
       com.github.zhanhb.ckfinder.connector.configuration.Configuration.Builder builder = com.github.zhanhb.ckfinder.connector.configuration.Configuration.builder();
-      if (properties.getEnabled() != null) {
-        builder.enabled(properties.getEnabled());
-      }
+      builder.enabled(properties.isEnabled());
       CKFinderProperties.License license = properties.getLicense();
       label:
       {
@@ -153,59 +160,44 @@ public class CKFinderAutoConfiguration {
       }
       CKFinderProperties.Image image = properties.getImage();
       if (image != null) {
-        if (image.getWidth() != null) {
-          builder.imgWidth(image.getWidth());
-        }
-        if (image.getHeight() != null) {
-          builder.imgHeight(image.getHeight());
-        }
-        if (image.getQuality() != null) {
-          builder.imgQuality(image.getQuality());
-        }
+        builder.imgWidth(image.getWidth())
+                .imgHeight(image.getHeight())
+                .imgQuality(image.getQuality());
       }
       if (properties.getDefaultResourceTypes() != null) {
         builder.defaultResourceTypes(Arrays.asList(properties.getDefaultResourceTypes()));
       }
       if (properties.getTypes() != null) {
-        setTypes(builder);
+        setTypes(builder, basePathBuilder, properties.getTypes());
       }
       if (properties.getUserRoleSessionVar() != null) {
         builder.userRoleName(properties.getUserRoleSessionVar());
       }
       builder.accessControl(defaultAccessControl);
-      setThumbs(builder);
-      if (properties.getDisallowUnsafeCharacters() != null) {
-        builder.disallowUnsafeCharacters(properties.getDisallowUnsafeCharacters());
-      }
-      if (properties.getCheckDoubleExtension() != null) {
-        builder.checkDoubleFileExtensions(properties.getCheckDoubleExtension());
-      }
-      if (properties.getCheckSizeAfterScaling() != null) {
-        builder.checkSizeAfterScaling(properties.getCheckSizeAfterScaling());
-      }
-      if (properties.getSecureImageUploads() != null) {
-        builder.secureImageUploads(properties.getSecureImageUploads());
-      }
+      setThumbs(properties.getThumbs(), basePathBuilder, builder);
+      builder.disallowUnsafeCharacters(properties.isDisallowUnsafeCharacters())
+              .checkDoubleFileExtensions(properties.isCheckDoubleExtension())
+              .checkSizeAfterScaling(properties.isCheckSizeAfterScaling())
+              .secureImageUploads(properties.isSecureImageUploads());
       if (properties.getHtmlExtensions() != null) {
         builder.htmlExtensions(Arrays.asList(properties.getHtmlExtensions()));
       }
-      if (properties.getForceAscii() != null) {
-        builder.forceAscii(properties.getForceAscii());
+      builder.forceAscii(properties.isForceAscii());
+      if (properties.getHiddenFolders() != null) {
+        builder.hiddenFolders(Arrays.asList(properties.getHiddenFolders()));
       }
-      if (properties.getHideFolders() != null) {
-        builder.hiddenFolders(Arrays.asList(properties.getHideFolders()));
+      if (properties.getHiddenFiles() != null) {
+        builder.hiddenFiles(Arrays.asList(properties.getHiddenFiles()));
       }
-      if (properties.getHideFiles() != null) {
-        builder.hiddenFiles(Arrays.asList(properties.getHideFiles()));
-      }
-      builder.eventsFromPlugins(plugins);
+      builder.eventsFromPlugins(plugins != null ? plugins : Collections.emptyList());
       return builder.build();
     }
 
-    private void setTypes(com.github.zhanhb.ckfinder.connector.configuration.Configuration.Builder builder) throws IOException {
+    private void setTypes(com.github.zhanhb.ckfinder.connector.configuration.Configuration.Builder builder,
+            IBasePathBuilder basePathBuilder, Map<String, CKFinderProperties.Type> types) throws IOException {
       String baseDir = basePathBuilder.getBaseDir();
       String baseUrl = basePathBuilder.getBaseUrl();
-      for (Map.Entry<String, CKFinderProperties.Type> entry : properties.getTypes().entrySet()) {
+      for (Map.Entry<String, CKFinderProperties.Type> entry : types.entrySet()) {
         final String typeName = entry.getKey();
         CKFinderProperties.Type type = entry.getValue();
         Assert.hasText(typeName, "Resource type name should not be empty");
@@ -235,33 +227,18 @@ public class CKFinderAutoConfiguration {
       }
     }
 
-    private void setThumbs(com.github.zhanhb.ckfinder.connector.configuration.Configuration.Builder builder) {
-      CKFinderProperties.Thumbs thumbs = properties.getThumbs();
+    private void setThumbs(CKFinderProperties.Thumbs thumbs, IBasePathBuilder basePathBuilder,
+            com.github.zhanhb.ckfinder.connector.configuration.Configuration.Builder builder) {
       if (thumbs != null) {
         String baseDir = basePathBuilder.getBaseDir();
         String baseUrl = basePathBuilder.getBaseUrl();
-        if (thumbs.getEnabled() != null) {
-          builder.thumbsEnabled(thumbs.getEnabled());
-        }
-        if (thumbs.getDirectory() != null) {
-          String path = thumbs.getDirectory().replace(Constants.BASE_DIR_PLACEHOLDER, baseDir);
-          builder.thumbsPath(path);
-        }
-        if (thumbs.getDirectAccess() != null) {
-          builder.thumbsDirectAccess(thumbs.getDirectAccess());
-        }
-        if (thumbs.getUrl() != null) {
-          builder.thumbsUrl(thumbs.getUrl().replace(Constants.BASE_URL_PLACEHOLDER, baseUrl));
-        }
-        if (thumbs.getMaxHeight() != null) {
-          builder.maxThumbHeight(thumbs.getMaxHeight());
-        }
-        if (thumbs.getMaxWidth() != null) {
-          builder.maxThumbWidth(thumbs.getMaxWidth());
-        }
-        if (thumbs.getQuality() != null) {
-          builder.imgQuality(thumbs.getQuality());
-        }
+        builder.thumbsEnabled(thumbs.isEnabled())
+                .thumbsPath(thumbs.getDirectory().replace(Constants.BASE_DIR_PLACEHOLDER, baseDir))
+                .thumbsDirectAccess(thumbs.isDirectAccess())
+                .thumbsUrl(thumbs.getUrl().replace(Constants.BASE_URL_PLACEHOLDER, baseUrl))
+                .maxThumbHeight(thumbs.getMaxHeight())
+                .maxThumbWidth(thumbs.getMaxWidth())
+                .imgQuality(thumbs.getQuality());
       }
     }
 
@@ -270,7 +247,7 @@ public class CKFinderAutoConfiguration {
   @Configuration
   @ConditionalOnMissingBean(FileEditorPlugin.class)
   @ConditionalOnProperty(prefix = CKFinderProperties.CKFINDER_PREFIX + ".file-editor", name = "enabled", havingValue = "true", matchIfMissing = true)
-  public static class DefaultFileEditorConfiguration {
+  public static class DefaultFileEditorConfigurer {
 
     @Bean
     public FileEditorPlugin fileEditorPlugin() {
@@ -281,19 +258,29 @@ public class CKFinderAutoConfiguration {
 
   @Configuration
   @ConditionalOnMissingBean(ImageResizePlugin.class)
-  @ConditionalOnProperty(prefix = CKFinderProperties.CKFINDER_PREFIX + ".image-resize", name = "enabled", havingValue = "true", matchIfMissing = true)
-  public static class DefaultImageResizeConfiguration {
+  @ConditionalOnProperty(prefix = DefaultImageResizeConfigurer.PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
+  public static class DefaultImageResizeConfigurer {
 
-    @Autowired
-    private CKFinderProperties properties;
+    static final String PREFIX = CKFinderProperties.CKFINDER_PREFIX + ".image-resize";
 
     @Bean
-    public ImageResizePlugin imageResizePlugin() {
+    public ImageResizePlugin imageResizePlugin(CKFinderProperties properties) {
       CKFinderProperties.ImageResize imageResize = properties.getImageResize();
-      Map<String, String> params = imageResize.getParams();
+      Map<? extends Enum<?>, String> params = imageResize.getParams();
       PluginInfo.Builder pluginInfoBuilder = PluginInfo.builder();
-      if (params != null) {
-        pluginInfoBuilder.params(params);
+      if (params != null && !params.isEmpty()) {
+        for (Map.Entry<? extends Enum<?>, String> entry : params.entrySet()) {
+          String key = entry.getKey().name();
+          String value = entry.getValue();
+          Assert.hasText(value, "thumbs size should not be empty");
+          Assert.isTrue(value.matches("\\d+x\\d+"), "thumbs size '" + value + "' not correct");
+          pluginInfoBuilder.param(key, value);
+        }
+      } else {
+        pluginInfoBuilder
+                .param("smallThumb", "90x90")
+                .param("mediumThumb", "120x120")
+                .param("largeThumb", "180x180");
       }
       return new ImageResizePlugin(pluginInfoBuilder.build().getParams());
     }
@@ -303,15 +290,10 @@ public class CKFinderAutoConfiguration {
   @Configuration
   @ConditionalOnMissingBean(WatermarkPlugin.class)
   @ConditionalOnProperty(prefix = CKFinderProperties.CKFINDER_PREFIX + ".watermark", name = "enabled", havingValue = "true", matchIfMissing = false)
-  public static class DefaultWatermarkConfiguration {
-
-    @Autowired
-    private CKFinderProperties properties;
-    @Autowired
-    private ResourceLoader resourceLoader;
+  public static class DefaultWatermarkConfigurer {
 
     @Bean
-    public WatermarkPlugin watermark() {
+    public WatermarkPlugin watermarkPlugin(CKFinderProperties properties, ResourceLoader resourceLoader) {
       CKFinderProperties.Watermark watermark = properties.getWatermark();
       WatermarkSettings.Builder builder = WatermarkSettings.builder();
       String source = watermark.getSource();
@@ -340,7 +322,7 @@ public class CKFinderAutoConfiguration {
   @Configuration
   @ConditionalOnMissingBean(name = "connectorServlet")
   @ConditionalOnProperty(prefix = CKFinderProperties.CKFINDER_PREFIX + ".servlet", name = "enabled", havingValue = "true", matchIfMissing = true)
-  public static class DefaultConnectorServletConfiguration {
+  public static class DefaultConnectorServletConfigurer {
 
     @Bean
     public ServletRegistrationBean connectorServlet(CKFinderProperties properties, MultipartConfigElement multipartConfigElement,

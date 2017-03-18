@@ -16,8 +16,6 @@ package com.github.zhanhb.ckfinder.connector.configuration;
  */
 public abstract class Plugin {
 
-  protected abstract void register(PluginRegister register);
-
-  protected abstract void registerCommands(CommandFactoryBuilder factory);
+  protected abstract void regist(PluginRegister register);
 
 }

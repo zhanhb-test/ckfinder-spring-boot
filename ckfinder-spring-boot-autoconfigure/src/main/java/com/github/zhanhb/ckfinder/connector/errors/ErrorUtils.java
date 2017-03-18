@@ -13,12 +13,10 @@ package com.github.zhanhb.ckfinder.connector.errors;
 
 import java.util.Locale;
 import java.util.ResourceBundle;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * Error utils.
  */
-@Slf4j
 public enum ErrorUtils {
 
   INSTANCE;
@@ -35,10 +33,8 @@ public enum ErrorUtils {
    */
   public String getErrorMsgByLangAndCode(String lang, int errorCode) {
     try {
-      return ResourceBundle.getBundle(BUNDLE_NAME, new Locale(lang))
-              .getString(Integer.toString(errorCode));
+      return ResourceBundle.getBundle(BUNDLE_NAME, new Locale(lang)).getString(Integer.toString(errorCode));
     } catch (RuntimeException ex) {
-      log.error("", ex);
       return "";
     }
   }

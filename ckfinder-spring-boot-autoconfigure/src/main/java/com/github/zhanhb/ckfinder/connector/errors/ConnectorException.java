@@ -11,23 +11,19 @@
  */
 package com.github.zhanhb.ckfinder.connector.errors;
 
-import com.github.zhanhb.ckfinder.connector.configuration.Constants;
+import com.github.zhanhb.ckfinder.connector.configuration.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.data.ResourceType;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.Parameter;
 import java.util.Objects;
-import lombok.Getter;
 
 /**
  * Connector Exception.
  */
-@Getter
 public class ConnectorException extends Exception {
 
-  /**
-   *
-   */
   private static final long serialVersionUID = -8643752550259111562L;
-  private final int errorCode;
+
+  private final ConnectorError errorCode;
   private final String currentFolder;
   private ResourceType type;
 
@@ -35,12 +31,13 @@ public class ConnectorException extends Exception {
    * standard constructor.
    *
    * @param param the parameters
-   * @param errorCode error code number
+   * @param code error code number
    */
-  public ConnectorException(Parameter param, int errorCode) {
-    this.errorCode = errorCode;
-    this.currentFolder = Objects.requireNonNull(param.getCurrentFolder());
-    this.type = Objects.requireNonNull(param.getType());
+  public ConnectorException(Parameter param, ConnectorError code) {
+    super(null, null);
+    this.errorCode = Objects.requireNonNull(code);
+    this.currentFolder = param.getCurrentFolder();
+    this.type = param.getType();
   }
 
   /**
@@ -48,9 +45,9 @@ public class ConnectorException extends Exception {
    *
    * @param errorCode error code number
    */
-  public ConnectorException(int errorCode) {
+  public ConnectorException(ConnectorError errorCode) {
     super(null, null);
-    this.errorCode = errorCode;
+    this.errorCode = Objects.requireNonNull(errorCode);
     this.currentFolder = null;
   }
 
@@ -60,9 +57,9 @@ public class ConnectorException extends Exception {
    * @param errorCode error code number
    * @param errorMsg error text message
    */
-  public ConnectorException(int errorCode, String errorMsg) {
+  public ConnectorException(ConnectorError errorCode, String errorMsg) {
     super(errorMsg, null);
-    this.errorCode = errorCode;
+    this.errorCode = Objects.requireNonNull(errorCode);
     this.currentFolder = null;
   }
 
@@ -72,12 +69,12 @@ public class ConnectorException extends Exception {
    * @param errorCode error code number
    * @param e exception
    */
-  public ConnectorException(int errorCode, Exception e) {
+  public ConnectorException(ConnectorError errorCode, Exception e) {
     super(e.getMessage(), e);
     if (e instanceof ConnectorException) {
       throw new IllegalArgumentException();
     }
-    this.errorCode = errorCode;
+    this.errorCode = Objects.requireNonNull(errorCode);
     this.currentFolder = null;
   }
 
@@ -86,13 +83,26 @@ public class ConnectorException extends Exception {
    *
    * @param cause Exception
    */
+  @SuppressWarnings("deprecation")
   public ConnectorException(Exception cause) {
     super(cause.getMessage(), cause);
     if (cause instanceof ConnectorException) {
       throw new IllegalArgumentException();
     }
     this.currentFolder = null;
-    this.errorCode = Constants.Errors.CKFINDER_CONNECTOR_ERROR_UNKNOWN;
+    this.errorCode = ConnectorError.UNKNOWN;
+  }
+
+  public ConnectorError getErrorCode() {
+    return errorCode;
+  }
+
+  public String getCurrentFolder() {
+    return currentFolder;
+  }
+
+  public ResourceType getType() {
+    return type;
   }
 
   @Override
