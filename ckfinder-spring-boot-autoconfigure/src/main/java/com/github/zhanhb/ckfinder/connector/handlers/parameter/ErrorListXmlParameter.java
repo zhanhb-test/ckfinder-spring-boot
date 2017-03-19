@@ -15,8 +15,7 @@ public class ErrorListXmlParameter extends Parameter {
    *
    * errors list.
    */
-  private final Errors.Builder errorsBuilder = Errors.builder();
-  private boolean hasError;
+  private Errors.Builder errorsBuilder;
 
   /**
    * save errors node to list.
@@ -27,8 +26,11 @@ public class ErrorListXmlParameter extends Parameter {
    * @param type resource type
    */
   public void appendErrorNodeChild(ConnectorError errorCode, String name, String folder, String type) {
-    errorsBuilder.error(DetailError.builder().type(type).name(name).folder(folder).code(errorCode.getCode()).build());
-    hasError = true;
+    int code = errorCode.getCode();
+    if (errorsBuilder == null) {
+      errorsBuilder = Errors.builder();
+    }
+    errorsBuilder.error(DetailError.builder().type(type).name(name).folder(folder).code(code).build());
   }
 
   /**
@@ -37,7 +39,7 @@ public class ErrorListXmlParameter extends Parameter {
    * @return true if there are any errors.
    */
   public boolean hasError() {
-    return hasError;
+    return errorsBuilder != null;
   }
 
   /**
@@ -46,7 +48,7 @@ public class ErrorListXmlParameter extends Parameter {
    * @param rootElement XML root element
    */
   public void addErrorsTo(Connector.Builder rootElement) {
-    if (hasError) {
+    if (errorsBuilder != null) {
       rootElement.errors(errorsBuilder.build());
     }
   }

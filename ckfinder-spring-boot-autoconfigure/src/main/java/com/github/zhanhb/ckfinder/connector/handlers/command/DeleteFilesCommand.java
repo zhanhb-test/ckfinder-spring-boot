@@ -79,37 +79,39 @@ public class DeleteFilesCommand extends ErrorListXmlCommand<DeleteFilesParameter
 
     for (FilePostParam fileItem : param.getFiles()) {
       if (!FileUtils.isFileNameValid(fileItem.getName())) {
-        return ConnectorError.INVALID_REQUEST;
+        param.throwException(ConnectorError.INVALID_REQUEST);
       }
 
       if (fileItem.getType() == null) {
-        return ConnectorError.INVALID_REQUEST;
+        param.throwException(ConnectorError.INVALID_REQUEST);
       }
 
       if (fileItem.getFolder() == null || fileItem.getFolder().isEmpty()
               || Pattern.compile(Constants.INVALID_PATH_REGEX).matcher(
                       fileItem.getFolder()).find()) {
-        return ConnectorError.INVALID_REQUEST;
+        param.throwException(ConnectorError.INVALID_REQUEST);
       }
 
       if (FileUtils.isDirectoryHidden(fileItem.getFolder(), configuration)) {
-        return ConnectorError.INVALID_REQUEST;
+        param.throwException(ConnectorError.INVALID_REQUEST);
       }
 
       if (FileUtils.isFileHidden(fileItem.getName(), configuration)) {
-        return ConnectorError.INVALID_REQUEST;
+        param.throwException(ConnectorError.INVALID_REQUEST);
       }
 
       if (!FileUtils.isFileExtensionAllowed(fileItem.getName(), fileItem.getType())) {
-        return ConnectorError.INVALID_REQUEST;
+        param.throwException(ConnectorError.INVALID_REQUEST);
 
       }
 
       if (!configuration.getAccessControl().hasPermission(fileItem.getType().getName(), fileItem.getFolder(), param.getUserRole(),
               AccessControl.FILE_DELETE)) {
-        return ConnectorError.UNAUTHORIZED;
+        param.throwException(ConnectorError.UNAUTHORIZED);
       }
+    }
 
+    for (FilePostParam fileItem : param.getFiles()) {
       Path file = Paths.get(fileItem.getType().getPath(), fileItem.getFolder(), fileItem.getName());
 
       try {
@@ -140,7 +142,6 @@ public class DeleteFilesCommand extends ErrorListXmlCommand<DeleteFilesParameter
       } catch (SecurityException e) {
         log.error("", e);
         return ConnectorError.ACCESS_DENIED;
-
       }
     }
     if (param.hasError()) {

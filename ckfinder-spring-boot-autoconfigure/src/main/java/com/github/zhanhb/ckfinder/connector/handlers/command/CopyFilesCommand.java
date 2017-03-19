@@ -15,7 +15,6 @@ import com.github.zhanhb.ckfinder.connector.configuration.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.configuration.Constants;
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
 import com.github.zhanhb.ckfinder.connector.data.FilePostParam;
-import com.github.zhanhb.ckfinder.connector.data.ResourceType;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.CopyFilesParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
@@ -23,9 +22,13 @@ import com.github.zhanhb.ckfinder.connector.handlers.response.CopyFiles;
 import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Objects;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -53,13 +56,11 @@ public class CopyFilesCommand extends ErrorListXmlCommand<CopyFilesParameter> im
   @Override
   protected ConnectorError getDataForXml(CopyFilesParameter param, IConfiguration configuration)
           throws ConnectorException {
-    ResourceType type = param.getType();
-    if (type == null) {
+    if (param.getType() == null) {
       throw new ConnectorException(ConnectorError.INVALID_TYPE);
     }
 
-    assert type != null;
-    if (!configuration.getAccessControl().hasPermission(type.getName(),
+    if (!configuration.getAccessControl().hasPermission(param.getType().getName(),
             param.getCurrentFolder(),
             param.getUserRole(),
             AccessControl.FILE_RENAME
@@ -68,114 +69,126 @@ public class CopyFilesCommand extends ErrorListXmlCommand<CopyFilesParameter> im
       param.throwException(ConnectorError.UNAUTHORIZED);
     }
 
-    return copyFiles(param, configuration, type);
+    return copyFiles(param, configuration);
   }
 
   /**
    * copy files from request.
    *
    * @param param
-   * @param type
    * @param configuration
    * @return error code
+   * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
    */
-  private ConnectorError copyFiles(CopyFilesParameter param, IConfiguration configuration, ResourceType type) {
+  private ConnectorError copyFiles(CopyFilesParameter param, IConfiguration configuration)
+          throws ConnectorException {
     param.setFilesCopied(0);
     param.setAddCopyNode(false);
     for (FilePostParam file : param.getFiles()) {
 
       if (!FileUtils.isFileNameValid(file.getName())) {
-        return ConnectorError.INVALID_REQUEST;
+        param.throwException(ConnectorError.INVALID_REQUEST);
       }
-
       if (Pattern.compile(Constants.INVALID_PATH_REGEX).matcher(
               file.getFolder()).find()) {
-        return ConnectorError.INVALID_REQUEST;
+        param.throwException(ConnectorError.INVALID_REQUEST);
       }
       if (file.getType() == null) {
-        return ConnectorError.INVALID_REQUEST;
+        param.throwException(ConnectorError.INVALID_REQUEST);
       }
       if (file.getFolder() == null || file.getFolder().isEmpty()) {
-        return ConnectorError.INVALID_REQUEST;
+        param.throwException(ConnectorError.INVALID_REQUEST);
       }
-      if (!FileUtils.isFileExtensionAllowed(file.getName(), type)) {
+
+      if (FileUtils.isDirectoryHidden(file.getFolder(), configuration)) {
+        param.throwException(ConnectorError.INVALID_REQUEST);
+      }
+
+      if (FileUtils.isFileHidden(file.getName(), configuration)) {
+        param.throwException(ConnectorError.INVALID_REQUEST);
+      }
+
+      if (!configuration.getAccessControl().hasPermission(file.getType().getName(),
+              file.getFolder(), param.getUserRole(), AccessControl.FILE_VIEW)) {
+        param.throwException(ConnectorError.UNAUTHORIZED);
+      }
+    }
+
+    for (FilePostParam file : param.getFiles()) {
+      if (!FileUtils.isFileExtensionAllowed(file.getName(), param.getType())) {
         param.appendErrorNodeChild(ConnectorError.INVALID_EXTENSION,
                 file.getName(), file.getFolder(), file.getType().getName());
         continue;
       }
-      // check #4 (extension) - when moving to another resource type,
+      // check #4 (extension) - when copy to another resource type,
       //double check extension
-      if (type != file.getType()) {
-        if (!FileUtils.isFileExtensionAllowed(file.getName(), file.getType())) {
-          param.appendErrorNodeChild(ConnectorError.INVALID_EXTENSION,
-                  file.getName(), file.getFolder(), file.getType().getName());
-          continue;
-        }
-      }
-      if (FileUtils.isDirectoryHidden(file.getFolder(), configuration)) {
-        return ConnectorError.INVALID_REQUEST;
-      }
-
-      if (FileUtils.isFileHidden(file.getName(), configuration)) {
-        return ConnectorError.INVALID_REQUEST;
-      }
-
-      if (!configuration.getAccessControl().hasPermission(file.getType().getName(), file.getFolder(), param.getUserRole(),
-              AccessControl.FILE_VIEW)) {
-        return ConnectorError.UNAUTHORIZED;
+      if (param.getType() != file.getType()
+              && !FileUtils.isFileExtensionAllowed(file.getName(), file.getType())) {
+        param.appendErrorNodeChild(ConnectorError.INVALID_EXTENSION,
+                file.getName(), file.getFolder(), file.getType().getName());
+        continue;
       }
 
       Path sourceFile = Paths.get(file.getType().getPath(),
               file.getFolder(), file.getName());
-      Path destFile = Paths.get(type.getPath(),
+      Path destFile = Paths.get(param.getType().getPath(),
               param.getCurrentFolder(), file.getName());
 
+      BasicFileAttributes attrs;
       try {
-        if (!Files.isRegularFile(sourceFile)) {
-          param.appendErrorNodeChild(ConnectorError.FILE_NOT_FOUND,
+        attrs = Files.readAttributes(sourceFile, BasicFileAttributes.class);
+        if (!attrs.isRegularFile()) {
+          throw new IOException();
+        }
+      } catch (IOException ex) {
+        param.appendErrorNodeChild(ConnectorError.FILE_NOT_FOUND,
+                file.getName(), file.getFolder(), file.getType().getName());
+        continue;
+      }
+      if (param.getType() != file.getType()) {
+        long maxSize = param.getType().getMaxSize();
+        if (maxSize != 0 && maxSize < attrs.size()) {
+          param.appendErrorNodeChild(ConnectorError.UPLOADED_TOO_BIG,
                   file.getName(), file.getFolder(), file.getType().getName());
           continue;
         }
-        if (type != file.getType()) {
-          long maxSize = type.getMaxSize();
-          if (maxSize != 0 && maxSize < Files.size(sourceFile)) {
-            param.appendErrorNodeChild(ConnectorError.UPLOADED_TOO_BIG,
+        // fail through
+      }
+      if (Objects.equals(sourceFile, destFile)) {
+        param.appendErrorNodeChild(ConnectorError.SOURCE_AND_TARGET_PATH_EQUAL,
+                file.getName(), file.getFolder(), file.getType().getName());
+        continue;
+      }
+      try {
+        Files.copy(sourceFile, destFile);
+      } catch (FileAlreadyExistsException e) {
+        String options = file.getOptions();
+        if (options != null && options.contains("overwrite")) {
+          if (!handleOverwrite(sourceFile, destFile)) {
+            param.appendErrorNodeChild(ConnectorError.ACCESS_DENIED,
                     file.getName(), file.getFolder(), file.getType().getName());
             continue;
           }
-        }
-        if (sourceFile.equals(destFile)) {
-          param.appendErrorNodeChild(ConnectorError.SOURCE_AND_TARGET_PATH_EQUAL,
-                  file.getName(), file.getFolder(), file.getType().getName());
-        } else if (Files.exists(destFile)) {
-          if (file.getOptions() != null
-                  && file.getOptions().contains("overwrite")) {
-            if (!handleOverwrite(sourceFile, destFile)) {
-              param.appendErrorNodeChild(ConnectorError.ACCESS_DENIED,
-                      file.getName(), file.getFolder(), file.getType().getName());
-            } else {
-              param.filesCopiedPlus();
-            }
-          } else if (file.getOptions() != null && file.getOptions().contains("autorename")) {
-            if (!handleAutoRename(sourceFile, destFile)) {
-              param.appendErrorNodeChild(ConnectorError.ACCESS_DENIED,
-                      file.getName(), file.getFolder(), file.getType().getName());
-            } else {
-              param.filesCopiedPlus();
-            }
-          } else {
-            param.appendErrorNodeChild(ConnectorError.ALREADY_EXIST,
+        } else if (options != null && options.contains("autorename")) {
+          destFile = handleAutoRename(sourceFile, destFile);
+          if (destFile == null) {
+            param.appendErrorNodeChild(ConnectorError.ACCESS_DENIED,
                     file.getName(), file.getFolder(), file.getType().getName());
+            continue;
           }
-        } else if (FileUtils.copyFromSourceToDestFile(sourceFile, destFile, false)) {
-          param.filesCopiedPlus();
-          copyThumb(file, param, configuration);
+        } else {
+          param.appendErrorNodeChild(ConnectorError.ALREADY_EXIST,
+                  file.getName(), file.getFolder(), file.getType().getName());
+          continue;
         }
-      } catch (SecurityException | IOException e) {
+      } catch (IOException e) {
         log.error("", e);
         param.appendErrorNodeChild(ConnectorError.ACCESS_DENIED,
                 file.getName(), file.getFolder(), file.getType().getName());
+        continue;
       }
+      param.filesCopiedPlus();
+      copyThumb(file, sourceFile.relativize(destFile), configuration);
     }
     param.setAddCopyNode(true);
     if (param.hasError()) {
@@ -186,15 +199,13 @@ public class CopyFilesCommand extends ErrorListXmlCommand<CopyFilesParameter> im
   }
 
   /**
-   * Handles autorename option.
+   * Handles auto rename option.
    *
    * @param sourceFile source file to copy from.
    * @param destFile destination file to copy to.
-   * @return true if copied correctly
-   * @throws IOException when ioerror occurs
+   * @return the new destination path
    */
-  private boolean handleAutoRename(Path sourceFile, Path destFile)
-          throws IOException {
+  private Path handleAutoRename(Path sourceFile, Path destFile) {
     String fileName = destFile.getFileName().toString();
     String fileNameWithoutExtension = FileUtils.getFileNameWithoutExtension(fileName, false);
     String fileExtension = FileUtils.getFileExtension(fileName, false);
@@ -203,12 +214,15 @@ public class CopyFilesCommand extends ErrorListXmlCommand<CopyFilesParameter> im
               + "(" + counter + ")."
               + fileExtension;
       Path newDestFile = destFile.resolveSibling(newFileName);
-      if (!Files.exists(newDestFile)) {
+      try {
+        log.debug("prepare copy file '{}' to '{}'", sourceFile, newDestFile);
+        Files.copy(sourceFile, newDestFile);
         // can't be in one if=, because when error in
         // copy file occurs then it will be infinity loop
-        log.debug("prepare copy file '{}' to '{}'", sourceFile, newDestFile);
-        return FileUtils.copyFromSourceToDestFile(sourceFile,
-                newDestFile, false);
+        return newDestFile;
+      } catch (FileAlreadyExistsException ex) {
+      } catch (IOException ex) {
+        return null;
       }
     }
   }
@@ -219,32 +233,34 @@ public class CopyFilesCommand extends ErrorListXmlCommand<CopyFilesParameter> im
    * @param sourceFile source file to copy from.
    * @param destFile destination file to copy to.
    * @return true if copied correctly
-   * @throws IOException when ioerror occurs
    */
-  private boolean handleOverwrite(Path sourceFile, Path destFile) throws IOException {
-    return FileUtils.copyFromSourceToDestFile(sourceFile, destFile, false);
+  private boolean handleOverwrite(Path sourceFile, Path destFile) {
+    try {
+      Files.copy(sourceFile, destFile, StandardCopyOption.REPLACE_EXISTING);
+      return true;
+    } catch (IOException ex) {
+      log.error("copy file fail", ex);
+      return false;
+    }
   }
 
   /**
    * copy thumb file.
    *
    * @param file file to copy.
-   * @param param
+   * @param relation
    * @param configuration
-   * @throws IOException when ioerror occurs
    */
-  private void copyThumb(FilePostParam file, CopyFilesParameter param, IConfiguration configuration) throws IOException {
+  private void copyThumb(FilePostParam file, Path relation, IConfiguration configuration) {
     Path sourceThumbFile = Paths.get(configuration.getThumbsPath(),
             file.getType().getName(), file.getFolder(), file.getName());
-    Path destThumbFile = Paths.get(configuration.getThumbsPath(),
-            param.getType().getName(), param.getCurrentFolder(),
-            file.getName());
+    Path destThumbFile = sourceThumbFile.resolve(relation).normalize();
 
     log.debug("copy thumb from '{}' to '{}'", sourceThumbFile, destThumbFile);
-
-    if (Files.isRegularFile(sourceThumbFile)) {
-      FileUtils.copyFromSourceToDestFile(sourceThumbFile, destThumbFile,
-              false);
+    try {
+      Files.copy(sourceThumbFile, destThumbFile, StandardCopyOption.REPLACE_EXISTING);
+    } catch (IOException ex) {
+      log.error("{}", ex.getMessage());
     }
   }
 

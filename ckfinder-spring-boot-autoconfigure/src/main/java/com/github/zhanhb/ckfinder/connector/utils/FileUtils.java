@@ -19,7 +19,6 @@ import java.io.InputStream;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -141,25 +140,6 @@ public class FileUtils {
       return null;
     }
     return fileName.substring(0, lastIndexOf);
-  }
-
-  /**
-   *
-   * @param sourceFile source file
-   * @param destFile destination file
-   * @param move if source file should be deleted.
-   * @return true if file moved/copied correctly
-   * @throws IOException when IOerror occurs
-   */
-  public static boolean copyFromSourceToDestFile(Path sourceFile, Path destFile,
-          boolean move) throws IOException {
-    createPath(destFile, true);
-    if (move) {
-      Files.move(sourceFile, destFile, StandardCopyOption.REPLACE_EXISTING);
-    } else {
-      Files.copy(sourceFile, destFile, StandardCopyOption.REPLACE_EXISTING);
-    }
-    return true;
   }
 
   /**
