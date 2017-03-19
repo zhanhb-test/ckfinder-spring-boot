@@ -11,7 +11,6 @@
  */
 package com.github.zhanhb.ckfinder.connector.errors;
 
-import com.github.zhanhb.ckfinder.connector.configuration.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
@@ -29,8 +28,12 @@ public enum FallbackExceptionHandler implements ExceptionHandler {
           HttpServletResponse response, IConfiguration configuration,
           ConnectorException connectorException) throws IOException {
     ConnectorError errorCode = connectorException.getErrorCode();
-    response.reset();
-    response.setHeader("X-CKFinder-Error", String.valueOf(errorCode));
+    try {
+      response.reset();
+    } catch (IllegalStateException ex) {
+      return;
+    }
+    response.setIntHeader("X-CKFinder-Error", errorCode.getCode());
     switch (errorCode) {
       case INVALID_REQUEST:
       case INVALID_NAME:

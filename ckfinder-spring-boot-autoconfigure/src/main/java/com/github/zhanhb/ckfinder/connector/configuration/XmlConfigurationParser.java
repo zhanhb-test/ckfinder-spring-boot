@@ -3,13 +3,13 @@ package com.github.zhanhb.ckfinder.connector.configuration;
 import com.github.zhanhb.ckfinder.connector.data.AccessControlLevel;
 import com.github.zhanhb.ckfinder.connector.data.PluginInfo;
 import com.github.zhanhb.ckfinder.connector.data.ResourceType;
+import com.github.zhanhb.ckfinder.connector.errors.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.plugins.FileEditorPlugin;
 import com.github.zhanhb.ckfinder.connector.plugins.ImageResizePlugin;
 import com.github.zhanhb.ckfinder.connector.plugins.WatermarkPlugin;
 import com.github.zhanhb.ckfinder.connector.plugins.WatermarkSettings;
 import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
-import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import com.github.zhanhb.ckfinder.connector.utils.InMemoryAccessController;
 import com.github.zhanhb.ckfinder.connector.utils.PathUtils;
 import java.io.IOException;
@@ -33,10 +33,10 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import static com.github.zhanhb.ckfinder.connector.configuration.IConfiguration.DEFAULT_IMG_HEIGHT;
-import static com.github.zhanhb.ckfinder.connector.configuration.IConfiguration.DEFAULT_IMG_QUALITY;
-import static com.github.zhanhb.ckfinder.connector.configuration.IConfiguration.DEFAULT_IMG_WIDTH;
-import static com.github.zhanhb.ckfinder.connector.configuration.IConfiguration.DEFAULT_THUMB_MAX_WIDTH;
+import static com.github.zhanhb.ckfinder.connector.configuration.Constants.DEFAULT_IMG_HEIGHT;
+import static com.github.zhanhb.ckfinder.connector.configuration.Constants.DEFAULT_IMG_QUALITY;
+import static com.github.zhanhb.ckfinder.connector.configuration.Constants.DEFAULT_IMG_WIDTH;
+import static com.github.zhanhb.ckfinder.connector.configuration.Constants.DEFAULT_THUMB_MAX_WIDTH;
 import static com.github.zhanhb.ckfinder.connector.plugins.WatermarkSettings.MARGIN_BOTTOM;
 import static com.github.zhanhb.ckfinder.connector.plugins.WatermarkSettings.MARGIN_RIGHT;
 import static com.github.zhanhb.ckfinder.connector.plugins.WatermarkSettings.QUALITY;
@@ -71,8 +71,8 @@ public enum XmlConfigurationParser {
           IBasePathBuilder basePathBuilder, String xmlFilePath)
           throws Exception {
     Configuration.Builder builder = Configuration.builder();
-    String baseFolder = getBaseFolder(basePathBuilder);
-    init(builder, resourceLoader, xmlFilePath, baseFolder, basePathBuilder);
+    String basePath = basePathBuilder.getBasePath();
+    init(builder, resourceLoader, xmlFilePath, basePath, basePathBuilder);
     return builder.build();
   }
 
@@ -411,19 +411,16 @@ public enum XmlConfigurationParser {
           builder.thumbsEnabled(Boolean.parseBoolean(nullNodeToString(childNode)));
           break;
         case "url":
-          builder.thumbsUrl(PathUtils.escape(nullNodeToString(childNode).replace(Constants.BASE_URL_PLACEHOLDER,
-                  basePathBuilder.getBaseUrl())));
+          builder.thumbsUrl(PathUtils.normalizeUrl(basePathBuilder.getBaseUrl() + nullNodeToString(childNode).replace(Constants.BASE_URL_PLACEHOLDER, "")));
           break;
         case "directory":
           String thumbsDir = nullNodeToString(childNode);
-          Path file = Paths.get(thumbsDir.replace(Constants.BASE_DIR_PLACEHOLDER, baseFolder));
+          Path file = Paths.get(baseFolder, thumbsDir.replace(Constants.BASE_DIR_PLACEHOLDER, ""));
           if (file == null) {
             throw new ConnectorException(ConnectorError.FOLDER_NOT_FOUND,
                     "Thumbs directory could not be created using specified path.");
           }
-          Files.createDirectories(file);
-          builder.thumbsPath(file.toAbsolutePath().toString());
-
+          builder.thumbsPath(Files.createDirectories(file).toString());
           break;
         case "directAccess":
           builder.thumbsDirectAccess(Boolean.parseBoolean(nullNodeToString(childNode)));
@@ -492,8 +489,8 @@ public enum XmlConfigurationParser {
   private ResourceType createTypeFromXml(String typeName,
           NodeList childNodes, IBasePathBuilder basePathBuilder) throws IOException, ConnectorException {
     ResourceType.Builder builder = ResourceType.builder().name(typeName);
-    String path = Constants.BASE_DIR_PLACEHOLDER + "/" + typeName.toLowerCase() + "/";
-    String url = Constants.BASE_URL_PLACEHOLDER + "/" + typeName.toLowerCase() + "/";
+    String path = typeName.toLowerCase();
+    String url = typeName.toLowerCase();
 
     for (int i = 0, j = childNodes.getLength(); i < j; i++) {
       Node childNode = childNodes.item(i);
@@ -519,27 +516,15 @@ public enum XmlConfigurationParser {
           builder.deniedExtensions(nullNodeToString(childNode));
       }
     }
-    url = url.replace(Constants.BASE_URL_PLACEHOLDER,
-            basePathBuilder.getBaseUrl());
-    url = PathUtils.escape(url);
-    url = PathUtils.removeSlashFromEnd(url);
+    url = basePathBuilder.getBaseUrl() + url.replace(Constants.BASE_URL_PLACEHOLDER, "");
+    url = PathUtils.normalizeUrl(url);
 
-    path = path.replace(Constants.BASE_DIR_PLACEHOLDER, getBaseFolder(basePathBuilder));
-    path = PathUtils.escape(path);
-    path = PathUtils.removeSlashFromEnd(path);
-
-    if (path == null || path.isEmpty()) {
-      throw new IllegalStateException("baseFolder is empty");
-    }
-    Path p = Paths.get(path);
-    if (p == null) {
+    Path p = Paths.get(basePathBuilder.getBasePath(), path.replace(Constants.BASE_DIR_PLACEHOLDER, ""));
+    if (!p.isAbsolute()) {
       throw new ConnectorException(ConnectorError.FOLDER_NOT_FOUND,
               "Resource directory could not be created using specified path.");
     }
-
-    FileUtils.createPath(p, false);
-
-    return builder.url(url).path(p.toAbsolutePath().toString()).build();
+    return builder.url(url).path(Files.createDirectories(p).toString()).build();
   }
 
   /**
@@ -677,23 +662,6 @@ public enum XmlConfigurationParser {
       }
     }
     return builder.build();
-  }
-
-  /**
-   * Gets the path to base dir from configuration Crates the base dir folder if
-   * it doesn't exists.
-   *
-   * @param basePathBuilder the basePathBuilder
-   * @return path to base dir from conf
-   * @throws IOException when error during creating folder occurs
-   */
-  private String getBaseFolder(IBasePathBuilder basePathBuilder) throws IOException {
-    String baseFolder = basePathBuilder.getBaseDir();
-    Path baseDir = Paths.get(baseFolder);
-    if (!Files.exists(baseDir)) {
-      FileUtils.createPath(baseDir, false);
-    }
-    return baseFolder;
   }
 
 }

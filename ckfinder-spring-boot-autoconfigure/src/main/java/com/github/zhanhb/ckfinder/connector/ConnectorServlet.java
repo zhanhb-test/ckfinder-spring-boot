@@ -11,8 +11,8 @@
  */
 package com.github.zhanhb.ckfinder.connector;
 
-import com.github.zhanhb.ckfinder.connector.configuration.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
+import com.github.zhanhb.ckfinder.connector.errors.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.errors.ExceptionHandler;
 import com.github.zhanhb.ckfinder.connector.errors.FallbackExceptionHandler;
@@ -98,6 +98,7 @@ public class ConnectorServlet extends HttpServlet {
       if (command == null) {
         throw new ConnectorException(ConnectorError.INVALID_COMMAND);
       }
+      log.debug("command: {}", command);
       if (command instanceof ExceptionHandler) {
         handler = (ExceptionHandler) command;
       } else if (!(command instanceof XmlCommand)) {
@@ -106,9 +107,12 @@ public class ConnectorServlet extends HttpServlet {
       // checks if command should go via POST request or it's a post request
       // and it's not upload command
       Class<?> commandClass = command.getClass();
-      if ((IPostCommand.class.isAssignableFrom(commandClass) || post)
-              && !FileUploadCommand.class.isAssignableFrom(commandClass)) {
-        checkPostRequest(request);
+      if (IPostCommand.class.isAssignableFrom(commandClass) != post) {
+        throw new ConnectorException(ConnectorError.INVALID_REQUEST);
+      }
+      if (post && !FileUploadCommand.class.isAssignableFrom(commandClass)
+              && !"true".equals(request.getParameter("CKFinderCommand"))) {
+        throw new ConnectorException(ConnectorError.INVALID_REQUEST);
       }
       command.runCommand(request, response, configuration);
     } catch (RuntimeException e) {
@@ -118,19 +122,6 @@ public class ConnectorServlet extends HttpServlet {
     } catch (ConnectorException e) {
       log.error("", e);
       handleException(e, configuration, request, response, handler);
-    }
-  }
-
-  /**
-   * checks post request if it's ckfinder command.
-   *
-   * @param request request
-   * @throws ConnectorException when param isn't set or has wrong value.
-   */
-  private void checkPostRequest(HttpServletRequest request)
-          throws ConnectorException {
-    if (!"true".equals(request.getParameter("CKFinderCommand"))) {
-      throw new ConnectorException(ConnectorError.INVALID_REQUEST);
     }
   }
 

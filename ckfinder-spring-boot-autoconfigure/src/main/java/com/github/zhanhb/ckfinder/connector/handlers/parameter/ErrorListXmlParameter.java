@@ -1,6 +1,6 @@
 package com.github.zhanhb.ckfinder.connector.handlers.parameter;
 
-import com.github.zhanhb.ckfinder.connector.configuration.ConnectorError;
+import com.github.zhanhb.ckfinder.connector.errors.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.DetailError;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Errors;

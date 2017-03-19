@@ -1,4 +1,4 @@
-package com.github.zhanhb.ckfinder.connector.configuration;
+package com.github.zhanhb.ckfinder.connector.errors;
 
 /**
  * Class holding CKFinder error codes.

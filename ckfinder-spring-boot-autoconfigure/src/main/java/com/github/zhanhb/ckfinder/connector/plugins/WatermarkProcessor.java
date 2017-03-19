@@ -11,7 +11,6 @@
  */
 package com.github.zhanhb.ckfinder.connector.plugins;
 
-import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
 import com.github.zhanhb.ckfinder.connector.data.FileUploadEvent;
 import com.github.zhanhb.ckfinder.connector.data.FileUploadListener;
 import java.awt.image.BufferedImage;
@@ -32,7 +31,7 @@ public class WatermarkProcessor implements FileUploadListener {
   private final WatermarkSettings settings;
 
   @Override
-  public void onFileUploadComplete(FileUploadEvent event, IConfiguration configuration) {
+  public void onFileUploadComplete(FileUploadEvent event) {
     try {
       final Path originalFile = event.getFile();
       final WatermarkPosition position = new WatermarkPosition(settings.getMarginBottom(), settings.getMarginRight());

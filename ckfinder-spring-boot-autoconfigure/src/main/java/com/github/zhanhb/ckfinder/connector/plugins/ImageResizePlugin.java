@@ -26,7 +26,7 @@ public class ImageResizePlugin extends Plugin {
     register.addName("imageresize")
             .addPluginInfoRegister(new ImageResizeRegister(params))
             .registCommands(new ImageResizeCommand(params),
-            new ImageResizeInfoCommand());
+                    new ImageResizeInfoCommand());
   }
 
 }

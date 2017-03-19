@@ -11,7 +11,7 @@
  */
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
-import com.github.zhanhb.ckfinder.connector.configuration.ConnectorError;
+import com.github.zhanhb.ckfinder.connector.errors.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.FileUploadParameter;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import com.google.gson.Gson;

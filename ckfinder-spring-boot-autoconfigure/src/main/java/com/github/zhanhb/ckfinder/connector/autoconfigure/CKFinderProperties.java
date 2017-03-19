@@ -12,15 +12,16 @@ import org.springframework.util.Assert;
  */
 @Getter
 @Setter
-@ConfigurationProperties(prefix = CKFinderProperties.CKFINDER_PREFIX)
+@ConfigurationProperties(CKFinderProperties.CKFINDER_PREFIX)
 @SuppressWarnings({"PublicInnerClass", "ReturnOfCollectionOrArrayField", "AssignmentToCollectionOrArrayFieldFromParameter"})
 public class CKFinderProperties {
 
   public static final String CKFINDER_PREFIX = "ckfinder";
 
   private boolean enabled = true;
-  private String baseDir;
-  private String baseUrl;
+  private Connector connector = new Connector();
+  private String basePath;
+  private String baseUrl = "/userfiles";
   private License license = new License();
   private Image image = new Image();
   private String[] defaultResourceTypes = {};
@@ -39,6 +40,14 @@ public class CKFinderProperties {
   private Watermark watermark = new Watermark();
   private ImageResize imageResize = new ImageResize();
   private Servlet servlet = new Servlet();
+
+  @Getter
+  @Setter
+  public static class Connector {
+
+    private boolean enabled = true;
+
+  }
 
   @Getter
   @Setter
@@ -70,9 +79,9 @@ public class CKFinderProperties {
 
     private String url;
     private String directory;
-    private Integer maxSize;
-    private String[] allowedExtensions;
-    private String[] deniedExtensions;
+    private int maxSize = 0;
+    private String[] allowedExtensions = {};
+    private String[] deniedExtensions = {};
 
   }
 

@@ -19,6 +19,7 @@ import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.InitParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.ConnectorInfo;
+import com.github.zhanhb.ckfinder.connector.handlers.response.PluginsInfos;
 import com.github.zhanhb.ckfinder.connector.handlers.response.ResourceTypes;
 import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
@@ -164,8 +165,10 @@ public class InitCommand extends XmlCommand<InitParameter> {
    */
   private void createPluginsData(Connector.Builder rootElement, IConfiguration configuration) {
     if (configuration.getEvents() != null) {
-      InitCommandEvent event = new InitCommandEvent(rootElement);
-      configuration.getEvents().runInitCommand(event, configuration);
+      PluginsInfos.Builder builder = PluginsInfos.builder();
+      InitCommandEvent event = new InitCommandEvent(builder);
+      configuration.getEvents().fireOnInitCommand(event);
+      rootElement.pluginsInfos(builder.build());
     }
   }
 
@@ -201,7 +204,7 @@ public class InitCommand extends XmlCommand<InitParameter> {
         childElement.url(PathUtils.addSlashToEnd(resourceType.getUrl()));
         long maxSize = resourceType.getMaxSize();
         childElement.maxSize(maxSize > 0 ? maxSize : 0);
-        boolean hasChildren = FileUtils.hasChildren(configuration.getAccessControl(), "/", Paths.get(PathUtils.escape(resourceType.getPath())), configuration, resourceType.getName(), param.getUserRole());
+        boolean hasChildren = FileUtils.hasChildren(configuration.getAccessControl(), "/", Paths.get(resourceType.getPath()), configuration, resourceType.getName(), param.getUserRole());
         childElement.hasChildren(hasChildren);
         resourceTypes.resourceType(childElement.build());
       }

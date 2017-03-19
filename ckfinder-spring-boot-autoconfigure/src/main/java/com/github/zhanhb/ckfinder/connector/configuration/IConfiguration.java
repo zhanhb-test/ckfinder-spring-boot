@@ -23,15 +23,6 @@ import javax.servlet.http.HttpServletRequest;
  */
 public interface IConfiguration {
 
-  int DEFAULT_IMG_WIDTH = 500;
-  int DEFAULT_IMG_HEIGHT = 400;
-  int DEFAULT_THUMB_MAX_WIDTH = 100;
-  int DEFAULT_THUMB_MAX_HEIGHT = 100;
-  float DEFAULT_IMG_QUALITY = 0.8f;
-  String DEFAULT_THUMBS_URL = "_thumbs";
-  String DEFAULT_THUMBS_DIR = "%BASE_DIR%/_thumbs";
-  String DEFAULT_BASE_URL = "/userfiles";
-
   /**
    * gets user role name sets in config.
    *

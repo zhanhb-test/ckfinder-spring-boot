@@ -17,11 +17,11 @@ package com.github.zhanhb.ckfinder.connector.configuration;
 public interface IBasePathBuilder {
 
   /**
-   * create baseDir value.
+   * create base directory value.
    *
-   * @return value of baseDir
+   * @return value of base directory
    */
-  public String getBaseDir();
+  public String getBasePath();
 
   /**
    * create baseURL value.

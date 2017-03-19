@@ -11,9 +11,9 @@
  */
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
-import com.github.zhanhb.ckfinder.connector.configuration.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
 import com.github.zhanhb.ckfinder.connector.configuration.ParameterFactory;
+import com.github.zhanhb.ckfinder.connector.errors.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.ErrorListXmlParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
@@ -62,8 +62,8 @@ public abstract class ErrorListXmlCommand<T extends ErrorListXmlParameter> exten
    * @param param
    * @param configuration connector configuration
    * @return error code
-   * {@link com.github.zhanhb.ckfinder.connector.configuration.ConnectorError}
-   * if no error occurred.
+   * {@link com.github.zhanhb.ckfinder.connector.errors.ConnectorError} if no
+   * error occurred.
    * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
    */
   protected abstract ConnectorError getDataForXml(T param, IConfiguration configuration) throws ConnectorException;

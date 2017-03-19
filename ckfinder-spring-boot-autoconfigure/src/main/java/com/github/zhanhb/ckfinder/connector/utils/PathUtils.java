@@ -13,6 +13,7 @@ package com.github.zhanhb.ckfinder.connector.utils;
 
 import com.github.zhanhb.ckfinder.connector.configuration.Constants;
 import java.util.regex.Pattern;
+import org.springframework.util.StringUtils;
 
 /**
  * Utility class used to change paths in connector.
@@ -20,24 +21,31 @@ import java.util.regex.Pattern;
 @SuppressWarnings("UtilityClassWithoutPrivateConstructor")
 public class PathUtils {
 
+  public static String normalize(String string) {
+    return string != null ? string.replaceAll("[\\\\/]+", "/") : null;
+  }
+
   /**
    * Escapes double slashes (//) and replaces backslashes characters (\) with
    * slashes (/). <br>
    * <strong>NOTE:</strong> This method preserves UNC paths.
    *
-   * @param string string to escape
+   * @param string string to escapeUrl
    * @return Escaped string, {@code null} or empty string.
    */
-  public static String escape(String string) {
-    if (string == null || string.isEmpty()) {
+  public static String normalizeUrl(String string) {
+    if (StringUtils.isEmpty(string)) {
       return string;
     }
     final int prefixIndex = string.indexOf("://");
-    String prefix = "";
-    String suffix = string;
+    String prefix;
+    String suffix;
     if (prefixIndex > -1) {
-      prefix = suffix.substring(0, prefixIndex + 3);
-      suffix = suffix.substring(prefixIndex + 3);
+      prefix = string.substring(0, prefixIndex + 1);
+      suffix = string.substring(prefixIndex + 1);
+    } else {
+      prefix = "";
+      suffix = string;
     }
     suffix = suffix.replace('\\', '/');
 
@@ -73,40 +81,12 @@ public class PathUtils {
    * @return String with slash character at the beginning, {@code null} or full
    * URL.
    */
-  public static String addSlashToBeginning(String string) {
-    if (string == null || string.charAt(0) == '/'
+  public static String addSlashToBegin(String string) {
+    if (string == null || string.startsWith("/")
             || Pattern.matches(Constants.URL_REGEX, string)) {
       return string;
     }
     return "/".concat(string);
-  }
-
-  /**
-   * Removes slash from the start of string, provided as parameter if necessary.
-   *
-   * @param string string to remove slash character from
-   * @return String without slash character at the beginning, {@code null} or
-   * empty string.
-   */
-  public static String removeSlashFromBeginning(String string) {
-    if (string != null && string.startsWith("/")) {
-      return string.substring(1, string.length());
-    }
-    return string;
-  }
-
-  /**
-   * Removes slash character from the end of string, provided as parameter if
-   * necessary.
-   *
-   * @param string string to remove slash character from
-   * @return String without slash at the end, {@code null} or empty string.
-   */
-  public static String removeSlashFromEnd(String string) {
-    if (string != null && string.endsWith("/")) {
-      return string.substring(0, string.length() - 1);
-    }
-    return string;
   }
 
 }

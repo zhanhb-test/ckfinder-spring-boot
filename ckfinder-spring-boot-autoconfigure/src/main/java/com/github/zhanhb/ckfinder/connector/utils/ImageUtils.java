@@ -71,11 +71,12 @@ public class ImageUtils {
    * @param orginFile origin image file.
    * @param file file to save thumb
    * @param conf connector configuration
-   * @return 
+   * @return
    * @throws IOException when error occurs.
    */
   public static boolean createThumb(Path orginFile, Path file, IConfiguration conf)
           throws IOException {
+    log.debug("createThumb");
     BufferedImage image;
     try (InputStream is = Files.newInputStream(orginFile)) {
       image = ImageIO.read(is);
@@ -167,22 +168,22 @@ public class ImageUtils {
    */
   private static Dimension createThumbDimension(BufferedImage image,
           int maxWidth, int maxHeight) {
-    int width, height;
-    if (image.getWidth() >= image.getHeight()) {
-      if (image.getWidth() >= maxWidth) {
+    log.debug("image(w={},h={}), max w={}, max h={}", image.getWidth(), image.getHeight(), maxWidth, maxHeight);
+    int width = image.getWidth(), height = image.getHeight();
+
+    long w = (long) width * maxHeight;
+    long h = (long) height * maxWidth;
+
+    if (w > h) {
+      if (width > maxWidth) {
+        height = (int) Math.round(1.0 * h / width);
         width = maxWidth;
-        height = Math.round(((float) maxWidth / image.getWidth()) * image.getHeight());
-      } else {
-        height = image.getHeight();
-        width = image.getWidth();
       }
-    } else if (image.getHeight() >= maxHeight) {
+    } else if (height >= maxHeight) {
+      width = (int) Math.round(1.0 * w / height);
       height = maxHeight;
-      width = Math.round((((float) maxHeight / image.getHeight()) * image.getWidth()));
-    } else {
-      height = image.getHeight();
-      width = image.getWidth();
     }
+    log.debug("didmension w={}, h={}", width, height);
     return new Dimension(width, height);
   }
 

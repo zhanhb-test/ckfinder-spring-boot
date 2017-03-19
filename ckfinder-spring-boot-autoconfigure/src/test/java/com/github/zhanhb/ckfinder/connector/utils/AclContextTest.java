@@ -31,6 +31,7 @@ public class AclContextTest {
     AclContext instance = new AclContext();
     instance.getRoot().setValue(4);
     assertEquals(4, instance.getMask("/test").getEffectiveValue());
+    assertEquals(4, instance.getMask("/test").getEffectiveValue());
   }
 
   /**

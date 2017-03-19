@@ -34,12 +34,11 @@ public class Events {
   }
 
   @SuppressWarnings({"BroadCatchBlock", "TooBroadCatch", "UseSpecificCatch"})
-  public void fireOnFileUpload(FileUploadEvent args, IConfiguration configuration)
-          throws ConnectorException {
+  public void fireOnFileUpload(FileUploadEvent args) throws ConnectorException {
     log.trace("{}", fileUploadListeners);
     try {
       for (FileUploadListener eventHandler : fileUploadListeners) {
-        eventHandler.onFileUploadComplete(args, configuration);
+        eventHandler.onFileUploadComplete(args);
       }
     } catch (ConnectorException ex) {
       throw ex;
@@ -48,10 +47,10 @@ public class Events {
     }
   }
 
-  public void runInitCommand(InitCommandEvent event, IConfiguration configuration) {
+  public void fireOnInitCommand(InitCommandEvent event) {
     log.trace("{}", pluginInfoRegisters);
     for (PluginInfoRegister pluginInfoRegister : pluginInfoRegisters) {
-      pluginInfoRegister.runEventHandler(event, configuration);
+      pluginInfoRegister.onInitEvent(event);
     }
   }
 

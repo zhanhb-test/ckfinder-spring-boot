@@ -1,35 +1,35 @@
 ckfinder:
   enabled: true
-  base-dir:
+  connector.enabled: true
+  base-path:
   base-url:
   license:
-    strategy:
-    key:
     name:
-  imgage:
+    key:
+  image:
     width: 1600
     height: 1200
     quality: 0.8
   default-resource-types:
   types:
     Files:
-      url: '%BASE_URL%files'
-      directory: '%BASE_DIR%/files'
+      url: files
+      directory: files
       max-size: 0
       allowed-extensions: 7z,aiff,asf,avi,bmp,csv,doc,docx,fla,flv,gif,gz,gzip,jpeg,jpg,mid,mov,mp3,mp4,mpc,mpeg,mpg,ods,odt,pdf,png,ppt,pptx,pxd,qt,ram,rar,rm,rmi,rmvb,rtf,sdc,sitd,swf,sxc,sxw,tar,tgz,tif,tiff,txt,vsd,wav,wma,wmv,xls,xlsx,zip
       denied-extensions: exe,jsp,jspx,asp,aspx
     Images:
-      url: '%BASE_URL%images'
-      directory: '%BASE_DIR%/images'
+      url: images
+      directory: images
       max-size: 0
       allowed-extensions: bmp,gif,jpeg,jpg,png
       denied-extensions:
-#    Flash:
-#      url: '%BASE_URL%flash'
-#      directory: '%BASE_DIR%/flash'
-#      max-size: 0
-#      allowed-extensions: swf,flv
-#      denied-extensions:
+    Flash:
+      url: flash
+      directory: flash
+      max-size: 0
+      allowed-extensions: swf,flv
+      denied-extensions:
   user-role-session-var: CKFinder_UserRole
   access-controls:
   - role: '*'

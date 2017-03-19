@@ -7,6 +7,7 @@ import com.github.zhanhb.ckfinder.connector.configuration.FixLicenseFactory;
 import com.github.zhanhb.ckfinder.connector.configuration.IBasePathBuilder;
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
 import com.github.zhanhb.ckfinder.connector.configuration.License;
+import com.github.zhanhb.ckfinder.connector.configuration.LicenseFactory;
 import com.github.zhanhb.ckfinder.connector.configuration.Plugin;
 import com.github.zhanhb.ckfinder.connector.data.AccessControlLevel;
 import com.github.zhanhb.ckfinder.connector.data.PluginInfo;
@@ -44,6 +45,8 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
+import static com.github.zhanhb.ckfinder.connector.configuration.Constants.DEFAULT_BASE_URL;
+
 /**
  *
  * @author zhanhb
@@ -52,6 +55,7 @@ import org.springframework.util.StringUtils;
 @ConditionalOnWebApplication
 @EnableConfigurationProperties(CKFinderProperties.class)
 @SuppressWarnings("PublicInnerClass")
+@ConditionalOnProperty(prefix = CKFinderProperties.CKFINDER_PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
 public class CKFinderAutoConfiguration {
 
   @Configuration
@@ -63,25 +67,25 @@ public class CKFinderAutoConfiguration {
       ServletContext servletContext = applicationContext.getBean(ServletContext.class);
       String baseUrl = properties.getBaseUrl();
       if (StringUtils.isEmpty(baseUrl)) {
-        baseUrl = IConfiguration.DEFAULT_BASE_URL;
+        baseUrl = DEFAULT_BASE_URL;
       }
-      baseUrl = PathUtils.addSlashToBeginning(PathUtils.addSlashToEnd(baseUrl));
-      String baseDir = properties.getBaseDir();
-      if (StringUtils.isEmpty(baseDir)) {
-        baseDir = baseUrl.replaceAll("^/+", "");
+      baseUrl = PathUtils.addSlashToBegin(PathUtils.addSlashToEnd(baseUrl));
+      String basePath = properties.getBasePath();
+      if (StringUtils.isEmpty(basePath)) {
+        basePath = baseUrl.replaceAll("^/+", "");
       }
       try {
-        Path path = Paths.get(baseDir);
-        baseDir = path.toString();
+        Path path = Paths.get(basePath).normalize();
+        basePath = path.toString();
         if (!path.isAbsolute()) {
-          baseDir = servletContext.getRealPath(baseDir);
-          if (baseDir == null) {
-            baseDir = path.toString();
+          basePath = servletContext.getRealPath(basePath);
+          if (basePath == null) {
+            basePath = path.toString();
           }
         }
       } catch (IllegalArgumentException ex) {
       }
-      return DefaultPathBuilder.builder().baseDir(baseDir).baseUrl(servletContext.getContextPath() + PathUtils.addSlashToEnd(baseUrl)).build();
+      return DefaultPathBuilder.builder().basePath(basePath).baseUrl(servletContext.getContextPath() + PathUtils.addSlashToEnd(baseUrl)).build();
     }
 
   }
@@ -138,32 +142,13 @@ public class CKFinderAutoConfiguration {
             AccessControl defaultAccessControl,
             ObjectProvider<Collection<Plugin>> pluginsProvider) throws IOException {
       Collection<Plugin> plugins = pluginsProvider.getIfAvailable();
-      com.github.zhanhb.ckfinder.connector.configuration.Configuration.Builder builder = com.github.zhanhb.ckfinder.connector.configuration.Configuration.builder();
-      builder.enabled(properties.isEnabled());
-      CKFinderProperties.License license = properties.getLicense();
-      label:
-      {
-        License.Builder licenseBuilder = License.builder().name("").key("");
-        if (license != null) {
-          licenseBuilder.name(license.getName()).key(license.getKey());
-          CKFinderProperties.LicenseStrategy strategy = license.getStrategy();
-          if (strategy == CKFinderProperties.LicenseStrategy.host) {
-            builder.licenseFactory(new HostLicenseFactory());
-            break label;
-          } else if (strategy == CKFinderProperties.LicenseStrategy.auth) {
-            if (!StringUtils.isEmpty(license.getName()) && StringUtils.isEmpty(license.getKey())) {
-              licenseBuilder.key(KeyGenerator.INSTANCE.generateKey(license.getName(), false));
-            }
-          }
-        }
-        builder.licenseFactory(new FixLicenseFactory(licenseBuilder.build()));
-      }
+      com.github.zhanhb.ckfinder.connector.configuration.Configuration.Builder builder = com.github.zhanhb.ckfinder.connector.configuration.Configuration.builder()
+              .enabled(properties.getConnector().isEnabled())
+              .licenseFactory(createLiceFactory(properties.getLicense()));
       CKFinderProperties.Image image = properties.getImage();
-      if (image != null) {
-        builder.imgWidth(image.getWidth())
-                .imgHeight(image.getHeight())
-                .imgQuality(image.getQuality());
-      }
+      builder.imgWidth(image.getWidth())
+              .imgHeight(image.getHeight())
+              .imgQuality(image.getQuality());
       if (properties.getDefaultResourceTypes() != null) {
         builder.defaultResourceTypes(Arrays.asList(properties.getDefaultResourceTypes()));
       }
@@ -195,14 +180,14 @@ public class CKFinderAutoConfiguration {
 
     private void setTypes(com.github.zhanhb.ckfinder.connector.configuration.Configuration.Builder builder,
             IBasePathBuilder basePathBuilder, Map<String, CKFinderProperties.Type> types) throws IOException {
-      String baseDir = basePathBuilder.getBaseDir();
+      String basePath = basePathBuilder.getBasePath();
       String baseUrl = basePathBuilder.getBaseUrl();
       for (Map.Entry<String, CKFinderProperties.Type> entry : types.entrySet()) {
         final String typeName = entry.getKey();
         CKFinderProperties.Type type = entry.getValue();
         Assert.hasText(typeName, "Resource type name should not be empty");
-        ResourceType.Builder resourceTypeBuilder = ResourceType.builder();
-        resourceTypeBuilder.name(typeName);
+        ResourceType.Builder resourceTypeBuilder = ResourceType.builder()
+                .name(typeName);
 
         if (type.getAllowedExtensions() != null) {
           resourceTypeBuilder.allowedExtensions(toString(type.getAllowedExtensions()));
@@ -210,18 +195,12 @@ public class CKFinderAutoConfiguration {
         if (type.getDeniedExtensions() != null) {
           resourceTypeBuilder.deniedExtensions(toString(type.getDeniedExtensions()));
         }
-        if (type.getMaxSize() != null) {
-          resourceTypeBuilder.maxSize(type.getMaxSize());
-        }
-        String path = !StringUtils.isEmpty(type.getDirectory())
-                ? type.getDirectory()
-                : Constants.BASE_DIR_PLACEHOLDER + "/" + typeName.toLowerCase() + "/";
-        resourceTypeBuilder.path(Files.createDirectories(
-                Paths.get(path
-                        .replace(Constants.BASE_DIR_PLACEHOLDER, baseDir)))
-                .toAbsolutePath().toString());
-        String url = type.getUrl() != null ? type.getUrl() : Constants.BASE_URL_PLACEHOLDER + "/" + typeName.toLowerCase();
-        resourceTypeBuilder.url(url.replace(Constants.BASE_URL_PLACEHOLDER, baseUrl));
+        resourceTypeBuilder.maxSize(type.getMaxSize());
+        String path = StringUtils.hasLength(type.getDirectory()) ? type.getDirectory() : typeName.toLowerCase();
+        String url = type.getUrl() != null ? type.getUrl() : "/" + typeName.toLowerCase();
+
+        resourceTypeBuilder.path(Files.createDirectories(Paths.get(basePath, path.replace(Constants.BASE_DIR_PLACEHOLDER, ""))).toString());
+        resourceTypeBuilder.url(PathUtils.normalizeUrl(baseUrl + url.replace(Constants.BASE_URL_PLACEHOLDER, "")));
 
         builder.type(typeName, resourceTypeBuilder.build());
       }
@@ -230,16 +209,34 @@ public class CKFinderAutoConfiguration {
     private void setThumbs(CKFinderProperties.Thumbs thumbs, IBasePathBuilder basePathBuilder,
             com.github.zhanhb.ckfinder.connector.configuration.Configuration.Builder builder) {
       if (thumbs != null) {
-        String baseDir = basePathBuilder.getBaseDir();
+        String basePath = basePathBuilder.getBasePath();
         String baseUrl = basePathBuilder.getBaseUrl();
         builder.thumbsEnabled(thumbs.isEnabled())
-                .thumbsPath(thumbs.getDirectory().replace(Constants.BASE_DIR_PLACEHOLDER, baseDir))
+                .thumbsPath(Paths.get(basePath, thumbs.getDirectory().replace(Constants.BASE_DIR_PLACEHOLDER, "")).toString())
                 .thumbsDirectAccess(thumbs.isDirectAccess())
-                .thumbsUrl(thumbs.getUrl().replace(Constants.BASE_URL_PLACEHOLDER, baseUrl))
+                .thumbsUrl(PathUtils.normalizeUrl(baseUrl + thumbs.getUrl().replace(Constants.BASE_URL_PLACEHOLDER, "")))
                 .maxThumbHeight(thumbs.getMaxHeight())
                 .maxThumbWidth(thumbs.getMaxWidth())
                 .imgQuality(thumbs.getQuality());
       }
+    }
+
+    private LicenseFactory createLiceFactory(CKFinderProperties.License license) {
+      License.Builder licenseBuilder = License.builder()
+              .name(license.getName()).key(license.getKey());
+      CKFinderProperties.LicenseStrategy strategy = license.getStrategy();
+      if (null != strategy) {
+        switch (strategy) {
+          case host:
+            return new HostLicenseFactory();
+          case auth:
+            if (StringUtils.hasLength(license.getName())) {
+              licenseBuilder.key(KeyGenerator.INSTANCE.generateKey(license.getName(), false));
+            }
+            break;
+        }
+      }
+      return new FixLicenseFactory(licenseBuilder.build());
     }
 
   }
@@ -325,7 +322,8 @@ public class CKFinderAutoConfiguration {
   public static class DefaultConnectorServletConfigurer {
 
     @Bean
-    public ServletRegistrationBean connectorServlet(CKFinderProperties properties, MultipartConfigElement multipartConfigElement,
+    public ServletRegistrationBean connectorServlet(CKFinderProperties properties,
+            MultipartConfigElement multipartConfigElement,
             IConfiguration configuration) {
       ConnectorServlet servlet = new ConnectorServlet(configuration);
       ServletRegistrationBean servletRegistrationBean = new ServletRegistrationBean(servlet, false, properties.getServlet().getPath());

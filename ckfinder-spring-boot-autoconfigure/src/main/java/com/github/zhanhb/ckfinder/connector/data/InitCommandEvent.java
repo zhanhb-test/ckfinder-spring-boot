@@ -12,21 +12,22 @@
 package com.github.zhanhb.ckfinder.connector.data;
 
 import com.github.zhanhb.ckfinder.connector.configuration.PluginRegister;
-import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
+import com.github.zhanhb.ckfinder.connector.handlers.response.PluginsInfos;
+import java.util.Objects;
 
 /**
  * Event data for {@link PluginRegister#addPluginInfoRegister} event.
  */
 public class InitCommandEvent {
 
-  private final Connector.Builder connector;
+  private final PluginsInfos.Builder builder;
 
-  public InitCommandEvent(Connector.Builder connector) {
-    this.connector = connector;
+  public InitCommandEvent(PluginsInfos.Builder connector) {
+    this.builder = Objects.requireNonNull(connector);
   }
 
-  public Connector.Builder getConnector() {
-    return connector;
+  public PluginsInfos.Builder getBuilder() {
+    return builder;
   }
 
 }

@@ -11,11 +11,11 @@
  */
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
-import com.github.zhanhb.ckfinder.connector.configuration.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.configuration.Constants;
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
 import com.github.zhanhb.ckfinder.connector.configuration.ParameterFactory;
 import com.github.zhanhb.ckfinder.connector.data.ResourceType;
+import com.github.zhanhb.ckfinder.connector.errors.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.Parameter;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
@@ -29,6 +29,7 @@ import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import org.springframework.util.StringUtils;
 
 /**
  * Base class for all command handlers.
@@ -116,7 +117,9 @@ public abstract class Command<T extends Parameter> {
    * @throws ConnectorException when error occurs
    * @throws java.io.IOException
    */
-  abstract void execute(T param, HttpServletRequest request, HttpServletResponse response, IConfiguration configuration) throws ConnectorException, IOException;
+  abstract void execute(T param, HttpServletRequest request,
+          HttpServletResponse response, IConfiguration configuration)
+          throws ConnectorException, IOException;
 
   /**
    * check request for security issue.
@@ -146,13 +149,11 @@ public abstract class Command<T extends Parameter> {
    */
   String getCurrentFolder(HttpServletRequest request) {
     String currentFolder = request.getParameter("currentFolder");
-    if (currentFolder != null && !currentFolder.isEmpty()) {
-      currentFolder = PathUtils.addSlashToBeginning(PathUtils.addSlashToEnd(currentFolder));
+    if (StringUtils.hasLength(currentFolder)) {
+      return PathUtils.normalize('/' + currentFolder + '/');
     } else {
-      currentFolder = "/";
+      return "/";
     }
-    currentFolder = PathUtils.escape(currentFolder);
-    return currentFolder;
   }
 
 }

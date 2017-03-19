@@ -167,7 +167,7 @@ public class FileUtils {
     if (dirName == null || dirName.isEmpty()) {
       return false;
     }
-    String dir = PathUtils.removeSlashFromEnd(PathUtils.escape(dirName));
+    String dir = PathUtils.normalize(dirName);
     StringTokenizer sc = new StringTokenizer(dir, "/");
     Pattern pattern = Pattern.compile(getHiddenFileOrFolderRegex(
             conf.getHiddenFolders()));
@@ -316,16 +316,15 @@ public class FileUtils {
    *
    * @param file file to create.
    * @param asFile if it is path to folder.
-   * @throws IOException when io error occurs.
+   * @throws IOException when IO Exception occurs.
    */
   public static void createPath(Path file, boolean asFile) throws IOException {
     if (asFile) {
-      Path path = file.toAbsolutePath();
-      Path dir = path.getParent();
+      Path dir = file.getParent();
       if (dir != null) {
         Files.createDirectories(dir);
       }
-      Files.createFile(path);
+      Files.createFile(file);
     } else {
       Files.createDirectories(file);
     }
@@ -364,7 +363,7 @@ public class FileUtils {
    *
    * @param item file upload item
    * @return true if detected.
-   * @throws IOException when io error occurs.
+   * @throws IOException when IO Exception occurs.
    */
   public static boolean hasHtmlContent(InputStreamSource item) throws IOException {
     byte[] buff = new byte[MAX_BUFFER_SIZE];

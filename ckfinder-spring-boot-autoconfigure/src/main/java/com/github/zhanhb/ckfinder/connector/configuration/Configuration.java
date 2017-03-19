@@ -78,14 +78,14 @@ public class Configuration implements IConfiguration {
   public static class Builder {
 
     Builder() {
-      imgWidth = DEFAULT_IMG_WIDTH;
-      imgHeight = DEFAULT_IMG_HEIGHT;
-      imgQuality = DEFAULT_IMG_QUALITY;
+      imgWidth = Constants.DEFAULT_IMG_WIDTH;
+      imgHeight = Constants.DEFAULT_IMG_HEIGHT;
+      imgQuality = Constants.DEFAULT_IMG_QUALITY;
       thumbsUrl = "";
       thumbsPath = "";
-      thumbsQuality = DEFAULT_IMG_QUALITY;
-      maxThumbHeight = DEFAULT_THUMB_MAX_HEIGHT;
-      maxThumbWidth = DEFAULT_THUMB_MAX_WIDTH;
+      thumbsQuality = Constants.DEFAULT_IMG_QUALITY;
+      maxThumbHeight = Constants.DEFAULT_THUMB_MAX_HEIGHT;
+      maxThumbWidth = Constants.DEFAULT_THUMB_MAX_WIDTH;
       userRoleName = "";
     }
 

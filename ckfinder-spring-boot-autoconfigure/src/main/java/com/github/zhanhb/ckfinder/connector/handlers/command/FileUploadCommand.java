@@ -11,10 +11,10 @@
  */
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
-import com.github.zhanhb.ckfinder.connector.configuration.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
 import com.github.zhanhb.ckfinder.connector.data.FileUploadEvent;
 import com.github.zhanhb.ckfinder.connector.data.ResourceType;
+import com.github.zhanhb.ckfinder.connector.errors.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.FileUploadParameter;
 import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
@@ -257,7 +257,7 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
       item.transferTo(file.toFile());
     }
     FileUploadEvent args = new FileUploadEvent(param.getCurrentFolder(), file);
-    configuration.getEvents().fireOnFileUpload(args, configuration);
+    configuration.getEvents().fireOnFileUpload(args);
   }
 
   /**

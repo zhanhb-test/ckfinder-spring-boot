@@ -15,13 +15,13 @@ import lombok.Builder;
 import lombok.Getter;
 
 /**
- * Path builder that creates default values of baseDir and baseURL.
+ * Path builder that creates default values of base directory and baseURL.
  */
 @Builder(builderClassName = "Builder")
 @Getter
 public class DefaultPathBuilder implements IBasePathBuilder {
 
-  private final String baseDir;
+  private final String basePath;
   private final String baseUrl;
 
 }

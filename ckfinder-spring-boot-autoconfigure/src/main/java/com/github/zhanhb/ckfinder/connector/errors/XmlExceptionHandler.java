@@ -49,7 +49,7 @@ public enum XmlExceptionHandler implements ExceptionHandler {
     if (type != null) {
       String typeName = type.getName();
       connector.resourceType(typeName);
-      if (!StringUtils.isEmpty(currentFolder)) {
+      if (StringUtils.hasLength(currentFolder)) {
         connector.currentFolder(CurrentFolder.builder()
                 .path(currentFolder)
                 .url(type.getUrl() + currentFolder)
