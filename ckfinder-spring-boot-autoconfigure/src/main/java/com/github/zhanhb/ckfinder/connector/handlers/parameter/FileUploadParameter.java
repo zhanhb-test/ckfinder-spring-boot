@@ -1,6 +1,9 @@
 package com.github.zhanhb.ckfinder.connector.handlers.parameter;
 
 import com.github.zhanhb.ckfinder.connector.configuration.ConnectorError;
+import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
+import com.github.zhanhb.ckfinder.connector.errors.ErrorUtils;
+import java.util.Objects;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -44,14 +47,21 @@ public class FileUploadParameter extends Parameter {
    * Error code number.
    */
   private ConnectorError errorCode;
-  /**
-   * Custom error message.
-   */
-  private String customErrorMsg;
 
   public FileUploadParameter() {
     this.fileName = "";
     this.newFileName = "";
+  }
+
+  @Override
+  public void throwException(ConnectorError code) throws ConnectorException {
+    String msg = ErrorUtils.INSTANCE.getErrorMsgByLangAndCode(getLangCode(), code.getCode());
+    throw new ConnectorException(code, msg);
+  }
+
+  public void throwException(String message) throws ConnectorException {
+    Objects.requireNonNull(message);
+    throw new ConnectorException(ConnectorError.CUSTOM_ERROR, message);
   }
 
 }

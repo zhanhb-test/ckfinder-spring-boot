@@ -16,7 +16,6 @@ import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
 import com.github.zhanhb.ckfinder.connector.data.FileUploadEvent;
 import com.github.zhanhb.ckfinder.connector.data.ResourceType;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
-import com.github.zhanhb.ckfinder.connector.errors.ErrorUtils;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.FileUploadParameter;
 import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
@@ -69,41 +68,41 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
    * @param response
    * @param configuration
    * @throws ConnectorException when error occurs.
+   * @throws java.io.IOException
    */
   @Override
   @SuppressWarnings("FinalMethod")
   final void execute(FileUploadParameter param, HttpServletRequest request,
           HttpServletResponse response, IConfiguration configuration) throws ConnectorException, IOException {
-    if (param.getErrorCode() == null) {
-      param.setUploaded(uploadFile(request, param, configuration));
-    }
-
-    try {
-      String errorMsg = param.getErrorCode() == null ? "":  param.getErrorCode() == ConnectorError.CUSTOM_ERROR ? param.getCustomErrorMsg()
-              : ErrorUtils.INSTANCE.getErrorMsgByLangAndCode(param.getLangCode(), param.getErrorCode().getCode());
-      errorMsg = errorMsg.replace("%1", param.getNewFileName());
-      String path = "";
-
-      if (!param.isUploaded()) {
-        param.setNewFileName("");
-        param.setCurrentFolder("");
-      } else {
-        path = param.getType().getUrl() + param.getCurrentFolder();
+    String errorMsg = "";
+    if (param.getErrorCode() == null) { // set in method initParams
+      try {
+        uploadFile(request, param, configuration);
+        param.setUploaded(true);
+      } catch (ConnectorException ex) {
+        param.setErrorCode(ex.getErrorCode());
+        errorMsg = ex.getMessage();
       }
-      setContentType(param, response);
-      PrintWriter writer = response.getWriter();
-      if ("txt".equals(param.getResponseType())) {
-        writer.write(param.getNewFileName() + "|" + errorMsg);
-      } else if (checkFuncNum(param)) {
-        handleOnUploadCompleteCallFuncResponse(writer, errorMsg, path, param);
-      } else {
-        handleOnUploadCompleteResponse(writer, errorMsg, param);
-      }
-      writer.flush();
-    } catch (IOException | SecurityException e) {
-      throw new ConnectorException(
-              ConnectorError.ACCESS_DENIED, e);
     }
+    errorMsg = errorMsg.replace("%1", param.getNewFileName());
+    String path = "";
+
+    if (!param.isUploaded()) {
+      param.setNewFileName("");
+      param.setCurrentFolder("");
+    } else {
+      path = param.getType().getUrl() + param.getCurrentFolder();
+    }
+    setContentType(param, response);
+    PrintWriter writer = response.getWriter();
+    if ("txt".equals(param.getResponseType())) {
+      writer.write(param.getNewFileName() + "|" + errorMsg);
+    } else if (checkFuncNum(param)) {
+      handleOnUploadCompleteCallFuncResponse(writer, errorMsg, path, param);
+    } else {
+      handleOnUploadCompleteResponse(writer, errorMsg, param);
+    }
+    writer.flush();
   }
 
   /**
@@ -156,7 +155,8 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
    * @param configuration connector configuration.
    */
   @Override
-  protected void initParams(FileUploadParameter param, HttpServletRequest request, IConfiguration configuration) {
+  protected void initParams(FileUploadParameter param,
+          HttpServletRequest request, IConfiguration configuration) {
     try {
       super.initParams(param, request, configuration);
     } catch (ConnectorException ex) {
@@ -166,6 +166,9 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
     param.setCkEditorFuncNum(request.getParameter("CKEditorFuncNum"));
     param.setResponseType(request.getParameter("response_type") != null ? request.getParameter("response_type") : request.getParameter("responseType"));
     param.setLangCode(request.getParameter("langCode"));
+    if (param.getType() == null) {
+      param.setErrorCode(ConnectorError.INVALID_TYPE);
+    }
   }
 
   /**
@@ -174,16 +177,16 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
    * @param request request
    * @param param
    * @param configuration
-   * @return true if uploaded correctly.
+   * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
    */
-  private boolean uploadFile(HttpServletRequest request, FileUploadParameter param, IConfiguration configuration) {
+  private void uploadFile(HttpServletRequest request, FileUploadParameter param,
+          IConfiguration configuration) throws ConnectorException {
     if (!configuration.getAccessControl().hasPermission(param.getType().getName(),
             param.getCurrentFolder(), param.getUserRole(),
             AccessControl.FILE_UPLOAD)) {
-      param.setErrorCode(ConnectorError.UNAUTHORIZED);
-      return false;
+      param.throwException(ConnectorError.UNAUTHORIZED);
     }
-    return fileUpload(request, param, configuration);
+    fileUpload(request, param, configuration);
   }
 
   /**
@@ -191,9 +194,10 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
    * @param request http request
    * @param param
    * @param configuration
-   * @return true if uploaded correctly
+   * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
    */
-  private boolean fileUpload(HttpServletRequest request, FileUploadParameter param, IConfiguration configuration) {
+  private void fileUpload(HttpServletRequest request, FileUploadParameter param,
+          IConfiguration configuration) throws ConnectorException {
     try {
       boolean multipart = multipartResolver.isMultipart(request);
       if (multipart) {
@@ -206,28 +210,21 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
             String path = Paths.get(param.getType().getPath(),
                     param.getCurrentFolder()).toString();
             param.setFileName(getFileItemName(part));
-            return validateUploadItem(part, path, param, configuration)
-                    && saveTemporaryFile(path, part, param, configuration);
+            validateUploadItem(part, path, param, configuration);
+            saveTemporaryFile(path, part, param, configuration);
+            return;
           }
         } finally {
           multipartResolver.cleanupMultipart(resolveMultipart);
         }
       }
-      throw new ConnectorException(ConnectorError.CUSTOM_ERROR, "No file provided in the request.");
-    } catch (ConnectorException e) {
-      param.setErrorCode(e.getErrorCode());
-      if (param.getErrorCode() == ConnectorError.CUSTOM_ERROR) {
-        param.setCustomErrorMsg(e.getMessage());
-      }
-      return false;
+      param.throwException("No file provided in the request.");
     } catch (MultipartException e) {
       log.debug("catch MultipartException", e);
-      param.setErrorCode(ConnectorError.UPLOADED_TOO_BIG);
-      return false;
+      param.throwException(ConnectorError.UPLOADED_TOO_BIG);
     } catch (IOException e) {
       log.debug("catch IOException", e);
-      param.setErrorCode(ConnectorError.ACCESS_DENIED);
-      return false;
+      param.throwException(ConnectorError.ACCESS_DENIED);
     }
   }
 
@@ -238,36 +235,29 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
    * @param item file upload item
    * @param param
    * @param configuration
-   * @return result of saving, true if saved correctly
    * @throws java.io.IOException
    * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
    */
-  private boolean saveTemporaryFile(String path, MultipartFile item, FileUploadParameter param, IConfiguration configuration)
+  private void saveTemporaryFile(String path, MultipartFile item, FileUploadParameter param, IConfiguration configuration)
           throws IOException, ConnectorException {
     Path file = Paths.get(path, param.getNewFileName());
 
-    if (!ImageUtils.isImageExtension(file)) {
-      item.transferTo(file.toFile());
-      FileUploadEvent args = new FileUploadEvent(param.getCurrentFolder(), file);
-      configuration.getEvents().fireOnFileUpload(args, configuration);
-      return true;
-    } else if (ImageUtils.checkImageSize(item, configuration)
-            || configuration.isCheckSizeAfterScaling()) {
-      ImageUtils.createTmpThumb(item, file, getFileItemName(item), configuration);
+    if (ImageUtils.isImageExtension(file)) {
       if (!configuration.isCheckSizeAfterScaling()
-              || FileUtils.isFileSizeInRange(param.getType(), Files.size(file))) {
-        FileUploadEvent args = new FileUploadEvent(param.getCurrentFolder(), file);
-        configuration.getEvents().fireOnFileUpload(args, configuration);
-        return true;
-      } else {
+              && !ImageUtils.checkImageSize(item, configuration)) {
+        param.throwException(ConnectorError.UPLOADED_TOO_BIG);
+      }
+      ImageUtils.createTmpThumb(item, file, getFileItemName(item), configuration);
+      if (configuration.isCheckSizeAfterScaling()
+              && !FileUtils.isFileSizeInRange(param.getType(), Files.size(file))) {
         Files.deleteIfExists(file);
-        param.setErrorCode(ConnectorError.UPLOADED_TOO_BIG);
-        return false;
+        param.throwException(ConnectorError.UPLOADED_TOO_BIG);
       }
     } else {
-      param.setErrorCode(ConnectorError.UPLOADED_TOO_BIG);
-      return false;
+      item.transferTo(file.toFile());
     }
+    FileUploadEvent args = new FileUploadEvent(param.getCurrentFolder(), file);
+    configuration.getEvents().fireOnFileUpload(args, configuration);
   }
 
   /**
@@ -308,15 +298,14 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
    * @param path file path
    * @param param
    * @param configuration
-   * @return true if validation
+   * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
    */
-  private boolean validateUploadItem(MultipartFile item, String path, FileUploadParameter param, IConfiguration configuration) {
-
+  private void validateUploadItem(MultipartFile item, String path,
+          FileUploadParameter param, IConfiguration configuration) throws ConnectorException {
     if (item.getOriginalFilename() != null && item.getOriginalFilename().length() > 0) {
       param.setFileName(getFileItemName(item));
     } else {
-      param.setErrorCode(ConnectorError.UPLOADED_INVALID);
-      return false;
+      param.throwException(ConnectorError.UPLOADED_INVALID);
     }
     param.setNewFileName(param.getFileName());
 
@@ -333,18 +322,15 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
     }
 
     if (FileUtils.isDirectoryHidden(param.getCurrentFolder(), configuration)) {
-      param.setErrorCode(ConnectorError.INVALID_REQUEST);
-      return false;
+      param.throwException(ConnectorError.INVALID_REQUEST);
     }
     if (!FileUtils.isFileNameValid(param.getNewFileName())
             || FileUtils.isFileHidden(param.getNewFileName(), configuration)) {
-      param.setErrorCode(ConnectorError.INVALID_NAME);
-      return false;
+      param.throwException(ConnectorError.INVALID_NAME);
     }
     final ResourceType resourceType = param.getType();
     if (!FileUtils.isFileExtensionAllowed(param.getNewFileName(), resourceType)) {
-      param.setErrorCode(ConnectorError.INVALID_EXTENSION);
-      return false;
+      param.throwException(ConnectorError.INVALID_EXTENSION);
     }
     if (configuration.isCheckDoubleFileExtensions()) {
       param.setNewFileName(FileUtils.renameFileWithBadExt(resourceType, param.getNewFileName()));
@@ -354,28 +340,22 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
       Path file = Paths.get(path, getFinalFileName(path, param.getNewFileName(), param));
       if (!(ImageUtils.isImageExtension(file) && configuration.isCheckSizeAfterScaling())
               && !FileUtils.isFileSizeInRange(resourceType, item.getSize())) {
-        param.setErrorCode(ConnectorError.UPLOADED_TOO_BIG);
-        return false;
+        param.throwException(ConnectorError.UPLOADED_TOO_BIG);
       }
 
       if (configuration.isSecureImageUploads() && ImageUtils.isImageExtension(file)
               && !ImageUtils.isValid(item)) {
-        param.setErrorCode(ConnectorError.UPLOADED_CORRUPT);
-        return false;
+        param.throwException(ConnectorError.UPLOADED_CORRUPT);
       }
 
       if (!FileUtils.isExtensionHtml(file.getFileName().toString(), configuration)
               && FileUtils.hasHtmlContent(item)) {
-        param.setErrorCode(ConnectorError.UPLOADED_WRONG_HTML_FILE);
-        return false;
+        param.throwException(ConnectorError.UPLOADED_WRONG_HTML_FILE);
       }
     } catch (SecurityException | IOException e) {
       log.error("", e);
-      param.setErrorCode(ConnectorError.ACCESS_DENIED);
-      return false;
+      param.throwException(ConnectorError.ACCESS_DENIED);
     }
-
-    return true;
   }
 
   /**
@@ -388,31 +368,6 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
     Pattern p = Pattern.compile("[^\\\\/]+$");
     Matcher m = p.matcher(item.getOriginalFilename());
     return m.find() ? m.group() : "";
-  }
-
-  @Deprecated
-  @Override
-  protected boolean isCurrFolderExists(FileUploadParameter param, HttpServletRequest request, IConfiguration configuration) {
-    try {
-      String tmpType = request.getParameter("type");
-      if (tmpType != null) {
-        try {
-          checkTypeExists(tmpType, configuration);
-        } catch (ConnectorException ex) {
-          param.setErrorCode(ex.getErrorCode());
-          return false;
-        }
-        Path currDir = Paths.get(configuration.getTypes().get(tmpType).getPath(),
-                param.getCurrentFolder());
-        if (!Files.isDirectory(currDir)) {
-          throw new ConnectorException(ConnectorError.FOLDER_NOT_FOUND);
-        }
-      }
-      return true;
-    } catch (ConnectorException ex) {
-      param.setErrorCode(ex.getErrorCode());
-      return false;
-    }
   }
 
   private boolean isProtectedName(String nameWithoutExtension) {

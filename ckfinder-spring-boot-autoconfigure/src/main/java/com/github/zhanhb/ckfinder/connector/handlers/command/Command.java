@@ -83,9 +83,15 @@ public abstract class Command<T extends Parameter> {
       throw new ConnectorException(ConnectorError.INVALID_REQUEST);
     }
 
-    if (currentFolder == null || isCurrFolderExists(param, request, configuration)) {
-      param.setType(configuration.getTypes().get(request.getParameter("type")));
+    String typeName = request.getParameter("type");
+    ResourceType type = configuration.getTypes().get(typeName);
+    if (currentFolder != null && typeName != null && type != null) {
+      Path currDir = Paths.get(type.getPath(), currentFolder);
+      if (!Files.isDirectory(currDir)) {
+        throw new ConnectorException(ConnectorError.FOLDER_NOT_FOUND);
+      }
     }
+    param.setType(type);
   }
 
   /**
@@ -97,50 +103,6 @@ public abstract class Command<T extends Parameter> {
   private void checkConnectorEnabled(IConfiguration configuration) throws ConnectorException {
     if (!configuration.isEnabled()) {
       throw new ConnectorException(ConnectorError.CONNECTOR_DISABLED);
-    }
-  }
-
-  /**
-   * Checks if current folder exists.
-   *
-   * @param param
-   * @param request current request object
-   * @param configuration connector configuration
-   * @return {@code true} if current folder exists
-   * @throws ConnectorException if current folder doesn't exist
-   */
-  @Deprecated
-  protected boolean isCurrFolderExists(T param, HttpServletRequest request, IConfiguration configuration)
-          throws ConnectorException {
-    String tmpType = request.getParameter("type");
-    if (tmpType != null) {
-      try {
-        checkTypeExists(tmpType, configuration);
-      } catch (ConnectorException ex) {
-        return false;
-      }
-      Path currDir = Paths.get(configuration.getTypes().get(tmpType).getPath(),
-              param.getCurrentFolder());
-      if (!Files.isDirectory(currDir)) {
-        throw new ConnectorException(ConnectorError.FOLDER_NOT_FOUND);
-      }
-    }
-    return true;
-  }
-
-  /**
-   * Checks if type of resource provided as parameter exists.
-   *
-   * @param type name of the resource type to check if it exists
-   * @param configuration connector configuration
-   * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
-   */
-  @Deprecated
-  @SuppressWarnings("FinalMethod")
-  protected final void checkTypeExists(String type, IConfiguration configuration) throws ConnectorException {
-    ResourceType testType = configuration.getTypes().get(type);
-    if (testType == null) {
-      throw new ConnectorException(ConnectorError.INVALID_TYPE);
     }
   }
 
@@ -162,7 +124,6 @@ public abstract class Command<T extends Parameter> {
    * @param reqParam request param
    * @throws ConnectorException if validation error occurs.
    */
-  @Deprecated
   @SuppressWarnings("FinalMethod")
   final void checkRequestPathValid(String reqParam) throws ConnectorException {
     if (reqParam != null && !reqParam.isEmpty()
