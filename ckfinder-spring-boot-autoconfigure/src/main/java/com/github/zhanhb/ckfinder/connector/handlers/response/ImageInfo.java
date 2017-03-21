@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlRootElement(name = "ImageInfo")
-public class ImageInfo implements ConnectorElement {
+public class ImageInfo extends Result implements ConnectorElement {
 
   @XmlAttribute(name = "width")
   private int width;

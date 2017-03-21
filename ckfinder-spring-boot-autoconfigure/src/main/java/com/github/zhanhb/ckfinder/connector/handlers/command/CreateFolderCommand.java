@@ -72,7 +72,7 @@ public class CreateFolderCommand extends BaseXmlCommand<CreateFolderParameter> i
 
     createFolder(param);
 
-    rootElement.newFolder(NewFolder.builder()
+    rootElement.result(NewFolder.builder()
             .name(param.getNewFolderName())
             .build());
   }

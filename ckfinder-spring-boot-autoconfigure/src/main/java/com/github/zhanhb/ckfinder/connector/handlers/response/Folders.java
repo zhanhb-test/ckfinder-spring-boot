@@ -20,7 +20,7 @@ import lombok.Singular;
 @NoArgsConstructor
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlRootElement(name = "Folders")
-public class Folders implements ConnectorElement {
+public class Folders extends Result implements ConnectorElement {
 
   @Singular
   @XmlElementRef

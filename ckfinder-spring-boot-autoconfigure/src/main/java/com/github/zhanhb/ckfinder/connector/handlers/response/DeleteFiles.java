@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlRootElement(name = "DeleteFiles")
-public class DeleteFiles implements ConnectorElement {
+public class DeleteFiles extends Result implements ConnectorElement {
 
   @XmlAttribute(name = "deleted")
   private int deleted;

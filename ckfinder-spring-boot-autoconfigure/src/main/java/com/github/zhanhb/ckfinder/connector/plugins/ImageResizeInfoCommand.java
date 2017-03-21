@@ -85,7 +85,7 @@ public class ImageResizeInfoCommand extends BaseXmlCommand<ImageResizeInfoParame
     ImageInfo.Builder element = ImageInfo.builder();
     element.width(param.getImageWidth())
             .height(param.getImageHeight());
-    rootElement.imageInfo(element.build());
+    rootElement.result(element.build());
   }
 
   @Override

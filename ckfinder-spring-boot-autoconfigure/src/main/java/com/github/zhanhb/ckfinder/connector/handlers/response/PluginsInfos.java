@@ -20,7 +20,7 @@ import lombok.Singular;
 @NoArgsConstructor
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlRootElement(name = "PluginsInfo")
-public class PluginsInfos implements ConnectorElement {
+public class PluginsInfos extends Result implements ConnectorElement {
 
   @Singular
   @XmlElementRef

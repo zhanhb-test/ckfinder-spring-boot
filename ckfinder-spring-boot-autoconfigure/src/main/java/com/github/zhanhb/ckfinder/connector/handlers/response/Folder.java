@@ -21,7 +21,7 @@ import lombok.NoArgsConstructor;
 @XmlRootElement(name = "Folder")
 public class Folder {
 
-  @XmlAttribute(name = "name")
+  @XmlAttribute(name = "name", required = true)
   private String name;
   @XmlAttribute(name = "hasChildren")
   private boolean hasChildren;

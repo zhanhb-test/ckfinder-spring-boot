@@ -46,7 +46,7 @@ public class MoveFilesCommand extends ErrorListXmlCommand<MoveFilesParameter> im
   @Override
   protected void addRestNodes(Connector.Builder rootElement, MoveFilesParameter param, IConfiguration configuration) {
     if (param.isAddMoveNode()) {
-      rootElement.moveFiles(MoveFiles.builder()
+      rootElement.result(MoveFiles.builder()
               .moved(param.getFilesMoved())
               .movedTotal(param.getMovedAll() + param.getFilesMoved())
               .build());

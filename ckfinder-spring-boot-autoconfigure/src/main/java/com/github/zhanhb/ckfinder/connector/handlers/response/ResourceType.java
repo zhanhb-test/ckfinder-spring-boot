@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 @XmlRootElement(name = "ResourceType")
 public class ResourceType {
 
-  @XmlAttribute(name = "name")
+  @XmlAttribute(name = "name", required = true)
   private String name;
   @XmlAttribute(name = "url")
   private String url;

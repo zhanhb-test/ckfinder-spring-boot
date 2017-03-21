@@ -95,7 +95,7 @@ public class InitCommand extends XmlCommand<InitParameter> {
     if (plugins.length() > 0) {
       element.plugins(plugins);
     }
-    rootElement.connectorInfo(element.build());
+    rootElement.result(element.build());
   }
 
   /**
@@ -163,7 +163,7 @@ public class InitCommand extends XmlCommand<InitParameter> {
       PluginsInfos.Builder builder = PluginsInfos.builder();
       InitCommandEvent event = new InitCommandEvent(builder);
       configuration.getEvents().fireOnInitCommand(event);
-      rootElement.pluginsInfos(builder.build());
+      rootElement.result(builder.build());
     }
   }
 
@@ -201,7 +201,7 @@ public class InitCommand extends XmlCommand<InitParameter> {
                 .hasChildren(hasChildren).build());
       }
     }
-    rootElement.resourceTypes(resourceTypes.build());
+    rootElement.result(resourceTypes.build());
   }
 
   /**

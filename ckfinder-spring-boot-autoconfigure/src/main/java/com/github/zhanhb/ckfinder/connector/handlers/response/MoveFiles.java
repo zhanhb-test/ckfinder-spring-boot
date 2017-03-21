@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlRootElement(name = "MoveFiles")
-public class MoveFiles implements ConnectorElement {
+public class MoveFiles extends Result implements ConnectorElement {
 
   @XmlAttribute(name = "moved")
   private int moved;

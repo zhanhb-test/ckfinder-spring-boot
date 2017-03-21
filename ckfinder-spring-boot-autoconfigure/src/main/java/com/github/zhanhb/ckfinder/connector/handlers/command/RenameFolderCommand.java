@@ -88,7 +88,7 @@ public class RenameFolderCommand extends BaseXmlCommand<RenameFolderParameter> i
     } catch (IOException ex) {
       param.throwException(ConnectorError.ACCESS_DENIED);
     }
-    rootElement.renamedFolder(RenamedFolder.builder()
+    rootElement.result(RenamedFolder.builder()
             .newName(param.getNewFolderName())
             .newPath(param.getNewFolderPath())
             .newUrl(param.getType().getUrl() + param.getNewFolderPath())

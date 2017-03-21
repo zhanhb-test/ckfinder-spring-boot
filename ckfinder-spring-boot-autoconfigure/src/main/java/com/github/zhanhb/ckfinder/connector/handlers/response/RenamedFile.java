@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlRootElement(name = "RenamedFile")
-public class RenamedFile implements ConnectorElement {
+public class RenamedFile extends Result implements ConnectorElement {
 
   @XmlAttribute(name = "name")
   private String name;

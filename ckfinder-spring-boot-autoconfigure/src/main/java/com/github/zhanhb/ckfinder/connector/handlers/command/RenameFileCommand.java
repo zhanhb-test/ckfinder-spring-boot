@@ -56,7 +56,7 @@ public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> 
     if (param.isRenamed()) {
       element.newName(param.getNewFileName());
     }
-    rootElement.renamedFile(element.build());
+    rootElement.result(element.build());
   }
 
   /**

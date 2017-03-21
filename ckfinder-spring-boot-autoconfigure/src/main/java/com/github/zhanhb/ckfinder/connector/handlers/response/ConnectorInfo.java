@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlRootElement(name = "ConnectorInfo")
-public class ConnectorInfo implements ConnectorElement {
+public class ConnectorInfo extends Result implements ConnectorElement {
 
   @XmlAttribute(name = "enabled")
   private boolean enabled;

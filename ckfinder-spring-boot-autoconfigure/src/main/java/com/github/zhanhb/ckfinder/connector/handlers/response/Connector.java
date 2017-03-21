@@ -1,5 +1,6 @@
 package com.github.zhanhb.ckfinder.connector.handlers.response;
 
+import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -9,6 +10,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
+import lombok.Singular;
 
 /**
  *
@@ -33,40 +35,8 @@ public class Connector {
   @XmlElementRef
   private Errors errors;
 
+  @Singular
   @XmlElementRef
-  private ConnectorInfo connectorInfo;
-
-  @XmlElementRef
-  private ResourceTypes resourceTypes;
-
-  @XmlElementRef
-  private PluginsInfos pluginsInfos;
-
-  @XmlElementRef
-  private DeleteFiles deleteFiles;
-
-  @XmlElementRef
-  private NewFolder newFolder;
-
-  @XmlElementRef
-  private CopyFiles copyFiles;
-
-  @XmlElementRef
-  private ImageInfo imageInfo;
-
-  @XmlElementRef
-  private Folders folders;
-
-  @XmlElementRef
-  private Files files;
-
-  @XmlElementRef
-  private RenamedFile renamedFile;
-
-  @XmlElementRef
-  private RenamedFolder renamedFolder;
-
-  @XmlElementRef
-  private MoveFiles moveFiles;
+  private List<Result> results;
 
 }

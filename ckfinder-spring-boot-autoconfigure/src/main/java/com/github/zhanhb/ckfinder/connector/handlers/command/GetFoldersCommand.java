@@ -99,7 +99,7 @@ public class GetFoldersCommand extends BaseXmlCommand<Parameter> {
                               param.getCurrentFolder()
                               + dirName, param.getUserRole())).build());
     }
-    rootElement.folders(folders.build());
+    rootElement.result(folders.build());
   }
 
 }

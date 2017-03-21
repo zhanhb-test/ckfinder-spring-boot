@@ -52,7 +52,7 @@ public class DeleteFilesCommand extends ErrorListXmlCommand<DeleteFilesParameter
    * @param param
    */
   private void createDeleteFielsNode(Connector.Builder rootElement, DeleteFilesParameter param) {
-    rootElement.deleteFiles(DeleteFiles.builder()
+    rootElement.result(DeleteFiles.builder()
             .deleted(param.getFilesDeleted())
             .build());
   }

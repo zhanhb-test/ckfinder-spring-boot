@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlRootElement(name = "RenamedFolder")
-public class RenamedFolder implements ConnectorElement {
+public class RenamedFolder extends Result implements ConnectorElement {
 
   @XmlAttribute(name = "newName")
   private String newName;

@@ -21,11 +21,11 @@ import lombok.NoArgsConstructor;
 @XmlRootElement(name = "File")
 public class File {
 
-  @XmlAttribute(name = "name")
+  @XmlAttribute(name = "name", required = true)
   private String name;
-  @XmlAttribute(name = "date")
+  @XmlAttribute(name = "date", required = true)
   private String date;
-  @XmlAttribute(name = "size")
+  @XmlAttribute(name = "size", required = true)
   private long size;
   @XmlAttribute(name = "thumb")
   private String thumb;

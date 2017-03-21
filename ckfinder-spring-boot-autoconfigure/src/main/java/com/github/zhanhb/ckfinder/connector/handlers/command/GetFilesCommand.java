@@ -121,7 +121,7 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
               .thumb(createThumbAttr(file, param, configuration))
               .build());
     }
-    rootElement.files(files.build());
+    rootElement.result(files.build());
   }
 
   /**
