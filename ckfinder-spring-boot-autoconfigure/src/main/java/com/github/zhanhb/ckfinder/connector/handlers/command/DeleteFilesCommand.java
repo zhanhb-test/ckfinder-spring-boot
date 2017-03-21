@@ -39,19 +39,7 @@ public class DeleteFilesCommand extends ErrorListXmlCommand<DeleteFilesParameter
   }
 
   @Override
-  protected void addRestNodes(Connector.Builder rootElement, DeleteFilesParameter param, IConfiguration configuration) {
-    if (param.isAddDeleteNode()) {
-      createDeleteFielsNode(rootElement, param);
-    }
-  }
-
-  /**
-   * Adds file deletion node in XML response.
-   *
-   * @param rootElement root element in XML response
-   * @param param
-   */
-  private void createDeleteFielsNode(Connector.Builder rootElement, DeleteFilesParameter param) {
+  protected void addResultNode(Connector.Builder rootElement, DeleteFilesParameter param, IConfiguration configuration) {
     rootElement.result(DeleteFiles.builder()
             .deleted(param.getFilesDeleted())
             .build());
@@ -68,11 +56,6 @@ public class DeleteFilesCommand extends ErrorListXmlCommand<DeleteFilesParameter
   @Override
   protected ConnectorError getDataForXml(DeleteFilesParameter param, IConfiguration configuration)
           throws ConnectorException {
-
-    param.setFilesDeleted(0);
-
-    param.setAddDeleteNode(false);
-
     if (param.getType() == null) {
       throw new ConnectorException(ConnectorError.INVALID_TYPE);
     }
@@ -114,7 +97,7 @@ public class DeleteFilesCommand extends ErrorListXmlCommand<DeleteFilesParameter
     for (FilePostParam fileItem : param.getFiles()) {
       Path file = Paths.get(fileItem.getType().getPath(), fileItem.getFolder(), fileItem.getName());
 
-      param.setAddDeleteNode(true);
+      param.setAddResultNode(true);
       if (!Files.exists(file)) {
         param.appendErrorNodeChild(ConnectorError.FILE_NOT_FOUND,
                 fileItem.getName(), fileItem.getFolder(), fileItem.getType().getName());

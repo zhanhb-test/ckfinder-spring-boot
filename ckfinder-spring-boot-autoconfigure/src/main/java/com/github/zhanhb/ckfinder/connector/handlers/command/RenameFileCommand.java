@@ -39,19 +39,7 @@ public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> 
   }
 
   @Override
-  protected void addRestNodes(Connector.Builder rootElement, RenameFileParameter param, IConfiguration configuration) {
-    if (param.isAddRenameNode()) {
-      createRenamedFileNode(rootElement, param);
-    }
-  }
-
-  /**
-   * create rename file XML node.
-   *
-   * @param rootElement XML root node
-   * @param param
-   */
-  private void createRenamedFileNode(Connector.Builder rootElement, RenameFileParameter param) {
+  protected void addResultNode(Connector.Builder rootElement, RenameFileParameter param, IConfiguration configuration) {
     RenamedFile.Builder element = RenamedFile.builder().name(param.getFileName());
     if (param.isRenamed()) {
       element.newName(param.getNewFileName());
@@ -87,7 +75,7 @@ public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> 
 
     if (param.getFileName() != null && !param.getFileName().isEmpty()
             && param.getNewFileName() != null && !param.getNewFileName().isEmpty()) {
-      param.setAddRenameNode(true);
+      param.setAddResultNode(true);
     }
 
     if (!FileUtils.isFileExtensionAllowed(param.getNewFileName(), param.getType())) {

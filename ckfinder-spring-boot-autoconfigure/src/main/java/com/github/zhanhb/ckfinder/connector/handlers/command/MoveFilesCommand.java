@@ -44,13 +44,11 @@ public class MoveFilesCommand extends ErrorListXmlCommand<MoveFilesParameter> im
   }
 
   @Override
-  protected void addRestNodes(Connector.Builder rootElement, MoveFilesParameter param, IConfiguration configuration) {
-    if (param.isAddMoveNode()) {
-      rootElement.result(MoveFiles.builder()
-              .moved(param.getFilesMoved())
-              .movedTotal(param.getMovedAll() + param.getFilesMoved())
-              .build());
-    }
+  protected void addResultNode(Connector.Builder rootElement, MoveFilesParameter param, IConfiguration configuration) {
+    rootElement.result(MoveFiles.builder()
+            .moved(param.getFilesMoved())
+            .movedTotal(param.getMovedAll() + param.getFilesMoved())
+            .build());
   }
 
   @Override
@@ -82,10 +80,7 @@ public class MoveFilesCommand extends ErrorListXmlCommand<MoveFilesParameter> im
    */
   private ConnectorError moveFiles(MoveFilesParameter param, IConfiguration configuration)
           throws ConnectorException {
-    param.setFilesMoved(0);
-    param.setAddMoveNode(false);
     for (FilePostParam file : param.getFiles()) {
-
       if (!FileUtils.isFileNameValid(file.getName())) {
         param.throwException(ConnectorError.INVALID_REQUEST);
       }
@@ -191,7 +186,7 @@ public class MoveFilesCommand extends ErrorListXmlCommand<MoveFilesParameter> im
       moveThumb(file, sourceFile.relativize(destFile), configuration);
     }
 
-    param.setAddMoveNode(true);
+    param.setAddResultNode(true);
     if (param.hasError()) {
       return ConnectorError.MOVE_FAILED;
     } else {

@@ -44,13 +44,11 @@ public class CopyFilesCommand extends ErrorListXmlCommand<CopyFilesParameter> im
   }
 
   @Override
-  protected void addRestNodes(Connector.Builder rootElement, CopyFilesParameter param, IConfiguration configuration) {
-    if (param.isAddCopyNode()) {
-      rootElement.result(CopyFiles.builder()
-              .copied(param.getFilesCopied())
-              .copiedTotal(param.getCopiedAll() + param.getFilesCopied())
-              .build());
-    }
+  protected void addResultNode(Connector.Builder rootElement, CopyFilesParameter param, IConfiguration configuration) {
+    rootElement.result(CopyFiles.builder()
+            .copied(param.getFilesCopied())
+            .copiedTotal(param.getCopiedAll() + param.getFilesCopied())
+            .build());
   }
 
   @Override
@@ -82,10 +80,7 @@ public class CopyFilesCommand extends ErrorListXmlCommand<CopyFilesParameter> im
    */
   private ConnectorError copyFiles(CopyFilesParameter param, IConfiguration configuration)
           throws ConnectorException {
-    param.setFilesCopied(0);
-    param.setAddCopyNode(false);
     for (FilePostParam file : param.getFiles()) {
-
       if (!FileUtils.isFileNameValid(file.getName())) {
         param.throwException(ConnectorError.INVALID_REQUEST);
       }
@@ -190,7 +185,7 @@ public class CopyFilesCommand extends ErrorListXmlCommand<CopyFilesParameter> im
       param.filesCopiedPlus();
       copyThumb(file, sourceFile.relativize(destFile), configuration);
     }
-    param.setAddCopyNode(true);
+    param.setAddResultNode(true);
     if (param.hasError()) {
       return ConnectorError.COPY_FAILED;
     } else {

@@ -42,7 +42,9 @@ public abstract class ErrorListXmlCommand<T extends ErrorListXmlParameter> exten
     createCurrentFolderNode(param, connector, configuration.getAccessControl());
     createErrorNode(connector, errorNum);
     param.addErrorsTo(connector);
-    addRestNodes(connector, param, configuration);
+    if (param.isAddResultNode()) {
+      addResultNode(connector, param, configuration);
+    }
     return connector.build();
   }
 
@@ -53,7 +55,7 @@ public abstract class ErrorListXmlCommand<T extends ErrorListXmlParameter> exten
    * @param param
    * @param configuration connector configuration
    */
-  protected abstract void addRestNodes(Connector.Builder rootElement, T param, IConfiguration configuration);
+  protected abstract void addResultNode(Connector.Builder rootElement, T param, IConfiguration configuration);
 
   /**
    * gets all necessary data to create XML response.

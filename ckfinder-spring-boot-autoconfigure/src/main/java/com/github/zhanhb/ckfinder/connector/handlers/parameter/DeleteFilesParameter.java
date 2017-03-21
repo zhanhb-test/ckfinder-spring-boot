@@ -17,7 +17,6 @@ public class DeleteFilesParameter extends ErrorListXmlParameter {
 
   private List<FilePostParam> files = new ArrayList<>();
   private int filesDeleted;
-  private boolean addDeleteNode;
 
   public void filesDeletedPlus() {
     filesDeleted++;

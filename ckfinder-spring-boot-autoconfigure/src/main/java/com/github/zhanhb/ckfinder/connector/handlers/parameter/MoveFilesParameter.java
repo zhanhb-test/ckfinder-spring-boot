@@ -18,7 +18,6 @@ public class MoveFilesParameter extends ErrorListXmlParameter {
   private final List<FilePostParam> files = new ArrayList<>();
   private int filesMoved;
   private int movedAll;
-  private boolean addMoveNode;
 
   public void filesMovedPlus() {
     filesMoved++;

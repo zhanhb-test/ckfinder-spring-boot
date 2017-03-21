@@ -18,7 +18,6 @@ public class CopyFilesParameter extends ErrorListXmlParameter {
   private final List<FilePostParam> files = new ArrayList<>();
   private int filesCopied;
   private int copiedAll;
-  private boolean addCopyNode;
 
   public void filesCopiedPlus() {
     filesCopied++;

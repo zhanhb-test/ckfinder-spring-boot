@@ -17,6 +17,8 @@ public class ErrorListXmlParameter extends Parameter {
    */
   private Errors.Builder errorsBuilder;
 
+  private boolean addResultNode;
+
   /**
    * save errors node to list.
    *
@@ -51,6 +53,14 @@ public class ErrorListXmlParameter extends Parameter {
     if (errorsBuilder != null) {
       rootElement.errors(errorsBuilder.build());
     }
+  }
+
+  public boolean isAddResultNode() {
+    return addResultNode;
+  }
+
+  public void setAddResultNode(boolean addResultNode) {
+    this.addResultNode = addResultNode;
   }
 
 }
