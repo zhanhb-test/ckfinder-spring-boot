@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -59,15 +60,11 @@ public class FileUtils {
    * @return list of files or subdirectories in selected directory
    * @throws java.io.IOException
    */
-  public static List<String> findChildrensList(Path dir, boolean searchDirectory)
+  public static List<Path> listChildren(Path dir, boolean searchDirectory)
           throws IOException {
     DirectoryStream.Filter<Path> filter = searchDirectory ? Files::isDirectory : Files::isRegularFile;
     try (DirectoryStream<Path> ds = Files.newDirectoryStream(dir, filter)) {
-      return StreamSupport.stream(ds.spliterator(), false)
-              .map(Path::getFileName)
-              .map(Object::toString)
-              .sorted()
-              .collect(Collectors.toList());
+      return StreamSupport.stream(ds.spliterator(), false).collect(Collectors.toList());
     }
   }
 
@@ -146,12 +143,11 @@ public class FileUtils {
    * Parse date with pattern yyyyMMddHHmm. Pattern is used in get file command
    * response XML.
    *
-   * @param file input file.
+   * @param attributes input file attributes.
    * @return parsed file modification date.
-   * @throws java.io.IOException
    */
-  public static String parseLastModifDate(Path file) throws IOException {
-    Instant instant = Files.getLastModifiedTime(file).toInstant();
+  public static String parseLastModifDate(BasicFileAttributes attributes) {
+    Instant instant = attributes.lastModifiedTime().toInstant();
     return DateTimeFormatterHolder.FORMATTER.format(instant);
   }
 

@@ -38,7 +38,6 @@ public abstract class XmlCommand<T extends Parameter> extends Command<T> {
    * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
    */
   @Override
-  @SuppressWarnings("FinalMethod")
   final void execute(T param, HttpServletRequest request, HttpServletResponse response,
           IConfiguration configuration) throws IOException, ConnectorException {
     Connector connector = buildConnector(param, configuration);

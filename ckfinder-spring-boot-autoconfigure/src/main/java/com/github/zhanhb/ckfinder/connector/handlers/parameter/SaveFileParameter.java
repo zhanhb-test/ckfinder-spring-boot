@@ -14,6 +14,5 @@ public class SaveFileParameter extends Parameter {
 
   private String fileName;
   private String fileContent;
-  private HttpServletRequest request;
 
 }

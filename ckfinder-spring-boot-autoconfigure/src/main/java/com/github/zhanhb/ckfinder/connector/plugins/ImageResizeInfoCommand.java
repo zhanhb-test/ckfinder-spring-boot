@@ -92,10 +92,6 @@ public class ImageResizeInfoCommand extends BaseXmlCommand<ImageResizeInfoParame
   protected void initParams(ImageResizeInfoParameter param, HttpServletRequest request, IConfiguration configuration)
           throws ConnectorException {
     super.initParams(param, request, configuration);
-    param.setImageHeight(0);
-    param.setImageWidth(0);
-    param.setCurrentFolder(request.getParameter("currentFolder"));
-    param.setType(configuration.getTypes().get(request.getParameter("type")));
     param.setFileName(request.getParameter("fileName"));
   }
 

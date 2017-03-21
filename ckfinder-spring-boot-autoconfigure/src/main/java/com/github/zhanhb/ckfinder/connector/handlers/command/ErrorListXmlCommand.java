@@ -23,7 +23,6 @@ import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
  *
  * @param <T>
  */
-@SuppressWarnings("FinalMethod")
 public abstract class ErrorListXmlCommand<T extends ErrorListXmlParameter> extends XmlCommand<T> {
 
   public ErrorListXmlCommand(ParameterFactory<T> paramFactory) {

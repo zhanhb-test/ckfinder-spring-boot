@@ -39,22 +39,47 @@ public class DownloadFileCommand extends Command<DownloadFileParameter> {
    * @param param
    * @param request
    * @throws ConnectorException when something went wrong during reading file.
+   * @throws java.io.IOException
    */
   @Override
   void execute(DownloadFileParameter param, HttpServletRequest request, HttpServletResponse response, IConfiguration configuration)
-          throws ConnectorException {
+          throws ConnectorException, IOException {
     if (param.getType() == null) {
       throw new ConnectorException(ConnectorError.INVALID_TYPE);
     }
 
+    if (!configuration.getAccessControl().hasPermission(param.getType().getName(),
+            param.getCurrentFolder(), param.getUserRole(),
+            AccessControl.FILE_VIEW)) {
+      param.throwException(ConnectorError.UNAUTHORIZED);
+    }
+
+    if (!FileUtils.isFileNameValid(param.getFileName())
+            || !FileUtils.isFileExtensionAllowed(param.getFileName(),
+                    param.getType())) {
+      param.throwException(ConnectorError.INVALID_REQUEST);
+    }
+
+    if (configuration.isDirectoryHidden(param.getCurrentFolder())) {
+      param.throwException(ConnectorError.INVALID_REQUEST);
+    }
+
+    if (configuration.isFileHidden(param.getFileName())) {
+      param.throwException(ConnectorError.FILE_NOT_FOUND);
+    }
+
     Path file = Paths.get(param.getType().getPath(), param.getCurrentFolder(), param.getFileName());
 
-    if (file != null) {
-      try {
-        response.setContentLengthLong(Files.size(file));
-      } catch (IOException ex) {
-      }
+    long size;
+
+    try {
+      size = Files.size(file);
+    } catch (IOException ex) {
+      param.throwException(ConnectorError.FILE_NOT_FOUND);
+      return;
     }
+
+    response.setContentLengthLong(size);
 
     String mimetype = request.getServletContext().getMimeType(param.getFileName());
     if (mimetype != null) {
@@ -74,32 +99,7 @@ public class DownloadFileCommand extends Command<DownloadFileParameter> {
     response.setHeader("Pragma", "public");
     response.setHeader("Expires", "0");
 
-    if (!configuration.getAccessControl().hasPermission(param.getType().getName(),
-            param.getCurrentFolder(), param.getUserRole(),
-            AccessControl.FILE_VIEW)) {
-      param.throwException(ConnectorError.UNAUTHORIZED);
-    }
-
-    if (!FileUtils.isFileNameValid(param.getFileName())
-            || !FileUtils.isFileExtensionAllowed(param.getFileName(),
-                    param.getType())) {
-      param.throwException(ConnectorError.INVALID_REQUEST);
-    }
-
-    if (configuration.isDirectoryHidden(param.getCurrentFolder())) {
-      param.throwException(ConnectorError.INVALID_REQUEST);
-    }
-    try {
-      if (!Files.isRegularFile(file)
-              || configuration.isFileHidden(param.getFileName())) {
-        param.throwException(ConnectorError.FILE_NOT_FOUND);
-      }
-
-      Files.copy(file, response.getOutputStream());
-    } catch (IOException e) {
-      throw new ConnectorException(ConnectorError.ACCESS_DENIED, e);
-    }
-
+    Files.copy(file, response.getOutputStream());
   }
 
   /**

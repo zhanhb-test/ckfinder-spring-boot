@@ -82,11 +82,8 @@ public class SaveFileCommand extends BaseXmlCommand<SaveFileParameter> implement
   protected void initParams(SaveFileParameter param, HttpServletRequest request, IConfiguration configuration)
           throws ConnectorException {
     super.initParams(param, request, configuration);
-    param.setCurrentFolder(request.getParameter("currentFolder"));
-    param.setType(configuration.getTypes().get(request.getParameter("type")));
     param.setFileContent(request.getParameter("content"));
     param.setFileName(request.getParameter("fileName"));
-    param.setRequest(request);
   }
 
 }

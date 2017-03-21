@@ -21,11 +21,13 @@ import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import com.github.zhanhb.ckfinder.connector.utils.ImageUtils;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
@@ -39,7 +41,7 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
   /**
    * number of bytes in kilobyte.
    */
-  private static final float BYTES = 1024f;
+  private static final BigDecimal BYTES = BigDecimal.valueOf(1024);
 
   public GetFilesCommand() {
     super(GetFilesParameter::new);
@@ -67,73 +69,57 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
       throw new ConnectorException(ConnectorError.INVALID_TYPE);
     }
 
-    param.setFullCurrentPath(Paths.get(param.getType().getPath(),
-            param.getCurrentFolder()).toString());
-
     if (!configuration.getAccessControl().hasPermission(param.getType().getName(),
             param.getCurrentFolder(), param.getUserRole(),
             AccessControl.FILE_VIEW)) {
       param.throwException(ConnectorError.UNAUTHORIZED);
     }
 
-    Path dir = Paths.get(param.getFullCurrentPath());
+    Path dir = Paths.get(param.getType().getPath(), param.getCurrentFolder());
+
+    if (!Files.isDirectory(dir)) {
+      param.throwException(ConnectorError.FOLDER_NOT_FOUND);
+    }
+
     try {
-      if (!Files.isDirectory(dir)) {
-        param.throwException(ConnectorError.FOLDER_NOT_FOUND);
-      }
-      param.setFiles(FileUtils.findChildrensList(dir, false));
+      List<Path> files = FileUtils.listChildren(dir, false);
+      createFilesData(files, rootElement, param, configuration);
     } catch (IOException e) {
       log.error("", e);
       param.throwException(ConnectorError.ACCESS_DENIED);
     }
-    filterListByHiddenAndNotAllowed(param, configuration);
-    createFilesData(rootElement, param, configuration);
-  }
-
-  /**
-   *
-   *
-   * @param param
-   * @param configuration
-   */
-  private void filterListByHiddenAndNotAllowed(GetFilesParameter param, IConfiguration configuration) {
-    List<String> tmpFiles = param.getFiles().stream()
-            .filter(file -> (FileUtils.isFileExtensionAllowed(file, param.getType())
-            && !configuration.isFileHidden(file)))
-            .collect(Collectors.toList());
-
-    param.getFiles().clear();
-    param.getFiles().addAll(tmpFiles);
-
   }
 
   /**
    * creates files data node in response XML.
    *
+   * @param list
    * @param rootElement root element from XML.
    * @param param
    * @param configuration
    */
-  private void createFilesData(Connector.Builder rootElement, GetFilesParameter param, IConfiguration configuration) {
+  private void createFilesData(List<Path> list, Connector.Builder rootElement, GetFilesParameter param, IConfiguration configuration) {
     com.github.zhanhb.ckfinder.connector.handlers.response.Files.Builder files = com.github.zhanhb.ckfinder.connector.handlers.response.Files.builder();
-    for (String filePath : param.getFiles()) {
-      Path file = Paths.get(param.getFullCurrentPath(), filePath);
-      if (Files.exists(file)) {
-        try {
-          File.Builder builder = File.builder()
-                  .name(filePath)
-                  .date(FileUtils.parseLastModifDate(file))
-                  .size(getSize(file));
-          if (ImageUtils.isImageExtension(file) && isAddThumbsAttr(param, configuration)) {
-            String attr = createThumbAttr(file, param, configuration);
-            if (!attr.isEmpty()) {
-              builder.thumb(attr);
-            }
-          }
-          files.file(builder.build());
-        } catch (IOException ex) {
-        }
+    for (Path file : list) {
+      String fileName = file.getFileName().toString();
+      if (!FileUtils.isFileExtensionAllowed(fileName, param.getType())) {
+        continue;
       }
+      if (configuration.isFileHidden(fileName)) {
+        continue;
+      }
+      BasicFileAttributes attrs;
+      try {
+        attrs = Files.readAttributes(file, BasicFileAttributes.class);
+      } catch (IOException ex) {
+        continue;
+      }
+      files.file(File.builder()
+              .name(file.getFileName().toString())
+              .date(FileUtils.parseLastModifDate(attrs))
+              .size(getSizeInKB(attrs).longValue())
+              .thumb(createThumbAttr(file, param, configuration))
+              .build());
     }
     rootElement.files(files.build());
   }
@@ -147,32 +133,32 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
    * @return thumb attribute values
    */
   private String createThumbAttr(Path file, GetFilesParameter param, IConfiguration configuration) {
-    Path thumbFile = Paths.get(configuration.getThumbsPath(),
-            param.getType().getName(), param.getCurrentFolder(),
-            file.getFileName().toString());
-    if (Files.exists(thumbFile)) {
-      return file.getFileName().toString();
-    } else if (isShowThumbs(param)) {
-      return "?".concat(file.getFileName().toString());
-    } else {
-      return "";
+    if (ImageUtils.isImageExtension(file) && isAddThumbsAttr(param, configuration)) {
+      Path thumbFile = Paths.get(configuration.getThumbsPath(),
+              param.getType().getName(), param.getCurrentFolder(),
+              file.getFileName().toString());
+      if (Files.exists(thumbFile)) {
+        return file.getFileName().toString();
+      } else if (isShowThumbs(param)) {
+        return "?".concat(file.getFileName().toString());
+      }
     }
+    return null;
   }
 
   /**
    * get file size.
    *
-   * @param file file
+   * @param attributes file attributes
    * @return file size
-   * @throws java.io.IOException
    */
-  private String getSize(Path file) throws IOException {
-    long size = Files.size(file);
-    if (size > 0 && size < BYTES) {
-      return "1";
-    } else {
-      return String.valueOf(Math.round(size / BYTES));
+  private BigDecimal getSizeInKB(BasicFileAttributes attributes) {
+    long size = attributes.size();
+    if (size > 0) {
+      return size > 0 && size <= 1024 ? BigDecimal.ONE
+              : BigDecimal.valueOf(size).divide(BYTES, 0, RoundingMode.HALF_EVEN);
     }
+    return BigDecimal.ZERO;
   }
 
   /**

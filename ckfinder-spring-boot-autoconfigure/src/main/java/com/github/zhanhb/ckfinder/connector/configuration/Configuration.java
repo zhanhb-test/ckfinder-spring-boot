@@ -67,7 +67,6 @@ public class Configuration implements IConfiguration {
   @Singular
   private Set<String> defaultResourceTypes;
   private boolean disallowUnsafeCharacters;
-  @NonNull
   private Events events;
   @NonNull
   private AccessControl accessControl;

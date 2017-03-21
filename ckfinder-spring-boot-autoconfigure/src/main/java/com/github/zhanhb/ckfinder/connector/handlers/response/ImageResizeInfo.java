@@ -22,7 +22,7 @@ import lombok.Singular;
 @NoArgsConstructor
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlRootElement(name = "imageresize")
-public class ImageResizeInfo {
+public class ImageResizeInfo extends PluginInfo {
 
   @Singular
   @XmlAnyAttribute

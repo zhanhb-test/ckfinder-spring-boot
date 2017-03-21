@@ -12,7 +12,6 @@
 package com.github.zhanhb.ckfinder.connector.data;
 
 import lombok.Builder;
-import lombok.NonNull;
 import lombok.Value;
 
 /**
@@ -26,29 +25,31 @@ public class ResourceType {
   /**
    * resource name.
    */
-  @NonNull
   private final String name;
+
   /**
    * resource url.
    */
   private final String url;
+
   /**
    * resource directory.
    */
   private final String path;
+
   /**
    * max file size in resource.
    */
   private final long maxSize;
+
   /**
    * list of allowed extensions in resource (separated with comma).
    */
-  @NonNull
   private final String allowedExtensions;
+
   /**
    * list of denied extensions in resource (separated with comma).
    */
-  @NonNull
   private final String deniedExtensions;
 
   @SuppressWarnings("PublicInnerClass")

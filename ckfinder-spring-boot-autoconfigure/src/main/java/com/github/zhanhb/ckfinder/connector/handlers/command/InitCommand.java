@@ -25,7 +25,6 @@ import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import com.github.zhanhb.ckfinder.connector.utils.KeyGenerator;
 import com.github.zhanhb.ckfinder.connector.utils.PathUtils;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
@@ -48,7 +47,7 @@ public class InitCommand extends XmlCommand<InitParameter> {
    */
   private static final int[] LICENSE_CHARS = {11, 0, 8, 12, 26, 2, 3, 25, 1};
   private static final int LICENSE_CHAR_NR = 5;
-  private static final int LICENSE_KEY_LENGTH = 34;
+  private static final int MIN_LICENSE_KEY_LENGTH = 26;
   private static final char[] hexChars = "0123456789abcdef".toCharArray();
 
   public InitCommand() {
@@ -63,11 +62,7 @@ public class InitCommand extends XmlCommand<InitParameter> {
     }
     createErrorNode(rootElement, 0);
     createConnectorData(rootElement, param, configuration);
-    try {
-      createResouceTypesData(rootElement, param, configuration);
-    } catch (Exception e) {
-      log.error("", e);
-    }
+    createResouceTypesData(rootElement, param, configuration);
     createPluginsData(rootElement, configuration);
     return rootElement.build();
   }
@@ -154,7 +149,7 @@ public class InitCommand extends XmlCommand<InitParameter> {
    * @return true if has correct length
    */
   private boolean validateLicenseKey(String licenseKey) {
-    return licenseKey != null && licenseKey.length() == LICENSE_KEY_LENGTH;
+    return licenseKey != null && licenseKey.length() >= MIN_LICENSE_KEY_LENGTH;
   }
 
   /**
@@ -178,10 +173,8 @@ public class InitCommand extends XmlCommand<InitParameter> {
    * @param rootElement root element in XML
    * @param param
    * @param configuration
-   * @throws java.io.IOException
    */
-  @SuppressWarnings("CollectionWithoutInitialCapacity")
-  private void createResouceTypesData(Connector.Builder rootElement, InitParameter param, IConfiguration configuration) throws IOException {
+  private void createResouceTypesData(Connector.Builder rootElement, InitParameter param, IConfiguration configuration) {
     //resurcetypes
     ResourceTypes.Builder resourceTypes = ResourceTypes.builder();
     Collection<ResourceType> types;
@@ -192,21 +185,20 @@ public class InitCommand extends XmlCommand<InitParameter> {
     }
 
     for (ResourceType resourceType : types) {
-      String key = resourceType.getName();
-      if (configuration.getAccessControl().hasPermission(key, "/", param.getUserRole(),
-              AccessControl.FOLDER_VIEW)) {
-        com.github.zhanhb.ckfinder.connector.handlers.response.ResourceType.Builder childElement = com.github.zhanhb.ckfinder.connector.handlers.response.ResourceType.builder();
-        childElement.name(resourceType.getName());
-        childElement.acl(configuration.getAccessControl().getAcl(key, "/", param.getUserRole()));
-        childElement.hash(randomHash(resourceType.getPath()));
-        childElement.allowedExtensions(resourceType.getAllowedExtensions());
-        childElement.deniedExtensions(resourceType.getDeniedExtensions());
-        childElement.url(PathUtils.addSlashToEnd(resourceType.getUrl()));
+      String name = resourceType.getName();
+      int acl = configuration.getAccessControl().getAcl(name, "/", param.getUserRole());
+      if ((acl & AccessControl.FOLDER_VIEW) != 0) {
         long maxSize = resourceType.getMaxSize();
-        childElement.maxSize(maxSize > 0 ? maxSize : 0);
         boolean hasChildren = FileUtils.hasChildren(configuration.getAccessControl(), "/", Paths.get(resourceType.getPath()), configuration, resourceType.getName(), param.getUserRole());
-        childElement.hasChildren(hasChildren);
-        resourceTypes.resourceType(childElement.build());
+        resourceTypes.resourceType(com.github.zhanhb.ckfinder.connector.handlers.response.ResourceType.builder()
+                .name(name)
+                .acl(acl)
+                .hash(randomHash(resourceType.getPath()))
+                .allowedExtensions(resourceType.getAllowedExtensions())
+                .deniedExtensions(resourceType.getDeniedExtensions())
+                .url(PathUtils.addSlashToEnd(resourceType.getUrl()))
+                .maxSize(maxSize > 0 ? maxSize : 0)
+                .hasChildren(hasChildren).build());
       }
     }
     rootElement.resourceTypes(resourceTypes.build());

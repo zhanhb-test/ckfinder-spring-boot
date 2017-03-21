@@ -25,7 +25,13 @@ public class Connector {
   private String resourceType;
 
   @XmlElementRef
+  private CurrentFolder currentFolder;
+
+  @XmlElementRef
   private Error error;
+
+  @XmlElementRef
+  private Errors errors;
 
   @XmlElementRef
   private ConnectorInfo connectorInfo;
@@ -35,12 +41,6 @@ public class Connector {
 
   @XmlElementRef
   private PluginsInfos pluginsInfos;
-
-  @XmlElementRef
-  private Errors errors;
-
-  @XmlElementRef
-  private CurrentFolder currentFolder;
 
   @XmlElementRef
   private DeleteFiles deleteFiles;

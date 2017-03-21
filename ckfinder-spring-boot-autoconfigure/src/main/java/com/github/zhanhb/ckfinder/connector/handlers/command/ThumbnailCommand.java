@@ -164,7 +164,6 @@ public class ThumbnailCommand extends Command<ThumbnailParameter> {
    * @param configuration
    * @throws ConnectorException when thumbnail creation fails.
    */
-  @SuppressWarnings({"BroadCatchBlock", "TooBroadCatch"})
   private void createThumb(ThumbnailParameter param, IConfiguration configuration) throws ConnectorException {
     log.debug("ThumbnailCommand.createThumb()");
     log.debug("{}", param.getFullCurrentPath());

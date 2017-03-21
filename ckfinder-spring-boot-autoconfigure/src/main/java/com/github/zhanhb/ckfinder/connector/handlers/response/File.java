@@ -26,7 +26,7 @@ public class File {
   @XmlAttribute(name = "date")
   private String date;
   @XmlAttribute(name = "size")
-  private String size;
+  private long size;
   @XmlAttribute(name = "thumb")
   private String thumb;
 

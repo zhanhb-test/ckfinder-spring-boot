@@ -128,8 +128,7 @@ public abstract class Command<T extends Parameter> {
    */
   @SuppressWarnings("FinalMethod")
   final void checkRequestPathValid(String reqParam) throws ConnectorException {
-    if (reqParam != null && !reqParam.isEmpty()
-            && Pattern.compile(Constants.INVALID_PATH_REGEX).matcher(reqParam).find()) {
+    if (StringUtils.hasLength(reqParam) && Pattern.compile(Constants.INVALID_PATH_REGEX).matcher(reqParam).find()) {
       throw new ConnectorException(ConnectorError.INVALID_NAME);
     }
   }
