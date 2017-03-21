@@ -321,11 +321,11 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
       param.setErrorCode(ConnectorError.UPLOADED_INVALID_NAME_RENAMED);
     }
 
-    if (FileUtils.isDirectoryHidden(param.getCurrentFolder(), configuration)) {
+    if (configuration.isDirectoryHidden(param.getCurrentFolder())) {
       param.throwException(ConnectorError.INVALID_REQUEST);
     }
     if (!FileUtils.isFileNameValid(param.getNewFileName())
-            || FileUtils.isFileHidden(param.getNewFileName(), configuration)) {
+            || configuration.isFileHidden(param.getNewFileName())) {
       param.throwException(ConnectorError.INVALID_NAME);
     }
     final ResourceType resourceType = param.getType();

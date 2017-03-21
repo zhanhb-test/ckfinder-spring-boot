@@ -156,63 +156,6 @@ public class FileUtils {
   }
 
   /**
-   * check if dirname matches configuration hidden folder regex.
-   *
-   * @param dirName dir name
-   * @param conf connector configuration
-   * @return true if matches.
-   */
-  public static boolean isDirectoryHidden(String dirName,
-          IConfiguration conf) {
-    if (dirName == null || dirName.isEmpty()) {
-      return false;
-    }
-    String dir = PathUtils.normalize(dirName);
-    StringTokenizer sc = new StringTokenizer(dir, "/");
-    Pattern pattern = Pattern.compile(getHiddenFileOrFolderRegex(
-            conf.getHiddenFolders()));
-    while (sc.hasMoreTokens()) {
-      if (pattern.matcher(sc.nextToken()).matches()) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  /**
-   * check if filename matches configuration hidden file regex.
-   *
-   * @param fileName file name
-   * @param conf connector configuration
-   * @return true if matches.
-   */
-  public static boolean isFileHidden(String fileName, IConfiguration conf) {
-    return Pattern.compile(getHiddenFileOrFolderRegex(
-            conf.getHiddenFiles())).matcher(fileName).matches();
-  }
-
-  /**
-   * get hidden folder regex pattern.
-   *
-   * @param hiddenList list of hidden file or files patterns.
-   * @return full folder regex pattern
-   */
-  private static String getHiddenFileOrFolderRegex(List<String> hiddenList) {
-    StringBuilder sb = new StringBuilder("(");
-    for (String item : hiddenList) {
-      if (sb.length() > 3) {
-        sb.append("|");
-      }
-
-      sb.append("(");
-      sb.append(item.replace(".", "\\.").replace("*", ".+").replace("?", "."));
-      sb.append(")");
-    }
-    sb.append(")+");
-    return sb.toString();
-  }
-
-  /**
    * deletes file or folder with all subfolders and subfiles.
    *
    * @param file file or directory to delete.
@@ -431,7 +374,7 @@ public class FileUtils {
     try (DirectoryStream<Path> list = Files.newDirectoryStream(dir, Files::isDirectory)) {
       for (Path path : list) {
         String subDirName = path.getFileName().toString();
-        if (!FileUtils.isDirectoryHidden(subDirName, configuration)
+        if (!configuration.isDirectoryHidden(subDirName)
                 && accessControl.hasPermission(resourceType,
                         dirPath + subDirName, currentUserRole, AccessControl.FOLDER_VIEW)) {
           return true;

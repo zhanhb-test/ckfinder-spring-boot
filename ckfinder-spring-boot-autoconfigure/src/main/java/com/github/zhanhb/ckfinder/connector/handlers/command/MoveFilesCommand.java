@@ -100,11 +100,11 @@ public class MoveFilesCommand extends ErrorListXmlCommand<MoveFilesParameter> im
         param.throwException(ConnectorError.INVALID_REQUEST);
       }
 
-      if (FileUtils.isDirectoryHidden(file.getFolder(), configuration)) {
+      if (configuration.isDirectoryHidden(file.getFolder())) {
         param.throwException(ConnectorError.INVALID_REQUEST);
       }
 
-      if (FileUtils.isFileHidden(file.getName(), configuration)) {
+      if (configuration.isFileHidden(file.getName())) {
         param.throwException(ConnectorError.INVALID_REQUEST);
       }
 

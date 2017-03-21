@@ -18,7 +18,6 @@ import com.github.zhanhb.ckfinder.connector.data.ResourceType;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.Parameter;
-import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import com.github.zhanhb.ckfinder.connector.utils.PathUtils;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -80,7 +79,7 @@ public abstract class Command<T extends Parameter> {
 
     checkRequestPathValid(currentFolder);
 
-    if (FileUtils.isDirectoryHidden(currentFolder, configuration)) {
+    if (configuration.isDirectoryHidden(currentFolder)) {
       throw new ConnectorException(ConnectorError.INVALID_REQUEST);
     }
 

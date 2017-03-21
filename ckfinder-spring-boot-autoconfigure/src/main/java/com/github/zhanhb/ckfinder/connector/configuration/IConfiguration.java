@@ -123,18 +123,20 @@ public interface IConfiguration {
   public int getMaxThumbHeight();
 
   /**
-   * get regex for hidden folders.
+   * check if dirname matches configuration hidden folder regex.
    *
-   * @return regex for hidden folders
+   * @param dirName dir name
+   * @return true if matches.
    */
-  public List<String> getHiddenFolders();
+  public boolean isDirectoryHidden(String dirName);
 
   /**
-   * get regex for hidden files.
+   * check if filename matches configuration hidden file regex.
    *
-   * @return regex for hidden files
+   * @param fileName file name
+   * @return true if matches.
    */
-  public List<String> getHiddenFiles();
+  public boolean isFileHidden(String fileName);
 
   /**
    * get double extensions configuration.

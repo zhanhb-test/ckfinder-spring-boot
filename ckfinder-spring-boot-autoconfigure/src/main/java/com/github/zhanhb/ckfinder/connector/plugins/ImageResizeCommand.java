@@ -62,7 +62,7 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> imp
     }
 
     if (!FileUtils.isFileNameValid(param.getFileName())
-            || FileUtils.isFileHidden(param.getFileName(), configuration)) {
+            || configuration.isFileHidden(param.getFileName())) {
       param.throwException(ConnectorError.INVALID_REQUEST);
     }
 
@@ -85,7 +85,7 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> imp
       if (param.getWidth() != null && param.getHeight() != null) {
 
         if (!FileUtils.isFileNameValid(param.getNewFileName())
-                && FileUtils.isFileHidden(param.getNewFileName(), configuration)) {
+                && configuration.isFileHidden(param.getNewFileName())) {
           param.throwException(ConnectorError.INVALID_NAME);
         }
 

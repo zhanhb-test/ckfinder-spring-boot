@@ -135,7 +135,7 @@ public class ThumbnailCommand extends Command<ThumbnailParameter> {
       param.throwException(ConnectorError.INVALID_REQUEST);
     }
 
-    if (FileUtils.isFileHidden(param.getFileName(), configuration)) {
+    if (configuration.isFileHidden(param.getFileName())) {
       param.throwException(ConnectorError.FILE_NOT_FOUND);
     }
 

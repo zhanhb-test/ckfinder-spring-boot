@@ -49,7 +49,7 @@ public class GetFoldersCommand extends BaseXmlCommand<Parameter> {
             AccessControl.FOLDER_VIEW)) {
       param.throwException(ConnectorError.UNAUTHORIZED);
     }
-    if (FileUtils.isDirectoryHidden(param.getCurrentFolder(), configuration)) {
+    if (configuration.isDirectoryHidden(param.getCurrentFolder())) {
       param.throwException(ConnectorError.INVALID_REQUEST);
     }
 
@@ -79,7 +79,7 @@ public class GetFoldersCommand extends BaseXmlCommand<Parameter> {
   private void filterListByHiddenAndNotAllowed(List<String> directories, Parameter param, IConfiguration configuration) {
     directories.removeIf(dir -> !configuration.getAccessControl().hasPermission(param.getType().getName(), param.getCurrentFolder() + dir, param.getUserRole(),
             AccessControl.FOLDER_VIEW)
-            || FileUtils.isDirectoryHidden(dir, configuration));
+            || configuration.isDirectoryHidden(dir));
   }
 
   /**

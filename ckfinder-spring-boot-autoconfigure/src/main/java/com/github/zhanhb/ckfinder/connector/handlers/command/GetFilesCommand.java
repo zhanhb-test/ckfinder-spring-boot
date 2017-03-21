@@ -99,7 +99,7 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
   private void filterListByHiddenAndNotAllowed(GetFilesParameter param, IConfiguration configuration) {
     List<String> tmpFiles = param.getFiles().stream()
             .filter(file -> (FileUtils.isFileExtensionAllowed(file, param.getType())
-            && !FileUtils.isFileHidden(file, configuration)))
+            && !configuration.isFileHidden(file)))
             .collect(Collectors.toList());
 
     param.getFiles().clear();

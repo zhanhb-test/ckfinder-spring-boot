@@ -13,15 +13,19 @@ package com.github.zhanhb.ckfinder.connector.configuration;
 
 import com.github.zhanhb.ckfinder.connector.data.ResourceType;
 import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
+import com.github.zhanhb.ckfinder.connector.utils.PathUtils;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.Singular;
 import lombok.Value;
+import lombok.experimental.NonFinal;
 
 @Builder(builderClassName = "Builder")
 @SuppressWarnings({
@@ -69,6 +73,61 @@ public class Configuration implements IConfiguration {
   private AccessControl accessControl;
   @NonNull
   private CommandFactory commandFactory;
+  @NonFinal
+  private Pattern fileHiddenPattern;
+  @NonFinal
+  private Pattern directoryHiddenPattern;
+
+  @Override
+  public boolean isDirectoryHidden(String dirName) {
+    if (dirName == null || dirName.isEmpty()) {
+      return false;
+    }
+    String dir = PathUtils.normalize(dirName);
+    StringTokenizer sc = new StringTokenizer(dir, "/");
+    Pattern pattern = directoryHiddenPattern;
+    if (pattern == null) {
+      pattern = Pattern.compile(getHiddenFileOrFolderRegex(hiddenFolders));
+      directoryHiddenPattern = pattern;
+    }
+    while (sc.hasMoreTokens()) {
+      if (pattern.matcher(sc.nextToken()).matches()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  @Override
+  public boolean isFileHidden(String fileName) {
+    Pattern pattern = fileHiddenPattern;
+    if (pattern == null) {
+      pattern = Pattern.compile(getHiddenFileOrFolderRegex(hiddenFiles));
+      fileHiddenPattern = pattern;
+    }
+    return pattern.matcher(fileName).matches();
+  }
+
+  /**
+   * get hidden folder regex pattern.
+   *
+   * @param hiddenList list of hidden file or files patterns.
+   * @return full folder regex pattern
+   */
+  private String getHiddenFileOrFolderRegex(List<String> hiddenList) {
+    StringBuilder sb = new StringBuilder("(");
+    for (String item : hiddenList) {
+      if (sb.length() > 3) {
+        sb.append("|");
+      }
+
+      sb.append("(");
+      sb.append(item.replace(".", "\\.").replace("*", ".+").replace("?", "."));
+      sb.append(")");
+    }
+    sb.append(")+");
+    return sb.toString();
+  }
 
   @Override
   public License getLicense(HttpServletRequest request) {

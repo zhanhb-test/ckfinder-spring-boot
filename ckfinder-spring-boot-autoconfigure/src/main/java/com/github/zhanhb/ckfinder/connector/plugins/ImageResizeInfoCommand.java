@@ -51,7 +51,7 @@ public class ImageResizeInfoCommand extends BaseXmlCommand<ImageResizeInfoParame
 
     if (param.getFileName() == null || param.getFileName().isEmpty()
             || !FileUtils.isFileNameValid(param.getFileName())
-            || FileUtils.isFileHidden(param.getFileName(), configuration)) {
+            || configuration.isFileHidden(param.getFileName())) {
       param.throwException(ConnectorError.INVALID_REQUEST);
     }
 

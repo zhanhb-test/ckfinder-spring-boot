@@ -63,10 +63,10 @@ public class CreateFolderCommand extends BaseXmlCommand<CreateFolderParameter> i
     if (!FileUtils.isFolderNameValid(param.getNewFolderName(), configuration)) {
       param.throwException(ConnectorError.INVALID_NAME);
     }
-    if (FileUtils.isDirectoryHidden(param.getCurrentFolder(), configuration)) {
+    if (configuration.isDirectoryHidden(param.getCurrentFolder())) {
       param.throwException(ConnectorError.INVALID_REQUEST);
     }
-    if (FileUtils.isDirectoryHidden(param.getNewFolderName(), configuration)) {
+    if (configuration.isDirectoryHidden(param.getNewFolderName())) {
       param.throwException(ConnectorError.INVALID_NAME);
     }
 

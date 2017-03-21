@@ -62,7 +62,7 @@ public class RenameFolderCommand extends BaseXmlCommand<RenameFolderParameter> i
       param.setNewFolderName(FileUtils.convertToAscii(param.getNewFolderName()));
     }
 
-    if (FileUtils.isDirectoryHidden(param.getNewFolderName(), configuration)
+    if (configuration.isDirectoryHidden(param.getNewFolderName())
             || !FileUtils.isFolderNameValid(param.getNewFolderName(), configuration)) {
       param.throwException(ConnectorError.INVALID_NAME);
     }

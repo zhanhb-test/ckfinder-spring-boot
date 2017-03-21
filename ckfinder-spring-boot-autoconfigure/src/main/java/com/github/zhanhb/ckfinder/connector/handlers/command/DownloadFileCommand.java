@@ -86,12 +86,12 @@ public class DownloadFileCommand extends Command<DownloadFileParameter> {
       param.throwException(ConnectorError.INVALID_REQUEST);
     }
 
-    if (FileUtils.isDirectoryHidden(param.getCurrentFolder(), configuration)) {
+    if (configuration.isDirectoryHidden(param.getCurrentFolder())) {
       param.throwException(ConnectorError.INVALID_REQUEST);
     }
     try {
       if (!Files.isRegularFile(file)
-              || FileUtils.isFileHidden(param.getFileName(), configuration)) {
+              || configuration.isFileHidden(param.getFileName())) {
         param.throwException(ConnectorError.FILE_NOT_FOUND);
       }
 

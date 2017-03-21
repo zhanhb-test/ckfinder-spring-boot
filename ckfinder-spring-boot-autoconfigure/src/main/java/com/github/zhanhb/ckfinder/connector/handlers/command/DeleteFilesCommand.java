@@ -92,11 +92,11 @@ public class DeleteFilesCommand extends ErrorListXmlCommand<DeleteFilesParameter
         param.throwException(ConnectorError.INVALID_REQUEST);
       }
 
-      if (FileUtils.isDirectoryHidden(fileItem.getFolder(), configuration)) {
+      if (configuration.isDirectoryHidden(fileItem.getFolder())) {
         param.throwException(ConnectorError.INVALID_REQUEST);
       }
 
-      if (FileUtils.isFileHidden(fileItem.getName(), configuration)) {
+      if (configuration.isFileHidden(fileItem.getName())) {
         param.throwException(ConnectorError.INVALID_REQUEST);
       }
 

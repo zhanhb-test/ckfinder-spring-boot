@@ -49,7 +49,7 @@ public class DeleteFolderCommand extends BaseXmlCommand<ErrorListXmlParameter> i
       param.throwException(ConnectorError.INVALID_REQUEST);
     }
 
-    if (FileUtils.isDirectoryHidden(param.getCurrentFolder(), configuration)) {
+    if (configuration.isDirectoryHidden(param.getCurrentFolder())) {
       param.throwException(ConnectorError.INVALID_REQUEST);
     }
 
