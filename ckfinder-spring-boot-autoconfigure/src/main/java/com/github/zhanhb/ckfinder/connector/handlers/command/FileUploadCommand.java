@@ -352,7 +352,7 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
               && FileUtils.hasHtmlContent(item)) {
         param.throwException(ConnectorError.UPLOADED_WRONG_HTML_FILE);
       }
-    } catch (SecurityException | IOException e) {
+    } catch (IOException e) {
       log.error("", e);
       param.throwException(ConnectorError.ACCESS_DENIED);
     }

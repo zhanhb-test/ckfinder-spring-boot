@@ -66,12 +66,13 @@ public class SaveFileCommand extends BaseXmlCommand<SaveFileParameter> implement
     Path sourceFile = Paths.get(param.getType().getPath(),
             param.getCurrentFolder(), param.getFileName());
 
+    if (!Files.isRegularFile(sourceFile)) {
+      param.throwException(ConnectorError.FILE_NOT_FOUND);
+    }
+
     try {
-      if (!Files.isRegularFile(sourceFile)) {
-        param.throwException(ConnectorError.FILE_NOT_FOUND);
-      }
       Files.write(sourceFile, param.getFileContent().getBytes(StandardCharsets.UTF_8));
-    } catch (SecurityException | IOException e) {
+    } catch (IOException e) {
       log.error("", e);
       param.throwException(ConnectorError.ACCESS_DENIED);
     }

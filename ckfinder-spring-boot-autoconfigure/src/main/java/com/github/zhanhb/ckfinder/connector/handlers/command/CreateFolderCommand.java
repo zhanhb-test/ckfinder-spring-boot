@@ -70,13 +70,8 @@ public class CreateFolderCommand extends BaseXmlCommand<CreateFolderParameter> i
       param.throwException(ConnectorError.INVALID_NAME);
     }
 
-    try {
-      if (!createFolder(param)) {
-        param.throwException(ConnectorError.UNAUTHORIZED);
-      }
-    } catch (SecurityException e) {
-      log.error("", e);
-      param.throwException(ConnectorError.ACCESS_DENIED);
+    if (!createFolder(param)) {
+      param.throwException(ConnectorError.UNAUTHORIZED);
     }
     rootElement.newFolder(NewFolder.builder()
             .name(param.getNewFolderName())

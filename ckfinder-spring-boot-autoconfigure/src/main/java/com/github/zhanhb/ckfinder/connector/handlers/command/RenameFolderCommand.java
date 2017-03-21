@@ -73,24 +73,19 @@ public class RenameFolderCommand extends BaseXmlCommand<RenameFolderParameter> i
 
     Path dir = Paths.get(param.getType().getPath(),
             param.getCurrentFolder());
+    if (!Files.isDirectory(dir)) {
+      param.throwException(ConnectorError.INVALID_REQUEST);
+    }
+    setNewFolder(param);
+    Path newDir = Paths.get(param.getType().getPath(),
+            param.getNewFolderPath());
+    if (Files.exists(newDir)) {
+      param.throwException(ConnectorError.ALREADY_EXIST);
+    }
     try {
-      if (!Files.isDirectory(dir)) {
-        param.throwException(ConnectorError.INVALID_REQUEST);
-      }
-      setNewFolder(param);
-      Path newDir = Paths.get(param.getType().getPath(),
-              param.getNewFolderPath());
-      if (Files.exists(newDir)) {
-        param.throwException(ConnectorError.ALREADY_EXIST);
-      }
-      try {
-        Files.move(dir, newDir);
-        renameThumb(param, configuration);
-      } catch (IOException ex) {
-        param.throwException(ConnectorError.ACCESS_DENIED);
-      }
-    } catch (SecurityException e) {
-      log.error("", e);
+      Files.move(dir, newDir);
+      renameThumb(param, configuration);
+    } catch (IOException ex) {
       param.throwException(ConnectorError.ACCESS_DENIED);
     }
     rootElement.renamedFolder(RenamedFolder.builder()

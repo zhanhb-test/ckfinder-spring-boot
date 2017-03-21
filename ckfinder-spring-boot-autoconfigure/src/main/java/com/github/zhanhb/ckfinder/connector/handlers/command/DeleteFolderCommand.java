@@ -55,23 +55,17 @@ public class DeleteFolderCommand extends BaseXmlCommand<ErrorListXmlParameter> i
 
     Path dir = Paths.get(param.getType().getPath(), param.getCurrentFolder());
 
-    try {
-      if (!Files.isDirectory(dir)) {
-        param.throwException(ConnectorError.FOLDER_NOT_FOUND);
-      }
-
-      if (FileUtils.delete(dir)) {
-        Path thumbDir = Paths.get(configuration.getThumbsPath(),
-                param.getType().getName(), param.getCurrentFolder());
-        FileUtils.delete(thumbDir);
-      } else {
-        param.throwException(ConnectorError.ACCESS_DENIED);
-      }
-    } catch (SecurityException e) {
-      log.error("", e);
-      param.throwException(ConnectorError.ACCESS_DENIED);
+    if (!Files.isDirectory(dir)) {
+      param.throwException(ConnectorError.FOLDER_NOT_FOUND);
     }
 
+    if (FileUtils.delete(dir)) {
+      Path thumbDir = Paths.get(configuration.getThumbsPath(),
+              param.getType().getName(), param.getCurrentFolder());
+      FileUtils.delete(thumbDir);
+    } else {
+      param.throwException(ConnectorError.ACCESS_DENIED);
+    }
   }
 
 }

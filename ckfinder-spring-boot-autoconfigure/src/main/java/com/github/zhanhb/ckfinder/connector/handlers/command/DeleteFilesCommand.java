@@ -114,34 +114,29 @@ public class DeleteFilesCommand extends ErrorListXmlCommand<DeleteFilesParameter
     for (FilePostParam fileItem : param.getFiles()) {
       Path file = Paths.get(fileItem.getType().getPath(), fileItem.getFolder(), fileItem.getName());
 
-      try {
-        param.setAddDeleteNode(true);
-        if (!Files.exists(file)) {
-          param.appendErrorNodeChild(ConnectorError.FILE_NOT_FOUND,
-                  fileItem.getName(), fileItem.getFolder(), fileItem.getType().getName());
-          continue;
-        }
+      param.setAddDeleteNode(true);
+      if (!Files.exists(file)) {
+        param.appendErrorNodeChild(ConnectorError.FILE_NOT_FOUND,
+                fileItem.getName(), fileItem.getFolder(), fileItem.getType().getName());
+        continue;
+      }
 
-        log.debug("prepare delete file '{}'", file);
-        if (FileUtils.delete(file)) {
-          Path thumbFile = Paths.get(configuration.getThumbsPath(),
-                  fileItem.getType().getName(), param.getCurrentFolder(), fileItem.getName());
-          param.filesDeletedPlus();
+      log.debug("prepare delete file '{}'", file);
+      if (FileUtils.delete(file)) {
+        Path thumbFile = Paths.get(configuration.getThumbsPath(),
+                fileItem.getType().getName(), param.getCurrentFolder(), fileItem.getName());
+        param.filesDeletedPlus();
 
-          try {
-            log.debug("prepare delete thumb file '{}'", thumbFile);
-            FileUtils.delete(thumbFile);
-          } catch (Exception ignore) {
-            log.debug("delete thumb file '{}' failed", thumbFile);
-            // No errors if we are not able to delete the thumb.
-          }
-        } else { //If access is denied, report error and try to delete rest of files.
-          param.appendErrorNodeChild(ConnectorError.ACCESS_DENIED,
-                  fileItem.getName(), fileItem.getFolder(), fileItem.getType().getName());
+        try {
+          log.debug("prepare delete thumb file '{}'", thumbFile);
+          FileUtils.delete(thumbFile);
+        } catch (Exception ignore) {
+          log.debug("delete thumb file '{}' failed", thumbFile);
+          // No errors if we are not able to delete the thumb.
         }
-      } catch (SecurityException e) {
-        log.error("", e);
-        return ConnectorError.ACCESS_DENIED;
+      } else { //If access is denied, report error and try to delete rest of files.
+        param.appendErrorNodeChild(ConnectorError.ACCESS_DENIED,
+                fileItem.getName(), fileItem.getFolder(), fileItem.getType().getName());
       }
     }
     if (param.hasError()) {

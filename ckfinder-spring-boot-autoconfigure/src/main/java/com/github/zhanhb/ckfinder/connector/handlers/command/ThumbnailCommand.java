@@ -150,7 +150,7 @@ public class ThumbnailCommand extends Command<ThumbnailParameter> {
       if (!Files.exists(fullCurrentDir)) {
         Files.createDirectories(fullCurrentDir);
       }
-    } catch (IOException | SecurityException e) {
+    } catch (IOException e) {
       throw new ConnectorException(ConnectorError.ACCESS_DENIED, e);
     }
 
@@ -171,30 +171,27 @@ public class ThumbnailCommand extends Command<ThumbnailParameter> {
     Path thumbFile = Paths.get(param.getFullCurrentPath(), param.getFileName());
     log.debug("thumbFile: {}", thumbFile);
     param.setThumbFile(thumbFile);
-    try {
-      if (!Files.exists(thumbFile)) {
-        Path orginFile = Paths.get(param.getType().getPath(),
-                param.getCurrentFolder(), param.getFileName());
-        log.debug("orginFile: {}", orginFile);
-        if (!Files.exists(orginFile)) {
+
+    if (!Files.exists(thumbFile)) {
+      Path orginFile = Paths.get(param.getType().getPath(),
+              param.getCurrentFolder(), param.getFileName());
+      log.debug("orginFile: {}", orginFile);
+      if (!Files.exists(orginFile)) {
+        param.throwException(ConnectorError.FILE_NOT_FOUND);
+      }
+      try {
+        boolean success = ImageUtils.createThumb(orginFile, thumbFile, configuration);
+        if (!success) {
           param.throwException(ConnectorError.FILE_NOT_FOUND);
         }
+      } catch (IOException e) {
         try {
-          boolean success = ImageUtils.createThumb(orginFile, thumbFile, configuration);
-          if (!success) {
-            param.throwException(ConnectorError.FILE_NOT_FOUND);
-          }
-        } catch (IOException e) {
-          try {
-            Files.deleteIfExists(thumbFile);
-          } catch (IOException ex) {
-            e.addSuppressed(ex);
-          }
-          throw new ConnectorException(ConnectorError.ACCESS_DENIED, e);
+          Files.deleteIfExists(thumbFile);
+        } catch (IOException ex) {
+          e.addSuppressed(ex);
         }
+        throw new ConnectorException(ConnectorError.ACCESS_DENIED, e);
       }
-    } catch (SecurityException e) {
-      throw new ConnectorException(ConnectorError.ACCESS_DENIED, e);
     }
 
   }
@@ -227,7 +224,7 @@ public class ThumbnailCommand extends Command<ThumbnailParameter> {
       response.setContentLengthLong(Files.size(file));
 
       return true;
-    } catch (IOException | SecurityException e) {
+    } catch (IOException e) {
       throw new ConnectorException(ConnectorError.ACCESS_DENIED, e);
     }
   }

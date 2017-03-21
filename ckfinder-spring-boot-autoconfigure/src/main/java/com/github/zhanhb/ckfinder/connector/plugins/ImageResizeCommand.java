@@ -73,80 +73,75 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> imp
     Path file = Paths.get(param.getType().getPath(),
             param.getCurrentFolder(),
             param.getFileName());
-    try {
-      if (!Files.isRegularFile(file)) {
-        param.throwException(ConnectorError.FILE_NOT_FOUND);
+    if (!Files.isRegularFile(file)) {
+      param.throwException(ConnectorError.FILE_NOT_FOUND);
+    }
+
+    if (param.isWrongReqSizesParams()) {
+      param.throwException(ConnectorError.INVALID_REQUEST);
+    }
+
+    if (param.getWidth() != null && param.getHeight() != null) {
+
+      if (!FileUtils.isFileNameValid(param.getNewFileName())
+              && configuration.isFileHidden(param.getNewFileName())) {
+        param.throwException(ConnectorError.INVALID_NAME);
       }
 
-      if (param.isWrongReqSizesParams()) {
+      if (!FileUtils.isFileExtensionAllowed(param.getNewFileName(),
+              param.getType())) {
+        param.throwException(ConnectorError.INVALID_EXTENSION);
+      }
+
+      Path thumbFile = Paths.get(param.getType().getPath(),
+              param.getCurrentFolder(),
+              param.getNewFileName());
+
+      if (Files.exists(thumbFile) && !Files.isWritable(thumbFile)) {
+        param.throwException(ConnectorError.ACCESS_DENIED);
+      }
+      if (!"1".equals(param.getOverwrite()) && Files.exists(thumbFile)) {
+        param.throwException(ConnectorError.ALREADY_EXIST);
+      }
+      int maxImageHeight = configuration.getImgHeight();
+      int maxImageWidth = configuration.getImgWidth();
+      if ((maxImageWidth > 0 && param.getWidth() > maxImageWidth)
+              || (maxImageHeight > 0 && param.getHeight() > maxImageHeight)) {
         param.throwException(ConnectorError.INVALID_REQUEST);
       }
 
-      if (param.getWidth() != null && param.getHeight() != null) {
+      try {
+        ImageUtils.createResizedImage(file, thumbFile,
+                param.getWidth(), param.getHeight(), configuration.getImgQuality());
 
-        if (!FileUtils.isFileNameValid(param.getNewFileName())
-                && configuration.isFileHidden(param.getNewFileName())) {
-          param.throwException(ConnectorError.INVALID_NAME);
-        }
-
-        if (!FileUtils.isFileExtensionAllowed(param.getNewFileName(),
-                param.getType())) {
-          param.throwException(ConnectorError.INVALID_EXTENSION);
-        }
-
-        Path thumbFile = Paths.get(param.getType().getPath(),
-                param.getCurrentFolder(),
-                param.getNewFileName());
-
-        if (Files.exists(thumbFile) && !Files.isWritable(thumbFile)) {
-          param.throwException(ConnectorError.ACCESS_DENIED);
-        }
-        if (!"1".equals(param.getOverwrite()) && Files.exists(thumbFile)) {
-          param.throwException(ConnectorError.ALREADY_EXIST);
-        }
-        int maxImageHeight = configuration.getImgHeight();
-        int maxImageWidth = configuration.getImgWidth();
-        if ((maxImageWidth > 0 && param.getWidth() > maxImageWidth)
-                || (maxImageHeight > 0 && param.getHeight() > maxImageHeight)) {
-          param.throwException(ConnectorError.INVALID_REQUEST);
-        }
-
-        try {
-          ImageUtils.createResizedImage(file, thumbFile,
-                  param.getWidth(), param.getHeight(), configuration.getImgQuality());
-
-        } catch (IOException e) {
-          log.error("", e);
-          param.throwException(ConnectorError.ACCESS_DENIED);
-        }
+      } catch (IOException e) {
+        log.error("", e);
+        param.throwException(ConnectorError.ACCESS_DENIED);
       }
+    }
 
-      String fileNameWithoutExt = FileUtils.getFileNameWithoutExtension(param.getFileName());
-      String fileExt = FileUtils.getFileExtension(param.getFileName());
-      for (String size : SIZES) {
-        if ("1".equals(param.getSizesFromReq().get(size))) {
-          String thumbName = fileNameWithoutExt + "_" + size + "." + fileExt;
-          Path thumbFile = Paths.get(param.getType().getPath(),
-                  param.getCurrentFolder(), thumbName);
-          String value = pluginParams.get(size + "Thumb");
-          if (value != null) {
-            Matcher matcher = Pattern.compile("(\\d+)x(\\d+)").matcher(value);
-            if (matcher.matches()) {
-              String[] params = new String[]{matcher.group(1), matcher.group(2)};
-              try {
-                ImageUtils.createResizedImage(file, thumbFile, Integer.parseInt(params[0]),
-                        Integer.parseInt(params[1]), configuration.getImgQuality());
-              } catch (IOException e) {
-                log.error("", e);
-                param.throwException(ConnectorError.ACCESS_DENIED);
-              }
+    String fileNameWithoutExt = FileUtils.getFileNameWithoutExtension(param.getFileName());
+    String fileExt = FileUtils.getFileExtension(param.getFileName());
+    for (String size : SIZES) {
+      if ("1".equals(param.getSizesFromReq().get(size))) {
+        String thumbName = fileNameWithoutExt + "_" + size + "." + fileExt;
+        Path thumbFile = Paths.get(param.getType().getPath(),
+                param.getCurrentFolder(), thumbName);
+        String value = pluginParams.get(size + "Thumb");
+        if (value != null) {
+          Matcher matcher = Pattern.compile("(\\d+)x(\\d+)").matcher(value);
+          if (matcher.matches()) {
+            String[] params = new String[]{matcher.group(1), matcher.group(2)};
+            try {
+              ImageUtils.createResizedImage(file, thumbFile, Integer.parseInt(params[0]),
+                      Integer.parseInt(params[1]), configuration.getImgQuality());
+            } catch (IOException e) {
+              log.error("", e);
+              param.throwException(ConnectorError.ACCESS_DENIED);
             }
           }
         }
       }
-    } catch (SecurityException e) {
-      log.error("", e);
-      param.throwException(ConnectorError.ACCESS_DENIED);
     }
   }
 

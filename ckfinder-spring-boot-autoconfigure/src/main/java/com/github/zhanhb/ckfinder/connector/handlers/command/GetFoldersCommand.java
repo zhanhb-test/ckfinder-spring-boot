@@ -63,7 +63,7 @@ public class GetFoldersCommand extends BaseXmlCommand<Parameter> {
       List<String> directories = FileUtils.findChildrensList(dir, true);
       filterListByHiddenAndNotAllowed(directories, param, configuration);
       createFoldersData(rootElement, param, configuration, directories);
-    } catch (IOException | SecurityException e) {
+    } catch (IOException e) {
       log.error("", e);
       param.throwException(ConnectorError.ACCESS_DENIED);
     }

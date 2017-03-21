@@ -74,7 +74,7 @@ public class ImageResizeInfoCommand extends BaseXmlCommand<ImageResizeInfoParame
       }
       param.setImageWidth(image.getWidth());
       param.setImageHeight(image.getHeight());
-    } catch (SecurityException | IOException e) {
+    } catch (IOException e) {
       log.error("", e);
       param.throwException(ConnectorError.ACCESS_DENIED);
     }

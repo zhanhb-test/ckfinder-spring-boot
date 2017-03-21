@@ -165,7 +165,7 @@ public class FileUtils {
     try {
       DeleteHelper.delete(file);
       return true;
-    } catch (IOException | SecurityException ex) {
+    } catch (IOException ex) {
       return false;
     }
   }

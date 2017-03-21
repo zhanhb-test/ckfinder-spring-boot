@@ -82,7 +82,7 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
         param.throwException(ConnectorError.FOLDER_NOT_FOUND);
       }
       param.setFiles(FileUtils.findChildrensList(dir, false));
-    } catch (IOException | SecurityException e) {
+    } catch (IOException e) {
       log.error("", e);
       param.throwException(ConnectorError.ACCESS_DENIED);
     }

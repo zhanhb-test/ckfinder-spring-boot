@@ -130,9 +130,6 @@ public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> 
       param.setRenamed(false);
       log.error("IOException", ex);
       return ConnectorError.ACCESS_DENIED;
-    } catch (SecurityException e) {
-      log.error("", e);
-      return ConnectorError.ACCESS_DENIED;
     }
 
   }
