@@ -11,6 +11,7 @@
  */
 package com.github.zhanhb.ckfinder.connector.utils;
 
+import java.io.StringWriter;
 import java.io.Writer;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -27,6 +28,12 @@ public enum XmlCreator {
     } catch (JAXBException e) {
       throw new IllegalStateException("fail to instance xml transformer", e);
     }
+  }
+
+  public String toString(Object obj) {
+    StringWriter sw = new StringWriter();
+    writeTo(obj, sw);
+    return sw.toString();
   }
 
 }

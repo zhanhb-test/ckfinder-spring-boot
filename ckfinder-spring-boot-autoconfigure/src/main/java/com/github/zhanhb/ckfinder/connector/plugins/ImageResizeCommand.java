@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -150,14 +149,11 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> imp
   protected void initParams(ImageResizeParameter param, HttpServletRequest request,
           IConfiguration configuration) throws ConnectorException {
     super.initParams(param, request, configuration);
-
-    param.setSizesFromReq(new HashMap<>());
     param.setFileName(request.getParameter("fileName"));
     param.setNewFileName(request.getParameter("newFileName"));
     param.setOverwrite(request.getParameter("overwrite"));
     String reqWidth = request.getParameter("width");
     String reqHeight = request.getParameter("height");
-    param.setWrongReqSizesParams(false);
     try {
       if (reqWidth != null && !reqWidth.isEmpty()) {
         param.setWidth(Integer.valueOf(reqWidth));
@@ -181,7 +177,6 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> imp
     for (String size : SIZES) {
       param.getSizesFromReq().put(size, request.getParameter(size));
     }
-    param.setRequest(request);
   }
 
 }

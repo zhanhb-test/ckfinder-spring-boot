@@ -41,11 +41,12 @@ public abstract class XmlCommand<T extends Parameter> extends Command<T> {
   final void execute(T param, HttpServletRequest request, HttpServletResponse response,
           IConfiguration configuration) throws IOException, ConnectorException {
     Connector connector = buildConnector(param, configuration);
+    String result = XmlCreator.INSTANCE.toString(connector);
 
     response.setContentType("text/xml;charset=UTF-8");
     response.setHeader("Cache-Control", "no-cache");
     try (PrintWriter out = response.getWriter()) {
-      XmlCreator.INSTANCE.writeTo(connector, out);
+      out.write(result);
     }
   }
 

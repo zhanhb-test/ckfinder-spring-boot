@@ -1,7 +1,7 @@
 package com.github.zhanhb.ckfinder.connector.handlers.parameter;
 
+import java.util.HashMap;
 import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -22,7 +22,6 @@ public class ImageResizeParameter extends Parameter {
   private Integer width;
   private Integer height;
   private boolean wrongReqSizesParams;
-  private Map<String, String> sizesFromReq;
-  private HttpServletRequest request;
+  private final Map<String, String> sizesFromReq = new HashMap<>();
 
 }
