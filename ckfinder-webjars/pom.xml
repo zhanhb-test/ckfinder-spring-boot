@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <artifactId>ckfinder-spring-boot</artifactId>
+    <groupId>com.github.zhanhb</groupId>
+    <version>0.0.1.BUILD-SNAPSHOT</version>
+  </parent>
+  <artifactId>ckfinder-webjars</artifactId>
+  <name>CKFinder Webjars</name>
+
+  <properties>
+    <cache.path>${ckfinder.cache.directory}/ckfinder_java_${ckfinder.version}.zip</cache.path>
+    <ckfinder.cache.directory>${project.basedir}/.ckfinder</ckfinder.cache.directory>
+    <ckfinder.version>2.6.2.1</ckfinder.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>1.8</version>
+        <executions>
+          <execution>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <taskdef classpathref="maven.plugin.classpath" resource="net/sf/antcontrib/antcontrib.properties" />
+                <if>
+                  <available file="${cache.path}" />
+                  <then />
+                  <else>
+                    <mkdir dir="${ckfinder.cache.directory}" />
+                    <get dest="${cache.path}" src="https://download.cksource.com/CKFinder/CKFinder%20for%20Java/${ckfinder.version}/ckfinder_java_${ckfinder.version}.zip" />
+                  </else>
+                </if>
+
+                <unzip dest="${project.build.directory}" src="${cache.path}" />
+                <copy todir="${project.build.outputDirectory}/META-INF/resources/webjars/ckfinder/${ckfinder.version}">
+                  <fileset dir="${project.build.directory}/ckfinder/_source/CKFinder for Java/WebApp/src/main/webapp/ckfinder" excludes="_samples/**" includes="**" />
+                </copy>
+              </target>
+            </configuration>
+          </execution>
+        </executions>
+        <dependencies>
+          <dependency>
+            <groupId>ant-contrib</groupId>
+            <artifactId>ant-contrib</artifactId>
+            <version>20020829</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+    </plugins>
+  </build>
+</project>

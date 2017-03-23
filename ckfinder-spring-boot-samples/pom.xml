@@ -13,5 +13,6 @@
   <modules>
     <module>ckfinder-spring-boot-sample-yml</module>
     <module>ckfinder-spring-boot-sample-xml</module>
+    <module>ckfinder-spring-boot-sample-webjars</module>
   </modules>
 </project>
