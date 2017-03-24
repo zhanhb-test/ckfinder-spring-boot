@@ -86,7 +86,7 @@ public class Configuration implements IConfiguration {
     StringTokenizer sc = new StringTokenizer(dir, "/");
     Pattern pattern = directoryHiddenPattern;
     if (pattern == null) {
-      pattern = Pattern.compile(getHiddenFileOrFolderRegex(hiddenFolders));
+      pattern = Pattern.compile(buildHiddenFileOrFolderRegex(hiddenFolders));
       directoryHiddenPattern = pattern;
     }
     while (sc.hasMoreTokens()) {
@@ -101,7 +101,7 @@ public class Configuration implements IConfiguration {
   public boolean isFileHidden(String fileName) {
     Pattern pattern = fileHiddenPattern;
     if (pattern == null) {
-      pattern = Pattern.compile(getHiddenFileOrFolderRegex(hiddenFiles));
+      pattern = Pattern.compile(buildHiddenFileOrFolderRegex(hiddenFiles));
       fileHiddenPattern = pattern;
     }
     return pattern.matcher(fileName).matches();
@@ -113,7 +113,7 @@ public class Configuration implements IConfiguration {
    * @param hiddenList list of hidden file or files patterns.
    * @return full folder regex pattern
    */
-  private String getHiddenFileOrFolderRegex(List<String> hiddenList) {
+  private String buildHiddenFileOrFolderRegex(List<String> hiddenList) {
     StringBuilder sb = new StringBuilder("(");
     for (String item : hiddenList) {
       if (sb.length() > 3) {

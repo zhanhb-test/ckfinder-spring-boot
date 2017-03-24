@@ -37,11 +37,6 @@ import static com.github.zhanhb.ckfinder.connector.configuration.Constants.DEFAU
 import static com.github.zhanhb.ckfinder.connector.configuration.Constants.DEFAULT_IMG_QUALITY;
 import static com.github.zhanhb.ckfinder.connector.configuration.Constants.DEFAULT_IMG_WIDTH;
 import static com.github.zhanhb.ckfinder.connector.configuration.Constants.DEFAULT_THUMB_MAX_WIDTH;
-import static com.github.zhanhb.ckfinder.connector.plugins.WatermarkSettings.MARGIN_BOTTOM;
-import static com.github.zhanhb.ckfinder.connector.plugins.WatermarkSettings.MARGIN_RIGHT;
-import static com.github.zhanhb.ckfinder.connector.plugins.WatermarkSettings.QUALITY;
-import static com.github.zhanhb.ckfinder.connector.plugins.WatermarkSettings.SOURCE;
-import static com.github.zhanhb.ckfinder.connector.plugins.WatermarkSettings.TRANSPARENCY;
 
 /**
  * Class loads configuration from XML file.
@@ -56,8 +51,7 @@ public enum XmlConfigurationParser {
    */
   private static final int BYTES = 1024;
 
-  private static final int MAX_QUALITY = 100;
-  private static final float MAX_QUALITY_FLOAT = 100f;
+  private static final float MAX_QUALITY = 100f;
 
   /**
    *
@@ -245,9 +239,9 @@ public enum XmlConfigurationParser {
     if (helper == 0 || helper == 1) {
       return helper;
     } else if (helper > 0 && helper < 1) {
-      helper = (Math.round(helper * MAX_QUALITY_FLOAT) / MAX_QUALITY_FLOAT);
+      helper = (Math.round(helper * MAX_QUALITY) / MAX_QUALITY);
     } else if (helper > 1 && helper <= MAX_QUALITY) {
-      helper = (Math.round(helper) / MAX_QUALITY_FLOAT);
+      helper = (Math.round(helper) / MAX_QUALITY);
     } else {
       helper = DEFAULT_IMG_QUALITY;
     }
@@ -403,6 +397,7 @@ public enum XmlConfigurationParser {
    * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
    * @throws java.io.IOException
    */
+  @SuppressWarnings("deprecation")
   private void setThumbs(Configuration.Builder builder, NodeList childNodes, String baseFolder, IBasePathBuilder basePathBuilder) throws ConnectorException, IOException {
     for (int i = 0, j = childNodes.getLength(); i < j; i++) {
       Node childNode = childNodes.item(i);
@@ -486,6 +481,7 @@ public enum XmlConfigurationParser {
    * @throws java.io.IOException
    * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
    */
+  @SuppressWarnings("deprecation")
   private ResourceType createTypeFromXml(String typeName,
           NodeList childNodes, IBasePathBuilder basePathBuilder) throws IOException, ConnectorException {
     ResourceType.Builder builder = ResourceType.builder().name(typeName);
@@ -599,22 +595,22 @@ public enum XmlConfigurationParser {
       final String name = entry.getKey();
       final String value = entry.getValue();
       switch (name) {
-        case SOURCE:
+        case "source":
           settings.source(resourceLoader.getResource(value));
           break;
-        case TRANSPARENCY:
+        case "transparency":
           settings.transparency(Float.parseFloat(value));
           break;
-        case QUALITY:
+        case "quality":
           final int parseInt = Integer.parseInt(value);
           final int name1 = parseInt % 101;
           final float name2 = name1 / 100f;
           settings.quality(name2);
           break;
-        case MARGIN_BOTTOM:
+        case "marginBottom":
           settings.marginBottom(Integer.parseInt(value));
           break;
-        case MARGIN_RIGHT:
+        case "marginRight":
           settings.marginRight(Integer.parseInt(value));
           break;
       }
@@ -659,6 +655,7 @@ public enum XmlConfigurationParser {
               builder.param(name, value);
             }
           }
+          break;
       }
     }
     return builder.build();

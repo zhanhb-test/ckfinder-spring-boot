@@ -1,8 +1,8 @@
 ckfinder:
   enabled: true
   connector.enabled: true
-  base-path:
   base-url:
+  base-path:
   license:
     name:
     key:
@@ -45,8 +45,8 @@ ckfinder:
     file-delete: true
   thumbs:
     enabled: true
-    url: '%BASE_URL%_thumbs'
-    directory: '%BASE_DIR%/_thumbs'
+    url: _thumbs
+    directory: _thumbs
     direct-access: false
     max-height: 100
     max-width: 100
@@ -68,8 +68,9 @@ ckfinder:
   image-resize:
     enabled: true
     params:
-      smallThumb: 90x90
-      mediumThumb: 120x120
-      largeThumb: 180x180
+      small-thumb: 90x90
+      medium-thumb: 120x120
+      large-thumb: 180x180
   servlet:
     enabled: true
+    path: /ckfinder/core/connector/java/connector.java

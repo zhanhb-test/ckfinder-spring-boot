@@ -85,8 +85,8 @@ public class ImageUtils {
       Dimension dimension = createThumbDimension(image,
               conf.getMaxThumbWidth(), conf.getMaxThumbHeight());
       FileUtils.createPath(file, true);
-      if (image.getHeight() == dimension.height
-              && image.getWidth() == dimension.width) {
+      if (image.getHeight() <= dimension.height
+              && image.getWidth() <= dimension.width) {
         writeUntouchedImage(orginFile, file);
       } else {
         resizeImage(image, dimension.width, dimension.height,
@@ -121,13 +121,12 @@ public class ImageUtils {
     Dimension dimension = createThumbDimension(image, conf.getImgWidth(),
             conf.getImgHeight());
     if (dimension.width == 0 || dimension.height == 0
-            || (image.getHeight() == dimension.height && image.getWidth() == dimension.width)) {
+            || (image.getHeight() <= dimension.height && image.getWidth() <= dimension.width)) {
       try (InputStream stream = part.getInputStream()) {
         Files.copy(stream, file, StandardCopyOption.REPLACE_EXISTING);
       }
     } else {
-      resizeImage(image, dimension.width, dimension.height,
-              conf.getImgQuality(), file);
+      resizeImage(image, dimension.width, dimension.height, conf.getImgQuality(), file);
     }
     if (log.isTraceEnabled()) {
       log.trace("thumb size: {}", Files.size(file));
@@ -151,7 +150,7 @@ public class ImageUtils {
     try (InputStream is = Files.newInputStream(sourceFile)) {
       image = ImageIO.read(is);
     }
-    if (image.getHeight() == height && image.getWidth() == width) {
+    if (image.getHeight() <= height && image.getWidth() <= width) {
       writeUntouchedImage(sourceFile, destFile);
     } else {
       resizeImage(image, width, height, quality, destFile);

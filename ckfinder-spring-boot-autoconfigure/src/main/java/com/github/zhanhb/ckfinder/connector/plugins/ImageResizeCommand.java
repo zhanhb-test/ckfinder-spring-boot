@@ -160,17 +160,13 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> imp
       } else {
         param.setWidth(null);
       }
-    } catch (NumberFormatException e) {
-      param.setWidth(null);
-      param.setWrongReqSizesParams(true);
-    }
-    try {
       if (reqHeight != null && !reqHeight.isEmpty()) {
         param.setHeight(Integer.valueOf(reqHeight));
       } else {
         param.setHeight(null);
       }
     } catch (NumberFormatException e) {
+      param.setWidth(null);
       param.setHeight(null);
       param.setWrongReqSizesParams(true);
     }

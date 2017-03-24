@@ -78,14 +78,9 @@ public class ImageResizeInfoCommand extends BaseXmlCommand<ImageResizeInfoParame
       log.error("", e);
       param.throwException(ConnectorError.ACCESS_DENIED);
     }
-    createImageInfoNode(rootElement, param);
-  }
-
-  private void createImageInfoNode(Connector.Builder rootElement, ImageResizeInfoParameter param) {
-    ImageInfo.Builder element = ImageInfo.builder();
-    element.width(param.getImageWidth())
-            .height(param.getImageHeight());
-    rootElement.result(element.build());
+    rootElement.result(ImageInfo.builder()
+            .width(param.getImageWidth())
+            .height(param.getImageHeight()).build());
   }
 
   @Override

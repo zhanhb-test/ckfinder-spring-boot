@@ -139,7 +139,7 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
               file.getFileName().toString());
       if (Files.exists(thumbFile)) {
         return file.getFileName().toString();
-      } else if (isShowThumbs(param)) {
+      } else if (requestShowThumbs(param)) {
         return "?".concat(file.getFileName().toString());
       }
     }
@@ -171,7 +171,7 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
   private boolean isAddThumbsAttr(GetFilesParameter param, IConfiguration configuration) {
     return configuration.isThumbsEnabled()
             && (configuration.isThumbsDirectAccess()
-            || isShowThumbs(param));
+            || requestShowThumbs(param));
   }
 
   /**
@@ -180,7 +180,7 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
    * @param param
    * @return true if is set.
    */
-  private boolean isShowThumbs(GetFilesParameter param) {
+  private boolean requestShowThumbs(GetFilesParameter param) {
     return "1".equals(param.getShowThumbs());
   }
 

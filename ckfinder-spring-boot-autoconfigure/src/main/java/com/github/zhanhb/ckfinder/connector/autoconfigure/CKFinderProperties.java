@@ -148,11 +148,14 @@ public class CKFinderProperties {
   public static class Servlet {
 
     private boolean enabled = true;
-    private String path = "/ckfinder/core/connector/java/connector.java";
+    private String[] path = {"/ckfinder/core/connector/java/connector.java"};
 
-    public void setPath(String path) {
+    public void setPath(String[] path) {
+      Assert.notEmpty(path, "path should not be empty");
       Assert.notNull(path, "Path must not be null");
-      Assert.isTrue(path.startsWith("/"), "Path must start with /");
+      for (String string : path) {
+        Assert.isTrue(string.startsWith("/"), "Path must start with /");
+      }
       this.path = path;
     }
 

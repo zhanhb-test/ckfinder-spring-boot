@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -165,8 +166,7 @@ public class ThumbnailCommand extends Command<ThumbnailParameter> {
    * @throws ConnectorException when thumbnail creation fails.
    */
   private void createThumb(ThumbnailParameter param, IConfiguration configuration) throws ConnectorException {
-    log.debug("ThumbnailCommand.createThumb()");
-    log.debug("{}", param.getFullCurrentPath());
+    log.debug("ThumbnailCommand.createThumb({})", param.getFullCurrentPath());
     Path thumbFile = Paths.get(param.getFullCurrentPath(), param.getFileName());
     log.debug("thumbFile: {}", thumbFile);
     param.setThumbFile(thumbFile);
@@ -209,8 +209,9 @@ public class ThumbnailCommand extends Command<ThumbnailParameter> {
     // Set content size
     Path file = Paths.get(param.getFullCurrentPath(), param.getFileName());
     try {
-      FileTime lastModifiedTime = Files.getLastModifiedTime(file);
-      String etag = "W/\"" + Long.toHexString(lastModifiedTime.toMillis()) + "-" + Long.toHexString(Files.size(file)) + '"';
+      BasicFileAttributes attr = Files.readAttributes(file, BasicFileAttributes.class);
+      FileTime lastModifiedTime = attr.lastModifiedTime();
+      String etag = "W/\"" + Long.toHexString(lastModifiedTime.toMillis()) + "-" + Long.toHexString(attr.size()) + '"';
       Instant instant = lastModifiedTime.toInstant();
       response.setHeader("Etag", etag);
       response.setHeader("Last-Modified", FORMATTER.format(instant));
@@ -220,7 +221,7 @@ public class ThumbnailCommand extends Command<ThumbnailParameter> {
         return false;
       }
 
-      response.setContentLengthLong(Files.size(file));
+      response.setContentLengthLong(attr.size());
 
       return true;
     } catch (IOException e) {

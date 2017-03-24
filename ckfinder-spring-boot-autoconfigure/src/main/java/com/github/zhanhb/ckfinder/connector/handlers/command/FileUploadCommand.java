@@ -129,7 +129,7 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
     out.write("<script type=\"text/javascript\">window.parent.CKFinder.tools.callFunction("
             + param.getCkFinderFuncNum() + ", '"
             + path
-            + FileUtils.backupWithBackSlash(param.getNewFileName(), "'")
+            + FileUtils.escapeJavaScript(param.getNewFileName())
             + "', '" + errorMsg + "');</script>");
   }
 
@@ -141,7 +141,7 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
    * @throws IOException when error occurs
    */
   protected void handleOnUploadCompleteResponse(Writer writer, String errorMsg, FileUploadParameter param) throws IOException {
-    writer.write("<script type=\"text/javascript\">window.parent.OnUploadCompleted('" + FileUtils.backupWithBackSlash(param.getNewFileName(), "'") + "', '"
+    writer.write("<script type=\"text/javascript\">window.parent.OnUploadCompleted('" + FileUtils.escapeJavaScript(param.getNewFileName()) + "', '"
             + (param.getErrorCode()
             != null ? errorMsg
                     : "") + "');</script>");
@@ -268,27 +268,30 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
    * @param param
    * @return new file name.
    */
-  private String getFinalFileName(String path, String name, FileUploadParameter param) {
+  private String getFinalFileName(String path, FileUploadParameter param) {
+    String name = param.getNewFileName();
     Path file = Paths.get(path, name);
-    int number = 0;
 
     String nameWithoutExtension = FileUtils.getFileNameWithoutExtension(name, false);
 
     if (Files.exists(file) || isProtectedName(nameWithoutExtension)) {
       @SuppressWarnings("StringBufferWithoutInitialCapacity")
       StringBuilder sb = new StringBuilder();
-      sb.append(FileUtils.getFileNameWithoutExtension(name, false)).append("(");
+      sb.append(nameWithoutExtension).append("(");
+      String suffix = ")." + FileUtils.getFileExtension(name, false);
       int len = sb.length();
+      int number = 0;
       do {
         number++;
-        sb.append(number).append(").").append(FileUtils.getFileExtension(name, false));
-        param.setNewFileName(sb.toString());
+        sb.append(number).append(suffix);
+        name = sb.toString();
         sb.setLength(len);
-        file = Paths.get(path, param.getNewFileName());
-        param.setErrorCode(ConnectorError.UPLOADED_FILE_RENAMED);
+        file = Paths.get(path, name);
       } while (Files.exists(file));
+      param.setErrorCode(ConnectorError.UPLOADED_FILE_RENAMED);
+      param.setNewFileName(name);
     }
-    return param.getNewFileName();
+    return name;
   }
 
   /**
@@ -337,8 +340,8 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
     }
 
     try {
-      Path file = Paths.get(path, getFinalFileName(path, param.getNewFileName(), param));
-      if (!(ImageUtils.isImageExtension(file) && configuration.isCheckSizeAfterScaling())
+      Path file = Paths.get(path, getFinalFileName(path, param));
+      if ((!ImageUtils.isImageExtension(file) || !configuration.isCheckSizeAfterScaling())
               && !FileUtils.isFileSizeInRange(resourceType, item.getSize())) {
         param.throwException(ConnectorError.UPLOADED_TOO_BIG);
       }

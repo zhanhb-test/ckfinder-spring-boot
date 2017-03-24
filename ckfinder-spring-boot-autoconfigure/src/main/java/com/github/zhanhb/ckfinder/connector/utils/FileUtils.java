@@ -426,18 +426,18 @@ public class FileUtils {
   }
 
   public static boolean isFolderNameValid(String folderName, IConfiguration configuration) {
-    return !((configuration.isDisallowUnsafeCharacters()
-            && (folderName.contains(".") || folderName.contains(";")))
-            || FileUtils.hasInvalidCharacter(folderName));
+    return (!configuration.isDisallowUnsafeCharacters()
+            || !folderName.contains(".") && !folderName.contains(";"))
+            && !hasInvalidCharacter(folderName);
   }
 
-  public static boolean isFileNameInvalid(String fileName, IConfiguration configuration) {
-    return !((configuration.isDisallowUnsafeCharacters() && fileName.contains(";"))
-            || !FileUtils.isFileNameValid(fileName));
+  public static boolean isFileNameValid(String fileName, IConfiguration configuration) {
+    return (!configuration.isDisallowUnsafeCharacters() || !fileName.contains(";"))
+            && isFileNameValid(fileName);
   }
 
-  public static String backupWithBackSlash(String fileName, String toReplace) {
-    return fileName.replace(toReplace, "\\" + toReplace);
+  public static String escapeJavaScript(String fileName) {
+    return fileName.replace("'", "\\'");
   }
 
   private static class DateTimeFormatterHolder {

@@ -27,6 +27,8 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class QuickUploadCommand extends FileUploadCommand {
 
+  private final Gson gson = new GsonBuilder().serializeNulls().create();
+
   @Override
   protected void handleOnUploadCompleteResponse(Writer writer, String errorMsg, FileUploadParameter param) throws IOException {
     if ("json".equalsIgnoreCase(param.getResponseType())) {
@@ -38,8 +40,8 @@ public class QuickUploadCommand extends FileUploadCommand {
       if (param.isUploaded()) {
         writer.write("'" + param.getType().getUrl()
                 + param.getCurrentFolder()
-                + FileUtils.backupWithBackSlash(FileUtils.encodeURIComponent(param.getNewFileName()), "'")
-                + "', '" + FileUtils.backupWithBackSlash(param.getNewFileName(), "'")
+                + FileUtils.escapeJavaScript(FileUtils.encodeURIComponent(param.getNewFileName()))
+                + "', '" + FileUtils.escapeJavaScript(param.getNewFileName())
                 + "', ");
       } else {
         writer.write("'', '', ");
@@ -56,7 +58,7 @@ public class QuickUploadCommand extends FileUploadCommand {
       param.setCkEditorFuncNum(param.getCkEditorFuncNum().replaceAll("\\D", ""));
       writer.write("<script type=\"text/javascript\">window.parent.CKEDITOR.tools.callFunction(" + param.getCkEditorFuncNum() + ", '"
               + path
-              + FileUtils.backupWithBackSlash(FileUtils.encodeURIComponent(param.getNewFileName()), "'")
+              + FileUtils.escapeJavaScript(FileUtils.encodeURIComponent(param.getNewFileName()))
               + "', '" + errorMsg + "');</script>");
     }
   }
@@ -87,7 +89,6 @@ public class QuickUploadCommand extends FileUploadCommand {
    * @throws java.io.IOException
    */
   private void handleJSONResponse(Writer writer, String errorMsg, String path, FileUploadParameter param) throws IOException {
-    Gson gson = new GsonBuilder().serializeNulls().create();
     Map<String, Object> jsonObj = new HashMap<>(6);
 
     jsonObj.put("fileName", param.getNewFileName());
@@ -95,14 +96,13 @@ public class QuickUploadCommand extends FileUploadCommand {
 
     if (param.isUploaded()) {
       if (path != null && !path.isEmpty()) {
-        jsonObj.put("url", path + FileUtils.backupWithBackSlash(FileUtils.encodeURIComponent(param.getNewFileName()), "'"));
+        jsonObj.put("url", path + FileUtils.escapeJavaScript(FileUtils.encodeURIComponent(param.getNewFileName())));
       } else {
         jsonObj.put("url",
                 param.getType().getUrl()
                 + param.getCurrentFolder()
-                + FileUtils.backupWithBackSlash(FileUtils
-                        .encodeURIComponent(param.getNewFileName()),
-                        "'"));
+                + FileUtils.escapeJavaScript(FileUtils
+                        .encodeURIComponent(param.getNewFileName())));
       }
     }
 

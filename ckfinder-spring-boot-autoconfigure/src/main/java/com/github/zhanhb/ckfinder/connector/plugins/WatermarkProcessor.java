@@ -22,7 +22,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.coobird.thumbnailator.Thumbnails;
 import net.coobird.thumbnailator.name.Rename;
-import org.springframework.core.io.Resource;
+import org.springframework.core.io.InputStreamSource;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -58,7 +58,7 @@ public class WatermarkProcessor implements FileUploadListener {
    * @throws IOException
    */
   private BufferedImage getWatermakImage(WatermarkSettings settings) throws IOException {
-    final Resource source = settings.getSource();
+    final InputStreamSource source = settings.getSource();
     if (source == null) {
       return null;
     }

@@ -178,6 +178,7 @@ public class CKFinderAutoConfiguration {
       return builder.build();
     }
 
+    @SuppressWarnings("deprecation")
     private void setTypes(com.github.zhanhb.ckfinder.connector.configuration.Configuration.Builder builder,
             IBasePathBuilder basePathBuilder, Map<String, CKFinderProperties.Type> types) throws IOException {
       String basePath = basePathBuilder.getBasePath();
@@ -206,6 +207,7 @@ public class CKFinderAutoConfiguration {
       }
     }
 
+    @SuppressWarnings("deprecation")
     private void setThumbs(CKFinderProperties.Thumbs thumbs, IBasePathBuilder basePathBuilder,
             com.github.zhanhb.ckfinder.connector.configuration.Configuration.Builder builder) {
       if (thumbs != null) {

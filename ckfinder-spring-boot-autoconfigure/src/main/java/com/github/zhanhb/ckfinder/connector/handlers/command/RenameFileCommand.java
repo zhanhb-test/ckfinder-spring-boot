@@ -91,7 +91,7 @@ public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> 
       return ConnectorError.INVALID_REQUEST;
     }
 
-    if (!FileUtils.isFileNameInvalid(param.getNewFileName(), configuration)
+    if (!FileUtils.isFileNameValid(param.getNewFileName(), configuration)
             || configuration.isFileHidden(param.getNewFileName())) {
       return ConnectorError.INVALID_NAME;
     }

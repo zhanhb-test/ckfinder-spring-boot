@@ -67,19 +67,6 @@ public class CopyFilesCommand extends ErrorListXmlCommand<CopyFilesParameter> im
       param.throwException(ConnectorError.UNAUTHORIZED);
     }
 
-    return copyFiles(param, configuration);
-  }
-
-  /**
-   * copy files from request.
-   *
-   * @param param
-   * @param configuration
-   * @return error code
-   * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
-   */
-  private ConnectorError copyFiles(CopyFilesParameter param, IConfiguration configuration)
-          throws ConnectorException {
     for (FilePostParam file : param.getFiles()) {
       if (!FileUtils.isFileNameValid(file.getName())) {
         param.throwException(ConnectorError.INVALID_REQUEST);
@@ -159,7 +146,10 @@ public class CopyFilesCommand extends ErrorListXmlCommand<CopyFilesParameter> im
       } catch (FileAlreadyExistsException e) {
         String options = file.getOptions();
         if (options != null && options.contains("overwrite")) {
-          if (!handleOverwrite(sourceFile, destFile)) {
+          try {
+            Files.copy(sourceFile, destFile, StandardCopyOption.REPLACE_EXISTING);
+          } catch (IOException ex) {
+            log.error("copy file fail", ex);
             param.appendErrorNodeChild(ConnectorError.ACCESS_DENIED,
                     file.getName(), file.getFolder(), file.getType().getName());
             continue;
@@ -219,23 +209,6 @@ public class CopyFilesCommand extends ErrorListXmlCommand<CopyFilesParameter> im
       } catch (IOException ex) {
         return null;
       }
-    }
-  }
-
-  /**
-   * Handles overwrite option.
-   *
-   * @param sourceFile source file to copy from.
-   * @param destFile destination file to copy to.
-   * @return true if copied correctly
-   */
-  private boolean handleOverwrite(Path sourceFile, Path destFile) {
-    try {
-      Files.copy(sourceFile, destFile, StandardCopyOption.REPLACE_EXISTING);
-      return true;
-    } catch (IOException ex) {
-      log.error("copy file fail", ex);
-      return false;
     }
   }
 
