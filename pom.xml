@@ -68,7 +68,7 @@
     <delombok.directory>${project.build.directory}/delombok</delombok.directory>
     <jacoco-maven-plugin.version>0.7.9</jacoco-maven-plugin.version>
     <java.version>1.8</java.version>
-    <lombok.version>1.16.12</lombok.version>
+    <lombok.version>1.16.16</lombok.version>
     <maven-compiler-plugin.version>3.6.1</maven-compiler-plugin.version>
     <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
     <spring-boot.version>1.5.2.RELEASE</spring-boot.version>
@@ -214,7 +214,7 @@
       <plugin>
         <groupId>org.projectlombok</groupId>
         <artifactId>lombok-maven-plugin</artifactId>
-        <version>1.16.12.0</version>
+        <version>1.16.14.0</version>
         <executions>
           <execution>
             <id>delombok</id>
