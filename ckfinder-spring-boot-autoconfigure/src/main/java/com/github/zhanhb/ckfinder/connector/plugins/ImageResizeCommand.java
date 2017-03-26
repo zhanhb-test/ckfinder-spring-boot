@@ -26,19 +26,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> implements IPostCommand {
 
-  private static final String[] SIZES = {"small", "medium", "large"};
+  private final Map<ImageResizeParam, ImageResizeSize> pluginParams;
 
-  private final Map<String, String> pluginParams;
-
-  public ImageResizeCommand(Map<String, String> params) {
+  public ImageResizeCommand(Map<ImageResizeParam, ImageResizeSize> params) {
     super(ImageResizeParameter::new);
     this.pluginParams = params;
   }
@@ -121,23 +117,19 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> imp
 
     String fileNameWithoutExt = FileUtils.getFileNameWithoutExtension(param.getFileName());
     String fileExt = FileUtils.getFileExtension(param.getFileName());
-    for (String size : SIZES) {
-      if ("1".equals(param.getSizesFromReq().get(size))) {
-        String thumbName = fileNameWithoutExt + "_" + size + "." + fileExt;
+    for (ImageResizeParam key : ImageResizeParam.values()) {
+      if ("1".equals(param.getSizesFromReq().get(key))) {
+        String thumbName = fileNameWithoutExt + "_" + key.getParameter() + "." + fileExt;
         Path thumbFile = Paths.get(param.getType().getPath(),
                 param.getCurrentFolder(), thumbName);
-        String value = pluginParams.get(size + "Thumb");
-        if (value != null) {
-          Matcher matcher = Pattern.compile("(\\d+)x(\\d+)").matcher(value);
-          if (matcher.matches()) {
-            String[] params = new String[]{matcher.group(1), matcher.group(2)};
-            try {
-              ImageUtils.createResizedImage(file, thumbFile, Integer.parseInt(params[0]),
-                      Integer.parseInt(params[1]), configuration.getImgQuality());
-            } catch (IOException e) {
-              log.error("", e);
-              param.throwException(ConnectorError.ACCESS_DENIED);
-            }
+        ImageResizeSize size = pluginParams.get(key);
+        if (size != null) {
+          try {
+            ImageUtils.createResizedImage(file, thumbFile, size.getWidth(),
+                    size.getHeight(), configuration.getImgQuality());
+          } catch (IOException e) {
+            log.error("", e);
+            param.throwException(ConnectorError.ACCESS_DENIED);
           }
         }
       }
@@ -170,8 +162,8 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> imp
       param.setHeight(null);
       param.setWrongReqSizesParams(true);
     }
-    for (String size : SIZES) {
-      param.getSizesFromReq().put(size, request.getParameter(size));
+    for (ImageResizeParam size : ImageResizeParam.values()) {
+      param.getSizesFromReq().put(size, request.getParameter(size.getParameter()));
     }
   }
 

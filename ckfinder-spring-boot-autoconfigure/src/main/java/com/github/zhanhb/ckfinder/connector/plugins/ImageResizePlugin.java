@@ -19,7 +19,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ImageResizePlugin extends Plugin {
 
-  private final Map<String, String> params;
+  private final Map<ImageResizeParam, ImageResizeSize> params;
 
   @Override
   public void regist(PluginRegister register) {

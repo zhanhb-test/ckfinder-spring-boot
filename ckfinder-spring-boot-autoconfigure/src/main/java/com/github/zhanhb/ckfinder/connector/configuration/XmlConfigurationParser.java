@@ -1,12 +1,13 @@
 package com.github.zhanhb.ckfinder.connector.configuration;
 
 import com.github.zhanhb.ckfinder.connector.data.AccessControlLevel;
-import com.github.zhanhb.ckfinder.connector.data.PluginInfo;
 import com.github.zhanhb.ckfinder.connector.data.ResourceType;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.plugins.FileEditorPlugin;
 import com.github.zhanhb.ckfinder.connector.plugins.ImageResizePlugin;
+import com.github.zhanhb.ckfinder.connector.plugins.ImageResizeSize;
+import com.github.zhanhb.ckfinder.connector.plugins.ImageResizeParam;
 import com.github.zhanhb.ckfinder.connector.plugins.WatermarkPlugin;
 import com.github.zhanhb.ckfinder.connector.plugins.WatermarkSettings;
 import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
@@ -21,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.stream.Collectors;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -570,7 +572,14 @@ public enum XmlConfigurationParser {
           Plugin plugin;
           switch (name) {
             case "imageresize":
-              plugin = new ImageResizePlugin(pluginInfo.getParams());
+              try {
+                plugin = new ImageResizePlugin(pluginInfo.getParams().entrySet().stream()
+                        .collect(Collectors.toMap(entry
+                                -> ImageResizeParam.valueOf(entry.getKey()),
+                                entry -> new ImageResizeSize(entry.getValue()))));
+              } catch (IllegalArgumentException ex) {
+                plugin = new ImageResizePlugin(ImageResizeParam.createDefaultParams());
+              }
               break;
             case "watermark":
               WatermarkSettings watermarkSettings = checkPluginInfo(pluginInfo, resourceLoader);

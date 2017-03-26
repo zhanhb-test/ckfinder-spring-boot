@@ -1,6 +1,7 @@
 package com.github.zhanhb.ckfinder.connector.handlers.parameter;
 
-import java.util.HashMap;
+import com.github.zhanhb.ckfinder.connector.plugins.ImageResizeParam;
+import java.util.EnumMap;
 import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,6 +23,7 @@ public class ImageResizeParameter extends Parameter {
   private Integer width;
   private Integer height;
   private boolean wrongReqSizesParams;
-  private final Map<String, String> sizesFromReq = new HashMap<>();
+  private final Map<ImageResizeParam, String> sizesFromReq
+          = new EnumMap<>(ImageResizeParam.class);
 
 }

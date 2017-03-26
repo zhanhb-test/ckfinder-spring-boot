@@ -22,15 +22,15 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class ImageResizeRegister implements PluginInfoRegister {
 
-  private final Map<String, String> params;
+  private final Map<ImageResizeParam, ImageResizeSize> params;
 
   @Override
   public void onInitEvent(InitCommandEvent event) {
     log.debug("runEventHandler: {}", event);
     ImageResizeInfo.Builder builder = ImageResizeInfo.builder();
-    for (Map.Entry<String, String> entry : params.entrySet()) {
-      String key = entry.getKey();
-      String value = entry.getValue();
+    for (Map.Entry<ImageResizeParam, ImageResizeSize> entry : params.entrySet()) {
+      String key = entry.getKey().getXmlKey();
+      String value = entry.getValue().toString();
       builder.attr(key, value);
     }
     event.getBuilder().pluginsInfo(builder.build());

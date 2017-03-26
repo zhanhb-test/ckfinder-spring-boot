@@ -10,10 +10,11 @@ import com.github.zhanhb.ckfinder.connector.configuration.License;
 import com.github.zhanhb.ckfinder.connector.configuration.LicenseFactory;
 import com.github.zhanhb.ckfinder.connector.configuration.Plugin;
 import com.github.zhanhb.ckfinder.connector.data.AccessControlLevel;
-import com.github.zhanhb.ckfinder.connector.data.PluginInfo;
 import com.github.zhanhb.ckfinder.connector.data.ResourceType;
 import com.github.zhanhb.ckfinder.connector.plugins.FileEditorPlugin;
 import com.github.zhanhb.ckfinder.connector.plugins.ImageResizePlugin;
+import com.github.zhanhb.ckfinder.connector.plugins.ImageResizeSize;
+import com.github.zhanhb.ckfinder.connector.plugins.ImageResizeParam;
 import com.github.zhanhb.ckfinder.connector.plugins.WatermarkPlugin;
 import com.github.zhanhb.ckfinder.connector.plugins.WatermarkSettings;
 import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
@@ -27,6 +28,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.servlet.MultipartConfigElement;
@@ -265,23 +267,11 @@ public class CKFinderAutoConfiguration {
     @Bean
     public ImageResizePlugin imageResizePlugin(CKFinderProperties properties) {
       CKFinderProperties.ImageResize imageResize = properties.getImageResize();
-      Map<? extends Enum<?>, String> params = imageResize.getParams();
-      PluginInfo.Builder pluginInfoBuilder = PluginInfo.builder();
-      if (params != null && !params.isEmpty()) {
-        for (Map.Entry<? extends Enum<?>, String> entry : params.entrySet()) {
-          String key = entry.getKey().name();
-          String value = entry.getValue();
-          Assert.hasText(value, "thumbs size should not be empty");
-          Assert.isTrue(value.matches("\\d+x\\d+"), "thumbs size '" + value + "' not correct");
-          pluginInfoBuilder.param(key, value);
-        }
-      } else {
-        pluginInfoBuilder
-                .param("smallThumb", "90x90")
-                .param("mediumThumb", "120x120")
-                .param("largeThumb", "180x180");
-      }
-      return new ImageResizePlugin(pluginInfoBuilder.build().getParams());
+      Map<ImageResizeParam, ImageResizeSize> params = imageResize.getParams();
+      Map<ImageResizeParam, ImageResizeSize> map = new EnumMap<>(ImageResizeParam.class);
+      map.putAll(params != null && !params.isEmpty() ? params
+              : ImageResizeParam.createDefaultParams());
+      return new ImageResizePlugin(Collections.unmodifiableMap(map));
     }
 
   }

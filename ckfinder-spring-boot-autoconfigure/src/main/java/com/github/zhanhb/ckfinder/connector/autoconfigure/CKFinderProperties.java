@@ -1,5 +1,7 @@
 package com.github.zhanhb.ckfinder.connector.autoconfigure;
 
+import com.github.zhanhb.ckfinder.connector.plugins.ImageResizeSize;
+import com.github.zhanhb.ckfinder.connector.plugins.ImageResizeParam;
 import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
@@ -122,12 +124,8 @@ public class CKFinderProperties {
   public static class ImageResize {
 
     private boolean enabled = true;
-    private Map<ImageResizeParamKey, String> params;
+    private Map<ImageResizeParam, ImageResizeSize> params;
 
-  }
-
-  public static enum ImageResizeParamKey {
-    smallThumb, mediumThumb, largeThumb
   }
 
   @Getter
@@ -156,7 +154,7 @@ public class CKFinderProperties {
       for (String string : path) {
         Assert.isTrue(string.startsWith("/"), "Path must start with /");
       }
-      this.path = path;
+      this.path = path.clone();
     }
 
   }
