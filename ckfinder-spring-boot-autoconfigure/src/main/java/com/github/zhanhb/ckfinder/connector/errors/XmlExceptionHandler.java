@@ -63,7 +63,7 @@ public enum XmlExceptionHandler implements ExceptionHandler {
     response.setContentType("text/xml;charset=UTF-8");
     response.setHeader("Cache-Control", "no-cache");
     String result = XmlCreator.INSTANCE.toString(connector.build());
-    
+
     try (PrintWriter out = response.getWriter()) {
       out.write(result);
     }

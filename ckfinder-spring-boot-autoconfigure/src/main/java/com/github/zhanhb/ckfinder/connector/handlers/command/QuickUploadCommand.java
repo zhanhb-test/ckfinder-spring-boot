@@ -27,8 +27,6 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class QuickUploadCommand extends FileUploadCommand {
 
-  private final Gson gson = new GsonBuilder().serializeNulls().create();
-
   @Override
   protected void handleOnUploadCompleteResponse(Writer writer, String errorMsg, FileUploadParameter param) throws IOException {
     if ("json".equalsIgnoreCase(param.getResponseType())) {
@@ -36,17 +34,16 @@ public class QuickUploadCommand extends FileUploadCommand {
     } else {
       ConnectorError errorCode = param.getErrorCode();
       int errorNum = errorCode != null ? errorCode.getCode() : 0;
-      writer.write("<script type=\"text/javascript\">window.parent.OnUploadCompleted(" + errorNum + ", ");
+      writer.write("<script type=\"text/javascript\">window.parent.OnUploadCompleted(" + errorNum + ", '");
       if (param.isUploaded()) {
-        writer.write("'" + param.getType().getUrl()
+        writer.write(param.getType().getUrl()
                 + param.getCurrentFolder()
                 + FileUtils.escapeJavaScript(FileUtils.encodeURIComponent(param.getNewFileName()))
-                + "', '" + FileUtils.escapeJavaScript(param.getNewFileName())
-                + "', ");
+                + "', '" + FileUtils.escapeJavaScript(param.getNewFileName()));
       } else {
-        writer.write("'', '', ");
+        writer.write("', '");
       }
-      writer.write("'');</script>");
+      writer.write("', '');</script>");
     }
   }
 
@@ -114,7 +111,14 @@ public class QuickUploadCommand extends FileUploadCommand {
       jsonObj.put("error", jsonErrObj);
     }
 
-    writer.write(gson.toJson(jsonObj));
+    writer.write(GsonHolder.GSON.toJson(jsonObj));
+  }
+
+  @SuppressWarnings("UtilityClassWithoutPrivateConstructor")
+  private static class GsonHolder {
+
+    static final Gson GSON = new GsonBuilder().serializeNulls().create();
+
   }
 
 }

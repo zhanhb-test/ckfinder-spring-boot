@@ -119,10 +119,9 @@ public class RenameFolderCommand extends BaseXmlCommand<RenameFolderParameter> i
    * @param param
    */
   private void setNewFolder(RenameFolderParameter param) {
-    String tmp1 = param.getCurrentFolder().substring(0,
-            param.getCurrentFolder().lastIndexOf('/'));
-    param.setNewFolderPath(tmp1.substring(0,
-            tmp1.lastIndexOf('/') + 1).concat(param.getNewFolderName()));
+    String currentFolder = param.getCurrentFolder();
+    String tmp1 = currentFolder.substring(0, currentFolder.lastIndexOf('/'));
+    param.setNewFolderPath(tmp1.substring(0, tmp1.lastIndexOf('/') + 1).concat(param.getNewFolderName()));
     param.setNewFolderPath(PathUtils.addSlashToEnd(param.getNewFolderPath()));
   }
 

@@ -1,47 +1,36 @@
 package com.github.zhanhb.ckfinder.connector.autoconfigure;
 
+import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.boot.SpringBootConfiguration;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 
 /**
  *
  * @author zhanhb
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest
-@WebAppConfiguration
 public class CKFinderAutoConfigurationTest {
 
-  private AnnotationConfigApplicationContext context;
+  private AnnotationConfigWebApplicationContext context;
 
   @Before
   public void init() {
-    context = new AnnotationConfigApplicationContext();
+    context = new AnnotationConfigWebApplicationContext();
   }
 
   @After
   public void closeContext() {
-    context.close();
+    if (this.context != null) {
+      this.context.close();
+    }
   }
 
   @Test
   public void test() {
-    context.register(CKFinderAutoConfigurationAutoConfiguration.class);
+    context.register(MockServlecContextConfiguration.class);
     context.refresh();
-  }
-
-  @Configuration
-  @SpringBootConfiguration
-  @SuppressWarnings({"PackageVisibleInnerClass", "ClassMayBeInterface"})
-  static class CKFinderAutoConfigurationAutoConfiguration {
+    context.getBean(IConfiguration.class);
   }
 
 }

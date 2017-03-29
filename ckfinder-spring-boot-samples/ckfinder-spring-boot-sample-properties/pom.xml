@@ -7,7 +7,7 @@
     <version>0.0.1.BUILD-SNAPSHOT</version>
   </parent>
   <artifactId>ckfinder-spring-boot-sample-properties</artifactId>
-  <name>CKFinder Spring Boot Samples Properties</name>
+  <name>CKFinder Spring Boot Sample properties</name>
 
   <dependencies>
     <dependency>

@@ -443,7 +443,7 @@ public class FileUtils {
   private static class DateTimeFormatterHolder {
 
     static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmm", Locale.US)
-            .withZone(ZoneId.of("GMT"));
+            .withZone(ZoneId.systemDefault());
 
   }
 

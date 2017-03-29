@@ -70,21 +70,6 @@ public class CreateFolderCommand extends BaseXmlCommand<CreateFolderParameter> i
       param.throwException(ConnectorError.INVALID_NAME);
     }
 
-    createFolder(param);
-
-    rootElement.result(NewFolder.builder()
-            .name(param.getNewFolderName())
-            .build());
-  }
-
-  /**
-   * creates folder. throws Exception when security problem occurs or folder
-   * already exists
-   *
-   * @param param
-   * @throws ConnectorException when error occurs or dir exists
-   */
-  private void createFolder(CreateFolderParameter param) throws ConnectorException {
     Path dir = Paths.get(param.getType().getPath(),
             param.getCurrentFolder(), param.getNewFolderName());
     if (Files.exists(dir)) {
@@ -95,6 +80,10 @@ public class CreateFolderCommand extends BaseXmlCommand<CreateFolderParameter> i
     } catch (IOException ex) {
       param.throwException(ConnectorError.UNAUTHORIZED);
     }
+
+    rootElement.result(NewFolder.builder()
+            .name(param.getNewFolderName())
+            .build());
   }
 
   @Override

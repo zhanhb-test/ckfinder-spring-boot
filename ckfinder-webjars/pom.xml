@@ -37,14 +37,12 @@
                 <mkdir dir="${ckfinder.cache.directory}" />
                 <if>
                   <available file="${ckfinder.cache.path}" />
-                  <then />
                   <else>
                     <get dest="${ckfinder.cache.path}" src="https://download.cksource.com/CKFinder/CKFinder%20for%20Java/${ckfinder.version}/${ckfinder.zip.name}" />
                   </else>
                 </if>
                 <if>
                   <available file="${ckfinder.cache.path.php}" />
-                  <then />
                   <else>
                     <get dest="${ckfinder.cache.path.php}" src="https://download.cksource.com/CKFinder/CKFinder%20for%20PHP/${ckfinder.version}/${ckfinder.zip.name.php}" />
                   </else>

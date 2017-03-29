@@ -1,7 +1,7 @@
 package com.github.zhanhb.ckfinder.connector.autoconfigure;
 
-import com.github.zhanhb.ckfinder.connector.plugins.ImageResizeSize;
 import com.github.zhanhb.ckfinder.connector.plugins.ImageResizeParam;
+import com.github.zhanhb.ckfinder.connector.plugins.ImageResizeSize;
 import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
@@ -55,14 +55,14 @@ public class CKFinderProperties {
   @Setter
   public static class License {
 
-    private LicenseStrategy strategy = LicenseStrategy.none;
+    private LicenseStrategy strategy = LicenseStrategy.NONE;
     private String name;
     private String key;
 
   }
 
   public static enum LicenseStrategy {
-    none, host, auth;
+    NONE, HOST, AUTH;
   }
 
   @Getter
@@ -92,8 +92,8 @@ public class CKFinderProperties {
   public static class Thumbs {
 
     private boolean enabled = true;
-    private String url = "%BASE_URL%_thumbs";
-    private String directory = "%BASE_DIR%/_thumbs";
+    private String url = "_thumbs";
+    private String directory = "_thumbs";
     private boolean directAccess = false;
     private int maxHeight = 100;
     private int maxWidth = 100;
@@ -134,10 +134,10 @@ public class CKFinderProperties {
 
     private boolean enabled = false;
     private String source;
-    private Float transparency;
-    private Float quality;
-    private Integer marginBottom;
-    private Integer marginRight;
+    private float transparency = 0.8f;
+    private float quality = 1;
+    private int marginBottom = 5;
+    private int marginRight = 5;
 
   }
 
@@ -149,8 +149,8 @@ public class CKFinderProperties {
     private String[] path = {"/ckfinder/core/connector/java/connector.java"};
 
     public void setPath(String[] path) {
-      Assert.notEmpty(path, "path should not be empty");
       Assert.notNull(path, "Path must not be null");
+      Assert.notEmpty(path, "path should not be empty");
       for (String string : path) {
         Assert.isTrue(string.startsWith("/"), "Path must start with /");
       }

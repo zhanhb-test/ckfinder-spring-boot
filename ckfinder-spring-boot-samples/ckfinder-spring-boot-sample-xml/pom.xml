@@ -7,5 +7,5 @@
     <version>0.0.1.BUILD-SNAPSHOT</version>
   </parent>
   <artifactId>ckfinder-spring-boot-sample-xml</artifactId>
-  <name>CKFinder Spring Boot Samples xml</name>
+  <name>CKFinder Spring Boot Sample xml</name>
 </project>

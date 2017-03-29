@@ -12,9 +12,9 @@ import com.github.zhanhb.ckfinder.connector.configuration.Plugin;
 import com.github.zhanhb.ckfinder.connector.data.AccessControlLevel;
 import com.github.zhanhb.ckfinder.connector.data.ResourceType;
 import com.github.zhanhb.ckfinder.connector.plugins.FileEditorPlugin;
+import com.github.zhanhb.ckfinder.connector.plugins.ImageResizeParam;
 import com.github.zhanhb.ckfinder.connector.plugins.ImageResizePlugin;
 import com.github.zhanhb.ckfinder.connector.plugins.ImageResizeSize;
-import com.github.zhanhb.ckfinder.connector.plugins.ImageResizeParam;
 import com.github.zhanhb.ckfinder.connector.plugins.WatermarkPlugin;
 import com.github.zhanhb.ckfinder.connector.plugins.WatermarkSettings;
 import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
@@ -231,9 +231,9 @@ public class CKFinderAutoConfiguration {
       CKFinderProperties.LicenseStrategy strategy = license.getStrategy();
       if (null != strategy) {
         switch (strategy) {
-          case host:
+          case HOST:
             return new HostLicenseFactory();
-          case auth:
+          case AUTH:
             if (StringUtils.hasLength(license.getName())) {
               licenseBuilder.key(KeyGenerator.INSTANCE.generateKey(license.getName(), false));
             }
@@ -286,25 +286,14 @@ public class CKFinderAutoConfiguration {
       CKFinderProperties.Watermark watermark = properties.getWatermark();
       WatermarkSettings.Builder builder = WatermarkSettings.builder();
       String source = watermark.getSource();
-      Assert.notNull(source, "waltermark source should not be null");
+      Assert.notNull(source, "watermark source should not be null");
       Resource resource = resourceLoader.getResource(source);
-      Assert.isTrue(resource.exists(), "waltermark resource not exists");
-      if (watermark.getMarginBottom() != null) {
-        builder.marginBottom(watermark.getMarginBottom());
-      }
-      if (watermark.getMarginRight() != null) {
-        builder.marginRight(watermark.getMarginRight());
-      }
-      if (watermark.getQuality() != null) {
-        builder.quality(watermark.getQuality());
-      }
-      if (watermark.getSource() != null) {
-        builder.source(resource);
-      }
-      if (watermark.getTransparency() != null) {
-        builder.transparency(watermark.getTransparency());
-      }
-      return new WatermarkPlugin(builder.build());
+      Assert.isTrue(resource.exists(), "watermark resource not exists");
+      return new WatermarkPlugin(builder.marginBottom(watermark.getMarginBottom())
+              .marginRight(watermark.getMarginRight())
+              .quality(watermark.getQuality())
+              .source(resource)
+              .transparency(watermark.getTransparency()).build());
     }
   }
 

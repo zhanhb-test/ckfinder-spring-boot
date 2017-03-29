@@ -7,7 +7,7 @@
     <version>0.0.1.BUILD-SNAPSHOT</version>
   </parent>
   <artifactId>ckfinder-spring-boot-sample-yml</artifactId>
-  <name>CKFinder Spring Boot Samples yml</name>
+  <name>CKFinder Spring Boot Sample yml</name>
 
   <dependencies>
     <dependency>

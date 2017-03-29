@@ -52,22 +52,22 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> imp
       param.throwException(ConnectorError.UNAUTHORIZED);
     }
 
-    if (param.getFileName() == null || param.getFileName().isEmpty()) {
+    String fileName = param.getFileName();
+    String newFileName = param.getNewFileName();
+
+    if (fileName == null || fileName.isEmpty()) {
       param.throwException(ConnectorError.INVALID_NAME);
     }
 
-    if (!FileUtils.isFileNameValid(param.getFileName())
-            || configuration.isFileHidden(param.getFileName())) {
+    if (!FileUtils.isFileNameValid(fileName) || configuration.isFileHidden(fileName)) {
       param.throwException(ConnectorError.INVALID_REQUEST);
     }
 
-    if (!FileUtils.isFileExtensionAllowed(param.getFileName(), param.getType())) {
+    if (!FileUtils.isFileExtensionAllowed(fileName, param.getType())) {
       param.throwException(ConnectorError.INVALID_REQUEST);
     }
 
-    Path file = Paths.get(param.getType().getPath(),
-            param.getCurrentFolder(),
-            param.getFileName());
+    Path file = Paths.get(param.getType().getPath(), param.getCurrentFolder(), fileName);
     if (!Files.isRegularFile(file)) {
       param.throwException(ConnectorError.FILE_NOT_FOUND);
     }
@@ -78,19 +78,15 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> imp
 
     if (param.getWidth() != null && param.getHeight() != null) {
 
-      if (!FileUtils.isFileNameValid(param.getNewFileName())
-              && configuration.isFileHidden(param.getNewFileName())) {
+      if (!FileUtils.isFileNameValid(newFileName) && configuration.isFileHidden(newFileName)) {
         param.throwException(ConnectorError.INVALID_NAME);
       }
 
-      if (!FileUtils.isFileExtensionAllowed(param.getNewFileName(),
-              param.getType())) {
+      if (!FileUtils.isFileExtensionAllowed(newFileName, param.getType())) {
         param.throwException(ConnectorError.INVALID_EXTENSION);
       }
 
-      Path thumbFile = Paths.get(param.getType().getPath(),
-              param.getCurrentFolder(),
-              param.getNewFileName());
+      Path thumbFile = Paths.get(param.getType().getPath(), param.getCurrentFolder(), newFileName);
 
       if (Files.exists(thumbFile) && !Files.isWritable(thumbFile)) {
         param.throwException(ConnectorError.ACCESS_DENIED);
@@ -115,13 +111,12 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> imp
       }
     }
 
-    String fileNameWithoutExt = FileUtils.getFileNameWithoutExtension(param.getFileName());
-    String fileExt = FileUtils.getFileExtension(param.getFileName());
+    String fileNameWithoutExt = FileUtils.getFileNameWithoutExtension(fileName);
+    String fileExt = FileUtils.getFileExtension(fileName);
     for (ImageResizeParam key : ImageResizeParam.values()) {
       if ("1".equals(param.getSizesFromReq().get(key))) {
         String thumbName = fileNameWithoutExt + "_" + key.getParameter() + "." + fileExt;
-        Path thumbFile = Paths.get(param.getType().getPath(),
-                param.getCurrentFolder(), thumbName);
+        Path thumbFile = Paths.get(param.getType().getPath(), param.getCurrentFolder(), thumbName);
         ImageResizeSize size = pluginParams.get(key);
         if (size != null) {
           try {

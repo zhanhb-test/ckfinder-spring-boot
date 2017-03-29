@@ -35,7 +35,7 @@ public class WatermarkProcessor implements FileUploadListener {
     try {
       final Path originalFile = event.getFile();
       final WatermarkPosition position = new WatermarkPosition(settings.getMarginBottom(), settings.getMarginRight());
-      BufferedImage watermark = getWatermakImage(settings);
+      BufferedImage watermark = getWatermarkImage(settings);
       if (watermark != null) {
         Thumbnails.of(originalFile.toFile())
                 .watermark(position, watermark, settings.getTransparency())
@@ -57,7 +57,7 @@ public class WatermarkProcessor implements FileUploadListener {
    * @return
    * @throws IOException
    */
-  private BufferedImage getWatermakImage(WatermarkSettings settings) throws IOException {
+  private BufferedImage getWatermarkImage(WatermarkSettings settings) throws IOException {
     final InputStreamSource source = settings.getSource();
     if (source == null) {
       return null;
