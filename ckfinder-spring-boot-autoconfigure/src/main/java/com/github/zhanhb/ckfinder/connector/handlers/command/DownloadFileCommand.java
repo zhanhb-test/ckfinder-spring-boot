@@ -29,10 +29,6 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class DownloadFileCommand extends Command<DownloadFileParameter> {
 
-  public DownloadFileCommand() {
-    super(DownloadFileParameter::new);
-  }
-
   /**
    * executes the download file command. Writes file to response.
    *
@@ -105,17 +101,18 @@ public class DownloadFileCommand extends Command<DownloadFileParameter> {
   /**
    * inits params for download file command.
    *
-   * @param param
    * @param request request
    * @param configuration connector configuration
+   * @return
    * @throws ConnectorException when error occurs.
    */
   @Override
-  protected void initParams(DownloadFileParameter param, HttpServletRequest request, IConfiguration configuration)
+  protected DownloadFileParameter popupParams(HttpServletRequest request, IConfiguration configuration)
           throws ConnectorException {
-    super.initParams(param, request, configuration);
+    DownloadFileParameter param = doInitParam(new DownloadFileParameter(), request, configuration);
     // problem with showing filename when dialog window appear
     param.setFileName(request.getParameter("FileName"));
+    return param;
   }
 
 }

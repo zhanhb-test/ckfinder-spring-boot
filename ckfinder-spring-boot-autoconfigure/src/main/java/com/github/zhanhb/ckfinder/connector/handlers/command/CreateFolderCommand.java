@@ -32,10 +32,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class CreateFolderCommand extends BaseXmlCommand<CreateFolderParameter> implements IPostCommand {
 
-  public CreateFolderCommand() {
-    super(CreateFolderParameter::new);
-  }
-
   /**
    * creates current folder XML node.
    *
@@ -87,10 +83,11 @@ public class CreateFolderCommand extends BaseXmlCommand<CreateFolderParameter> i
   }
 
   @Override
-  protected void initParams(CreateFolderParameter param, HttpServletRequest request, IConfiguration configuration)
+  protected CreateFolderParameter popupParams(HttpServletRequest request, IConfiguration configuration)
           throws ConnectorException {
-    super.initParams(param, request, configuration);
+    CreateFolderParameter param = doInitParam(new CreateFolderParameter(), request, configuration);
     param.setNewFolderName(request.getParameter("NewFolderName"));
+    return param;
   }
 
 }

@@ -50,10 +50,6 @@ public class InitCommand extends XmlCommand<InitParameter> {
   private static final int MIN_LICENSE_KEY_LENGTH = 26;
   private static final char[] hexChars = "0123456789abcdef".toCharArray();
 
-  public InitCommand() {
-    super(InitParameter::new);
-  }
-
   @Override
   Connector buildConnector(InitParameter param, IConfiguration configuration) {
     Connector.Builder rootElement = Connector.builder();
@@ -252,10 +248,11 @@ public class InitCommand extends XmlCommand<InitParameter> {
   }
 
   @Override
-  protected void initParams(InitParameter param, HttpServletRequest request, IConfiguration configuration)
+  protected InitParameter popupParams(HttpServletRequest request, IConfiguration configuration)
           throws ConnectorException {
-    super.initParams(param, request, configuration);
+    InitParameter param = doInitParam(new InitParameter(), request, configuration);
     param.setRequest(request);
+    return param;
   }
 
   @Deprecated

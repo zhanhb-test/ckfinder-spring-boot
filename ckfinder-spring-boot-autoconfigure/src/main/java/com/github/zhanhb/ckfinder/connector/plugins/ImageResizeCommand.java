@@ -35,7 +35,6 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> imp
   private final Map<ImageResizeParam, ImageResizeSize> pluginParams;
 
   public ImageResizeCommand(Map<ImageResizeParam, ImageResizeSize> params) {
-    super(ImageResizeParameter::new);
     this.pluginParams = params;
   }
 
@@ -133,9 +132,8 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> imp
 
   @Override
   @SuppressWarnings("CollectionWithoutInitialCapacity")
-  protected void initParams(ImageResizeParameter param, HttpServletRequest request,
-          IConfiguration configuration) throws ConnectorException {
-    super.initParams(param, request, configuration);
+  protected ImageResizeParameter popupParams(HttpServletRequest request, IConfiguration configuration) throws ConnectorException {
+    ImageResizeParameter param = doInitParam(new ImageResizeParameter(), request, configuration);
     param.setFileName(request.getParameter("fileName"));
     param.setNewFileName(request.getParameter("newFileName"));
     param.setOverwrite(request.getParameter("overwrite"));
@@ -160,6 +158,7 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> imp
     for (ImageResizeParam size : ImageResizeParam.values()) {
       param.getSizesFromReq().put(size, request.getParameter(size.getParameter()));
     }
+    return param;
   }
 
 }

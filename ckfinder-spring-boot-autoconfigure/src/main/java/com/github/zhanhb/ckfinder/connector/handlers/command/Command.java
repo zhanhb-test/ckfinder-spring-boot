@@ -13,7 +13,6 @@ package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.configuration.Constants;
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
-import com.github.zhanhb.ckfinder.connector.configuration.ParameterFactory;
 import com.github.zhanhb.ckfinder.connector.data.ResourceType;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
@@ -23,7 +22,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Objects;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -36,12 +34,6 @@ import org.springframework.util.StringUtils;
  * @param <T> parameter type
  */
 public abstract class Command<T extends Parameter> {
-
-  private final ParameterFactory<T> paramFactory;
-
-  protected Command(ParameterFactory<T> paramFactory) {
-    this.paramFactory = Objects.requireNonNull(paramFactory);
-  }
 
   /**
    * Runs command. Initialize, sets response and execute command.
@@ -56,21 +48,23 @@ public abstract class Command<T extends Parameter> {
   public final void runCommand(HttpServletRequest request,
           HttpServletResponse response, IConfiguration configuration)
           throws ConnectorException, IOException {
-    T param = paramFactory.newParameter();
-    initParams(param, request, configuration);
-
-    execute(param, request, response, configuration);
+    execute(popupParams(request, configuration), request, response, configuration);
   }
+
+  protected abstract T popupParams(HttpServletRequest request, IConfiguration configuration) throws ConnectorException;
 
   /**
    * initialize params for command handler.
    *
+   * @param <T>
    * @param param
    * @param request request
    * @param configuration connector configuration
+   * @return
    * @throws ConnectorException to handle in error handler.
    */
-  protected void initParams(T param, HttpServletRequest request,
+  @SuppressWarnings("FinalMethod")
+  protected final <T extends Parameter> T doInitParam(T param, HttpServletRequest request,
           IConfiguration configuration) throws ConnectorException {
     checkConnectorEnabled(configuration);
     setUserRole(param, request, configuration);
@@ -92,6 +86,7 @@ public abstract class Command<T extends Parameter> {
       }
     }
     param.setType(type);
+    return param;
   }
 
   /**
@@ -133,7 +128,7 @@ public abstract class Command<T extends Parameter> {
     }
   }
 
-  private void setUserRole(T param, HttpServletRequest request, IConfiguration configuration) {
+  private void setUserRole(Parameter param, HttpServletRequest request, IConfiguration configuration) {
     HttpSession session = request.getSession(false);
     String userRole = session == null ? null : (String) session.getAttribute(configuration.getUserRoleName());
     param.setUserRole(userRole);

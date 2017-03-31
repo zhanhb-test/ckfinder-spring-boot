@@ -25,6 +25,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -33,10 +34,6 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class GetFoldersCommand extends BaseXmlCommand<Parameter> {
-
-  public GetFoldersCommand() {
-    super(Parameter::new);
-  }
 
   @Override
   protected void createXml(Connector.Builder rootElement, Parameter param, IConfiguration configuration) throws ConnectorException {
@@ -100,6 +97,11 @@ public class GetFoldersCommand extends BaseXmlCommand<Parameter> {
                               + dirName, param.getUserRole())).build());
     }
     rootElement.result(folders.build());
+  }
+
+  @Override
+  protected Parameter popupParams(HttpServletRequest request, IConfiguration configuration) throws ConnectorException {
+    return doInitParam(new Parameter(), request, configuration);
   }
 
 }

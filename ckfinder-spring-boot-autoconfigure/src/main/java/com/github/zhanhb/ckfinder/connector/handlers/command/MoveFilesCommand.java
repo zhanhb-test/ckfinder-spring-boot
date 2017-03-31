@@ -39,10 +39,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class MoveFilesCommand extends ErrorListXmlCommand<MoveFilesParameter> implements IPostCommand {
 
-  public MoveFilesCommand() {
-    super(MoveFilesParameter::new);
-  }
-
   @Override
   protected void addResultNode(Connector.Builder rootElement, MoveFilesParameter param, IConfiguration configuration) {
     rootElement.result(MoveFiles.builder()
@@ -235,11 +231,12 @@ public class MoveFilesCommand extends ErrorListXmlCommand<MoveFilesParameter> im
   }
 
   @Override
-  protected void initParams(MoveFilesParameter param, HttpServletRequest request, IConfiguration configuration)
+  protected MoveFilesParameter popupParams(HttpServletRequest request, IConfiguration configuration)
           throws ConnectorException {
-    super.initParams(param, request, configuration);
+    MoveFilesParameter param = doInitParam(new MoveFilesParameter(), request, configuration);
     param.setMovedAll(request.getParameter("moved") != null ? Integer.parseInt(request.getParameter("moved")) : 0);
     RequestFileHelper.addFilesListFromRequest(request, param.getFiles(), configuration);
+    return param;
   }
 
 }

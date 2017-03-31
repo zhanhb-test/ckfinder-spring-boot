@@ -43,24 +43,20 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
    */
   private static final BigDecimal BYTES = BigDecimal.valueOf(1024);
 
-  public GetFilesCommand() {
-    super(GetFilesParameter::new);
-  }
-
   /**
    * initializing parameters for command handler.
    *
-   * @param param
    * @param request request
    * @param configuration connector configuration
+   * @return
    * @throws ConnectorException when error occurs
    */
   @Override
-  protected void initParams(GetFilesParameter param, HttpServletRequest request, IConfiguration configuration)
+  protected GetFilesParameter popupParams(HttpServletRequest request, IConfiguration configuration)
           throws ConnectorException {
-    super.initParams(param, request, configuration);
-
+    GetFilesParameter param = doInitParam(new GetFilesParameter(), request, configuration);
     param.setShowThumbs(request.getParameter("showThumbs"));
+    return param;
   }
 
   @Override

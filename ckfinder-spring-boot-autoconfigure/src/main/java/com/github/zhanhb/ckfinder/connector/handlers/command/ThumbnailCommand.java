@@ -44,10 +44,6 @@ public class ThumbnailCommand extends Command<ThumbnailParameter> {
   private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US)
           .withZone(ZoneId.of("GMT"));
 
-  public ThumbnailCommand() {
-    super(ThumbnailParameter::new);
-  }
-
   /**
    * Gets mime type of image.
    *
@@ -98,9 +94,9 @@ public class ThumbnailCommand extends Command<ThumbnailParameter> {
   }
 
   @Override
-  protected void initParams(ThumbnailParameter param, HttpServletRequest request, IConfiguration configuration)
+  protected ThumbnailParameter popupParams(HttpServletRequest request, IConfiguration configuration)
           throws ConnectorException {
-    super.initParams(param, request, configuration);
+    ThumbnailParameter param = doInitParam(new ThumbnailParameter(), request, configuration);
     param.setFileName(request.getParameter("FileName"));
     try {
       param.setIfModifiedSince(request.getDateHeader("If-Modified-Since"));
@@ -108,6 +104,7 @@ public class ThumbnailCommand extends Command<ThumbnailParameter> {
       param.setIfModifiedSince(0);
     }
     param.setIfNoneMatch(request.getHeader("If-None-Match"));
+    return param;
   }
 
   /**

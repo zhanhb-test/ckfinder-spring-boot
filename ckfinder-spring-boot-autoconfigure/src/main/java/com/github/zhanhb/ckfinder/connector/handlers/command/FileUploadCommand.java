@@ -56,7 +56,6 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
    * default constructor.
    */
   public FileUploadCommand() {
-    super(FileUploadParameter::new);
     multipartResolver = new StandardServletMultipartResolver();
   }
 
@@ -150,15 +149,15 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
   /**
    * initializing parameters for command handler.
    *
-   * @param param
    * @param request request
    * @param configuration connector configuration.
+   * @return
    */
   @Override
-  protected void initParams(FileUploadParameter param,
-          HttpServletRequest request, IConfiguration configuration) {
+  protected FileUploadParameter popupParams(HttpServletRequest request, IConfiguration configuration) {
+    FileUploadParameter param = new FileUploadParameter();
     try {
-      super.initParams(param, request, configuration);
+      doInitParam(param, request, configuration);
     } catch (ConnectorException ex) {
       param.setErrorCode(ex.getErrorCode());
     }
@@ -169,6 +168,7 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
     if (param.getType() == null) {
       param.setErrorCode(ConnectorError.INVALID_TYPE);
     }
+    return param;
   }
 
   /**

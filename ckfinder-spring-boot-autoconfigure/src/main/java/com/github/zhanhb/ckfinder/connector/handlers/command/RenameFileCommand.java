@@ -34,10 +34,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> implements IPostCommand {
 
-  public RenameFileCommand() {
-    super(RenameFileParameter::new);
-  }
-
   @Override
   protected void addResultNode(Connector.Builder rootElement, RenameFileParameter param, IConfiguration configuration) {
     RenamedFile.Builder element = RenamedFile.builder().name(param.getFileName());
@@ -144,11 +140,12 @@ public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> 
   }
 
   @Override
-  protected void initParams(RenameFileParameter param, HttpServletRequest request, IConfiguration configuration)
+  protected RenameFileParameter popupParams(HttpServletRequest request, IConfiguration configuration)
           throws ConnectorException {
-    super.initParams(param, request, configuration);
+    RenameFileParameter param = doInitParam(new RenameFileParameter(), request, configuration);
     param.setFileName(request.getParameter("fileName"));
     param.setNewFileName(request.getParameter("newFileName"));
+    return param;
   }
 
 }

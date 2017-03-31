@@ -21,6 +21,7 @@ import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -28,10 +29,6 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class DeleteFolderCommand extends BaseXmlCommand<ErrorListXmlParameter> implements IPostCommand {
-
-  public DeleteFolderCommand() {
-    super(ErrorListXmlParameter::new);
-  }
 
   @Override
   protected void createXml(Connector.Builder rootElement, ErrorListXmlParameter param, IConfiguration configuration) throws ConnectorException {
@@ -66,6 +63,11 @@ public class DeleteFolderCommand extends BaseXmlCommand<ErrorListXmlParameter> i
     } else {
       param.throwException(ConnectorError.ACCESS_DENIED);
     }
+  }
+
+  @Override
+  protected ErrorListXmlParameter popupParams(HttpServletRequest request, IConfiguration configuration) throws ConnectorException {
+    return doInitParam(new ErrorListXmlParameter(), request, configuration);
   }
 
 }

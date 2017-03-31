@@ -39,10 +39,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class CopyFilesCommand extends ErrorListXmlCommand<CopyFilesParameter> implements IPostCommand {
 
-  public CopyFilesCommand() {
-    super(CopyFilesParameter::new);
-  }
-
   @Override
   protected void addResultNode(Connector.Builder rootElement, CopyFilesParameter param, IConfiguration configuration) {
     rootElement.result(CopyFiles.builder()
@@ -233,11 +229,12 @@ public class CopyFilesCommand extends ErrorListXmlCommand<CopyFilesParameter> im
   }
 
   @Override
-  protected void initParams(CopyFilesParameter param, HttpServletRequest request, IConfiguration configuration) throws ConnectorException {
-    super.initParams(param, request, configuration);
+  protected CopyFilesParameter popupParams(HttpServletRequest request, IConfiguration configuration) throws ConnectorException {
+    CopyFilesParameter param = doInitParam(new CopyFilesParameter(), request, configuration);
     param.setCopiedAll(request.getParameter("copied") != null ? Integer.parseInt(request.getParameter("copied")) : 0);
 
     RequestFileHelper.addFilesListFromRequest(request, param.getFiles(), configuration);
+    return param;
   }
 
 }

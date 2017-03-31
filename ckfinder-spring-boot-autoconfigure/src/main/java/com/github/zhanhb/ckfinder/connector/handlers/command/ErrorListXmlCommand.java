@@ -12,7 +12,6 @@
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
-import com.github.zhanhb.ckfinder.connector.configuration.ParameterFactory;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.ErrorListXmlParameter;
@@ -24,10 +23,6 @@ import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
  * @param <T>
  */
 public abstract class ErrorListXmlCommand<T extends ErrorListXmlParameter> extends XmlCommand<T> {
-
-  public ErrorListXmlCommand(ParameterFactory<T> paramFactory) {
-    super(paramFactory);
-  }
 
   @Override
   @SuppressWarnings("FinalMethod")

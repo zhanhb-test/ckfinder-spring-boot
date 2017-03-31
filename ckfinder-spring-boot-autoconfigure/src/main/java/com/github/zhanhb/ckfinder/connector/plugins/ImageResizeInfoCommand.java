@@ -33,10 +33,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ImageResizeInfoCommand extends BaseXmlCommand<ImageResizeInfoParameter> {
 
-  public ImageResizeInfoCommand() {
-    super(ImageResizeInfoParameter::new);
-  }
-
   @Override
   protected void createXml(Connector.Builder rootElement, ImageResizeInfoParameter param, IConfiguration configuration) throws ConnectorException {
     if (param.getType() == null) {
@@ -84,10 +80,11 @@ public class ImageResizeInfoCommand extends BaseXmlCommand<ImageResizeInfoParame
   }
 
   @Override
-  protected void initParams(ImageResizeInfoParameter param, HttpServletRequest request, IConfiguration configuration)
+  protected ImageResizeInfoParameter popupParams(HttpServletRequest request, IConfiguration configuration)
           throws ConnectorException {
-    super.initParams(param, request, configuration);
+    ImageResizeInfoParameter param = doInitParam(new ImageResizeInfoParameter(), request, configuration);
     param.setFileName(request.getParameter("fileName"));
+    return param;
   }
 
 }

@@ -12,7 +12,6 @@
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
-import com.github.zhanhb.ckfinder.connector.configuration.ParameterFactory;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.Parameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
@@ -23,10 +22,6 @@ import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
  * @param <T>
  */
 public abstract class BaseXmlCommand<T extends Parameter> extends XmlCommand<T> {
-
-  protected BaseXmlCommand(ParameterFactory<T> paramFactory) {
-    super(paramFactory);
-  }
 
   @Override
   @SuppressWarnings("FinalMethod")

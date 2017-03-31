@@ -31,10 +31,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class SaveFileCommand extends BaseXmlCommand<SaveFileParameter> implements IPostCommand {
 
-  public SaveFileCommand() {
-    super(SaveFileParameter::new);
-  }
-
   @Override
   protected void createXml(Connector.Builder rootElement, SaveFileParameter param, IConfiguration configuration) throws ConnectorException {
     if (param.getType() == null) {
@@ -79,11 +75,12 @@ public class SaveFileCommand extends BaseXmlCommand<SaveFileParameter> implement
   }
 
   @Override
-  protected void initParams(SaveFileParameter param, HttpServletRequest request, IConfiguration configuration)
+  protected SaveFileParameter popupParams(HttpServletRequest request, IConfiguration configuration)
           throws ConnectorException {
-    super.initParams(param, request, configuration);
+    SaveFileParameter param = doInitParam(new SaveFileParameter(), request, configuration);
     param.setFileContent(request.getParameter("content"));
     param.setFileName(request.getParameter("fileName"));
+    return param;
   }
 
 }

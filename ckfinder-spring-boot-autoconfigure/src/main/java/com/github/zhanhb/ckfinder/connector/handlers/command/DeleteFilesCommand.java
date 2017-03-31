@@ -34,10 +34,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class DeleteFilesCommand extends ErrorListXmlCommand<DeleteFilesParameter> implements IPostCommand {
 
-  public DeleteFilesCommand() {
-    super(DeleteFilesParameter::new);
-  }
-
   @Override
   protected void addResultNode(Connector.Builder rootElement, DeleteFilesParameter param, IConfiguration configuration) {
     rootElement.result(DeleteFiles.builder()
@@ -132,16 +128,17 @@ public class DeleteFilesCommand extends ErrorListXmlCommand<DeleteFilesParameter
   /**
    * Initializes parameters for command handler.
    *
-   * @param param
    * @param request current response object
    * @param configuration connector configuration object
+   * @return
    * @throws ConnectorException when initialization parameters can't be loaded
    * for command handler.
    */
   @Override
-  protected void initParams(DeleteFilesParameter param, HttpServletRequest request, IConfiguration configuration) throws ConnectorException {
-    super.initParams(param, request, configuration);
+  protected DeleteFilesParameter popupParams(HttpServletRequest request, IConfiguration configuration) throws ConnectorException {
+    DeleteFilesParameter param = doInitParam(new DeleteFilesParameter(), request, configuration);
     RequestFileHelper.addFilesListFromRequest(request, param.getFiles(), configuration);
+    return param;
   }
 
 }

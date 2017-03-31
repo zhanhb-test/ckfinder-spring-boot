@@ -1,7 +1,6 @@
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
-import com.github.zhanhb.ckfinder.connector.configuration.ParameterFactory;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.Parameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
@@ -21,10 +20,6 @@ import javax.servlet.http.HttpServletResponse;
  */
 @SuppressWarnings("FinalMethod")
 public abstract class XmlCommand<T extends Parameter> extends Command<T> {
-
-  protected XmlCommand(ParameterFactory<T> paramFactory) {
-    super(paramFactory);
-  }
 
   /**
    * executes XML command. Creates XML response and writes it to response output

@@ -33,10 +33,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class RenameFolderCommand extends BaseXmlCommand<RenameFolderParameter> implements IPostCommand {
 
-  public RenameFolderCommand() {
-    super(RenameFolderParameter::new);
-  }
-
   /**
    * creates XML node for renamed folder.
    *
@@ -126,15 +122,16 @@ public class RenameFolderCommand extends BaseXmlCommand<RenameFolderParameter> i
   }
 
   /**
-   * @param param
    * @param request request
    * @param configuration connector conf
+   * @return
    * @throws ConnectorException when error occurs.
    */
   @Override
-  protected void initParams(RenameFolderParameter param, HttpServletRequest request, IConfiguration configuration) throws ConnectorException {
-    super.initParams(param, request, configuration);
+  protected RenameFolderParameter popupParams(HttpServletRequest request, IConfiguration configuration) throws ConnectorException {
+    RenameFolderParameter param = doInitParam(new RenameFolderParameter(), request, configuration);
     param.setNewFolderName(request.getParameter("NewFolderName"));
+    return param;
   }
 
 }
