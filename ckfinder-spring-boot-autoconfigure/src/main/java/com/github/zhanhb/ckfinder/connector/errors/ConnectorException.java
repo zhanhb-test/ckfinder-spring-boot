@@ -33,7 +33,7 @@ public class ConnectorException extends Exception {
    * @param code error code number
    */
   public ConnectorException(Parameter param, ConnectorError code) {
-    super(null, null);
+    super(code.name(), null);
     this.errorCode = Objects.requireNonNull(code);
     this.currentFolder = param.getCurrentFolder();
     this.type = param.getType();
@@ -42,38 +42,38 @@ public class ConnectorException extends Exception {
   /**
    * standard constructor.
    *
-   * @param errorCode error code number
+   * @param code error code number
    */
-  public ConnectorException(ConnectorError errorCode) {
-    super(null, null);
-    this.errorCode = Objects.requireNonNull(errorCode);
+  public ConnectorException(ConnectorError code) {
+    super(code.name(), null);
+    this.errorCode = Objects.requireNonNull(code);
     this.currentFolder = null;
   }
 
   /**
    * constructor with error code and error message parameters.
    *
-   * @param errorCode error code number
+   * @param code error code number
    * @param errorMsg error text message
    */
-  public ConnectorException(ConnectorError errorCode, String errorMsg) {
+  public ConnectorException(ConnectorError code, String errorMsg) {
     super(errorMsg, null);
-    this.errorCode = Objects.requireNonNull(errorCode);
+    this.errorCode = Objects.requireNonNull(code);
     this.currentFolder = null;
   }
 
   /**
    * constructor with error code and error message parameters.
    *
-   * @param errorCode error code number
+   * @param code error code number
    * @param e exception
    */
-  public ConnectorException(ConnectorError errorCode, Exception e) {
+  public ConnectorException(ConnectorError code, Exception e) {
     super(e.getMessage(), e);
     if (e instanceof ConnectorException) {
       throw new IllegalArgumentException();
     }
-    this.errorCode = Objects.requireNonNull(errorCode);
+    this.errorCode = Objects.requireNonNull(code);
     this.currentFolder = null;
   }
 

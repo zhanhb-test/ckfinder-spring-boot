@@ -1,5 +1,6 @@
 package com.github.zhanhb.ckfinder.connector.handlers.parameter;
 
+import com.github.zhanhb.ckfinder.connector.data.FilePostParam;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.DetailError;
@@ -22,13 +23,14 @@ public class ErrorListXmlParameter extends Parameter {
   /**
    * save errors node to list.
    *
+   * @param filePostParam
    * @param errorCode error code
-   * @param name file name
-   * @param folder current folder
-   * @param type resource type
    */
-  public void appendErrorNodeChild(ConnectorError errorCode, String name, String folder, String type) {
+  public void appendError(FilePostParam filePostParam, ConnectorError errorCode) {
     int code = errorCode.getCode();
+    String name = filePostParam.getName();
+    String folder = filePostParam.getFolder();
+    String type = filePostParam.getType().getName();
     if (errorsBuilder == null) {
       errorsBuilder = Errors.builder();
     }

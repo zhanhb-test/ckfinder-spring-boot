@@ -94,8 +94,7 @@ public class DeleteFilesCommand extends ErrorListXmlCommand<DeleteFilesParameter
 
       param.setAddResultNode(true);
       if (!Files.exists(file)) {
-        param.appendErrorNodeChild(ConnectorError.FILE_NOT_FOUND,
-                fileItem.getName(), fileItem.getFolder(), fileItem.getType().getName());
+        param.appendError(fileItem, ConnectorError.FILE_NOT_FOUND);
         continue;
       }
 
@@ -113,8 +112,7 @@ public class DeleteFilesCommand extends ErrorListXmlCommand<DeleteFilesParameter
           // No errors if we are not able to delete the thumb.
         }
       } else { //If access is denied, report error and try to delete rest of files.
-        param.appendErrorNodeChild(ConnectorError.ACCESS_DENIED,
-                fileItem.getName(), fileItem.getFolder(), fileItem.getType().getName());
+        param.appendError(fileItem, ConnectorError.ACCESS_DENIED);
       }
     }
     if (param.hasError()) {

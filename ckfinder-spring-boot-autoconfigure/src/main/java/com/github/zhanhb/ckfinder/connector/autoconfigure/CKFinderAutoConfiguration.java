@@ -199,7 +199,7 @@ public class CKFinderAutoConfiguration {
         }
         resourceTypeBuilder.maxSize(type.getMaxSize());
         String path = StringUtils.hasLength(type.getDirectory()) ? type.getDirectory() : typeName.toLowerCase();
-        String url = type.getUrl() != null ? type.getUrl() : "/" + typeName.toLowerCase();
+        String url = StringUtils.hasLength(type.getUrl()) ? type.getUrl() : typeName.toLowerCase();
 
         resourceTypeBuilder.path(Files.createDirectories(basePath.getFileSystem().getPath(basePath.toString(), path.replace(Constants.BASE_DIR_PLACEHOLDER, ""))));
         resourceTypeBuilder.url(PathUtils.normalizeUrl(baseUrl + url.replace(Constants.BASE_URL_PLACEHOLDER, "")));
@@ -236,6 +236,8 @@ public class CKFinderAutoConfiguration {
             if (StringUtils.hasLength(license.getName())) {
               licenseBuilder.key(KeyGenerator.INSTANCE.generateKey(license.getName(), false));
             }
+            break;
+          default:
             break;
         }
       }

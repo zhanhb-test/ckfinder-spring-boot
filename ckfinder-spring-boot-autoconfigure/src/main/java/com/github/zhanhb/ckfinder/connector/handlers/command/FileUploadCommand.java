@@ -50,15 +50,6 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
    */
   private static final Pattern UNSAFE_FILE_NAME_PATTERN = Pattern.compile("[:*?|/]");
 
-  private final MultipartResolver multipartResolver;
-
-  /**
-   * default constructor.
-   */
-  public FileUploadCommand() {
-    multipartResolver = new StandardServletMultipartResolver();
-  }
-
   /**
    * Executes file upload command.
    *
@@ -198,6 +189,7 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
    */
   private void fileUpload(HttpServletRequest request, FileUploadParameter param,
           IConfiguration configuration) throws ConnectorException {
+    MultipartResolver multipartResolver = StandardHolder.RESOLVER;
     try {
       boolean multipart = multipartResolver.isMultipart(request);
       if (multipart) {
@@ -278,8 +270,7 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
 
     if (Files.exists(file) || isProtectedName(nameWithoutExtension)) {
       @SuppressWarnings("StringBufferWithoutInitialCapacity")
-      StringBuilder sb = new StringBuilder();
-      sb.append(nameWithoutExtension).append("(");
+      StringBuilder sb = new StringBuilder(nameWithoutExtension).append("(");
       String suffix = ")." + FileUtils.getFileExtension(name, false);
       int len = sb.length();
       int number = 0;
@@ -307,11 +298,10 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
    */
   private void validateUploadItem(MultipartFile item, Path path,
           FileUploadParameter param, IConfiguration configuration) throws ConnectorException {
-    if (item.getOriginalFilename() != null && item.getOriginalFilename().length() > 0) {
-      param.setFileName(getFileItemName(item));
-    } else {
+    if (item.getOriginalFilename() == null || item.getOriginalFilename().length() <= 0) {
       param.throwException(ConnectorError.UPLOADED_INVALID);
     }
+    param.setFileName(getFileItemName(item));
     param.setNewFileName(param.getFileName());
 
     param.setNewFileName(UNSAFE_FILE_NAME_PATTERN.matcher(param.getNewFileName()).replaceAll("_"));
@@ -389,6 +379,13 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
     if (code != null) {
       param.throwException(code);
     }
+  }
+
+  @SuppressWarnings("UtilityClassWithoutPrivateConstructor")
+  private static class StandardHolder {
+
+    static final MultipartResolver RESOLVER = new StandardServletMultipartResolver();
+
   }
 
 }

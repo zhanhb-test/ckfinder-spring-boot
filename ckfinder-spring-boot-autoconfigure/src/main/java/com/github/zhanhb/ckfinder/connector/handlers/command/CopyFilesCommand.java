@@ -93,16 +93,14 @@ public class CopyFilesCommand extends ErrorListXmlCommand<CopyFilesParameter> im
 
     for (FilePostParam file : param.getFiles()) {
       if (!FileUtils.isFileExtensionAllowed(file.getName(), param.getType())) {
-        param.appendErrorNodeChild(ConnectorError.INVALID_EXTENSION,
-                file.getName(), file.getFolder(), file.getType().getName());
+        param.appendError(file, ConnectorError.INVALID_EXTENSION);
         continue;
       }
       // check #4 (extension) - when copy to another resource type,
       //double check extension
       if (param.getType() != file.getType()
               && !FileUtils.isFileExtensionAllowed(file.getName(), file.getType())) {
-        param.appendErrorNodeChild(ConnectorError.INVALID_EXTENSION,
-                file.getName(), file.getFolder(), file.getType().getName());
+        param.appendError(file, ConnectorError.INVALID_EXTENSION);
         continue;
       }
 
@@ -118,22 +116,19 @@ public class CopyFilesCommand extends ErrorListXmlCommand<CopyFilesParameter> im
           throw new IOException();
         }
       } catch (IOException ex) {
-        param.appendErrorNodeChild(ConnectorError.FILE_NOT_FOUND,
-                file.getName(), file.getFolder(), file.getType().getName());
+        param.appendError(file, ConnectorError.FILE_NOT_FOUND);
         continue;
       }
       if (param.getType() != file.getType()) {
         long maxSize = param.getType().getMaxSize();
         if (maxSize != 0 && maxSize < attrs.size()) {
-          param.appendErrorNodeChild(ConnectorError.UPLOADED_TOO_BIG,
-                  file.getName(), file.getFolder(), file.getType().getName());
+          param.appendError(file, ConnectorError.UPLOADED_TOO_BIG);
           continue;
         }
         // fail through
       }
       if (Objects.equals(sourceFile, destFile)) {
-        param.appendErrorNodeChild(ConnectorError.SOURCE_AND_TARGET_PATH_EQUAL,
-                file.getName(), file.getFolder(), file.getType().getName());
+        param.appendError(file, ConnectorError.SOURCE_AND_TARGET_PATH_EQUAL);
         continue;
       }
       try {
@@ -145,26 +140,22 @@ public class CopyFilesCommand extends ErrorListXmlCommand<CopyFilesParameter> im
             Files.copy(sourceFile, destFile, StandardCopyOption.REPLACE_EXISTING);
           } catch (IOException ex) {
             log.error("copy file fail", ex);
-            param.appendErrorNodeChild(ConnectorError.ACCESS_DENIED,
-                    file.getName(), file.getFolder(), file.getType().getName());
+            param.appendError(file, ConnectorError.ACCESS_DENIED);
             continue;
           }
         } else if (options != null && options.contains("autorename")) {
           destFile = handleAutoRename(sourceFile, destFile);
           if (destFile == null) {
-            param.appendErrorNodeChild(ConnectorError.ACCESS_DENIED,
-                    file.getName(), file.getFolder(), file.getType().getName());
+            param.appendError(file, ConnectorError.ACCESS_DENIED);
             continue;
           }
         } else {
-          param.appendErrorNodeChild(ConnectorError.ALREADY_EXIST,
-                  file.getName(), file.getFolder(), file.getType().getName());
+          param.appendError(file, ConnectorError.ALREADY_EXIST);
           continue;
         }
       } catch (IOException e) {
         log.error("", e);
-        param.appendErrorNodeChild(ConnectorError.ACCESS_DENIED,
-                file.getName(), file.getFolder(), file.getType().getName());
+        param.appendError(file, ConnectorError.ACCESS_DENIED);
         continue;
       }
       param.filesCopiedPlus();

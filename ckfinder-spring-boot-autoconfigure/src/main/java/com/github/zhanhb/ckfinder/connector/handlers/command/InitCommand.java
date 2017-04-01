@@ -231,13 +231,13 @@ public class InitCommand extends XmlCommand<InitParameter> {
   private String randomHash(Path folder) {
     try {
       MessageDigest algorithm = MessageDigest.getInstance("SHA-256");
-      byte[] messageDigest = algorithm.digest(folder.toString().getBytes(StandardCharsets.UTF_8));
-      int len = messageDigest.length;
+      byte[] bytes = algorithm.digest(folder.toString().getBytes(StandardCharsets.UTF_8));
+      int len = bytes.length;
 
       StringBuilder hexString = new StringBuilder(len << 1);
 
       for (int i = 0; i < len; i++) {
-        byte b = messageDigest[i];
+        byte b = bytes[i];
         hexString.append(hexChars[b >> 4 & 15]).append(hexChars[b & 15]);
       }
       return hexString.substring(0, 15);
