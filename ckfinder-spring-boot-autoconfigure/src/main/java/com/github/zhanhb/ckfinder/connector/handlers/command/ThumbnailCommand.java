@@ -21,7 +21,6 @@ import com.github.zhanhb.ckfinder.connector.utils.ImageUtils;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.time.Instant;
@@ -138,13 +137,12 @@ public class ThumbnailCommand extends Command<ThumbnailParameter> {
     }
 
     log.debug("configuration thumbsPath: {}", configuration.getThumbsPath());
-    Path fullCurrentDir = Paths.get(configuration.getThumbsPath(), param.getType().getName(), param.getCurrentFolder());
+    Path fullCurrentDir = getPath(configuration.getThumbsPath(), param.getType().getName(), param.getCurrentFolder());
     log.debug("typeThumbDir: {}", fullCurrentDir);
 
     try {
-      String fullCurrentPath = fullCurrentDir.toString();
-      log.debug(fullCurrentPath);
-      param.setFullCurrentPath(fullCurrentPath);
+      log.debug("{}", fullCurrentDir);
+      param.setFullCurrentPath(fullCurrentDir);
       if (!Files.exists(fullCurrentDir)) {
         Files.createDirectories(fullCurrentDir);
       }
@@ -164,12 +162,12 @@ public class ThumbnailCommand extends Command<ThumbnailParameter> {
    */
   private void createThumb(ThumbnailParameter param, IConfiguration configuration) throws ConnectorException {
     log.debug("ThumbnailCommand.createThumb({})", param.getFullCurrentPath());
-    Path thumbFile = Paths.get(param.getFullCurrentPath(), param.getFileName());
+    Path thumbFile = getPath(param.getFullCurrentPath(), param.getFileName());
     log.debug("thumbFile: {}", thumbFile);
     param.setThumbFile(thumbFile);
 
     if (!Files.exists(thumbFile)) {
-      Path orginFile = Paths.get(param.getType().getPath(),
+      Path orginFile = getPath(param.getType().getPath(),
               param.getCurrentFolder(), param.getFileName());
       log.debug("orginFile: {}", orginFile);
       if (!Files.exists(orginFile)) {
@@ -204,7 +202,7 @@ public class ThumbnailCommand extends Command<ThumbnailParameter> {
   private boolean setResponseHeadersAfterCreatingFile(HttpServletResponse response,
           ThumbnailParameter param) throws ConnectorException {
     // Set content size
-    Path file = Paths.get(param.getFullCurrentPath(), param.getFileName());
+    Path file = getPath(param.getFullCurrentPath(), param.getFileName());
     try {
       BasicFileAttributes attr = Files.readAttributes(file, BasicFileAttributes.class);
       FileTime lastModifiedTime = attr.lastModifiedTime();

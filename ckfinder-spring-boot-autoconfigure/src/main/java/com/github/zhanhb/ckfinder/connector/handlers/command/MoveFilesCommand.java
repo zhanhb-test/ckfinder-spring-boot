@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Objects;
@@ -107,9 +106,9 @@ public class MoveFilesCommand extends ErrorListXmlCommand<MoveFilesParameter> im
         continue;
       }
 
-      Path sourceFile = Paths.get(file.getType().getPath(),
+      Path sourceFile = getPath(file.getType().getPath(),
               file.getFolder(), file.getName());
-      Path destFile = Paths.get(param.getType().getPath(),
+      Path destFile = getPath(param.getType().getPath(),
               param.getCurrentFolder(), file.getName());
 
       BasicFileAttributes attrs;
@@ -218,7 +217,7 @@ public class MoveFilesCommand extends ErrorListXmlCommand<MoveFilesParameter> im
    */
   private void moveThumb(FilePostParam file, Path relation,
           IConfiguration configuration) {
-    Path sourceThumbFile = Paths.get(configuration.getThumbsPath(),
+    Path sourceThumbFile = getPath(configuration.getThumbsPath(),
             file.getType().getName(), file.getFolder(), file.getName());
     Path destThumbFile = sourceThumbFile.resolve(relation).normalize();
 

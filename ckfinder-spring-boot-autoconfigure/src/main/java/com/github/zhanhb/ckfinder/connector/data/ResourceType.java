@@ -11,6 +11,7 @@
  */
 package com.github.zhanhb.ckfinder.connector.data;
 
+import java.nio.file.Path;
 import lombok.Builder;
 import lombok.Value;
 
@@ -35,7 +36,7 @@ public class ResourceType {
   /**
    * resource directory.
    */
-  private final String path;
+  private final Path path;
 
   /**
    * max file size in resource.

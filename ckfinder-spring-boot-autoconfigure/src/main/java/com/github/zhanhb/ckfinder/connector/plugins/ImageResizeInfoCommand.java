@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -55,7 +54,7 @@ public class ImageResizeInfoCommand extends BaseXmlCommand<ImageResizeInfoParame
       param.throwException(ConnectorError.INVALID_REQUEST);
     }
 
-    Path imageFile = Paths.get(param.getType().getPath(),
+    Path imageFile = getPath(param.getType().getPath(),
             param.getCurrentFolder(),
             param.getFileName());
 

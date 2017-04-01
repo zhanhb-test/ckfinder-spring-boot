@@ -21,7 +21,6 @@ import com.github.zhanhb.ckfinder.connector.utils.PathUtils;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -80,7 +79,7 @@ public abstract class Command<T extends Parameter> {
     String typeName = request.getParameter("type");
     ResourceType type = configuration.getTypes().get(typeName);
     if (currentFolder != null && typeName != null && type != null) {
-      Path currDir = Paths.get(type.getPath(), currentFolder);
+      Path currDir = getPath(type.getPath(), currentFolder);
       if (!Files.isDirectory(currDir)) {
         throw new ConnectorException(ConnectorError.FOLDER_NOT_FOUND);
       }
@@ -147,6 +146,11 @@ public abstract class Command<T extends Parameter> {
     } else {
       return "/";
     }
+  }
+
+  @SuppressWarnings("FinalMethod")
+  protected final Path getPath(Path first, String... more) {
+    return first.getFileSystem().getPath(first.toString(), more);
   }
 
 }

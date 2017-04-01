@@ -26,7 +26,7 @@ import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import com.github.zhanhb.ckfinder.connector.utils.KeyGenerator;
 import com.github.zhanhb.ckfinder.connector.utils.PathUtils;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -185,7 +185,7 @@ public class InitCommand extends XmlCommand<InitParameter> {
       int acl = configuration.getAccessControl().getAcl(name, "/", param.getUserRole());
       if ((acl & AccessControl.FOLDER_VIEW) != 0) {
         long maxSize = resourceType.getMaxSize();
-        boolean hasChildren = FileUtils.hasChildren(configuration.getAccessControl(), "/", Paths.get(resourceType.getPath()), configuration, resourceType.getName(), param.getUserRole());
+        boolean hasChildren = FileUtils.hasChildren(configuration.getAccessControl(), "/", getPath(resourceType.getPath()), configuration, resourceType.getName(), param.getUserRole());
         resourceTypes.resourceType(com.github.zhanhb.ckfinder.connector.handlers.response.ResourceType.builder()
                 .name(name)
                 .acl(acl)
@@ -228,10 +228,10 @@ public class InitCommand extends XmlCommand<InitParameter> {
    * @param folder folder
    * @return hash value
    */
-  private String randomHash(String folder) {
+  private String randomHash(Path folder) {
     try {
       MessageDigest algorithm = MessageDigest.getInstance("SHA-256");
-      byte[] messageDigest = algorithm.digest(folder.getBytes(StandardCharsets.UTF_8));
+      byte[] messageDigest = algorithm.digest(folder.toString().getBytes(StandardCharsets.UTF_8));
       int len = messageDigest.length;
 
       StringBuilder hexString = new StringBuilder(len << 1);

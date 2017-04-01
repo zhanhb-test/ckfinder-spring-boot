@@ -23,7 +23,6 @@ import com.github.zhanhb.ckfinder.connector.utils.PathUtils;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
@@ -67,13 +66,13 @@ public class RenameFolderCommand extends BaseXmlCommand<RenameFolderParameter> i
       param.throwException(ConnectorError.INVALID_REQUEST);
     }
 
-    Path dir = Paths.get(param.getType().getPath(),
+    Path dir = getPath(param.getType().getPath(),
             param.getCurrentFolder());
     if (!Files.isDirectory(dir)) {
       param.throwException(ConnectorError.INVALID_REQUEST);
     }
     setNewFolder(param);
-    Path newDir = Paths.get(param.getType().getPath(),
+    Path newDir = getPath(param.getType().getPath(),
             param.getNewFolderPath());
     if (Files.exists(newDir)) {
       param.throwException(ConnectorError.ALREADY_EXIST);
@@ -99,9 +98,9 @@ public class RenameFolderCommand extends BaseXmlCommand<RenameFolderParameter> i
    * @throws java.io.IOException
    */
   private void renameThumb(RenameFolderParameter param, IConfiguration configuration) throws IOException {
-    Path thumbDir = Paths.get(configuration.getThumbsPath(),
+    Path thumbDir = getPath(configuration.getThumbsPath(),
             param.getType().getName(), param.getCurrentFolder());
-    Path newThumbDir = Paths.get(configuration.getThumbsPath(),
+    Path newThumbDir = getPath(configuration.getThumbsPath(),
             param.getType().getName(), param.getNewFolderPath());
     try {
       Files.move(thumbDir, newThumbDir);

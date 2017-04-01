@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
@@ -59,7 +58,7 @@ public class SaveFileCommand extends BaseXmlCommand<SaveFileParameter> implement
       param.throwException(ConnectorError.INVALID_REQUEST);
     }
 
-    Path sourceFile = Paths.get(param.getType().getPath(),
+    Path sourceFile = getPath(param.getType().getPath(),
             param.getCurrentFolder(), param.getFileName());
 
     if (!Files.isRegularFile(sourceFile)) {

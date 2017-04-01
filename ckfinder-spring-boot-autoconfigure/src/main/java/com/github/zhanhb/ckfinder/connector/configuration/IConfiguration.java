@@ -13,6 +13,7 @@ package com.github.zhanhb.ckfinder.connector.configuration;
 
 import com.github.zhanhb.ckfinder.connector.data.ResourceType;
 import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -92,7 +93,7 @@ public interface IConfiguration {
    *
    * @return thumbs directory
    */
-  public String getThumbsPath();
+  public Path getThumbsPath();
 
   /**
    * gets thumbs quality.

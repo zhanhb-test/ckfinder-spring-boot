@@ -11,6 +11,8 @@
  */
 package com.github.zhanhb.ckfinder.connector.configuration;
 
+import java.nio.file.Path;
+
 /**
  *
  */
@@ -21,7 +23,7 @@ public interface IBasePathBuilder {
    *
    * @return value of base directory
    */
-  public String getBasePath();
+  public Path getBasePath();
 
   /**
    * create baseURL value.

@@ -23,7 +23,6 @@ import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -91,7 +90,7 @@ public class DeleteFilesCommand extends ErrorListXmlCommand<DeleteFilesParameter
     }
 
     for (FilePostParam fileItem : param.getFiles()) {
-      Path file = Paths.get(fileItem.getType().getPath(), fileItem.getFolder(), fileItem.getName());
+      Path file = getPath(fileItem.getType().getPath(), fileItem.getFolder(), fileItem.getName());
 
       param.setAddResultNode(true);
       if (!Files.exists(file)) {
@@ -102,7 +101,7 @@ public class DeleteFilesCommand extends ErrorListXmlCommand<DeleteFilesParameter
 
       log.debug("prepare delete file '{}'", file);
       if (FileUtils.delete(file)) {
-        Path thumbFile = Paths.get(configuration.getThumbsPath(),
+        Path thumbFile = getPath(configuration.getThumbsPath(),
                 fileItem.getType().getName(), param.getCurrentFolder(), fileItem.getName());
         param.filesDeletedPlus();
 

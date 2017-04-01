@@ -22,7 +22,6 @@ import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
@@ -66,7 +65,7 @@ public class CreateFolderCommand extends BaseXmlCommand<CreateFolderParameter> i
       param.throwException(ConnectorError.INVALID_NAME);
     }
 
-    Path dir = Paths.get(param.getType().getPath(),
+    Path dir = getPath(param.getType().getPath(),
             param.getCurrentFolder(), param.getNewFolderName());
     if (Files.exists(dir)) {
       param.throwException(ConnectorError.ALREADY_EXIST);

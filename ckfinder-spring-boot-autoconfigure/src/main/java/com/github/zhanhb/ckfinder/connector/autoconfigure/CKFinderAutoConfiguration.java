@@ -76,18 +76,17 @@ public class CKFinderAutoConfiguration {
       if (StringUtils.isEmpty(basePath)) {
         basePath = baseUrl.replaceAll("^/+", "");
       }
+      Path path = Paths.get(basePath).normalize();
       try {
-        Path path = Paths.get(basePath).normalize();
-        basePath = path.toString();
         if (!path.isAbsolute()) {
           basePath = servletContext.getRealPath(basePath);
-          if (basePath == null) {
-            basePath = path.toString();
+          if (basePath != null) {
+            path = Paths.get(basePath).normalize();
           }
         }
       } catch (IllegalArgumentException ex) {
       }
-      return DefaultPathBuilder.builder().basePath(basePath).baseUrl(servletContext.getContextPath() + PathUtils.addSlashToEnd(baseUrl)).build();
+      return DefaultPathBuilder.builder().basePath(path).baseUrl(servletContext.getContextPath() + PathUtils.addSlashToEnd(baseUrl)).build();
     }
 
   }
@@ -183,7 +182,7 @@ public class CKFinderAutoConfiguration {
     @SuppressWarnings("deprecation")
     private void setTypes(com.github.zhanhb.ckfinder.connector.configuration.Configuration.Builder builder,
             IBasePathBuilder basePathBuilder, Map<String, CKFinderProperties.Type> types) throws IOException {
-      String basePath = basePathBuilder.getBasePath();
+      Path basePath = basePathBuilder.getBasePath();
       String baseUrl = basePathBuilder.getBaseUrl();
       for (Map.Entry<String, CKFinderProperties.Type> entry : types.entrySet()) {
         final String typeName = entry.getKey();
@@ -202,7 +201,7 @@ public class CKFinderAutoConfiguration {
         String path = StringUtils.hasLength(type.getDirectory()) ? type.getDirectory() : typeName.toLowerCase();
         String url = type.getUrl() != null ? type.getUrl() : "/" + typeName.toLowerCase();
 
-        resourceTypeBuilder.path(Files.createDirectories(Paths.get(basePath, path.replace(Constants.BASE_DIR_PLACEHOLDER, ""))).toString());
+        resourceTypeBuilder.path(Files.createDirectories(basePath.getFileSystem().getPath(basePath.toString(), path.replace(Constants.BASE_DIR_PLACEHOLDER, ""))));
         resourceTypeBuilder.url(PathUtils.normalizeUrl(baseUrl + url.replace(Constants.BASE_URL_PLACEHOLDER, "")));
 
         builder.type(typeName, resourceTypeBuilder.build());
@@ -213,10 +212,10 @@ public class CKFinderAutoConfiguration {
     private void setThumbs(CKFinderProperties.Thumbs thumbs, IBasePathBuilder basePathBuilder,
             com.github.zhanhb.ckfinder.connector.configuration.Configuration.Builder builder) {
       if (thumbs != null) {
-        String basePath = basePathBuilder.getBasePath();
+        Path basePath = basePathBuilder.getBasePath();
         String baseUrl = basePathBuilder.getBaseUrl();
         builder.thumbsEnabled(thumbs.isEnabled())
-                .thumbsPath(Paths.get(basePath, thumbs.getDirectory().replace(Constants.BASE_DIR_PLACEHOLDER, "")).toString())
+                .thumbsPath(basePath.getFileSystem().getPath(basePath.toString(), thumbs.getDirectory().replace(Constants.BASE_DIR_PLACEHOLDER, "")))
                 .thumbsDirectAccess(thumbs.isDirectAccess())
                 .thumbsUrl(PathUtils.normalizeUrl(baseUrl + thumbs.getUrl().replace(Constants.BASE_URL_PLACEHOLDER, "")))
                 .maxThumbHeight(thumbs.getMaxHeight())

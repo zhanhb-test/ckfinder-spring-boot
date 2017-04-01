@@ -14,6 +14,7 @@ package com.github.zhanhb.ckfinder.connector.configuration;
 import com.github.zhanhb.ckfinder.connector.data.ResourceType;
 import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
 import com.github.zhanhb.ckfinder.connector.utils.PathUtils;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +48,8 @@ public class Configuration implements IConfiguration {
   private Map<String, ResourceType> types;
   private boolean thumbsEnabled;
   private String thumbsUrl;
-  private String thumbsPath;
+  @NonNull
+  private Path thumbsPath;
   private boolean thumbsDirectAccess;
   private int maxThumbHeight;
   private int maxThumbWidth;
@@ -67,6 +69,7 @@ public class Configuration implements IConfiguration {
   @Singular
   private Set<String> defaultResourceTypes;
   private boolean disallowUnsafeCharacters;
+  @NonNull
   private Events events;
   @NonNull
   private AccessControl accessControl;
@@ -140,7 +143,6 @@ public class Configuration implements IConfiguration {
       imgHeight = Constants.DEFAULT_IMG_HEIGHT;
       imgQuality = Constants.DEFAULT_IMG_QUALITY;
       thumbsUrl = "";
-      thumbsPath = "";
       thumbsQuality = Constants.DEFAULT_IMG_QUALITY;
       maxThumbHeight = Constants.DEFAULT_THUMB_MAX_HEIGHT;
       maxThumbWidth = Constants.DEFAULT_THUMB_MAX_WIDTH;

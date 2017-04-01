@@ -25,7 +25,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
@@ -71,7 +70,7 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
       param.throwException(ConnectorError.UNAUTHORIZED);
     }
 
-    Path dir = Paths.get(param.getType().getPath(), param.getCurrentFolder());
+    Path dir = getPath(param.getType().getPath(), param.getCurrentFolder());
 
     if (!Files.isDirectory(dir)) {
       param.throwException(ConnectorError.FOLDER_NOT_FOUND);
@@ -130,7 +129,7 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
    */
   private String createThumbAttr(Path file, GetFilesParameter param, IConfiguration configuration) {
     if (ImageUtils.isImageExtension(file) && isAddThumbsAttr(param, configuration)) {
-      Path thumbFile = Paths.get(configuration.getThumbsPath(),
+      Path thumbFile = getPath(configuration.getThumbsPath(),
               param.getType().getName(), param.getCurrentFolder(),
               file.getFileName().toString());
       if (Files.exists(thumbFile)) {

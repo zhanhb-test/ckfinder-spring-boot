@@ -24,7 +24,6 @@ import com.github.zhanhb.ckfinder.connector.utils.ImageUtils;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -66,7 +65,7 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> imp
       param.throwException(ConnectorError.INVALID_REQUEST);
     }
 
-    Path file = Paths.get(param.getType().getPath(), param.getCurrentFolder(), fileName);
+    Path file = getPath(param.getType().getPath(), param.getCurrentFolder(), fileName);
     if (!Files.isRegularFile(file)) {
       param.throwException(ConnectorError.FILE_NOT_FOUND);
     }
@@ -85,7 +84,7 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> imp
         param.throwException(ConnectorError.INVALID_EXTENSION);
       }
 
-      Path thumbFile = Paths.get(param.getType().getPath(), param.getCurrentFolder(), newFileName);
+      Path thumbFile = getPath(param.getType().getPath(), param.getCurrentFolder(), newFileName);
 
       if (Files.exists(thumbFile) && !Files.isWritable(thumbFile)) {
         param.throwException(ConnectorError.ACCESS_DENIED);
@@ -115,7 +114,7 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> imp
     for (ImageResizeParam key : ImageResizeParam.values()) {
       if ("1".equals(param.getSizesFromReq().get(key))) {
         String thumbName = fileNameWithoutExt + "_" + key.getParameter() + "." + fileExt;
-        Path thumbFile = Paths.get(param.getType().getPath(), param.getCurrentFolder(), thumbName);
+        Path thumbFile = getPath(param.getType().getPath(), param.getCurrentFolder(), thumbName);
         ImageResizeSize size = pluginParams.get(key);
         if (size != null) {
           try {

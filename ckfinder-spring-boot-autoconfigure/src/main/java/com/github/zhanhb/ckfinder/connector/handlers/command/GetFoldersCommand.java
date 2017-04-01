@@ -23,7 +23,6 @@ import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -50,7 +49,7 @@ public class GetFoldersCommand extends BaseXmlCommand<Parameter> {
       param.throwException(ConnectorError.INVALID_REQUEST);
     }
 
-    Path dir = Paths.get(param.getType().getPath(), param.getCurrentFolder());
+    Path dir = getPath(param.getType().getPath(), param.getCurrentFolder());
 
     if (!Files.isDirectory(dir)) {
       param.throwException(ConnectorError.FOLDER_NOT_FOUND);

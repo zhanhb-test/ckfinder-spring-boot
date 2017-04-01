@@ -21,11 +21,11 @@ import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import com.github.zhanhb.ckfinder.connector.utils.ImageUtils;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -74,14 +74,14 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
   final void execute(FileUploadParameter param, HttpServletRequest request,
           HttpServletResponse response, IConfiguration configuration) throws ConnectorException, IOException {
     String errorMsg = "";
-    if (param.getErrorCode() == null) { // set in method initParams
-      try {
-        uploadFile(request, param, configuration);
-        param.setUploaded(true);
-      } catch (ConnectorException ex) {
-        param.setErrorCode(ex.getErrorCode());
-        errorMsg = ex.getMessage();
-      }
+    try {
+      checkParam(param); // set in method initParams
+      uploadFile(request, param, configuration);
+      param.setUploaded(true);
+      checkParam(param); // set in method uploadFile
+    } catch (ConnectorException ex) {
+      param.setErrorCode(ex.getErrorCode());
+      errorMsg = ex.getMessage();
     }
     errorMsg = errorMsg.replace("%1", param.getNewFileName());
     String path = "";
@@ -207,8 +207,8 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
         try {
           Collection<MultipartFile> parts = resolveMultipart.getFileMap().values();
           for (MultipartFile part : parts) {
-            String path = Paths.get(param.getType().getPath(),
-                    param.getCurrentFolder()).toString();
+            Path path = getPath(param.getType().getPath(),
+                    param.getCurrentFolder());
             param.setFileName(getFileItemName(part));
             validateUploadItem(part, path, param, configuration);
             saveTemporaryFile(path, part, param, configuration);
@@ -238,9 +238,9 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
    * @throws java.io.IOException
    * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
    */
-  private void saveTemporaryFile(String path, MultipartFile item, FileUploadParameter param, IConfiguration configuration)
+  private void saveTemporaryFile(Path path, MultipartFile item, FileUploadParameter param, IConfiguration configuration)
           throws IOException, ConnectorException {
-    Path file = Paths.get(path, param.getNewFileName());
+    Path file = getPath(path, param.getNewFileName());
 
     if (ImageUtils.isImageExtension(file)) {
       if (!configuration.isCheckSizeAfterScaling()
@@ -254,7 +254,9 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
         param.throwException(ConnectorError.UPLOADED_TOO_BIG);
       }
     } else {
-      item.transferTo(file.toFile());
+      try (InputStream in = item.getInputStream()) {
+        Files.copy(in, file);
+      }
     }
     FileUploadEvent args = new FileUploadEvent(param.getCurrentFolder(), file);
     configuration.getEvents().fireOnFileUpload(args);
@@ -268,9 +270,9 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
    * @param param
    * @return new file name.
    */
-  private String getFinalFileName(String path, FileUploadParameter param) {
+  private String getFinalFileName(Path path, FileUploadParameter param) {
     String name = param.getNewFileName();
-    Path file = Paths.get(path, name);
+    Path file = getPath(path, name);
 
     String nameWithoutExtension = FileUtils.getFileNameWithoutExtension(name, false);
 
@@ -286,7 +288,7 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
         sb.append(number).append(suffix);
         name = sb.toString();
         sb.setLength(len);
-        file = Paths.get(path, name);
+        file = getPath(path, name);
       } while (Files.exists(file));
       param.setErrorCode(ConnectorError.UPLOADED_FILE_RENAMED);
       param.setNewFileName(name);
@@ -303,7 +305,7 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
    * @param configuration
    * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
    */
-  private void validateUploadItem(MultipartFile item, String path,
+  private void validateUploadItem(MultipartFile item, Path path,
           FileUploadParameter param, IConfiguration configuration) throws ConnectorException {
     if (item.getOriginalFilename() != null && item.getOriginalFilename().length() > 0) {
       param.setFileName(getFileItemName(item));
@@ -340,7 +342,7 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
     }
 
     try {
-      Path file = Paths.get(path, getFinalFileName(path, param));
+      Path file = getPath(path, getFinalFileName(path, param));
       if ((!ImageUtils.isImageExtension(file) || !configuration.isCheckSizeAfterScaling())
               && !FileUtils.isFileSizeInRange(resourceType, item.getSize())) {
         param.throwException(ConnectorError.UPLOADED_TOO_BIG);
@@ -380,6 +382,13 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
 
   void setContentType(FileUploadParameter param, HttpServletResponse response) {
     response.setContentType("text/html;charset=UTF-8");
+  }
+
+  private void checkParam(FileUploadParameter param) throws ConnectorException {
+    ConnectorError code = param.getErrorCode();
+    if (code != null) {
+      param.throwException(code);
+    }
   }
 
 }

@@ -20,7 +20,6 @@ import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
@@ -50,14 +49,14 @@ public class DeleteFolderCommand extends BaseXmlCommand<ErrorListXmlParameter> i
       param.throwException(ConnectorError.INVALID_REQUEST);
     }
 
-    Path dir = Paths.get(param.getType().getPath(), param.getCurrentFolder());
+    Path dir = getPath(param.getType().getPath(), param.getCurrentFolder());
 
     if (!Files.isDirectory(dir)) {
       param.throwException(ConnectorError.FOLDER_NOT_FOUND);
     }
 
     if (FileUtils.delete(dir)) {
-      Path thumbDir = Paths.get(configuration.getThumbsPath(),
+      Path thumbDir = getPath(configuration.getThumbsPath(),
               param.getType().getName(), param.getCurrentFolder());
       FileUtils.delete(thumbDir);
     } else {

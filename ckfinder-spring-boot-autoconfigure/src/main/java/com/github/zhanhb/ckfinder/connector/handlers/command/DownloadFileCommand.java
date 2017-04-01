@@ -20,7 +20,6 @@ import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -64,7 +63,7 @@ public class DownloadFileCommand extends Command<DownloadFileParameter> {
       param.throwException(ConnectorError.FILE_NOT_FOUND);
     }
 
-    Path file = Paths.get(param.getType().getPath(), param.getCurrentFolder(), param.getFileName());
+    Path file = getPath(param.getType().getPath(), param.getCurrentFolder(), param.getFileName());
 
     long size;
 

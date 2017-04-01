@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -67,7 +66,7 @@ public enum XmlConfigurationParser {
           IBasePathBuilder basePathBuilder, String xmlFilePath)
           throws Exception {
     Configuration.Builder builder = Configuration.builder();
-    String basePath = basePathBuilder.getBasePath();
+    Path basePath = basePathBuilder.getBasePath();
     init(builder, resourceLoader, xmlFilePath, basePath, basePathBuilder);
     return builder.build();
   }
@@ -78,7 +77,7 @@ public enum XmlConfigurationParser {
    * @param builder
    * @param basePathBuilder
    * @param resourceLoader
-   * @param baseFolder
+   * @param basePath
    * @param xmlFilePath
    * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
    * @throws java.io.IOException
@@ -86,7 +85,7 @@ public enum XmlConfigurationParser {
    * @throws javax.xml.parsers.ParserConfigurationException
    */
   private void init(Configuration.Builder builder, ResourceLoader resourceLoader,
-          String xmlFilePath, String baseFolder, IBasePathBuilder basePathBuilder)
+          String xmlFilePath, Path basePath, IBasePathBuilder basePathBuilder)
           throws ConnectorException, IOException, ParserConfigurationException, SAXException {
     Resource resource = getFullConfigPath(resourceLoader, xmlFilePath);
     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -136,7 +135,7 @@ public enum XmlConfigurationParser {
             }
             break;
           case "thumbs":
-            setThumbs(builder, childNode.getChildNodes(), baseFolder, basePathBuilder);
+            setThumbs(builder, childNode.getChildNodes(), basePath, basePathBuilder);
             break;
           case "accessControls":
             setACLs(builder, childNode.getChildNodes());
@@ -395,12 +394,12 @@ public enum XmlConfigurationParser {
    * @param builder
    * @param childNodes list of thumb XML nodes
    * @param basePathBuilder
-   * @param baseFolder
+   * @param basePath
    * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
    * @throws java.io.IOException
    */
   @SuppressWarnings("deprecation")
-  private void setThumbs(Configuration.Builder builder, NodeList childNodes, String baseFolder, IBasePathBuilder basePathBuilder) throws ConnectorException, IOException {
+  private void setThumbs(Configuration.Builder builder, NodeList childNodes, Path basePath, IBasePathBuilder basePathBuilder) throws ConnectorException, IOException {
     for (int i = 0, j = childNodes.getLength(); i < j; i++) {
       Node childNode = childNodes.item(i);
       switch (childNode.getNodeName()) {
@@ -412,12 +411,12 @@ public enum XmlConfigurationParser {
           break;
         case "directory":
           String thumbsDir = nullNodeToString(childNode);
-          Path file = Paths.get(baseFolder, thumbsDir.replace(Constants.BASE_DIR_PLACEHOLDER, ""));
+          Path file = basePath.getFileSystem().getPath(basePath.toString(), thumbsDir.replace(Constants.BASE_DIR_PLACEHOLDER, ""));
           if (file == null) {
             throw new ConnectorException(ConnectorError.FOLDER_NOT_FOUND,
                     "Thumbs directory could not be created using specified path.");
           }
-          builder.thumbsPath(Files.createDirectories(file).toString());
+          builder.thumbsPath(Files.createDirectories(file));
           break;
         case "directAccess":
           builder.thumbsDirectAccess(Boolean.parseBoolean(nullNodeToString(childNode)));
@@ -517,12 +516,12 @@ public enum XmlConfigurationParser {
     url = basePathBuilder.getBaseUrl() + url.replace(Constants.BASE_URL_PLACEHOLDER, "");
     url = PathUtils.normalizeUrl(url);
 
-    Path p = Paths.get(basePathBuilder.getBasePath(), path.replace(Constants.BASE_DIR_PLACEHOLDER, ""));
+    Path p = basePathBuilder.getBasePath().getFileSystem().getPath(basePathBuilder.getBasePath().toString(), path.replace(Constants.BASE_DIR_PLACEHOLDER, ""));
     if (!p.isAbsolute()) {
       throw new ConnectorException(ConnectorError.FOLDER_NOT_FOUND,
               "Resource directory could not be created using specified path.");
     }
-    return builder.url(url).path(Files.createDirectories(p).toString()).build();
+    return builder.url(url).path(Files.createDirectories(p)).build();
   }
 
   /**

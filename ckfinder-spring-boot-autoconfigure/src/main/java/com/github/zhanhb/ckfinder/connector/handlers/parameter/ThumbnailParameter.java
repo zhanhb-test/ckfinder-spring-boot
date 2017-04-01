@@ -31,6 +31,6 @@ public class ThumbnailParameter extends Parameter {
   /**
    * Full path to the thumbnail.
    */
-  private String fullCurrentPath;
+  private Path fullCurrentPath;
 
 }

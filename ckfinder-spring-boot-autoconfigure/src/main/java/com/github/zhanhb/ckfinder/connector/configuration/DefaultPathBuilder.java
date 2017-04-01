@@ -11,8 +11,10 @@
  */
 package com.github.zhanhb.ckfinder.connector.configuration;
 
+import java.nio.file.Path;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NonNull;
 
 /**
  * Path builder that creates default values of base directory and baseURL.
@@ -21,7 +23,9 @@ import lombok.Getter;
 @Getter
 public class DefaultPathBuilder implements IBasePathBuilder {
 
-  private final String basePath;
+  @NonNull
+  private final Path basePath;
+  @NonNull
   private final String baseUrl;
 
 }

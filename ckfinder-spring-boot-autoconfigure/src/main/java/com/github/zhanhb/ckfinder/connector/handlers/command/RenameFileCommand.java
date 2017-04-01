@@ -24,7 +24,6 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
@@ -97,9 +96,9 @@ public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> 
       return ConnectorError.INVALID_REQUEST;
     }
 
-    String dirPath = param.getType().getPath();
-    Path file = Paths.get(dirPath, param.getCurrentFolder(), param.getFileName());
-    Path newFile = Paths.get(dirPath, param.getCurrentFolder(), param.getNewFileName());
+    Path dirPath = param.getType().getPath();
+    Path file = getPath(dirPath, param.getCurrentFolder(), param.getFileName());
+    Path newFile = getPath(dirPath, param.getCurrentFolder(), param.getNewFileName());
 
     try {
       Files.move(file, newFile);
@@ -126,10 +125,10 @@ public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> 
    * @throws java.io.IOException
    */
   private void renameThumb(RenameFileParameter param, IConfiguration configuration) throws IOException {
-    Path thumbFile = Paths.get(configuration.getThumbsPath(),
+    Path thumbFile = getPath(configuration.getThumbsPath(),
             param.getType().getName(), param.getCurrentFolder(),
             param.getFileName());
-    Path newThumbFile = Paths.get(configuration.getThumbsPath(),
+    Path newThumbFile = getPath(configuration.getThumbsPath(),
             param.getType().getName(), param.getCurrentFolder(),
             param.getNewFileName());
 

@@ -13,15 +13,17 @@ package com.github.zhanhb.ckfinder.connector.plugins;
 
 import com.github.zhanhb.ckfinder.connector.data.FileUploadEvent;
 import com.github.zhanhb.ckfinder.connector.data.FileUploadListener;
+import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import javax.imageio.ImageIO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.coobird.thumbnailator.Thumbnails;
-import net.coobird.thumbnailator.name.Rename;
 import org.springframework.core.io.InputStreamSource;
 
 @RequiredArgsConstructor
@@ -35,13 +37,21 @@ public class WatermarkProcessor implements FileUploadListener {
     try {
       final Path originalFile = event.getFile();
       final WatermarkPosition position = new WatermarkPosition(settings.getMarginBottom(), settings.getMarginRight());
+      String format = FileUtils.getFileExtension(originalFile.getFileName().toString());
       BufferedImage watermark = getWatermarkImage(settings);
       if (watermark != null) {
-        Thumbnails.of(originalFile.toFile())
-                .watermark(position, watermark, settings.getTransparency())
-                .scale(1)
-                .outputQuality(settings.getQuality())
-                .toFiles(Rename.NO_CHANGE);
+        BufferedImage image;
+        try (InputStream in = Files.newInputStream(originalFile)) {
+          image = ImageIO.read(in);
+        }
+        try (OutputStream out = Files.newOutputStream(originalFile)) {
+          Thumbnails.of(image)
+                  .watermark(position, watermark, settings.getTransparency())
+                  .scale(1)
+                  .outputQuality(settings.getQuality())
+                  .outputFormat(format)
+                  .toOutputStream(out);
+        }
       }
     } catch (Exception ex) {
       // only log error if watermark is not created
