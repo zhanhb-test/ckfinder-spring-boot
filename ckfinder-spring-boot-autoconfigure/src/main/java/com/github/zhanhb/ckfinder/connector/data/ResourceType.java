@@ -44,6 +44,11 @@ public class ResourceType {
   private final long maxSize;
 
   /**
+   * resource directory.
+   */
+  private final Path thumbnailPath;
+
+  /**
    * list of allowed extensions in resource (separated with comma).
    */
   private final String allowedExtensions;

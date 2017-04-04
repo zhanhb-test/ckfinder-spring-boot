@@ -159,7 +159,7 @@ public class CopyFilesCommand extends ErrorListXmlCommand<CopyFilesParameter> im
         continue;
       }
       param.filesCopiedPlus();
-      copyThumb(file, sourceFile.relativize(destFile), configuration);
+      copyThumb(file, sourceFile.relativize(destFile));
     }
     param.setAddResultNode(true);
     if (param.hasError()) {
@@ -203,18 +203,19 @@ public class CopyFilesCommand extends ErrorListXmlCommand<CopyFilesParameter> im
    *
    * @param file file to copy.
    * @param relation
-   * @param configuration
    */
-  private void copyThumb(FilePostParam file, Path relation, IConfiguration configuration) {
-    Path sourceThumbFile = getPath(configuration.getThumbsPath(),
-            file.getType().getName(), file.getFolder(), file.getName());
-    Path destThumbFile = sourceThumbFile.resolve(relation).normalize();
+  private void copyThumb(FilePostParam file, Path relation) {
+    Path thumbnailPath = file.getType().getThumbnailPath();
+    if (thumbnailPath != null) {
+      Path sourceThumbFile = getPath(thumbnailPath, file.getFolder(), file.getName());
+      Path destThumbFile = sourceThumbFile.resolve(relation).normalize();
 
-    log.debug("copy thumb from '{}' to '{}'", sourceThumbFile, destThumbFile);
-    try {
-      Files.copy(sourceThumbFile, destThumbFile, StandardCopyOption.REPLACE_EXISTING);
-    } catch (IOException ex) {
-      log.error("{}", ex.getMessage());
+      log.debug("copy thumb from '{}' to '{}'", sourceThumbFile, destThumbFile);
+      try {
+        Files.copy(sourceThumbFile, destThumbFile, StandardCopyOption.REPLACE_EXISTING);
+      } catch (IOException ex) {
+        log.error("{}", ex.getMessage());
+      }
     }
   }
 

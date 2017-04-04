@@ -114,7 +114,7 @@ public class ThumbnailCommand extends Command<ThumbnailParameter> {
    * @throws ConnectorException when validation fails.
    */
   private void validate(ThumbnailParameter param, IConfiguration configuration) throws ConnectorException {
-    if (!configuration.isThumbsEnabled()) {
+    if (configuration.getThumbnail() == null) {
       param.throwException(ConnectorError.THUMBNAILS_DISABLED);
     }
 
@@ -136,8 +136,7 @@ public class ThumbnailCommand extends Command<ThumbnailParameter> {
       param.throwException(ConnectorError.FILE_NOT_FOUND);
     }
 
-    log.debug("configuration thumbsPath: {}", configuration.getThumbsPath());
-    Path fullCurrentDir = getPath(configuration.getThumbsPath(), param.getType().getName(), param.getCurrentFolder());
+    Path fullCurrentDir = getPath(param.getType().getThumbnailPath(), param.getCurrentFolder());
     log.debug("typeThumbDir: {}", fullCurrentDir);
 
     try {
@@ -174,7 +173,7 @@ public class ThumbnailCommand extends Command<ThumbnailParameter> {
         param.throwException(ConnectorError.FILE_NOT_FOUND);
       }
       try {
-        boolean success = ImageUtils.createThumb(orginFile, thumbFile, configuration);
+        boolean success = ImageUtils.createThumb(orginFile, thumbFile, configuration.getThumbnail());
         if (!success) {
           param.throwException(ConnectorError.FILE_NOT_FOUND);
         }

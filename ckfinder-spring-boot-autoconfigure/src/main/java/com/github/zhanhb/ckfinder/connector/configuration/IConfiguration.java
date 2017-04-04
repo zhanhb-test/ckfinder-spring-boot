@@ -13,10 +13,10 @@ package com.github.zhanhb.ckfinder.connector.configuration;
 
 import com.github.zhanhb.ckfinder.connector.data.ResourceType;
 import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -75,53 +75,12 @@ public interface IConfiguration {
   public boolean isEnabled();
 
   /**
-   * check if thums are enabled.
+   * get the thumbnail properties, null if thumbnail is disabled.
    *
-   * @return true if thums are enabled
+   * @return the thumbnail properties
    */
-  public boolean isThumbsEnabled();
-
-  /**
-   * gets url to thumbs dir(path from baseUrl).
-   *
-   * @return thumbs url
-   */
-  public String getThumbsUrl();
-
-  /**
-   * gets path to thumbs directory.
-   *
-   * @return thumbs directory
-   */
-  public Path getThumbsPath();
-
-  /**
-   * gets thumbs quality.
-   *
-   * @return thumbs quality
-   */
-  public float getThumbsQuality();
-
-  /**
-   * checks if thumbs are accessed direct.
-   *
-   * @return true if thumbs can be accessed directly
-   */
-  public boolean isThumbsDirectAccess();
-
-  /**
-   * gets max width of thumb.
-   *
-   * @return max width of thumb
-   */
-  public int getMaxThumbWidth();
-
-  /**
-   * gets max height of thumb.
-   *
-   * @return max height of thumb
-   */
-  public int getMaxThumbHeight();
+  @Nullable
+  public Thumbnail getThumbnail();
 
   /**
    * check if dirname matches configuration hidden folder regex.

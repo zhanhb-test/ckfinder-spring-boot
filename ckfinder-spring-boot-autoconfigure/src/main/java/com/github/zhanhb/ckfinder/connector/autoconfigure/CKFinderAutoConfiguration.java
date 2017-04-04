@@ -9,6 +9,7 @@ import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
 import com.github.zhanhb.ckfinder.connector.configuration.License;
 import com.github.zhanhb.ckfinder.connector.configuration.LicenseFactory;
 import com.github.zhanhb.ckfinder.connector.configuration.Plugin;
+import com.github.zhanhb.ckfinder.connector.configuration.Thumbnail;
 import com.github.zhanhb.ckfinder.connector.data.AccessControlLevel;
 import com.github.zhanhb.ckfinder.connector.data.ResourceType;
 import com.github.zhanhb.ckfinder.connector.plugins.FileEditorPlugin;
@@ -153,18 +154,19 @@ public class CKFinderAutoConfiguration {
       if (properties.getDefaultResourceTypes() != null) {
         builder.defaultResourceTypes(Arrays.asList(properties.getDefaultResourceTypes()));
       }
-      if (properties.getTypes() != null) {
-        setTypes(builder, basePathBuilder, properties.getTypes());
-      }
       if (properties.getUserRoleSessionVar() != null) {
         builder.userRoleName(properties.getUserRoleSessionVar());
       }
       builder.accessControl(defaultAccessControl);
-      setThumbs(properties.getThumbs(), basePathBuilder, builder);
-      builder.disallowUnsafeCharacters(properties.isDisallowUnsafeCharacters())
+      Thumbnail thumbnail = createThumbs(properties.getThumbs(), basePathBuilder);
+      builder.thumbnail(thumbnail)
+              .disallowUnsafeCharacters(properties.isDisallowUnsafeCharacters())
               .checkDoubleFileExtensions(properties.isCheckDoubleExtension())
               .checkSizeAfterScaling(properties.isCheckSizeAfterScaling())
               .secureImageUploads(properties.isSecureImageUploads());
+      if (properties.getTypes() != null) {
+        setTypes(builder, basePathBuilder, properties.getTypes(), thumbnail);
+      }
       if (properties.getHtmlExtensions() != null) {
         builder.htmlExtensions(Arrays.asList(properties.getHtmlExtensions()));
       }
@@ -181,47 +183,51 @@ public class CKFinderAutoConfiguration {
 
     @SuppressWarnings("deprecation")
     private void setTypes(com.github.zhanhb.ckfinder.connector.configuration.Configuration.Builder builder,
-            IBasePathBuilder basePathBuilder, Map<String, CKFinderProperties.Type> types) throws IOException {
+            IBasePathBuilder basePathBuilder, Map<String, CKFinderProperties.Type> types,
+            Thumbnail thumbnail) throws IOException {
       Path basePath = basePathBuilder.getBasePath();
       String baseUrl = basePathBuilder.getBaseUrl();
       for (Map.Entry<String, CKFinderProperties.Type> entry : types.entrySet()) {
         final String typeName = entry.getKey();
         CKFinderProperties.Type type = entry.getValue();
         Assert.hasText(typeName, "Resource type name should not be empty");
-        ResourceType.Builder resourceTypeBuilder = ResourceType.builder()
+        ResourceType.Builder resourceType = ResourceType.builder()
                 .name(typeName);
 
         if (type.getAllowedExtensions() != null) {
-          resourceTypeBuilder.allowedExtensions(toString(type.getAllowedExtensions()));
+          resourceType.allowedExtensions(toString(type.getAllowedExtensions()));
         }
         if (type.getDeniedExtensions() != null) {
-          resourceTypeBuilder.deniedExtensions(toString(type.getDeniedExtensions()));
+          resourceType.deniedExtensions(toString(type.getDeniedExtensions()));
         }
-        resourceTypeBuilder.maxSize(type.getMaxSize());
         String path = StringUtils.hasLength(type.getDirectory()) ? type.getDirectory() : typeName.toLowerCase();
         String url = StringUtils.hasLength(type.getUrl()) ? type.getUrl() : typeName.toLowerCase();
+        path = path.replace(Constants.BASE_DIR_PLACEHOLDER, "");
+        url = url.replace(Constants.BASE_URL_PLACEHOLDER, "");
 
-        resourceTypeBuilder.path(Files.createDirectories(basePath.getFileSystem().getPath(basePath.toString(), path.replace(Constants.BASE_DIR_PLACEHOLDER, ""))));
-        resourceTypeBuilder.url(PathUtils.normalizeUrl(baseUrl + url.replace(Constants.BASE_URL_PLACEHOLDER, "")));
-
-        builder.type(typeName, resourceTypeBuilder.build());
+        builder.type(typeName, resourceType.maxSize(type.getMaxSize())
+                .path(Files.createDirectories(getPath(basePath, path)))
+                .url(PathUtils.normalizeUrl(baseUrl + url))
+                .thumbnailPath(getPath(thumbnail != null ? thumbnail.getPath() : null, path)).build());
       }
     }
 
     @SuppressWarnings("deprecation")
-    private void setThumbs(CKFinderProperties.Thumbs thumbs, IBasePathBuilder basePathBuilder,
-            com.github.zhanhb.ckfinder.connector.configuration.Configuration.Builder builder) {
-      if (thumbs != null) {
+    private Thumbnail createThumbs(CKFinderProperties.Thumbs thumbs, IBasePathBuilder basePathBuilder) {
+      if (thumbs != null && thumbs.isEnabled()) {
         Path basePath = basePathBuilder.getBasePath();
         String baseUrl = basePathBuilder.getBaseUrl();
-        builder.thumbsEnabled(thumbs.isEnabled())
-                .thumbsPath(basePath.getFileSystem().getPath(basePath.toString(), thumbs.getDirectory().replace(Constants.BASE_DIR_PLACEHOLDER, "")))
-                .thumbsDirectAccess(thumbs.isDirectAccess())
-                .thumbsUrl(PathUtils.normalizeUrl(baseUrl + thumbs.getUrl().replace(Constants.BASE_URL_PLACEHOLDER, "")))
-                .maxThumbHeight(thumbs.getMaxHeight())
-                .maxThumbWidth(thumbs.getMaxWidth())
-                .imgQuality(thumbs.getQuality());
+        String url = PathUtils.normalizeUrl(baseUrl + thumbs.getUrl().replace(Constants.BASE_URL_PLACEHOLDER, ""));
+        return Thumbnail.builder()
+                .path(getPath(basePath, thumbs.getDirectory().replace(Constants.BASE_DIR_PLACEHOLDER, "")))
+                .directAccess(thumbs.isDirectAccess())
+                .url(url)
+                .maxHeight(thumbs.getMaxHeight())
+                .maxWidth(thumbs.getMaxWidth())
+                .quality(thumbs.getQuality())
+                .build();
       }
+      return null;
     }
 
     private LicenseFactory createLiceFactory(CKFinderProperties.License license) {
@@ -242,6 +248,10 @@ public class CKFinderAutoConfiguration {
         }
       }
       return new FixLicenseFactory(licenseBuilder.build());
+    }
+
+    private Path getPath(Path first, String... more) {
+      return first == null ? null : first.getFileSystem().getPath(first.toString(), more);
     }
 
   }

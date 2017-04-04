@@ -100,16 +100,18 @@ public class DeleteFilesCommand extends ErrorListXmlCommand<DeleteFilesParameter
 
       log.debug("prepare delete file '{}'", file);
       if (FileUtils.delete(file)) {
-        Path thumbFile = getPath(configuration.getThumbsPath(),
-                fileItem.getType().getName(), param.getCurrentFolder(), fileItem.getName());
         param.filesDeletedPlus();
+        Path thumbnailPath = fileItem.getType().getThumbnailPath();
+        if (thumbnailPath != null) {
+          Path thumbFile = getPath(thumbnailPath, param.getCurrentFolder(), fileItem.getName());
 
-        try {
-          log.debug("prepare delete thumb file '{}'", thumbFile);
-          FileUtils.delete(thumbFile);
-        } catch (Exception ignore) {
-          log.debug("delete thumb file '{}' failed", thumbFile);
-          // No errors if we are not able to delete the thumb.
+          try {
+            log.debug("prepare delete thumb file '{}'", thumbFile);
+            FileUtils.delete(thumbFile);
+          } catch (Exception ignore) {
+            log.debug("delete thumb file '{}' failed", thumbFile);
+            // No errors if we are not able to delete the thumb.
+          }
         }
       } else { //If access is denied, report error and try to delete rest of files.
         param.appendError(fileItem, ConnectorError.ACCESS_DENIED);

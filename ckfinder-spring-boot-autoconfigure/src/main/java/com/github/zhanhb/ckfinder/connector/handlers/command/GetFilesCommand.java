@@ -12,6 +12,7 @@
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
+import com.github.zhanhb.ckfinder.connector.configuration.Thumbnail;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.GetFilesParameter;
@@ -128,9 +129,8 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
    * @return thumb attribute values
    */
   private String createThumbAttr(Path file, GetFilesParameter param, IConfiguration configuration) {
-    if (ImageUtils.isImageExtension(file) && isAddThumbsAttr(param, configuration)) {
-      Path thumbFile = getPath(configuration.getThumbsPath(),
-              param.getType().getName(), param.getCurrentFolder(),
+    if (ImageUtils.isImageExtension(file) && isAddThumbsAttr(param, configuration.getThumbnail())) {
+      Path thumbFile = getPath(param.getType().getThumbnailPath(), param.getCurrentFolder(),
               file.getFileName().toString());
       if (Files.exists(thumbFile)) {
         return file.getFileName().toString();
@@ -160,13 +160,11 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
    * Check if show thumbs or not (add attr to file node with thumb file name).
    *
    * @param param
-   * @param configuration
+   * @param thumbnail
    * @return true if show thumbs
    */
-  private boolean isAddThumbsAttr(GetFilesParameter param, IConfiguration configuration) {
-    return configuration.isThumbsEnabled()
-            && (configuration.isThumbsDirectAccess()
-            || requestShowThumbs(param));
+  private boolean isAddThumbsAttr(GetFilesParameter param, Thumbnail thumbnail) {
+    return thumbnail != null && (thumbnail.isDirectAccess() || requestShowThumbs(param));
   }
 
   /**

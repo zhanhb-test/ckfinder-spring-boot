@@ -14,13 +14,13 @@ package com.github.zhanhb.ckfinder.connector.configuration;
 import com.github.zhanhb.ckfinder.connector.data.ResourceType;
 import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
 import com.github.zhanhb.ckfinder.connector.utils.PathUtils;
-import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
+import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import lombok.Builder;
 import lombok.NonNull;
@@ -32,7 +32,6 @@ import lombok.experimental.NonFinal;
 @SuppressWarnings({
   "CollectionWithoutInitialCapacity",
   "ReturnOfCollectionOrArrayField",
-  "FinalMethod",
   "FinalClass",
   "PublicInnerClass"
 })
@@ -46,14 +45,8 @@ public class Configuration implements IConfiguration {
   private float imgQuality;
   @Singular
   private Map<String, ResourceType> types;
-  private boolean thumbsEnabled;
-  private String thumbsUrl;
-  @NonNull
-  private Path thumbsPath;
-  private boolean thumbsDirectAccess;
-  private int maxThumbHeight;
-  private int maxThumbWidth;
-  private float thumbsQuality;
+  @Nullable
+  private Thumbnail thumbnail;
   @Singular
   private List<String> hiddenFolders;
   @Singular
@@ -62,6 +55,7 @@ public class Configuration implements IConfiguration {
   private boolean forceAscii;
   private boolean checkSizeAfterScaling;
   private String userRoleName;
+  @Nullable
   private String publicPluginNames;
   private boolean secureImageUploads;
   @Singular
@@ -142,10 +136,6 @@ public class Configuration implements IConfiguration {
       imgWidth = Constants.DEFAULT_IMG_WIDTH;
       imgHeight = Constants.DEFAULT_IMG_HEIGHT;
       imgQuality = Constants.DEFAULT_IMG_QUALITY;
-      thumbsUrl = "";
-      thumbsQuality = Constants.DEFAULT_IMG_QUALITY;
-      maxThumbHeight = Constants.DEFAULT_THUMB_MAX_HEIGHT;
-      maxThumbWidth = Constants.DEFAULT_THUMB_MAX_WIDTH;
       userRoleName = "";
     }
 

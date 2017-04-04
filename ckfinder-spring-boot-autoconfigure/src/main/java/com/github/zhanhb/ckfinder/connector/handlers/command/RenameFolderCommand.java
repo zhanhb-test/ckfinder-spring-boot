@@ -79,7 +79,7 @@ public class RenameFolderCommand extends BaseXmlCommand<RenameFolderParameter> i
     }
     try {
       Files.move(dir, newDir);
-      renameThumb(param, configuration);
+      renameThumb(param);
     } catch (IOException ex) {
       param.throwException(ConnectorError.ACCESS_DENIED);
     }
@@ -94,17 +94,17 @@ public class RenameFolderCommand extends BaseXmlCommand<RenameFolderParameter> i
    * renames thumb folder.
    *
    * @param param
-   * @param configuration
    * @throws java.io.IOException
    */
-  private void renameThumb(RenameFolderParameter param, IConfiguration configuration) throws IOException {
-    Path thumbDir = getPath(configuration.getThumbsPath(),
-            param.getType().getName(), param.getCurrentFolder());
-    Path newThumbDir = getPath(configuration.getThumbsPath(),
-            param.getType().getName(), param.getNewFolderPath());
-    try {
-      Files.move(thumbDir, newThumbDir);
-    } catch (IOException ex) {
+  private void renameThumb(RenameFolderParameter param) throws IOException {
+    Path thumbnailPath = param.getType().getThumbnailPath();
+    if (thumbnailPath != null) {
+      Path thumbDir = getPath(thumbnailPath, param.getCurrentFolder());
+      Path newThumbDir = getPath(param.getType().getThumbnailPath(), param.getNewFolderPath());
+      try {
+        Files.move(thumbDir, newThumbDir);
+      } catch (IOException ex) {
+      }
     }
   }
 

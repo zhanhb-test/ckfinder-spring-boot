@@ -103,7 +103,7 @@ public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> 
     try {
       Files.move(file, newFile);
       param.setRenamed(true);
-      renameThumb(param, configuration);
+      renameThumb(param);
       return null;
     } catch (NoSuchFileException ex) {
       return ConnectorError.FILE_NOT_FOUND;
@@ -124,17 +124,18 @@ public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> 
    * @param configuration
    * @throws java.io.IOException
    */
-  private void renameThumb(RenameFileParameter param, IConfiguration configuration) throws IOException {
-    Path thumbFile = getPath(configuration.getThumbsPath(),
-            param.getType().getName(), param.getCurrentFolder(),
-            param.getFileName());
-    Path newThumbFile = getPath(configuration.getThumbsPath(),
-            param.getType().getName(), param.getCurrentFolder(),
-            param.getNewFileName());
+  private void renameThumb(RenameFileParameter param) throws IOException {
+    Path thumbnailPath = param.getType().getThumbnailPath();
+    if (thumbnailPath != null) {
+      Path thumbFile = getPath(thumbnailPath, param.getCurrentFolder(),
+              param.getFileName());
+      Path newThumbFile = getPath(param.getType().getThumbnailPath(), param.getCurrentFolder(),
+              param.getNewFileName());
 
-    try {
-      Files.move(thumbFile, newThumbFile);
-    } catch (IOException ex) {
+      try {
+        Files.move(thumbFile, newThumbFile);
+      } catch (IOException ex) {
+      }
     }
   }
 

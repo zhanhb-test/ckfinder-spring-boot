@@ -97,6 +97,7 @@ public enum XmlConfigurationParser {
     doc.normalize();
     License.Builder licenseBuilder = License.builder().name("").key("");
     Node node = doc.getFirstChild();
+    Thumbnail thumbnail = null;
     if (node != null) {
       NodeList nodeList = node.getChildNodes();
       for (int i = 0; i < nodeList.getLength(); i++) {
@@ -135,7 +136,7 @@ public enum XmlConfigurationParser {
             }
             break;
           case "thumbs":
-            setThumbs(builder, childNode.getChildNodes(), basePath, basePathBuilder);
+            thumbnail = createThumbs(childNode.getChildNodes(), basePath, basePathBuilder);
             break;
           case "accessControls":
             setACLs(builder, childNode.getChildNodes());
@@ -192,7 +193,7 @@ public enum XmlConfigurationParser {
       }
     }
     builder.licenseFactory(new FixLicenseFactory(licenseBuilder.build()));
-    setTypes(builder, doc, basePathBuilder);
+    setTypes(builder.thumbnail(thumbnail), doc, basePathBuilder, thumbnail);
   }
 
   /**
@@ -391,7 +392,6 @@ public enum XmlConfigurationParser {
   /**
    * creates thumb configuration from XML.
    *
-   * @param builder
    * @param childNodes list of thumb XML nodes
    * @param basePathBuilder
    * @param basePath
@@ -399,52 +399,55 @@ public enum XmlConfigurationParser {
    * @throws java.io.IOException
    */
   @SuppressWarnings("deprecation")
-  private void setThumbs(Configuration.Builder builder, NodeList childNodes, Path basePath, IBasePathBuilder basePathBuilder) throws ConnectorException, IOException {
+  private Thumbnail createThumbs(NodeList childNodes, Path basePath, IBasePathBuilder basePathBuilder) throws ConnectorException, IOException {
+    boolean enabled = true;
+    Thumbnail.Builder thumbnail = Thumbnail.builder();
     for (int i = 0, j = childNodes.getLength(); i < j; i++) {
       Node childNode = childNodes.item(i);
       switch (childNode.getNodeName()) {
         case "enabled":
-          builder.thumbsEnabled(Boolean.parseBoolean(nullNodeToString(childNode)));
+          enabled = Boolean.parseBoolean(nullNodeToString(childNode));
           break;
         case "url":
-          builder.thumbsUrl(PathUtils.normalizeUrl(basePathBuilder.getBaseUrl() + nullNodeToString(childNode).replace(Constants.BASE_URL_PLACEHOLDER, "")));
+          thumbnail.url(PathUtils.normalizeUrl(basePathBuilder.getBaseUrl() + nullNodeToString(childNode).replace(Constants.BASE_URL_PLACEHOLDER, "")));
           break;
         case "directory":
-          String thumbsDir = nullNodeToString(childNode);
-          Path file = basePath.getFileSystem().getPath(basePath.toString(), thumbsDir.replace(Constants.BASE_DIR_PLACEHOLDER, ""));
+          String thumbsDir = nullNodeToString(childNode).replace(Constants.BASE_DIR_PLACEHOLDER, "");
+          Path file = getPath(basePath, thumbsDir);
           if (file == null) {
             throw new ConnectorException(ConnectorError.FOLDER_NOT_FOUND,
                     "Thumbs directory could not be created using specified path.");
           }
-          builder.thumbsPath(Files.createDirectories(file));
+          thumbnail.path(Files.createDirectories(file));
           break;
         case "directAccess":
-          builder.thumbsDirectAccess(Boolean.parseBoolean(nullNodeToString(childNode)));
+          thumbnail.directAccess(Boolean.parseBoolean(nullNodeToString(childNode)));
           break;
         case "maxHeight":
           String width = nullNodeToString(childNode);
           width = width.replaceAll("\\D", "");
           try {
-            builder.maxThumbHeight(Integer.valueOf(width));
+            thumbnail.maxHeight(Integer.valueOf(width));
           } catch (NumberFormatException e) {
-            builder.maxThumbHeight(DEFAULT_THUMB_MAX_WIDTH);
+            thumbnail.maxHeight(DEFAULT_THUMB_MAX_WIDTH);
           }
           break;
         case "maxWidth":
           width = nullNodeToString(childNode);
           width = width.replaceAll("\\D", "");
           try {
-            builder.maxThumbWidth(Integer.valueOf(width));
+            thumbnail.maxWidth(Integer.valueOf(width));
           } catch (NumberFormatException e) {
-            builder.maxThumbWidth(DEFAULT_IMG_WIDTH);
+            thumbnail.maxWidth(DEFAULT_IMG_WIDTH);
           }
           break;
         case "quality":
           String quality = nullNodeToString(childNode);
           quality = quality.replaceAll("\\D", "");
-          builder.thumbsQuality(adjustQuality(quality));
+          thumbnail.quality(adjustQuality(quality));
       }
     }
+    return enabled ? thumbnail.build() : null;
   }
 
   /**
@@ -457,7 +460,8 @@ public enum XmlConfigurationParser {
    * @throws java.io.IOException
    * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
    */
-  private void setTypes(Configuration.Builder builder, Document doc, IBasePathBuilder basePathBuilder)
+  private void setTypes(Configuration.Builder builder, Document doc, IBasePathBuilder basePathBuilder,
+          Thumbnail thumbnail)
           throws IOException, ConnectorException {
     NodeList list = doc.getElementsByTagName("type");
 
@@ -465,7 +469,7 @@ public enum XmlConfigurationParser {
       Element element = (Element) list.item(i);
       String name = element.getAttribute("name");
       if (name != null && !name.isEmpty()) {
-        ResourceType resourceType = createTypeFromXml(name, element.getChildNodes(), basePathBuilder);
+        ResourceType resourceType = createTypeFromXml(name, element.getChildNodes(), basePathBuilder, thumbnail);
         builder.type(name, resourceType);
       }
     }
@@ -484,7 +488,8 @@ public enum XmlConfigurationParser {
    */
   @SuppressWarnings("deprecation")
   private ResourceType createTypeFromXml(String typeName,
-          NodeList childNodes, IBasePathBuilder basePathBuilder) throws IOException, ConnectorException {
+          NodeList childNodes, IBasePathBuilder basePathBuilder, Thumbnail thumbnail)
+          throws IOException, ConnectorException {
     ResourceType.Builder builder = ResourceType.builder().name(typeName);
     String path = typeName.toLowerCase();
     String url = typeName.toLowerCase();
@@ -515,13 +520,14 @@ public enum XmlConfigurationParser {
     }
     url = basePathBuilder.getBaseUrl() + url.replace(Constants.BASE_URL_PLACEHOLDER, "");
     url = PathUtils.normalizeUrl(url);
+    path = path.replace(Constants.BASE_DIR_PLACEHOLDER, "");
 
-    Path p = basePathBuilder.getBasePath().getFileSystem().getPath(basePathBuilder.getBasePath().toString(), path.replace(Constants.BASE_DIR_PLACEHOLDER, ""));
+    Path p = getPath(basePathBuilder.getBasePath(), path);
     if (!p.isAbsolute()) {
       throw new ConnectorException(ConnectorError.FOLDER_NOT_FOUND,
               "Resource directory could not be created using specified path.");
     }
-    return builder.url(url).path(Files.createDirectories(p)).build();
+    return builder.url(url).path(Files.createDirectories(p)).thumbnailPath(getPath(thumbnail != null ? thumbnail.getPath() : null, path)).build();
   }
 
   /**
@@ -667,6 +673,10 @@ public enum XmlConfigurationParser {
       }
     }
     return builder.build();
+  }
+
+  private Path getPath(Path first, String... more) {
+    return first == null ? null : first.getFileSystem().getPath(first.toString(), more);
   }
 
 }

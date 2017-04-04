@@ -56,7 +56,7 @@ public class PluginRegister {
   }
 
   String getNames() {
-    return names.stream().collect(Collectors.joining(","));
+    return names.isEmpty() ? null : names.stream().collect(Collectors.joining(","));
   }
 
   CommandFactory buildCommandFactory() {

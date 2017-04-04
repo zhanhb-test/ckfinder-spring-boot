@@ -12,6 +12,7 @@
 package com.github.zhanhb.ckfinder.connector.utils;
 
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
+import com.github.zhanhb.ckfinder.connector.configuration.Thumbnail;
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -74,11 +75,11 @@ public class ImageUtils {
    *
    * @param orginFile origin image file.
    * @param file file to save thumb
-   * @param conf connector configuration
+   * @param thumbnail connector thumbnail properties
    * @return
    * @throws IOException when error occurs.
    */
-  public static boolean createThumb(Path orginFile, Path file, IConfiguration conf)
+  public static boolean createThumb(Path orginFile, Path file, Thumbnail thumbnail)
           throws IOException {
     log.debug("createThumb");
     BufferedImage image;
@@ -87,14 +88,14 @@ public class ImageUtils {
     }
     if (image != null) {
       Dimension dimension = createThumbDimension(image,
-              conf.getMaxThumbWidth(), conf.getMaxThumbHeight());
+              thumbnail.getMaxWidth(), thumbnail.getMaxHeight());
       FileUtils.createPath(file, true);
       if (image.getHeight() <= dimension.height
               && image.getWidth() <= dimension.width) {
         writeUntouchedImage(orginFile, file);
       } else {
         resizeImage(image, dimension.width, dimension.height,
-                conf.getThumbsQuality(), file);
+                thumbnail.getQuality(), file);
       }
       return true;
     } else {

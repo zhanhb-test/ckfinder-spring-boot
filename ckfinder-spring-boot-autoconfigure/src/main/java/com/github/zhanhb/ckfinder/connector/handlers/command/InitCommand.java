@@ -13,6 +13,7 @@ package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
 import com.github.zhanhb.ckfinder.connector.configuration.License;
+import com.github.zhanhb.ckfinder.connector.configuration.Thumbnail;
 import com.github.zhanhb.ckfinder.connector.data.InitCommandEvent;
 import com.github.zhanhb.ckfinder.connector.data.ResourceType;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
@@ -71,37 +72,26 @@ public class InitCommand extends XmlCommand<InitParameter> {
    * @param configuration
    */
   private void createConnectorData(Connector.Builder rootElement, InitParameter param, IConfiguration configuration) {
-    // connector info
-    ConnectorInfo.Builder element = ConnectorInfo.builder();
-    element.enabled(configuration.isEnabled());
+    Thumbnail thumbnail = configuration.getThumbnail();
     License license = configuration.getLicense(param.getRequest());
-    element.licenseName(getLicenseName(license));
-    element.licenseKey(createLicenseKey(license.getKey()));
-    element.thumbsEnabled(configuration.isThumbsEnabled());
-    element.uploadCheckImages(!configuration.isCheckSizeAfterScaling());
-    if (configuration.isThumbsEnabled()) {
-      element.thumbsUrl(PathUtils.addSlashToEnd(configuration.getThumbsUrl()));
-      element.thumbsDirectAccess(configuration.isThumbsDirectAccess());
-      element.thumbsWidth(configuration.getMaxThumbWidth());
-      element.thumbsHeight(configuration.getMaxThumbHeight());
-    }
-    element.imgWidth(configuration.getImgWidth());
-    element.imgHeight(configuration.getImgHeight());
-    String plugins = getPlugins(configuration);
-    if (plugins.length() > 0) {
-      element.plugins(plugins);
+
+    // connector info
+    ConnectorInfo.Builder element = ConnectorInfo.builder()
+            .enabled(configuration.isEnabled())
+            .licenseName(getLicenseName(license))
+            .licenseKey(createLicenseKey(license.getKey()))
+            .uploadCheckImages(!configuration.isCheckSizeAfterScaling())
+            .imgWidth(configuration.getImgWidth())
+            .imgHeight(configuration.getImgHeight())
+            .thumbsEnabled(thumbnail != null)
+            .plugins(configuration.getPublicPluginNames());
+    if (thumbnail != null) {
+      element.thumbsUrl(PathUtils.addSlashToEnd(thumbnail.getUrl()))
+              .thumbsDirectAccess(thumbnail.isDirectAccess())
+              .thumbsWidth(thumbnail.getMaxWidth())
+              .thumbsHeight(thumbnail.getMaxHeight());
     }
     rootElement.result(element.build());
-  }
-
-  /**
-   * gets plugins names.
-   *
-   * @param configuration
-   * @return plugins names.
-   */
-  private String getPlugins(IConfiguration configuration) {
-    return configuration.getPublicPluginNames();
   }
 
   /**
