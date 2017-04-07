@@ -18,17 +18,12 @@ import com.github.zhanhb.ckfinder.connector.handlers.parameter.ThumbnailParamete
 import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import com.github.zhanhb.ckfinder.connector.utils.ImageUtils;
+import com.github.zhanhb.ckfinder.download.ContentDisposition;
+import com.github.zhanhb.ckfinder.download.PathPartial;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.nio.file.attribute.FileTime;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.Locale;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletOutputStream;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -40,80 +35,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ThumbnailCommand extends Command<ThumbnailParameter> {
 
-  private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US)
-          .withZone(ZoneId.of("GMT"));
-
-  /**
-   * Gets mime type of image.
-   *
-   * @param sc the {@code ServletContext} object.
-   * @param response currect response object
-   * @param param
-   * @return mime type of the image.
-   */
-  private String getMimeTypeOfImage(ServletContext sc,
-          HttpServletResponse response, ThumbnailParameter param) {
-    String fileName = param.getFileName();
-    if (fileName != null && fileName.length() != 0) {
-      String fileExtension = FileUtils.getFileExtension(fileName);
-      if (fileExtension != null) {
-        String tempFileName = fileName.substring(0, fileName.lastIndexOf('.') + 1).concat(fileExtension.toLowerCase());
-        String mimeType = sc.getMimeType(tempFileName);
-        if (mimeType != null && mimeType.length() != 0) {
-          return mimeType;
-        }
-      }
-    }
-    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-    return null;
-  }
-
   @Override
   @SuppressWarnings("FinalMethod")
   final void execute(ThumbnailParameter param, HttpServletRequest request, HttpServletResponse response, IConfiguration configuration) throws ConnectorException, IOException {
-    validate(param, configuration);
-    createThumb(param, configuration);
-    response.setHeader("Cache-Control", "public");
-    String mimetype = getMimeTypeOfImage(request.getServletContext(), response, param);
-    if (mimetype != null) {
-      response.setContentType(mimetype);
-    }
-    response.addHeader("Content-Disposition",
-            ContentDisposition.getContentDisposition("attachment", param.getFileName()));
-    if (setResponseHeadersAfterCreatingFile(response, param)) {
-      try (ServletOutputStream out = response.getOutputStream()) {
-        Files.copy(param.getThumbFile(), out);
-      } catch (IOException e) {
-        log.error("", e);
-        response.sendError(HttpServletResponse.SC_FORBIDDEN);
-      }
-    } else {
-      response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-    }
-  }
-
-  @Override
-  protected ThumbnailParameter popupParams(HttpServletRequest request, IConfiguration configuration)
-          throws ConnectorException {
-    ThumbnailParameter param = doInitParam(new ThumbnailParameter(), request, configuration);
-    param.setFileName(request.getParameter("FileName"));
-    try {
-      param.setIfModifiedSince(request.getDateHeader("If-Modified-Since"));
-    } catch (IllegalArgumentException e) {
-      param.setIfModifiedSince(0);
-    }
-    param.setIfNoneMatch(request.getHeader("If-None-Match"));
-    return param;
-  }
-
-  /**
-   * Validates thumbnail file properties and current user access rights.
-   *
-   * @param param
-   * @param configuration
-   * @throws ConnectorException when validation fails.
-   */
-  private void validate(ThumbnailParameter param, IConfiguration configuration) throws ConnectorException {
     if (configuration.getThumbnail() == null) {
       param.throwException(ConnectorError.THUMBNAILS_DISABLED);
     }
@@ -136,34 +60,18 @@ public class ThumbnailCommand extends Command<ThumbnailParameter> {
       param.throwException(ConnectorError.FILE_NOT_FOUND);
     }
 
-    Path fullCurrentDir = getPath(param.getType().getThumbnailPath(), param.getCurrentFolder());
-    log.debug("typeThumbDir: {}", fullCurrentDir);
+    Path fullCurrentPath = getPath(param.getType().getThumbnailPath(), param.getCurrentFolder());
+    log.debug("typeThumbDir: {}", fullCurrentPath);
 
     try {
-      log.debug("{}", fullCurrentDir);
-      param.setFullCurrentPath(fullCurrentDir);
-      if (!Files.exists(fullCurrentDir)) {
-        Files.createDirectories(fullCurrentDir);
-      }
+      log.debug("ThumbnailCommand.createThumb({})", fullCurrentPath);
+      Files.createDirectories(fullCurrentPath);
     } catch (IOException e) {
       throw new ConnectorException(ConnectorError.ACCESS_DENIED, e);
     }
-
-  }
-
-  /**
-   * Creates thumbnail file if thumbnails are enabled and thumb file doesn't
-   * exists.
-   *
-   * @param param
-   * @param configuration
-   * @throws ConnectorException when thumbnail creation fails.
-   */
-  private void createThumb(ThumbnailParameter param, IConfiguration configuration) throws ConnectorException {
-    log.debug("ThumbnailCommand.createThumb({})", param.getFullCurrentPath());
-    Path thumbFile = getPath(param.getFullCurrentPath(), param.getFileName());
+    log.debug("", fullCurrentPath);
+    Path thumbFile = getPath(fullCurrentPath, param.getFileName());
     log.debug("thumbFile: {}", thumbFile);
-    param.setThumbFile(thumbFile);
 
     if (!Files.exists(thumbFile)) {
       Path orginFile = getPath(param.getType().getPath(),
@@ -177,7 +85,7 @@ public class ThumbnailCommand extends Command<ThumbnailParameter> {
         if (!success) {
           param.throwException(ConnectorError.FILE_NOT_FOUND);
         }
-      } catch (IOException e) {
+      } catch (IOException | ConnectorException e) {
         try {
           Files.deleteIfExists(thumbFile);
         } catch (IOException ex) {
@@ -187,40 +95,41 @@ public class ThumbnailCommand extends Command<ThumbnailParameter> {
       }
     }
 
+    response.setHeader("Cache-Control", "public");
+
+    try {
+      PartialHolder.INSTANCE.service(request, response, thumbFile);
+    } catch (UncheckedConnectorException ex) {
+      throw ex.getCause();
+    } catch (ServletException ex) {
+      throw new AssertionError(ex);
+    } catch (IOException ex) {
+      throw new ConnectorException(ConnectorError.ACCESS_DENIED, ex);
+    }
   }
 
-  /**
-   * Fills in response headers after creating file.
-   *
-   * @param response
-   * @param param
-   * @return true if continue returning thumb or false if break and send
-   * response code.
-   * @throws ConnectorException when access is denied.
-   */
-  private boolean setResponseHeadersAfterCreatingFile(HttpServletResponse response,
-          ThumbnailParameter param) throws ConnectorException {
-    // Set content size
-    Path file = getPath(param.getFullCurrentPath(), param.getFileName());
-    try {
-      BasicFileAttributes attr = Files.readAttributes(file, BasicFileAttributes.class);
-      FileTime lastModifiedTime = attr.lastModifiedTime();
-      String etag = "W/\"" + Long.toHexString(lastModifiedTime.toMillis()) + "-" + Long.toHexString(attr.size()) + '"';
-      Instant instant = lastModifiedTime.toInstant();
-      response.setHeader("Etag", etag);
-      response.setHeader("Last-Modified", FORMATTER.format(instant));
+  @Override
+  protected ThumbnailParameter popupParams(HttpServletRequest request, IConfiguration configuration)
+          throws ConnectorException {
+    ThumbnailParameter param = doInitParam(new ThumbnailParameter(), request, configuration);
+    param.setFileName(request.getParameter("FileName"));
+    return param;
+  }
 
-      if (etag.equals(param.getIfNoneMatch())
-              || lastModifiedTime.toMillis() <= param.getIfModifiedSince() + 1000L) {
-        return false;
-      }
+  @SuppressWarnings("UtilityClassWithoutPrivateConstructor")
+  private static class PartialHolder {
 
-      response.setContentLengthLong(attr.size());
+    static PathPartial INSTANCE;
 
-      return true;
-    } catch (IOException e) {
-      throw new ConnectorException(ConnectorError.ACCESS_DENIED, e);
+    static {
+      INSTANCE = PathPartial.builder()
+              .notFound(context -> {
+                throw new UncheckedConnectorException(ConnectorError.FILE_NOT_FOUND);
+              })
+              .contentDisposition(ContentDisposition.inline())
+              .build();
     }
+
   }
 
 }

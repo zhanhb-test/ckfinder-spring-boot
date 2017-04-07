@@ -14,6 +14,7 @@ package com.github.zhanhb.ckfinder.connector.utils;
 import com.github.zhanhb.ckfinder.connector.configuration.Constants;
 import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
 import com.github.zhanhb.ckfinder.connector.data.ResourceType;
+import com.github.zhanhb.ckfinder.download.URLEncoder;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.DirectoryStream;
@@ -46,9 +47,6 @@ public class FileUtils {
   private static final Pattern INVALID_FILENAME_PATTERN = Pattern.compile(Constants.INVALID_FILE_NAME_REGEX);
 
   private static final URLEncoder URI_COMPONENT = new URLEncoder("-_.*!'()~");
-  // https://tools.ietf.org/html/rfc5987#section-3.2.1
-  // we will encoding + for some browser will decode + to a space
-  private static final URLEncoder CONTENT_DISPOSITION = new URLEncoder("!#$&-.^_`|~");
 
   /**
    * Gets list of children folder or files for dir, according to searchDirectory
@@ -419,10 +417,6 @@ public class FileUtils {
 
   public static String encodeURIComponent(String fileName) {
     return URI_COMPONENT.encode(fileName);
-  }
-
-  public static String encodeContentDisposition(String fileName) {
-    return CONTENT_DISPOSITION.encode(fileName);
   }
 
   public static boolean isFolderNameValid(String folderName, IConfiguration configuration) {

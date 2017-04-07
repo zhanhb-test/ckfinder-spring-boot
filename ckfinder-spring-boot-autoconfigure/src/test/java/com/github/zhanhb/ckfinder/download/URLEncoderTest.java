@@ -1,4 +1,4 @@
-package com.github.zhanhb.ckfinder.connector.utils;
+package com.github.zhanhb.ckfinder.download;
 
 import com.google.common.base.Strings;
 import org.junit.Test;

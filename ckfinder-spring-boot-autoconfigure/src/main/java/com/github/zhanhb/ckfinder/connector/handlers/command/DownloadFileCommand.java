@@ -17,9 +17,12 @@ import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.DownloadFileParameter;
 import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
+import com.github.zhanhb.ckfinder.download.ContentDisposition;
+import com.github.zhanhb.ckfinder.download.ContentTypeResolver;
+import com.github.zhanhb.ckfinder.download.PathPartial;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -65,36 +68,17 @@ public class DownloadFileCommand extends Command<DownloadFileParameter> {
 
     Path file = getPath(param.getType().getPath(), param.getCurrentFolder(), param.getFileName());
 
-    long size;
-
-    try {
-      size = Files.size(file);
-    } catch (IOException ex) {
-      param.throwException(ConnectorError.FILE_NOT_FOUND);
-      return;
-    }
-
-    response.setContentLengthLong(size);
-
-    String mimetype = request.getServletContext().getMimeType(param.getFileName());
-    if (mimetype != null) {
-      if (mimetype.startsWith("text/") || mimetype.endsWith("/javascript")
-              || mimetype.endsWith("/xml")) {
-        mimetype += ";charset=UTF-8";
-      }
-      response.setContentType(mimetype);
-    } else {
-      response.setContentType("application/octet-stream");
-    }
-    response.setHeader("Content-Disposition",
-            ContentDisposition.getContentDisposition("attachment",
-                    param.getFileName()));
-
     response.setHeader("Cache-Control", "cache, must-revalidate");
     response.setHeader("Pragma", "public");
     response.setHeader("Expires", "0");
 
-    Files.copy(file, response.getOutputStream());
+    try {
+      PartialHolder.INSTANCE.service(request, response, file);
+    } catch (UncheckedConnectorException ex) {
+      throw ex.getCause();
+    } catch (ServletException ex) {
+      throw new AssertionError(ex);
+    }
   }
 
   /**
@@ -112,6 +96,33 @@ public class DownloadFileCommand extends Command<DownloadFileParameter> {
     // problem with showing filename when dialog window appear
     param.setFileName(request.getParameter("FileName"));
     return param;
+  }
+
+  @SuppressWarnings("UtilityClassWithoutPrivateConstructor")
+  private static class PartialHolder {
+
+    static PathPartial INSTANCE;
+
+    static {
+      ContentTypeResolver contentTypeResolver = ContentTypeResolver.getDefault();
+      INSTANCE = PathPartial.builder()
+              .contentType(context -> {
+                String mimetype = contentTypeResolver.getValue(context);
+                if (mimetype == null) {
+                  return "application/octet-stream";
+                }
+                if (mimetype.startsWith("text/") || mimetype.endsWith("/javascript") || mimetype.endsWith("/xml")) {
+                  return mimetype + ";charset=UTF-8";
+                }
+                return mimetype;
+              })
+              .notFound(context -> {
+                throw new UncheckedConnectorException(ConnectorError.FILE_NOT_FOUND);
+              })
+              .contentDisposition(ContentDisposition.attachment())
+              .build();
+    }
+
   }
 
 }

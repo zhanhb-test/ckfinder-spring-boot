@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.zhanhb.ckfinder.connector.utils;
+package com.github.zhanhb.ckfinder.download;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -25,13 +25,13 @@ import javax.annotation.Nonnull;
  *
  * @author zhanhb
  */
-class URLEncoder {
+public class URLEncoder {
 
   private static final char[] HEX_CHARS = "0123456789ABCDEF".toCharArray();
 
   private final BitSet dontNeedEncoding;
 
-  URLEncoder(@Nonnull String dontNeedEncoding) {
+  public URLEncoder(@Nonnull String dontNeedEncoding) {
     BitSet bs = new BitSet(128);
     bs.set('a', 'z' + 1);
     bs.set('A', 'Z' + 1);
