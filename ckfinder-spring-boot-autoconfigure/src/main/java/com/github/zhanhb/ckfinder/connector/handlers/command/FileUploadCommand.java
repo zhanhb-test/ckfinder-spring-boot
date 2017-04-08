@@ -258,7 +258,6 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
    * if file exists this method adds (number) to file.
    *
    * @param path folder
-   * @param name file name
    * @param param
    * @return new file name.
    */
@@ -266,12 +265,12 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
     String name = param.getNewFileName();
     Path file = getPath(path, name);
 
-    String nameWithoutExtension = FileUtils.getFileNameWithoutExtension(name, false);
+    String nameWithoutExtension = FileUtils.getNameWithoutLongExtension(name);
 
     if (Files.exists(file) || isProtectedName(nameWithoutExtension)) {
       @SuppressWarnings("StringBufferWithoutInitialCapacity")
       StringBuilder sb = new StringBuilder(nameWithoutExtension).append("(");
-      String suffix = ")." + FileUtils.getFileExtension(name, false);
+      String suffix = ")." + FileUtils.getLongExtension(name);
       int len = sb.length();
       int number = 0;
       do {

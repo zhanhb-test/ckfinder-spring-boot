@@ -112,7 +112,7 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
       }
       files.file(File.builder()
               .name(file.getFileName().toString())
-              .date(FileUtils.parseLastModifDate(attrs))
+              .date(FileUtils.parseLastModifiedDate(attrs))
               .size(getSizeInKB(attrs).longValue())
               .thumb(createThumbAttr(file, param, configuration))
               .build());

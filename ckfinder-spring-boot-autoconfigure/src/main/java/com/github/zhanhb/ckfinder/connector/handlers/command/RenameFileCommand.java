@@ -121,7 +121,6 @@ public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> 
    * rename thumb file.
    *
    * @param param
-   * @param configuration
    * @throws java.io.IOException
    */
   private void renameThumb(RenameFileParameter param) throws IOException {

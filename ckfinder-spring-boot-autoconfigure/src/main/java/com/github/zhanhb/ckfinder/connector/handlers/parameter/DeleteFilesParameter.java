@@ -15,7 +15,7 @@ import lombok.Setter;
 @SuppressWarnings("CollectionWithoutInitialCapacity")
 public class DeleteFilesParameter extends ErrorListXmlParameter {
 
-  private List<FilePostParam> files = new ArrayList<>();
+  private final List<FilePostParam> files = new ArrayList<>();
   private int filesDeleted;
 
   public void filesDeletedPlus() {

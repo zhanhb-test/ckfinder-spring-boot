@@ -41,8 +41,8 @@ public class PathUtils {
     String prefix;
     String suffix;
     if (prefixIndex > -1) {
-      prefix = string.substring(0, prefixIndex + 1);
-      suffix = string.substring(prefixIndex + 1);
+      prefix = string.substring(0, prefixIndex + 2);
+      suffix = string.substring(prefixIndex + 2);
     } else {
       prefix = "";
       suffix = string;

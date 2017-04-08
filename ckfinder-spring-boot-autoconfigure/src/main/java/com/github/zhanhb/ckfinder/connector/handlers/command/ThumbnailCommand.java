@@ -69,7 +69,6 @@ public class ThumbnailCommand extends Command<ThumbnailParameter> {
     } catch (IOException e) {
       throw new ConnectorException(ConnectorError.ACCESS_DENIED, e);
     }
-    log.debug("", fullCurrentPath);
     Path thumbFile = getPath(fullCurrentPath, param.getFileName());
     log.debug("thumbFile: {}", thumbFile);
 

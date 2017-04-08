@@ -1,7 +1,7 @@
 package com.github.zhanhb.ckfinder.connector.configuration;
 
 import java.util.Objects;
-import javax.servlet.http.HttpServletRequest;
+import javax.annotation.Nonnull;
 
 /**
  *
@@ -16,7 +16,8 @@ public class FixLicenseFactory implements LicenseFactory {
   }
 
   @Override
-  public License getLicense(HttpServletRequest request) {
+  @Nonnull
+  public License getLicense(String host) {
     return license;
   }
 

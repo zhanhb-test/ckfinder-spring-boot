@@ -52,7 +52,8 @@ public class ImageUtils {
    */
   private static void resizeImage(BufferedImage sourceImage, int width,
           int height, float quality, Path destFile) throws IOException {
-    String format = FileUtils.getFileExtension(destFile.getFileName().toString());
+    String format = FileUtils.getExtension(destFile.getFileName().toString());
+    format = format != null ? format.toLowerCase() : null;
     try (OutputStream out = Files.newOutputStream(destFile)) {
       try {
         Thumbnails.of(sourceImage).size(width, height).keepAspectRatio(false).outputQuality(quality).outputFormat(format).toOutputStream(out);
@@ -183,7 +184,7 @@ public class ImageUtils {
         height = (int) Math.round(1.0 * h / width);
         width = maxWidth;
       }
-    } else if (height >= maxHeight) {
+    } else if (height > maxHeight) {
       width = (int) Math.round(1.0 * w / height);
       height = maxHeight;
     }
@@ -199,7 +200,7 @@ public class ImageUtils {
    */
   public static boolean isImageExtension(Path file) {
     if (file != null) {
-      String fileExt = FileUtils.getFileExtension(file.getFileName().toString());
+      String fileExt = FileUtils.getExtension(file.getFileName().toString());
       return fileExt != null && ALLOWED_EXT.contains(fileExt.toLowerCase());
     } else {
       return false;
@@ -216,15 +217,13 @@ public class ImageUtils {
    */
   public static boolean checkImageSize(InputStreamSource part, IConfiguration conf)
           throws IOException {
-    final int maxWidth;
-    final int maxHeight;
+    final int maxWidth = conf.getImgWidth();
+    final int maxHeight = conf.getImgHeight();
+    if (maxHeight == 0 && maxWidth == 0) {
+      return true;
+    }
     BufferedImage bi;
     try (InputStream stream = part.getInputStream()) {
-      maxWidth = conf.getImgWidth();
-      maxHeight = conf.getImgHeight();
-      if (maxHeight == 0 && maxWidth == 0) {
-        return true;
-      }
       bi = ImageIO.read(stream);
     }
     if (bi != null) {
@@ -254,9 +253,7 @@ public class ImageUtils {
    * writes unchanged file to disk.
    *
    * @param sourceFile - file to read from
-   *
    * @param destFile - file to write to
-   *
    * @throws IOException when error occurs.
    */
   private static void writeUntouchedImage(Path sourceFile, Path destFile)

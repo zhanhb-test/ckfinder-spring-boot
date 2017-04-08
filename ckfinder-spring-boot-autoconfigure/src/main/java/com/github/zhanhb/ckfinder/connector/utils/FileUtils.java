@@ -70,14 +70,10 @@ public class FileUtils {
    * Gets file extension.
    *
    * @param fileName name of file.
-   * @param shortExtensionMode
    * @return file extension
    */
   @Nullable
-  public static String getFileExtension(String fileName, boolean shortExtensionMode) {
-    if (shortExtensionMode) {
-      return FileUtils.getFileExtension(fileName);
-    }
+  public static String getLongExtension(String fileName) {
     int indexOf;
     if (fileName == null || (indexOf = fileName.indexOf('.')) == -1
             || indexOf == fileName.length() - 1) {
@@ -93,7 +89,7 @@ public class FileUtils {
    * @return file extension
    */
   @Nullable
-  public static String getFileExtension(String fileName) {
+  public static String getExtension(String fileName) {
     int lastIndexOf;
     if (fileName == null || (lastIndexOf = fileName.lastIndexOf('.')) == -1
             || lastIndexOf == fileName.length() - 1) {
@@ -106,15 +102,10 @@ public class FileUtils {
    * Gets file name without its extension.
    *
    * @param fileName name of file
-   * @param shortExtensionMode
    * @return file extension
    */
   @Nullable
-  public static String getFileNameWithoutExtension(String fileName, boolean shortExtensionMode) {
-    if (shortExtensionMode) {
-      return FileUtils.getFileNameWithoutExtension(fileName);
-    }
-
+  public static String getNameWithoutLongExtension(String fileName) {
     int indexOf;
     if (fileName == null || (indexOf = fileName.indexOf('.')) == -1) {
       return null;
@@ -129,7 +120,7 @@ public class FileUtils {
    * @return file extension
    */
   @Nullable
-  public static String getFileNameWithoutExtension(String fileName) {
+  public static String getNameWithoutExtension(String fileName) {
     int lastIndexOf;
     if (fileName == null || (lastIndexOf = fileName.lastIndexOf('.')) == -1) {
       return null;
@@ -144,7 +135,7 @@ public class FileUtils {
    * @param attributes input file attributes.
    * @return parsed file modification date.
    */
-  public static String parseLastModifDate(BasicFileAttributes attributes) {
+  public static String parseLastModifiedDate(BasicFileAttributes attributes) {
     Instant instant = attributes.lastModifiedTime().toInstant();
     return DateTimeFormatterHolder.FORMATTER.format(instant);
   }
@@ -203,7 +194,7 @@ public class FileUtils {
       return true;
     }
 
-    return isExtensionAllowed(getFileExtension(fileName), type);
+    return isExtensionAllowed(getExtension(fileName), type);
   }
 
   /**
@@ -288,7 +279,7 @@ public class FileUtils {
    */
   public static boolean isExtensionHtml(String file,
           IConfiguration configuration) {
-    String extension = getFileExtension(file);
+    String extension = getExtension(file);
     return extension != null && configuration.getHtmlExtensions().contains(
             extension.toLowerCase());
   }

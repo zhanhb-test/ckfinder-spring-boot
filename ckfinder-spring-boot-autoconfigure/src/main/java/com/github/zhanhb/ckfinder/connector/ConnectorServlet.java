@@ -114,15 +114,15 @@ public class ConnectorServlet extends HttpServlet {
       }
       command.runCommand(request, response, configuration);
     } catch (SecurityException ex) {
-      log.error("", ex);
+      log.info("security exception", ex);
       handleException(new ConnectorException(ConnectorError.ACCESS_DENIED),
               configuration, request, response, handler);
     } catch (RuntimeException e) {
-      log.error("", e);
+      log.error("runtime exception", e);
       handleException(new ConnectorException(ConnectorError.INVALID_COMMAND),
               configuration, request, response, handler);
     } catch (ConnectorException e) {
-      log.error("", e);
+      log.debug("ConnectorException: {} {}", e.getErrorCode(), e.getMessage());
       handleException(e, configuration, request, response, handler);
     }
   }

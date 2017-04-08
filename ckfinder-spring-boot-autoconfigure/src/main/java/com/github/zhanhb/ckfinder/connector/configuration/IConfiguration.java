@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.annotation.Nullable;
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * Interface for configuration.
@@ -29,50 +28,50 @@ public interface IConfiguration {
    *
    * @return role name
    */
-  public String getUserRoleName();
+  String getUserRoleName();
 
   /**
    * gets resources map types with names as map keys.
    *
    * @return resources map
    */
-  public Map<String, ResourceType> getTypes();
+  Map<String, ResourceType> getTypes();
 
   /**
    * returns license.
    *
-   * @param request
+   * @param host the http host
    * @return license
    */
-  public License getLicense(HttpServletRequest request);
+  License getLicense(String host);
 
   /**
    * gets image max width.
    *
    * @return max image height
    */
-  public int getImgWidth();
+  int getImgWidth();
 
   /**
    * get image max height.
    *
    * @return max image height
    */
-  public int getImgHeight();
+  int getImgHeight();
 
   /**
    * get image quality.
    *
    * @return image quality
    */
-  public float getImgQuality();
+  float getImgQuality();
 
   /**
    * check if connector is enabled.
    *
    * @return if connector is enabled
    */
-  public boolean isEnabled();
+  boolean isEnabled();
 
   /**
    * get the thumbnail properties, null if thumbnail is disabled.
@@ -80,7 +79,7 @@ public interface IConfiguration {
    * @return the thumbnail properties
    */
   @Nullable
-  public Thumbnail getThumbnail();
+  Thumbnail getThumbnail();
 
   /**
    * check if dirname matches configuration hidden folder regex.
@@ -88,7 +87,7 @@ public interface IConfiguration {
    * @param dirName dir name
    * @return true if matches.
    */
-  public boolean isDirectoryHidden(String dirName);
+  boolean isDirectoryHidden(String dirName);
 
   /**
    * check if filename matches configuration hidden file regex.
@@ -96,81 +95,81 @@ public interface IConfiguration {
    * @param fileName file name
    * @return true if matches.
    */
-  public boolean isFileHidden(String fileName);
+  boolean isFileHidden(String fileName);
 
   /**
    * get double extensions configuration.
    *
    * @return configuration value.
    */
-  public boolean isCheckDoubleFileExtensions();
+  boolean isCheckDoubleFileExtensions();
 
   /**
    * flag to check if force ASCII.
    *
    * @return true if force ASCII.
    */
-  public boolean isForceAscii();
+  boolean isForceAscii();
 
   /**
    * Checks if disallowed characters in file and folder names are turned on.
    *
    * @return disallowUnsafeCharacters
    */
-  public boolean isDisallowUnsafeCharacters();
+  boolean isDisallowUnsafeCharacters();
 
   /**
    * flag if check image size after resizing image.
    *
    * @return true if check.
    */
-  public boolean isCheckSizeAfterScaling();
+  boolean isCheckSizeAfterScaling();
 
   /**
    * gets a list of plugins.
    *
    * @return list of plugins.
    */
-  public String getPublicPluginNames();
+  String getPublicPluginNames();
 
   /**
    * gets events.
    *
    * @return events.
    */
-  public Events getEvents();
+  Events getEvents();
 
   /**
    * gets param SecureImageUploads.
    *
    * @return true if is set
    */
-  public boolean isSecureImageUploads();
+  boolean isSecureImageUploads();
 
   /**
    * gets html extensions.
    *
    * @return list of html extensions.
    */
-  public List<String> getHtmlExtensions();
+  List<String> getHtmlExtensions();
 
   /**
    * gets a list of default resource types.
    *
    * @return list of default resource types
    */
-  public Set<String> getDefaultResourceTypes();
+  Set<String> getDefaultResourceTypes();
 
   /**
    *
    * @return the configuration
    */
-  public AccessControl getAccessControl();
+  AccessControl getAccessControl();
 
   /**
    *
    * @return the command factory
    */
-  public CommandFactory getCommandFactory();
+  CommandFactory getCommandFactory();
 
 }

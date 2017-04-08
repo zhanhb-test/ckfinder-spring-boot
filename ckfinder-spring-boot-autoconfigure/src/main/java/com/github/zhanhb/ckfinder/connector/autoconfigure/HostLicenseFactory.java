@@ -4,7 +4,7 @@ import com.github.zhanhb.ckfinder.connector.configuration.License;
 import com.github.zhanhb.ckfinder.connector.configuration.LicenseFactory;
 import com.github.zhanhb.ckfinder.connector.utils.KeyGenerator;
 import java.util.concurrent.atomic.AtomicReferenceArray;
-import javax.servlet.http.HttpServletRequest;
+import javax.annotation.Nonnull;
 
 /**
  *
@@ -15,10 +15,10 @@ class HostLicenseFactory implements LicenseFactory {
   private final AtomicReferenceArray<String> keys = new AtomicReferenceArray<>(256);
 
   @Override
-  public License getLicense(HttpServletRequest request) {
-    String name = request.getServerName();
-    String key = getKey(name);
-    return License.builder().name(name).key(key).build();
+  @Nonnull
+  public License getLicense(String host) {
+    String key = getKey(host);
+    return License.builder().name(host).key(key).build();
   }
 
   private String getKey(String name) {

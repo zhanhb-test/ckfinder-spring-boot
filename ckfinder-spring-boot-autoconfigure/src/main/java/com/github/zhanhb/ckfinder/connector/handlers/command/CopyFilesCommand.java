@@ -27,7 +27,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.Objects;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -112,12 +111,12 @@ public class CopyFilesCommand extends ErrorListXmlCommand<CopyFilesParameter> im
       BasicFileAttributes attrs;
       try {
         attrs = Files.readAttributes(sourceFile, BasicFileAttributes.class);
-        if (!attrs.isRegularFile()) {
-          throw new IOException();
-        }
       } catch (IOException ex) {
         param.appendError(file, ConnectorError.FILE_NOT_FOUND);
         continue;
+      }
+      if (!attrs.isRegularFile()) {
+        param.appendError(file, ConnectorError.FILE_NOT_FOUND);
       }
       if (param.getType() != file.getType()) {
         long maxSize = param.getType().getMaxSize();
@@ -127,9 +126,13 @@ public class CopyFilesCommand extends ErrorListXmlCommand<CopyFilesParameter> im
         }
         // fail through
       }
-      if (Objects.equals(sourceFile, destFile)) {
-        param.appendError(file, ConnectorError.SOURCE_AND_TARGET_PATH_EQUAL);
-        continue;
+      try {
+        if (Files.isSameFile(sourceFile, destFile)) {
+          param.appendError(file, ConnectorError.SOURCE_AND_TARGET_PATH_EQUAL);
+          continue;
+        }
+      } catch (IOException ex) {
+        // usually no such file exception, ok
       }
       try {
         Files.copy(sourceFile, destFile);
@@ -178,8 +181,8 @@ public class CopyFilesCommand extends ErrorListXmlCommand<CopyFilesParameter> im
    */
   private Path handleAutoRename(Path sourceFile, Path destFile) {
     String fileName = destFile.getFileName().toString();
-    String fileNameWithoutExtension = FileUtils.getFileNameWithoutExtension(fileName, false);
-    String fileExtension = FileUtils.getFileExtension(fileName, false);
+    String fileNameWithoutExtension = FileUtils.getNameWithoutLongExtension(fileName);
+    String fileExtension = FileUtils.getLongExtension(fileName);
     for (int counter = 1;; counter++) {
       String newFileName = fileNameWithoutExtension
               + "(" + counter + ")."

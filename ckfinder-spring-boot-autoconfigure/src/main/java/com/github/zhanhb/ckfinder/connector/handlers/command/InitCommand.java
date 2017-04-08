@@ -73,7 +73,7 @@ public class InitCommand extends XmlCommand<InitParameter> {
    */
   private void createConnectorData(Connector.Builder rootElement, InitParameter param, IConfiguration configuration) {
     Thumbnail thumbnail = configuration.getThumbnail();
-    License license = configuration.getLicense(param.getRequest());
+    License license = configuration.getLicense(param.getHost());
 
     // connector info
     ConnectorInfo.Builder element = ConnectorInfo.builder()
@@ -226,8 +226,7 @@ public class InitCommand extends XmlCommand<InitParameter> {
 
       StringBuilder hexString = new StringBuilder(len << 1);
 
-      for (int i = 0; i < len; i++) {
-        byte b = bytes[i];
+      for (byte b : bytes) {
         hexString.append(hexChars[b >> 4 & 15]).append(hexChars[b & 15]);
       }
       return hexString.substring(0, 15);
@@ -241,7 +240,7 @@ public class InitCommand extends XmlCommand<InitParameter> {
   protected InitParameter popupParams(HttpServletRequest request, IConfiguration configuration)
           throws ConnectorException {
     InitParameter param = doInitParam(new InitParameter(), request, configuration);
-    param.setRequest(request);
+    param.setHost(request.getServerName());
     return param;
   }
 

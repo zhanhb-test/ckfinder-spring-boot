@@ -109,8 +109,8 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> imp
       }
     }
 
-    String fileNameWithoutExt = FileUtils.getFileNameWithoutExtension(fileName);
-    String fileExt = FileUtils.getFileExtension(fileName);
+    String fileNameWithoutExt = FileUtils.getNameWithoutExtension(fileName);
+    String fileExt = FileUtils.getExtension(fileName);
     for (ImageResizeParam key : ImageResizeParam.values()) {
       if ("1".equals(param.getSizesFromReq().get(key))) {
         String thumbName = fileNameWithoutExt + "_" + key.getParameter() + "." + fileExt;

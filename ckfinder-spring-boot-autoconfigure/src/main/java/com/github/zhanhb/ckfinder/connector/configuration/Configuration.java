@@ -21,7 +21,6 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
-import javax.servlet.http.HttpServletRequest;
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.Singular;
@@ -126,8 +125,8 @@ public class Configuration implements IConfiguration {
   }
 
   @Override
-  public License getLicense(HttpServletRequest request) {
-    return licenseFactory.getLicense(request);
+  public License getLicense(String host) {
+    return licenseFactory.getLicense(host);
   }
 
   public static class Builder {

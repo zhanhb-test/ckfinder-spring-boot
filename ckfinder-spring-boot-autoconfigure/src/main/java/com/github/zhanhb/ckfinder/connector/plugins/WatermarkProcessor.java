@@ -37,7 +37,8 @@ public class WatermarkProcessor implements FileUploadListener {
     try {
       final Path originalFile = event.getFile();
       final WatermarkPosition position = new WatermarkPosition(settings.getMarginBottom(), settings.getMarginRight());
-      String format = FileUtils.getFileExtension(originalFile.getFileName().toString());
+      String format = FileUtils.getExtension(originalFile.getFileName().toString());
+      format = format != null ? format.toLowerCase() : null;
       BufferedImage watermark = getWatermarkImage(settings);
       if (watermark != null) {
         BufferedImage image;
