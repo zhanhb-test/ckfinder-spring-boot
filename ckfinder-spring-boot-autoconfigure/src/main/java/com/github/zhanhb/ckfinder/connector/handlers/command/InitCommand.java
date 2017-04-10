@@ -11,20 +11,20 @@
  */
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
-import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
-import com.github.zhanhb.ckfinder.connector.configuration.License;
-import com.github.zhanhb.ckfinder.connector.configuration.Thumbnail;
-import com.github.zhanhb.ckfinder.connector.data.InitCommandEvent;
-import com.github.zhanhb.ckfinder.connector.data.ResourceType;
+import com.github.zhanhb.ckfinder.connector.api.AccessControl;
+import com.github.zhanhb.ckfinder.connector.api.Configuration;
+import com.github.zhanhb.ckfinder.connector.api.InitCommandEvent;
+import com.github.zhanhb.ckfinder.connector.api.License;
+import com.github.zhanhb.ckfinder.connector.api.ResourceType;
+import com.github.zhanhb.ckfinder.connector.api.ThumbnailProperties;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.InitParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.ConnectorInfo;
 import com.github.zhanhb.ckfinder.connector.handlers.response.PluginsInfos;
 import com.github.zhanhb.ckfinder.connector.handlers.response.ResourceTypes;
-import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
+import com.github.zhanhb.ckfinder.connector.support.KeyGenerator;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
-import com.github.zhanhb.ckfinder.connector.utils.KeyGenerator;
 import com.github.zhanhb.ckfinder.connector.utils.PathUtils;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -52,7 +52,7 @@ public class InitCommand extends XmlCommand<InitParameter> {
   private static final char[] hexChars = "0123456789abcdef".toCharArray();
 
   @Override
-  Connector buildConnector(InitParameter param, IConfiguration configuration) {
+  Connector buildConnector(InitParameter param, Configuration configuration) {
     Connector.Builder rootElement = Connector.builder();
     if (param.getType() != null) {
       rootElement.resourceType(param.getType().getName());
@@ -71,8 +71,8 @@ public class InitCommand extends XmlCommand<InitParameter> {
    * @param param
    * @param configuration
    */
-  private void createConnectorData(Connector.Builder rootElement, InitParameter param, IConfiguration configuration) {
-    Thumbnail thumbnail = configuration.getThumbnail();
+  private void createConnectorData(Connector.Builder rootElement, InitParameter param, Configuration configuration) {
+    ThumbnailProperties thumbnail = configuration.getThumbnail();
     License license = configuration.getLicense(param.getHost());
 
     // connector info
@@ -144,7 +144,7 @@ public class InitCommand extends XmlCommand<InitParameter> {
    * @param rootElement root element in XML
    * @param configuration
    */
-  private void createPluginsData(Connector.Builder rootElement, IConfiguration configuration) {
+  private void createPluginsData(Connector.Builder rootElement, Configuration configuration) {
     if (configuration.getEvents() != null) {
       PluginsInfos.Builder builder = PluginsInfos.builder();
       InitCommandEvent event = new InitCommandEvent(builder);
@@ -160,7 +160,7 @@ public class InitCommand extends XmlCommand<InitParameter> {
    * @param param
    * @param configuration
    */
-  private void createResouceTypesData(Connector.Builder rootElement, InitParameter param, IConfiguration configuration) {
+  private void createResouceTypesData(Connector.Builder rootElement, InitParameter param, Configuration configuration) {
     //resurcetypes
     ResourceTypes.Builder resourceTypes = ResourceTypes.builder();
     Collection<ResourceType> types;
@@ -196,7 +196,7 @@ public class InitCommand extends XmlCommand<InitParameter> {
    * @param configuration
    * @return list of types names.
    */
-  private Collection<ResourceType> getTypes(IConfiguration configuration) {
+  private Collection<ResourceType> getTypes(Configuration configuration) {
     if (configuration.getDefaultResourceTypes().size() > 0) {
       Set<String> defaultResourceTypes = configuration.getDefaultResourceTypes();
       ArrayList<ResourceType> arrayList = new ArrayList<>(defaultResourceTypes.size());
@@ -237,7 +237,7 @@ public class InitCommand extends XmlCommand<InitParameter> {
   }
 
   @Override
-  protected InitParameter popupParams(HttpServletRequest request, IConfiguration configuration)
+  protected InitParameter popupParams(HttpServletRequest request, Configuration configuration)
           throws ConnectorException {
     InitParameter param = doInitParam(new InitParameter(), request, configuration);
     param.setHost(request.getServerName());

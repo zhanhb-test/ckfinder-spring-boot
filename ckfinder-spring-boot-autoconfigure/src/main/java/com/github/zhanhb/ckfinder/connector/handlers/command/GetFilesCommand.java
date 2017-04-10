@@ -11,14 +11,14 @@
  */
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
-import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
-import com.github.zhanhb.ckfinder.connector.configuration.Thumbnail;
+import com.github.zhanhb.ckfinder.connector.api.AccessControl;
+import com.github.zhanhb.ckfinder.connector.api.Configuration;
+import com.github.zhanhb.ckfinder.connector.api.ThumbnailProperties;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.GetFilesParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.File;
-import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import com.github.zhanhb.ckfinder.connector.utils.ImageUtils;
 import java.io.IOException;
@@ -52,7 +52,7 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
    * @throws ConnectorException when error occurs
    */
   @Override
-  protected GetFilesParameter popupParams(HttpServletRequest request, IConfiguration configuration)
+  protected GetFilesParameter popupParams(HttpServletRequest request, Configuration configuration)
           throws ConnectorException {
     GetFilesParameter param = doInitParam(new GetFilesParameter(), request, configuration);
     param.setShowThumbs(request.getParameter("showThumbs"));
@@ -60,7 +60,7 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
   }
 
   @Override
-  protected void createXml(Connector.Builder rootElement, GetFilesParameter param, IConfiguration configuration) throws ConnectorException {
+  protected void createXml(Connector.Builder rootElement, GetFilesParameter param, Configuration configuration) throws ConnectorException {
     if (param.getType() == null) {
       throw new ConnectorException(ConnectorError.INVALID_TYPE);
     }
@@ -94,7 +94,7 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
    * @param param
    * @param configuration
    */
-  private void createFilesData(List<Path> list, Connector.Builder rootElement, GetFilesParameter param, IConfiguration configuration) {
+  private void createFilesData(List<Path> list, Connector.Builder rootElement, GetFilesParameter param, Configuration configuration) {
     com.github.zhanhb.ckfinder.connector.handlers.response.Files.Builder files = com.github.zhanhb.ckfinder.connector.handlers.response.Files.builder();
     for (Path file : list) {
       String fileName = file.getFileName().toString();
@@ -128,7 +128,7 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
    * @param configuration
    * @return thumb attribute values
    */
-  private String createThumbAttr(Path file, GetFilesParameter param, IConfiguration configuration) {
+  private String createThumbAttr(Path file, GetFilesParameter param, Configuration configuration) {
     if (ImageUtils.isImageExtension(file) && isAddThumbsAttr(param, configuration.getThumbnail())) {
       Path thumbFile = getPath(param.getType().getThumbnailPath(), param.getCurrentFolder(),
               file.getFileName().toString());
@@ -163,7 +163,7 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
    * @param thumbnail
    * @return true if show thumbs
    */
-  private boolean isAddThumbsAttr(GetFilesParameter param, Thumbnail thumbnail) {
+  private boolean isAddThumbsAttr(GetFilesParameter param, ThumbnailProperties thumbnail) {
     return thumbnail != null && (thumbnail.isDirectAccess() || requestShowThumbs(param));
   }
 

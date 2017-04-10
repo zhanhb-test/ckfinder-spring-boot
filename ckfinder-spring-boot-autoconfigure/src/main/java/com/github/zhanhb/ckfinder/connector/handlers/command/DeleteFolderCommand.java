@@ -11,12 +11,12 @@
  */
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
-import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
+import com.github.zhanhb.ckfinder.connector.api.AccessControl;
+import com.github.zhanhb.ckfinder.connector.api.Configuration;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.ErrorListXmlParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
-import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,7 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 public class DeleteFolderCommand extends BaseXmlCommand<ErrorListXmlParameter> implements IPostCommand {
 
   @Override
-  protected void createXml(Connector.Builder rootElement, ErrorListXmlParameter param, IConfiguration configuration) throws ConnectorException {
+  protected void createXml(Connector.Builder rootElement, ErrorListXmlParameter param, Configuration configuration) throws ConnectorException {
     if (param.getType() == null) {
       throw new ConnectorException(ConnectorError.INVALID_TYPE);
     }
@@ -67,7 +67,7 @@ public class DeleteFolderCommand extends BaseXmlCommand<ErrorListXmlParameter> i
   }
 
   @Override
-  protected ErrorListXmlParameter popupParams(HttpServletRequest request, IConfiguration configuration) throws ConnectorException {
+  protected ErrorListXmlParameter popupParams(HttpServletRequest request, Configuration configuration) throws ConnectorException {
     return doInitParam(new ErrorListXmlParameter(), request, configuration);
   }
 

@@ -11,7 +11,7 @@
  */
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
-import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
+import com.github.zhanhb.ckfinder.connector.api.Configuration;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.ErrorListXmlParameter;
@@ -26,7 +26,7 @@ public abstract class ErrorListXmlCommand<T extends ErrorListXmlParameter> exten
 
   @Override
   @SuppressWarnings("FinalMethod")
-  final Connector buildConnector(T param, IConfiguration configuration)
+  final Connector buildConnector(T param, Configuration configuration)
           throws ConnectorException {
     Connector.Builder connector = Connector.builder();
     ConnectorError error = getDataForXml(param, configuration);
@@ -50,7 +50,7 @@ public abstract class ErrorListXmlCommand<T extends ErrorListXmlParameter> exten
    * @param param
    * @param configuration connector configuration
    */
-  protected abstract void addResultNode(Connector.Builder rootElement, T param, IConfiguration configuration);
+  protected abstract void addResultNode(Connector.Builder rootElement, T param, Configuration configuration);
 
   /**
    * gets all necessary data to create XML response.
@@ -62,6 +62,6 @@ public abstract class ErrorListXmlCommand<T extends ErrorListXmlParameter> exten
    * error occurred.
    * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
    */
-  protected abstract ConnectorError getDataForXml(T param, IConfiguration configuration) throws ConnectorException;
+  protected abstract ConnectorError getDataForXml(T param, Configuration configuration) throws ConnectorException;
 
 }

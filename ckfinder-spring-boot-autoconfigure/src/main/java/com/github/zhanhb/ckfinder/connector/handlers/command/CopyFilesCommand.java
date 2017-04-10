@@ -11,15 +11,15 @@
  */
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
-import com.github.zhanhb.ckfinder.connector.configuration.Constants;
-import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
-import com.github.zhanhb.ckfinder.connector.data.FilePostParam;
+import com.github.zhanhb.ckfinder.connector.api.AccessControl;
+import com.github.zhanhb.ckfinder.connector.api.Configuration;
+import com.github.zhanhb.ckfinder.connector.api.Constants;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.CopyFilesParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.CopyFiles;
-import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
+import com.github.zhanhb.ckfinder.connector.support.FilePostParam;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
@@ -38,7 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 public class CopyFilesCommand extends ErrorListXmlCommand<CopyFilesParameter> implements IPostCommand {
 
   @Override
-  protected void addResultNode(Connector.Builder rootElement, CopyFilesParameter param, IConfiguration configuration) {
+  protected void addResultNode(Connector.Builder rootElement, CopyFilesParameter param, Configuration configuration) {
     rootElement.result(CopyFiles.builder()
             .copied(param.getFilesCopied())
             .copiedTotal(param.getCopiedAll() + param.getFilesCopied())
@@ -46,7 +46,7 @@ public class CopyFilesCommand extends ErrorListXmlCommand<CopyFilesParameter> im
   }
 
   @Override
-  protected ConnectorError getDataForXml(CopyFilesParameter param, IConfiguration configuration)
+  protected ConnectorError getDataForXml(CopyFilesParameter param, Configuration configuration)
           throws ConnectorException {
     if (param.getType() == null) {
       throw new ConnectorException(ConnectorError.INVALID_TYPE);
@@ -223,7 +223,7 @@ public class CopyFilesCommand extends ErrorListXmlCommand<CopyFilesParameter> im
   }
 
   @Override
-  protected CopyFilesParameter popupParams(HttpServletRequest request, IConfiguration configuration) throws ConnectorException {
+  protected CopyFilesParameter popupParams(HttpServletRequest request, Configuration configuration) throws ConnectorException {
     CopyFilesParameter param = doInitParam(new CopyFilesParameter(), request, configuration);
     param.setCopiedAll(request.getParameter("copied") != null ? Integer.parseInt(request.getParameter("copied")) : 0);
 

@@ -11,8 +11,8 @@
  */
 package com.github.zhanhb.ckfinder.connector.plugins;
 
-import com.github.zhanhb.ckfinder.connector.data.FileUploadEvent;
-import com.github.zhanhb.ckfinder.connector.data.FileUploadListener;
+import com.github.zhanhb.ckfinder.connector.api.FileUploadEvent;
+import com.github.zhanhb.ckfinder.connector.api.FileUploadListener;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import java.awt.image.BufferedImage;
 import java.io.IOException;

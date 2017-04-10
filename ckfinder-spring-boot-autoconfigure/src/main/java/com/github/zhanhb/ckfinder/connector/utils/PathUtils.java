@@ -11,7 +11,7 @@
  */
 package com.github.zhanhb.ckfinder.connector.utils;
 
-import com.github.zhanhb.ckfinder.connector.configuration.Constants;
+import com.github.zhanhb.ckfinder.connector.api.Constants;
 import java.util.regex.Pattern;
 import org.springframework.util.StringUtils;
 

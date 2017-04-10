@@ -11,13 +11,13 @@
  */
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
-import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
+import com.github.zhanhb.ckfinder.connector.api.AccessControl;
+import com.github.zhanhb.ckfinder.connector.api.Configuration;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.RenameFolderParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.RenamedFolder;
-import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import com.github.zhanhb.ckfinder.connector.utils.PathUtils;
 import java.io.IOException;
@@ -39,7 +39,7 @@ public class RenameFolderCommand extends BaseXmlCommand<RenameFolderParameter> i
    * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
    */
   @Override
-  protected void createXml(Connector.Builder rootElement, RenameFolderParameter param, IConfiguration configuration) throws ConnectorException {
+  protected void createXml(Connector.Builder rootElement, RenameFolderParameter param, Configuration configuration) throws ConnectorException {
     checkRequestPathValid(param.getNewFolderName());
 
     if (param.getType() == null) {
@@ -127,7 +127,7 @@ public class RenameFolderCommand extends BaseXmlCommand<RenameFolderParameter> i
    * @throws ConnectorException when error occurs.
    */
   @Override
-  protected RenameFolderParameter popupParams(HttpServletRequest request, IConfiguration configuration) throws ConnectorException {
+  protected RenameFolderParameter popupParams(HttpServletRequest request, Configuration configuration) throws ConnectorException {
     RenameFolderParameter param = doInitParam(new RenameFolderParameter(), request, configuration);
     param.setNewFolderName(request.getParameter("NewFolderName"));
     return param;

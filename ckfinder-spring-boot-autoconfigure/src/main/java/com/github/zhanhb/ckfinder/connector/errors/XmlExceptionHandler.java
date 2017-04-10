@@ -11,12 +11,12 @@
  */
 package com.github.zhanhb.ckfinder.connector.errors;
 
-import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
-import com.github.zhanhb.ckfinder.connector.data.ResourceType;
+import com.github.zhanhb.ckfinder.connector.api.Configuration;
+import com.github.zhanhb.ckfinder.connector.api.ResourceType;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.CurrentFolder;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Error;
-import com.github.zhanhb.ckfinder.connector.utils.XmlCreator;
+import com.github.zhanhb.ckfinder.connector.support.XmlCreator;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.servlet.http.HttpServletRequest;
@@ -33,7 +33,7 @@ public enum XmlExceptionHandler implements ExceptionHandler {
 
   @Override
   public void handleException(HttpServletRequest request,
-          HttpServletResponse response, IConfiguration configuration,
+          HttpServletResponse response, Configuration configuration,
           ConnectorException connectorException) throws IOException {
     HttpSession session = request.getSession(false);
     String userRole = session == null ? null : (String) session.getAttribute(configuration.getUserRoleName());

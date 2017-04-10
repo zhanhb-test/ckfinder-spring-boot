@@ -11,8 +11,8 @@
  */
 package com.github.zhanhb.ckfinder.connector.plugins;
 
-import com.github.zhanhb.ckfinder.connector.data.InitCommandEvent;
-import com.github.zhanhb.ckfinder.connector.data.PluginInfoRegister;
+import com.github.zhanhb.ckfinder.connector.api.InitCommandEvent;
+import com.github.zhanhb.ckfinder.connector.api.PluginInfoRegister;
 import com.github.zhanhb.ckfinder.connector.handlers.response.ImageResizeInfo;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;

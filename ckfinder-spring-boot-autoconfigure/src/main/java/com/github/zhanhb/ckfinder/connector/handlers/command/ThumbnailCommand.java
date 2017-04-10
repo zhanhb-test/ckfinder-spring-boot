@@ -11,11 +11,11 @@
  */
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
-import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
+import com.github.zhanhb.ckfinder.connector.api.AccessControl;
+import com.github.zhanhb.ckfinder.connector.api.Configuration;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.ThumbnailParameter;
-import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import com.github.zhanhb.ckfinder.connector.utils.ImageUtils;
 import com.github.zhanhb.ckfinder.download.ContentDisposition;
@@ -33,11 +33,11 @@ import lombok.extern.slf4j.Slf4j;
  * command.
  */
 @Slf4j
-public class ThumbnailCommand extends Command<ThumbnailParameter> {
+public class ThumbnailCommand extends BaseCommand<ThumbnailParameter> {
 
   @Override
   @SuppressWarnings("FinalMethod")
-  final void execute(ThumbnailParameter param, HttpServletRequest request, HttpServletResponse response, IConfiguration configuration) throws ConnectorException, IOException {
+  final void execute(ThumbnailParameter param, HttpServletRequest request, HttpServletResponse response, Configuration configuration) throws ConnectorException, IOException {
     if (configuration.getThumbnail() == null) {
       param.throwException(ConnectorError.THUMBNAILS_DISABLED);
     }
@@ -108,7 +108,7 @@ public class ThumbnailCommand extends Command<ThumbnailParameter> {
   }
 
   @Override
-  protected ThumbnailParameter popupParams(HttpServletRequest request, IConfiguration configuration)
+  protected ThumbnailParameter popupParams(HttpServletRequest request, Configuration configuration)
           throws ConnectorException {
     ThumbnailParameter param = doInitParam(new ThumbnailParameter(), request, configuration);
     param.setFileName(request.getParameter("FileName"));

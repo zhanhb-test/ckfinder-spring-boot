@@ -1,6 +1,6 @@
 package com.github.zhanhb.ckfinder.connector.errors;
 
-import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
+import com.github.zhanhb.ckfinder.connector.api.Configuration;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -11,6 +11,6 @@ import javax.servlet.http.HttpServletResponse;
  */
 public interface ExceptionHandler {
 
-  void handleException(HttpServletRequest request, HttpServletResponse response, IConfiguration configuration, ConnectorException connectorException) throws IOException;
+  void handleException(HttpServletRequest request, HttpServletResponse response, Configuration configuration, ConnectorException connectorException) throws IOException;
 
 }

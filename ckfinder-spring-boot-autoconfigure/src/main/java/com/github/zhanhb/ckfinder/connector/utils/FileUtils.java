@@ -11,9 +11,10 @@
  */
 package com.github.zhanhb.ckfinder.connector.utils;
 
-import com.github.zhanhb.ckfinder.connector.configuration.Constants;
-import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
-import com.github.zhanhb.ckfinder.connector.data.ResourceType;
+import com.github.zhanhb.ckfinder.connector.api.AccessControl;
+import com.github.zhanhb.ckfinder.connector.api.Configuration;
+import com.github.zhanhb.ckfinder.connector.api.Constants;
+import com.github.zhanhb.ckfinder.connector.api.ResourceType;
 import com.github.zhanhb.ckfinder.download.URLEncoder;
 import java.io.IOException;
 import java.io.InputStream;
@@ -278,7 +279,7 @@ public class FileUtils {
    * @return true if has
    */
   public static boolean isExtensionHtml(String file,
-          IConfiguration configuration) {
+          Configuration configuration) {
     String extension = getExtension(file);
     return extension != null && configuration.getHtmlExtensions().contains(
             extension.toLowerCase());
@@ -354,7 +355,7 @@ public class FileUtils {
    * @return true if there are any allowed and non-hidden subfolders.
    */
   public static boolean hasChildren(AccessControl accessControl, String dirPath,
-          Path dir, IConfiguration configuration, String resourceType,
+          Path dir, Configuration configuration, String resourceType,
           String currentUserRole) {
     try (DirectoryStream<Path> list = Files.newDirectoryStream(dir, Files::isDirectory)) {
       for (Path path : list) {
@@ -410,13 +411,13 @@ public class FileUtils {
     return URI_COMPONENT.encode(fileName);
   }
 
-  public static boolean isFolderNameValid(String folderName, IConfiguration configuration) {
+  public static boolean isFolderNameValid(String folderName, Configuration configuration) {
     return (!configuration.isDisallowUnsafeCharacters()
             || !folderName.contains(".") && !folderName.contains(";"))
             && !hasInvalidCharacter(folderName);
   }
 
-  public static boolean isFileNameValid(String fileName, IConfiguration configuration) {
+  public static boolean isFileNameValid(String fileName, Configuration configuration) {
     return (!configuration.isDisallowUnsafeCharacters() || !fileName.contains(";"))
             && isFileNameValid(fileName);
   }

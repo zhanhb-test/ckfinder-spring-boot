@@ -11,14 +11,14 @@
  */
 package com.github.zhanhb.ckfinder.connector.plugins;
 
-import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
+import com.github.zhanhb.ckfinder.connector.api.AccessControl;
+import com.github.zhanhb.ckfinder.connector.api.Configuration;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.command.BaseXmlCommand;
 import com.github.zhanhb.ckfinder.connector.handlers.command.IPostCommand;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.ImageResizeParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
-import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import com.github.zhanhb.ckfinder.connector.utils.ImageUtils;
 import java.io.IOException;
@@ -38,7 +38,7 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> imp
   }
 
   @Override
-  protected void createXml(Connector.Builder rootElement, ImageResizeParameter param, IConfiguration configuration) throws ConnectorException {
+  protected void createXml(Connector.Builder rootElement, ImageResizeParameter param, Configuration configuration) throws ConnectorException {
     if (param.getType() == null) {
       throw new ConnectorException(ConnectorError.INVALID_TYPE);
     }
@@ -131,7 +131,7 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> imp
 
   @Override
   @SuppressWarnings("CollectionWithoutInitialCapacity")
-  protected ImageResizeParameter popupParams(HttpServletRequest request, IConfiguration configuration) throws ConnectorException {
+  protected ImageResizeParameter popupParams(HttpServletRequest request, Configuration configuration) throws ConnectorException {
     ImageResizeParameter param = doInitParam(new ImageResizeParameter(), request, configuration);
     param.setFileName(request.getParameter("fileName"));
     param.setNewFileName(request.getParameter("newFileName"));

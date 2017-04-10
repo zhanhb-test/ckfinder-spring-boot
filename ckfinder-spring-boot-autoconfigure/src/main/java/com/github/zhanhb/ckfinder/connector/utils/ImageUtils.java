@@ -11,8 +11,8 @@
  */
 package com.github.zhanhb.ckfinder.connector.utils;
 
-import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
-import com.github.zhanhb.ckfinder.connector.configuration.Thumbnail;
+import com.github.zhanhb.ckfinder.connector.api.Configuration;
+import com.github.zhanhb.ckfinder.connector.api.ThumbnailProperties;
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -80,7 +80,7 @@ public class ImageUtils {
    * @return
    * @throws IOException when error occurs.
    */
-  public static boolean createThumb(Path orginFile, Path file, Thumbnail thumbnail)
+  public static boolean createThumb(Path orginFile, Path file, ThumbnailProperties thumbnail)
           throws IOException {
     log.debug("createThumb");
     BufferedImage image;
@@ -116,7 +116,7 @@ public class ImageUtils {
    * @throws IOException when error occurs.
    */
   public static void createTmpThumb(InputStreamSource part, Path file, String fileName,
-          IConfiguration conf) throws IOException {
+          Configuration conf) throws IOException {
     BufferedImage image;
     try (InputStream stream = part.getInputStream()) {
       image = ImageIO.read(stream);
@@ -215,7 +215,7 @@ public class ImageUtils {
    * @return true if image size isn't bigger then biggest allowed.
    * @throws IOException when error occurs during reading image.
    */
-  public static boolean checkImageSize(InputStreamSource part, IConfiguration conf)
+  public static boolean checkImageSize(InputStreamSource part, Configuration conf)
           throws IOException {
     final int maxWidth = conf.getImgWidth();
     final int maxHeight = conf.getImgHeight();

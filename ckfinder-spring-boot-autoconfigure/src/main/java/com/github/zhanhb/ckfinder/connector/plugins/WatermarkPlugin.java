@@ -11,8 +11,8 @@
  */
 package com.github.zhanhb.ckfinder.connector.plugins;
 
-import com.github.zhanhb.ckfinder.connector.configuration.Plugin;
-import com.github.zhanhb.ckfinder.connector.configuration.PluginRegister;
+import com.github.zhanhb.ckfinder.connector.support.Plugin;
+import com.github.zhanhb.ckfinder.connector.support.PluginRegister;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor

@@ -11,11 +11,11 @@
  */
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
-import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
+import com.github.zhanhb.ckfinder.connector.api.AccessControl;
+import com.github.zhanhb.ckfinder.connector.api.Configuration;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.DownloadFileParameter;
-import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import com.github.zhanhb.ckfinder.download.ContentDisposition;
 import com.github.zhanhb.ckfinder.download.ContentTypeResolver;
@@ -29,7 +29,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * Class to handle <code>DownloadFile</code> command.
  */
-public class DownloadFileCommand extends Command<DownloadFileParameter> {
+public class DownloadFileCommand extends BaseCommand<DownloadFileParameter> {
 
   /**
    * executes the download file command. Writes file to response.
@@ -40,7 +40,7 @@ public class DownloadFileCommand extends Command<DownloadFileParameter> {
    * @throws java.io.IOException
    */
   @Override
-  void execute(DownloadFileParameter param, HttpServletRequest request, HttpServletResponse response, IConfiguration configuration)
+  void execute(DownloadFileParameter param, HttpServletRequest request, HttpServletResponse response, Configuration configuration)
           throws ConnectorException, IOException {
     if (param.getType() == null) {
       throw new ConnectorException(ConnectorError.INVALID_TYPE);
@@ -90,7 +90,7 @@ public class DownloadFileCommand extends Command<DownloadFileParameter> {
    * @throws ConnectorException when error occurs.
    */
   @Override
-  protected DownloadFileParameter popupParams(HttpServletRequest request, IConfiguration configuration)
+  protected DownloadFileParameter popupParams(HttpServletRequest request, Configuration configuration)
           throws ConnectorException {
     DownloadFileParameter param = doInitParam(new DownloadFileParameter(), request, configuration);
     // problem with showing filename when dialog window appear

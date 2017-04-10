@@ -11,13 +11,13 @@
  */
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
-import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
+import com.github.zhanhb.ckfinder.connector.api.AccessControl;
+import com.github.zhanhb.ckfinder.connector.api.Configuration;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.RenameFileParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.RenamedFile;
-import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
@@ -34,7 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> implements IPostCommand {
 
   @Override
-  protected void addResultNode(Connector.Builder rootElement, RenameFileParameter param, IConfiguration configuration) {
+  protected void addResultNode(Connector.Builder rootElement, RenameFileParameter param, Configuration configuration) {
     RenamedFile.Builder element = RenamedFile.builder().name(param.getFileName());
     if (param.isRenamed()) {
       element.newName(param.getNewFileName());
@@ -51,7 +51,7 @@ public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> 
    * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
    */
   @Override
-  protected ConnectorError getDataForXml(RenameFileParameter param, IConfiguration configuration)
+  protected ConnectorError getDataForXml(RenameFileParameter param, Configuration configuration)
           throws ConnectorException {
     log.trace("getDataForXml");
     if (param.getType() == null) {
@@ -139,7 +139,7 @@ public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> 
   }
 
   @Override
-  protected RenameFileParameter popupParams(HttpServletRequest request, IConfiguration configuration)
+  protected RenameFileParameter popupParams(HttpServletRequest request, Configuration configuration)
           throws ConnectorException {
     RenameFileParameter param = doInitParam(new RenameFileParameter(), request, configuration);
     param.setFileName(request.getParameter("fileName"));

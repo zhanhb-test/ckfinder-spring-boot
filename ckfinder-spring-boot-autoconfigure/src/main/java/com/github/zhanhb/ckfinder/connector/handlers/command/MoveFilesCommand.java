@@ -11,15 +11,15 @@
  */
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
-import com.github.zhanhb.ckfinder.connector.configuration.Constants;
-import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
-import com.github.zhanhb.ckfinder.connector.data.FilePostParam;
+import com.github.zhanhb.ckfinder.connector.api.AccessControl;
+import com.github.zhanhb.ckfinder.connector.api.Configuration;
+import com.github.zhanhb.ckfinder.connector.api.Constants;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.MoveFilesParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.MoveFiles;
-import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
+import com.github.zhanhb.ckfinder.connector.support.FilePostParam;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
@@ -38,7 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 public class MoveFilesCommand extends ErrorListXmlCommand<MoveFilesParameter> implements IPostCommand {
 
   @Override
-  protected void addResultNode(Connector.Builder rootElement, MoveFilesParameter param, IConfiguration configuration) {
+  protected void addResultNode(Connector.Builder rootElement, MoveFilesParameter param, Configuration configuration) {
     rootElement.result(MoveFiles.builder()
             .moved(param.getFilesMoved())
             .movedTotal(param.getMovedAll() + param.getFilesMoved())
@@ -46,7 +46,7 @@ public class MoveFilesCommand extends ErrorListXmlCommand<MoveFilesParameter> im
   }
 
   @Override
-  protected ConnectorError getDataForXml(MoveFilesParameter param, IConfiguration configuration)
+  protected ConnectorError getDataForXml(MoveFilesParameter param, Configuration configuration)
           throws ConnectorException {
     if (param.getType() == null) {
       throw new ConnectorException(ConnectorError.INVALID_TYPE);
@@ -224,7 +224,7 @@ public class MoveFilesCommand extends ErrorListXmlCommand<MoveFilesParameter> im
   }
 
   @Override
-  protected MoveFilesParameter popupParams(HttpServletRequest request, IConfiguration configuration)
+  protected MoveFilesParameter popupParams(HttpServletRequest request, Configuration configuration)
           throws ConnectorException {
     MoveFilesParameter param = doInitParam(new MoveFilesParameter(), request, configuration);
     param.setMovedAll(request.getParameter("moved") != null ? Integer.parseInt(request.getParameter("moved")) : 0);

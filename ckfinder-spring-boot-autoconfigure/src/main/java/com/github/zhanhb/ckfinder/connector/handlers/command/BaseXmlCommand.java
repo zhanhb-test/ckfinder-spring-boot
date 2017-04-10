@@ -11,7 +11,7 @@
  */
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
-import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
+import com.github.zhanhb.ckfinder.connector.api.Configuration;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.Parameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
@@ -25,7 +25,7 @@ public abstract class BaseXmlCommand<T extends Parameter> extends XmlCommand<T> 
 
   @Override
   @SuppressWarnings("FinalMethod")
-  final Connector buildConnector(T param, IConfiguration configuration)
+  final Connector buildConnector(T param, Configuration configuration)
           throws ConnectorException {
     Connector.Builder connector = Connector.builder();
     if (param.getType() != null) {
@@ -45,6 +45,6 @@ public abstract class BaseXmlCommand<T extends Parameter> extends XmlCommand<T> 
    * @param configuration connector configuration
    * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
    */
-  protected abstract void createXml(Connector.Builder rootElement, T param, IConfiguration configuration) throws ConnectorException;
+  protected abstract void createXml(Connector.Builder rootElement, T param, Configuration configuration) throws ConnectorException;
 
 }

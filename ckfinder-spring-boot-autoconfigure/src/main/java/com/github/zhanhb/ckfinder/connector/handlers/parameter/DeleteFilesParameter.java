@@ -1,6 +1,6 @@
 package com.github.zhanhb.ckfinder.connector.handlers.parameter;
 
-import com.github.zhanhb.ckfinder.connector.data.FilePostParam;
+import com.github.zhanhb.ckfinder.connector.support.FilePostParam;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;

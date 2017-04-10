@@ -11,7 +11,7 @@
  */
 package com.github.zhanhb.ckfinder.connector.errors;
 
-import com.github.zhanhb.ckfinder.connector.data.ResourceType;
+import com.github.zhanhb.ckfinder.connector.api.ResourceType;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.Parameter;
 import java.util.Objects;
 

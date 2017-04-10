@@ -11,13 +11,13 @@
  */
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
-import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
+import com.github.zhanhb.ckfinder.connector.api.AccessControl;
+import com.github.zhanhb.ckfinder.connector.api.Configuration;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.CreateFolderParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.NewFolder;
-import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -38,7 +38,7 @@ public class CreateFolderCommand extends BaseXmlCommand<CreateFolderParameter> i
    * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
    */
   @Override
-  protected void createXml(Connector.Builder rootElement, CreateFolderParameter param, IConfiguration configuration) throws ConnectorException {
+  protected void createXml(Connector.Builder rootElement, CreateFolderParameter param, Configuration configuration) throws ConnectorException {
     checkRequestPathValid(param.getNewFolderName());
 
     if (param.getType() == null) {
@@ -82,7 +82,7 @@ public class CreateFolderCommand extends BaseXmlCommand<CreateFolderParameter> i
   }
 
   @Override
-  protected CreateFolderParameter popupParams(HttpServletRequest request, IConfiguration configuration)
+  protected CreateFolderParameter popupParams(HttpServletRequest request, Configuration configuration)
           throws ConnectorException {
     CreateFolderParameter param = doInitParam(new CreateFolderParameter(), request, configuration);
     param.setNewFolderName(request.getParameter("NewFolderName"));

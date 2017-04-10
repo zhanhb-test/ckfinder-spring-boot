@@ -11,13 +11,13 @@
  */
 package com.github.zhanhb.ckfinder.connector;
 
-import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
+import com.github.zhanhb.ckfinder.connector.api.Command;
+import com.github.zhanhb.ckfinder.connector.api.Configuration;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.errors.ExceptionHandler;
 import com.github.zhanhb.ckfinder.connector.errors.FallbackExceptionHandler;
 import com.github.zhanhb.ckfinder.connector.errors.XmlExceptionHandler;
-import com.github.zhanhb.ckfinder.connector.handlers.command.Command;
 import com.github.zhanhb.ckfinder.connector.handlers.command.FileUploadCommand;
 import com.github.zhanhb.ckfinder.connector.handlers.command.IPostCommand;
 import com.github.zhanhb.ckfinder.connector.handlers.command.XmlCommand;
@@ -37,9 +37,9 @@ public class ConnectorServlet extends HttpServlet {
 
   private static final long serialVersionUID = 2960665641425153638L;
 
-  private final IConfiguration configuration;
+  private final Configuration configuration;
 
-  public ConnectorServlet(IConfiguration configuration) {
+  public ConnectorServlet(Configuration configuration) {
     this.configuration = Objects.requireNonNull(configuration);
   }
 
@@ -92,7 +92,7 @@ public class ConnectorServlet extends HttpServlet {
         throw new ConnectorException(ConnectorError.INVALID_COMMAND);
       }
 
-      Command<?> command = configuration.getCommandFactory().getCommand(commandName);
+      Command command = configuration.getCommandFactory().getCommand(commandName);
       if (command == null) {
         throw new ConnectorException(ConnectorError.INVALID_COMMAND);
       }
@@ -137,7 +137,7 @@ public class ConnectorServlet extends HttpServlet {
    * @param handler exception handler
    * @throws java.io.IOException
    */
-  private void handleException(ConnectorException e, IConfiguration configuration,
+  private void handleException(ConnectorException e, Configuration configuration,
           HttpServletRequest request, HttpServletResponse response,
           ExceptionHandler handler) throws IOException {
     handler.handleException(request, response, configuration, e);

@@ -11,13 +11,13 @@
  */
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
-import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
-import com.github.zhanhb.ckfinder.connector.data.FileUploadEvent;
-import com.github.zhanhb.ckfinder.connector.data.ResourceType;
+import com.github.zhanhb.ckfinder.connector.api.AccessControl;
+import com.github.zhanhb.ckfinder.connector.api.Configuration;
+import com.github.zhanhb.ckfinder.connector.api.FileUploadEvent;
+import com.github.zhanhb.ckfinder.connector.api.ResourceType;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.FileUploadParameter;
-import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import com.github.zhanhb.ckfinder.connector.utils.ImageUtils;
 import java.io.IOException;
@@ -43,7 +43,7 @@ import org.springframework.web.multipart.support.StandardServletMultipartResolve
  *
  */
 @Slf4j
-public class FileUploadCommand extends Command<FileUploadParameter> implements IPostCommand {
+public class FileUploadCommand extends BaseCommand<FileUploadParameter> implements IPostCommand {
 
   /**
    * Array containing unsafe characters which can't be used in file name.
@@ -63,7 +63,7 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
   @Override
   @SuppressWarnings("FinalMethod")
   final void execute(FileUploadParameter param, HttpServletRequest request,
-          HttpServletResponse response, IConfiguration configuration) throws ConnectorException, IOException {
+          HttpServletResponse response, Configuration configuration) throws ConnectorException, IOException {
     String errorMsg = "";
     try {
       checkParam(param); // set in method initParams
@@ -145,7 +145,7 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
    * @return
    */
   @Override
-  protected FileUploadParameter popupParams(HttpServletRequest request, IConfiguration configuration) {
+  protected FileUploadParameter popupParams(HttpServletRequest request, Configuration configuration) {
     FileUploadParameter param = new FileUploadParameter();
     try {
       doInitParam(param, request, configuration);
@@ -171,7 +171,7 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
    * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
    */
   private void uploadFile(HttpServletRequest request, FileUploadParameter param,
-          IConfiguration configuration) throws ConnectorException {
+          Configuration configuration) throws ConnectorException {
     if (!configuration.getAccessControl().hasPermission(param.getType().getName(),
             param.getCurrentFolder(), param.getUserRole(),
             AccessControl.FILE_UPLOAD)) {
@@ -188,7 +188,7 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
    * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
    */
   private void fileUpload(HttpServletRequest request, FileUploadParameter param,
-          IConfiguration configuration) throws ConnectorException {
+          Configuration configuration) throws ConnectorException {
     MultipartResolver multipartResolver = StandardHolder.RESOLVER;
     try {
       boolean multipart = multipartResolver.isMultipart(request);
@@ -230,7 +230,7 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
    * @throws java.io.IOException
    * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
    */
-  private void saveTemporaryFile(Path path, MultipartFile item, FileUploadParameter param, IConfiguration configuration)
+  private void saveTemporaryFile(Path path, MultipartFile item, FileUploadParameter param, Configuration configuration)
           throws IOException, ConnectorException {
     Path file = getPath(path, param.getNewFileName());
 
@@ -296,7 +296,7 @@ public class FileUploadCommand extends Command<FileUploadParameter> implements I
    * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
    */
   private void validateUploadItem(MultipartFile item, Path path,
-          FileUploadParameter param, IConfiguration configuration) throws ConnectorException {
+          FileUploadParameter param, Configuration configuration) throws ConnectorException {
     if (item.getOriginalFilename() == null || item.getOriginalFilename().length() <= 0) {
       param.throwException(ConnectorError.UPLOADED_INVALID);
     }

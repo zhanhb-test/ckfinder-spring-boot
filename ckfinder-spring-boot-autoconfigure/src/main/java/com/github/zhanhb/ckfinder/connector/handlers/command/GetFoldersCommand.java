@@ -11,14 +11,14 @@
  */
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
-import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
+import com.github.zhanhb.ckfinder.connector.api.AccessControl;
+import com.github.zhanhb.ckfinder.connector.api.Configuration;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.Parameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Folder;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Folders;
-import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -35,7 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 public class GetFoldersCommand extends BaseXmlCommand<Parameter> {
 
   @Override
-  protected void createXml(Connector.Builder rootElement, Parameter param, IConfiguration configuration) throws ConnectorException {
+  protected void createXml(Connector.Builder rootElement, Parameter param, Configuration configuration) throws ConnectorException {
     if (param.getType() == null) {
       throw new ConnectorException(ConnectorError.INVALID_TYPE);
     }
@@ -72,7 +72,7 @@ public class GetFoldersCommand extends BaseXmlCommand<Parameter> {
    * @param configuration
    * @param directories
    */
-  private void createFoldersData(Connector.Builder rootElement, Parameter param, IConfiguration configuration, List<Path> directories) {
+  private void createFoldersData(Connector.Builder rootElement, Parameter param, Configuration configuration, List<Path> directories) {
     Folders.Builder folders = Folders.builder();
     for (Path dir : directories) {
       String dirName = dir.getFileName().toString();
@@ -99,7 +99,7 @@ public class GetFoldersCommand extends BaseXmlCommand<Parameter> {
   }
 
   @Override
-  protected Parameter popupParams(HttpServletRequest request, IConfiguration configuration) throws ConnectorException {
+  protected Parameter popupParams(HttpServletRequest request, Configuration configuration) throws ConnectorException {
     return doInitParam(new Parameter(), request, configuration);
   }
 

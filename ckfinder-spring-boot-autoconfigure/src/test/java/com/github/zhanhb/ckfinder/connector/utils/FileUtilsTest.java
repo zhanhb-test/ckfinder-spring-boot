@@ -1,6 +1,6 @@
 package com.github.zhanhb.ckfinder.connector.utils;
 
-import com.github.zhanhb.ckfinder.connector.data.ResourceType;
+import com.github.zhanhb.ckfinder.connector.api.ResourceType;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 

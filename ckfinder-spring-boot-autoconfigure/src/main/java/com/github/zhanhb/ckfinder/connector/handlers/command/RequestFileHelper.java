@@ -1,8 +1,8 @@
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
-import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
-import com.github.zhanhb.ckfinder.connector.data.FilePostParam;
-import com.github.zhanhb.ckfinder.connector.data.ResourceType;
+import com.github.zhanhb.ckfinder.connector.api.Configuration;
+import com.github.zhanhb.ckfinder.connector.api.ResourceType;
+import com.github.zhanhb.ckfinder.connector.support.FilePostParam;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
@@ -22,7 +22,7 @@ class RequestFileHelper {
    * @param configuration
    */
   static void addFilesListFromRequest(HttpServletRequest request, List<FilePostParam> files,
-          IConfiguration configuration) {
+          Configuration configuration) {
     Map<String, ResourceType> types = configuration.getTypes();
     for (int i = 0;; ++i) {
       String paramName = "files[" + i + "][name]";

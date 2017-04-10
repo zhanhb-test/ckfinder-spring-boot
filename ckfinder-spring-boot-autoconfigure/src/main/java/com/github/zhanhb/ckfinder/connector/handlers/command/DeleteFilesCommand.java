@@ -11,15 +11,15 @@
  */
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
-import com.github.zhanhb.ckfinder.connector.configuration.Constants;
-import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
-import com.github.zhanhb.ckfinder.connector.data.FilePostParam;
+import com.github.zhanhb.ckfinder.connector.api.AccessControl;
+import com.github.zhanhb.ckfinder.connector.api.Configuration;
+import com.github.zhanhb.ckfinder.connector.api.Constants;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.DeleteFilesParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.DeleteFiles;
-import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
+import com.github.zhanhb.ckfinder.connector.support.FilePostParam;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -34,7 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 public class DeleteFilesCommand extends ErrorListXmlCommand<DeleteFilesParameter> implements IPostCommand {
 
   @Override
-  protected void addResultNode(Connector.Builder rootElement, DeleteFilesParameter param, IConfiguration configuration) {
+  protected void addResultNode(Connector.Builder rootElement, DeleteFilesParameter param, Configuration configuration) {
     rootElement.result(DeleteFiles.builder()
             .deleted(param.getFilesDeleted())
             .build());
@@ -49,7 +49,7 @@ public class DeleteFilesCommand extends ErrorListXmlCommand<DeleteFilesParameter
    * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
    */
   @Override
-  protected ConnectorError getDataForXml(DeleteFilesParameter param, IConfiguration configuration)
+  protected ConnectorError getDataForXml(DeleteFilesParameter param, Configuration configuration)
           throws ConnectorException {
     if (param.getType() == null) {
       throw new ConnectorException(ConnectorError.INVALID_TYPE);
@@ -134,7 +134,7 @@ public class DeleteFilesCommand extends ErrorListXmlCommand<DeleteFilesParameter
    * for command handler.
    */
   @Override
-  protected DeleteFilesParameter popupParams(HttpServletRequest request, IConfiguration configuration) throws ConnectorException {
+  protected DeleteFilesParameter popupParams(HttpServletRequest request, Configuration configuration) throws ConnectorException {
     DeleteFilesParameter param = doInitParam(new DeleteFilesParameter(), request, configuration);
     RequestFileHelper.addFilesListFromRequest(request, param.getFiles(), configuration);
     return param;

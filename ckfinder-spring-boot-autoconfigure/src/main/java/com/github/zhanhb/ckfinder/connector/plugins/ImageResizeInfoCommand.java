@@ -11,14 +11,14 @@
  */
 package com.github.zhanhb.ckfinder.connector.plugins;
 
-import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
+import com.github.zhanhb.ckfinder.connector.api.AccessControl;
+import com.github.zhanhb.ckfinder.connector.api.Configuration;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorError;
 import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.command.BaseXmlCommand;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.ImageResizeInfoParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.ImageInfo;
-import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -33,7 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ImageResizeInfoCommand extends BaseXmlCommand<ImageResizeInfoParameter> {
 
   @Override
-  protected void createXml(Connector.Builder rootElement, ImageResizeInfoParameter param, IConfiguration configuration) throws ConnectorException {
+  protected void createXml(Connector.Builder rootElement, ImageResizeInfoParameter param, Configuration configuration) throws ConnectorException {
     if (param.getType() == null) {
       throw new ConnectorException(ConnectorError.INVALID_TYPE);
     }
@@ -79,7 +79,7 @@ public class ImageResizeInfoCommand extends BaseXmlCommand<ImageResizeInfoParame
   }
 
   @Override
-  protected ImageResizeInfoParameter popupParams(HttpServletRequest request, IConfiguration configuration)
+  protected ImageResizeInfoParameter popupParams(HttpServletRequest request, Configuration configuration)
           throws ConnectorException {
     ImageResizeInfoParameter param = doInitParam(new ImageResizeInfoParameter(), request, configuration);
     param.setFileName(request.getParameter("fileName"));

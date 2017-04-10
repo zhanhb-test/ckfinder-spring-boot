@@ -1,26 +1,27 @@
 package com.github.zhanhb.ckfinder.connector.autoconfigure;
 
 import com.github.zhanhb.ckfinder.connector.ConnectorServlet;
-import com.github.zhanhb.ckfinder.connector.configuration.Constants;
-import com.github.zhanhb.ckfinder.connector.configuration.DefaultPathBuilder;
-import com.github.zhanhb.ckfinder.connector.configuration.FixLicenseFactory;
-import com.github.zhanhb.ckfinder.connector.configuration.IBasePathBuilder;
-import com.github.zhanhb.ckfinder.connector.configuration.IConfiguration;
-import com.github.zhanhb.ckfinder.connector.configuration.License;
-import com.github.zhanhb.ckfinder.connector.configuration.LicenseFactory;
-import com.github.zhanhb.ckfinder.connector.configuration.Plugin;
-import com.github.zhanhb.ckfinder.connector.configuration.Thumbnail;
-import com.github.zhanhb.ckfinder.connector.data.AccessControlLevel;
-import com.github.zhanhb.ckfinder.connector.data.ResourceType;
+import com.github.zhanhb.ckfinder.connector.api.AccessControl;
+import com.github.zhanhb.ckfinder.connector.api.BasePathBuilder;
+import com.github.zhanhb.ckfinder.connector.api.Constants;
+import com.github.zhanhb.ckfinder.connector.api.License;
+import com.github.zhanhb.ckfinder.connector.api.LicenseFactory;
+import com.github.zhanhb.ckfinder.connector.api.ResourceType;
+import com.github.zhanhb.ckfinder.connector.api.ThumbnailProperties;
 import com.github.zhanhb.ckfinder.connector.plugins.FileEditorPlugin;
 import com.github.zhanhb.ckfinder.connector.plugins.ImageResizeParam;
 import com.github.zhanhb.ckfinder.connector.plugins.ImageResizePlugin;
 import com.github.zhanhb.ckfinder.connector.plugins.ImageResizeSize;
 import com.github.zhanhb.ckfinder.connector.plugins.WatermarkPlugin;
 import com.github.zhanhb.ckfinder.connector.plugins.WatermarkSettings;
-import com.github.zhanhb.ckfinder.connector.utils.AccessControl;
-import com.github.zhanhb.ckfinder.connector.utils.InMemoryAccessController;
-import com.github.zhanhb.ckfinder.connector.utils.KeyGenerator;
+import com.github.zhanhb.ckfinder.connector.support.AccessControlLevel;
+import com.github.zhanhb.ckfinder.connector.support.DefaultConfiguration;
+import com.github.zhanhb.ckfinder.connector.support.DefaultPathBuilder;
+import com.github.zhanhb.ckfinder.connector.support.FixLicenseFactory;
+import com.github.zhanhb.ckfinder.connector.support.HostLicenseFactory;
+import com.github.zhanhb.ckfinder.connector.support.InMemoryAccessController;
+import com.github.zhanhb.ckfinder.connector.support.KeyGenerator;
+import com.github.zhanhb.ckfinder.connector.support.Plugin;
 import com.github.zhanhb.ckfinder.connector.utils.PathUtils;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -48,7 +49,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import static com.github.zhanhb.ckfinder.connector.configuration.Constants.DEFAULT_BASE_URL;
+import static com.github.zhanhb.ckfinder.connector.api.Constants.DEFAULT_BASE_URL;
 
 /**
  *
@@ -62,7 +63,7 @@ import static com.github.zhanhb.ckfinder.connector.configuration.Constants.DEFAU
 public class CKFinderAutoConfiguration {
 
   @Configuration
-  @ConditionalOnMissingBean(IBasePathBuilder.class)
+  @ConditionalOnMissingBean(BasePathBuilder.class)
   public static class DefaultBasePathBuilderConfigurer {
 
     @Bean
@@ -131,7 +132,7 @@ public class CKFinderAutoConfiguration {
   }
 
   @Configuration
-  @ConditionalOnMissingBean(IConfiguration.class)
+  @ConditionalOnMissingBean(com.github.zhanhb.ckfinder.connector.api.Configuration.class)
   public static class DefaultConfigurationConfigurer {
 
     private static String toString(String[] array) {
@@ -139,12 +140,12 @@ public class CKFinderAutoConfiguration {
     }
 
     @Bean
-    public IConfiguration ckfinderConfiguration(CKFinderProperties properties,
-            IBasePathBuilder basePathBuilder,
+    public com.github.zhanhb.ckfinder.connector.api.Configuration ckfinderConfiguration(CKFinderProperties properties,
+            BasePathBuilder basePathBuilder,
             AccessControl defaultAccessControl,
             ObjectProvider<Collection<Plugin>> pluginsProvider) throws IOException {
       Collection<Plugin> plugins = pluginsProvider.getIfAvailable();
-      com.github.zhanhb.ckfinder.connector.configuration.Configuration.Builder builder = com.github.zhanhb.ckfinder.connector.configuration.Configuration.builder()
+      DefaultConfiguration.Builder builder = DefaultConfiguration.builder()
               .enabled(properties.getConnector().isEnabled())
               .licenseFactory(createLiceFactory(properties.getLicense()));
       CKFinderProperties.Image image = properties.getImage();
@@ -158,7 +159,7 @@ public class CKFinderAutoConfiguration {
         builder.userRoleName(properties.getUserRoleSessionVar());
       }
       builder.accessControl(defaultAccessControl);
-      Thumbnail thumbnail = createThumbs(properties.getThumbs(), basePathBuilder);
+      ThumbnailProperties thumbnail = createThumbs(properties.getThumbs(), basePathBuilder);
       builder.thumbnail(thumbnail)
               .disallowUnsafeCharacters(properties.isDisallowUnsafeCharacters())
               .checkDoubleFileExtensions(properties.isCheckDoubleExtension())
@@ -182,9 +183,9 @@ public class CKFinderAutoConfiguration {
     }
 
     @SuppressWarnings("deprecation")
-    private void setTypes(com.github.zhanhb.ckfinder.connector.configuration.Configuration.Builder builder,
-            IBasePathBuilder basePathBuilder, Map<String, CKFinderProperties.Type> types,
-            Thumbnail thumbnail) throws IOException {
+    private void setTypes(DefaultConfiguration.Builder builder,
+            BasePathBuilder basePathBuilder, Map<String, CKFinderProperties.Type> types,
+            ThumbnailProperties thumbnail) throws IOException {
       Path basePath = basePathBuilder.getBasePath();
       String baseUrl = basePathBuilder.getBaseUrl();
       for (Map.Entry<String, CKFinderProperties.Type> entry : types.entrySet()) {
@@ -213,12 +214,12 @@ public class CKFinderAutoConfiguration {
     }
 
     @SuppressWarnings("deprecation")
-    private Thumbnail createThumbs(CKFinderProperties.Thumbs thumbs, IBasePathBuilder basePathBuilder) {
+    private ThumbnailProperties createThumbs(CKFinderProperties.Thumbs thumbs, BasePathBuilder basePathBuilder) {
       if (thumbs != null && thumbs.isEnabled()) {
         Path basePath = basePathBuilder.getBasePath();
         String baseUrl = basePathBuilder.getBaseUrl();
         String url = PathUtils.normalizeUrl(baseUrl + thumbs.getUrl().replace(Constants.BASE_URL_PLACEHOLDER, ""));
-        return Thumbnail.builder()
+        return ThumbnailProperties.builder()
                 .path(getPath(basePath, thumbs.getDirectory().replace(Constants.BASE_DIR_PLACEHOLDER, "")))
                 .directAccess(thumbs.isDirectAccess())
                 .url(url)
@@ -316,7 +317,7 @@ public class CKFinderAutoConfiguration {
     @Bean
     public ServletRegistrationBean connectorServlet(CKFinderProperties properties,
             MultipartConfigElement multipartConfigElement,
-            IConfiguration configuration) {
+            com.github.zhanhb.ckfinder.connector.api.Configuration configuration) {
       ConnectorServlet servlet = new ConnectorServlet(configuration);
       ServletRegistrationBean servletRegistrationBean = new ServletRegistrationBean(servlet, false, properties.getServlet().getPath());
       servletRegistrationBean.setMultipartConfig(multipartConfigElement);

@@ -13,7 +13,7 @@ import lombok.Singular;
 
 /**
  *
- * @see com.github.zhanhb.ckfinder.connector.utils.XmlCreator
+ * @see com.github.zhanhb.ckfinder.connector.support.XmlCreator
  * @author zhanhb
  */
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
