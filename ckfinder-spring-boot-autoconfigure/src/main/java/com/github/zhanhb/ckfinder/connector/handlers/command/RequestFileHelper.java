@@ -19,7 +19,7 @@ class RequestFileHelper {
    *
    * @param request request
    * @param files
-   * @param configuration
+   * @param configuration connector configuration
    */
   static void addFilesListFromRequest(HttpServletRequest request, List<FilePostParam> files,
           Configuration configuration) {

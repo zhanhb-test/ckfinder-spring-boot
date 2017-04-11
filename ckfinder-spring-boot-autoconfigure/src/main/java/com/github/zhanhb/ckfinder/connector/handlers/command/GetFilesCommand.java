@@ -48,7 +48,7 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
    *
    * @param request request
    * @param configuration connector configuration
-   * @return
+   * @return the parameter
    * @throws ConnectorException when error occurs
    */
   @Override
@@ -91,8 +91,8 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
    *
    * @param list
    * @param rootElement root element from XML.
-   * @param param
-   * @param configuration
+   * @param param the parameter
+   * @param configuration connector configuration
    */
   private void createFilesData(List<Path> list, Connector.Builder rootElement, GetFilesParameter param, Configuration configuration) {
     com.github.zhanhb.ckfinder.connector.handlers.response.Files.Builder files = com.github.zhanhb.ckfinder.connector.handlers.response.Files.builder();
@@ -124,8 +124,8 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
    * gets thumb attribute value.
    *
    * @param file file to check if has thumb.
-   * @param param
-   * @param configuration
+   * @param param the parameter
+   * @param configuration connector configuration
    * @return thumb attribute values
    */
   private String createThumbAttr(Path file, GetFilesParameter param, Configuration configuration) {
@@ -159,7 +159,7 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
   /**
    * Check if show thumbs or not (add attr to file node with thumb file name).
    *
-   * @param param
+   * @param param the parameter
    * @param thumbnail
    * @return true if show thumbs
    */
@@ -170,7 +170,7 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
   /**
    * checks show thumb request attribute.
    *
-   * @param param
+   * @param param the parameter
    * @return true if is set.
    */
   private boolean requestShowThumbs(GetFilesParameter param) {

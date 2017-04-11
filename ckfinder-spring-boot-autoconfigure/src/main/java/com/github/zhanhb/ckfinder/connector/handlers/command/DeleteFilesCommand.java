@@ -43,10 +43,10 @@ public class DeleteFilesCommand extends ErrorListXmlCommand<DeleteFilesParameter
   /**
    * Prepares data for XML response.
    *
-   * @param param
+   * @param param the parameter
    * @param configuration connector configuration
-   * @return error code or 0 if action ended with success.
-   * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
+   * @return error code or null if action ended with success.
+   * @throws ConnectorException when error occurs
    */
   @Override
   protected ConnectorError getDataForXml(DeleteFilesParameter param, Configuration configuration)
@@ -129,7 +129,7 @@ public class DeleteFilesCommand extends ErrorListXmlCommand<DeleteFilesParameter
    *
    * @param request current response object
    * @param configuration connector configuration object
-   * @return
+   * @return the parameter
    * @throws ConnectorException when initialization parameters can't be loaded
    * for command handler.
    */

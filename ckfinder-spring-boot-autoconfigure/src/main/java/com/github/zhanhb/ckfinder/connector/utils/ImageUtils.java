@@ -48,7 +48,7 @@ public class ImageUtils {
    * @param height requested height
    * @param quality requested destination file quality
    * @param destFile file to write to
-   * @throws IOException when error occurs.
+   * @throws IOException when IO Exception occurs.
    */
   private static void resizeImage(BufferedImage sourceImage, int width,
           int height, float quality, Path destFile) throws IOException {
@@ -77,8 +77,8 @@ public class ImageUtils {
    * @param orginFile origin image file.
    * @param file file to save thumb
    * @param thumbnail connector thumbnail properties
-   * @return
-   * @throws IOException when error occurs.
+   * @return true if success
+   * @throws IOException when IO Exception occurs.
    */
   public static boolean createThumb(Path orginFile, Path file, ThumbnailProperties thumbnail)
           throws IOException {
@@ -113,7 +113,7 @@ public class ImageUtils {
    * @param file file name
    * @param fileName name of file
    * @param conf connector configuration
-   * @throws IOException when error occurs.
+   * @throws IOException when IO Exception occurs.
    */
   public static void createTmpThumb(InputStreamSource part, Path file, String fileName,
           Configuration conf) throws IOException {
@@ -147,7 +147,7 @@ public class ImageUtils {
    * @param width image width
    * @param height image height
    * @param quality image quality
-   * @throws IOException when error occurs.
+   * @throws IOException when IO Exception occurs.
    */
   public static void createResizedImage(Path sourceFile,
           Path destFile, int width, int height,
@@ -213,7 +213,7 @@ public class ImageUtils {
    * @param part servlet part
    * @param conf connector configuration.
    * @return true if image size isn't bigger then biggest allowed.
-   * @throws IOException when error occurs during reading image.
+   * @throws IOException when IO Exception occurs during reading image.
    */
   public static boolean checkImageSize(InputStreamSource part, Configuration conf)
           throws IOException {
@@ -254,7 +254,7 @@ public class ImageUtils {
    *
    * @param sourceFile - file to read from
    * @param destFile - file to write to
-   * @throws IOException when error occurs.
+   * @throws IOException when IO Exception occurs.
    */
   private static void writeUntouchedImage(Path sourceFile, Path destFile)
           throws IOException {

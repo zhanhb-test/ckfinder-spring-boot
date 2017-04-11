@@ -35,7 +35,7 @@ public class CreateFolderCommand extends BaseXmlCommand<CreateFolderParameter> i
    * creates current folder XML node.
    *
    * @param rootElement XML root element.
-   * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
+   * @throws ConnectorException when error occurs
    */
   @Override
   protected void createXml(Connector.Builder rootElement, CreateFolderParameter param, Configuration configuration) throws ConnectorException {

@@ -68,8 +68,8 @@ public class InitCommand extends XmlCommand<InitParameter> {
    * Creates connector node in XML.
    *
    * @param rootElement root element in XML
-   * @param param
-   * @param configuration
+   * @param param the parameter
+   * @param configuration connector configuration
    */
   private void createConnectorData(Connector.Builder rootElement, InitParameter param, Configuration configuration) {
     ThumbnailProperties thumbnail = configuration.getThumbnail();
@@ -142,7 +142,7 @@ public class InitCommand extends XmlCommand<InitParameter> {
    * Creates plugins node in XML.
    *
    * @param rootElement root element in XML
-   * @param configuration
+   * @param configuration connector configuration
    */
   private void createPluginsData(Connector.Builder rootElement, Configuration configuration) {
     if (configuration.getEvents() != null) {
@@ -157,8 +157,8 @@ public class InitCommand extends XmlCommand<InitParameter> {
    * Creates plugins node in XML.
    *
    * @param rootElement root element in XML
-   * @param param
-   * @param configuration
+   * @param param the parameter
+   * @param configuration connector configuration
    */
   private void createResouceTypesData(Connector.Builder rootElement, InitParameter param, Configuration configuration) {
     //resurcetypes
@@ -193,7 +193,7 @@ public class InitCommand extends XmlCommand<InitParameter> {
   /**
    * gets list of types names.
    *
-   * @param configuration
+   * @param configuration connector configuration
    * @return list of types names.
    */
   private Collection<ResourceType> getTypes(Configuration configuration) {

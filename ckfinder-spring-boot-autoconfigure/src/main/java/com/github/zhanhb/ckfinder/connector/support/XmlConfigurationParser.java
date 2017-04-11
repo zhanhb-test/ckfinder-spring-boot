@@ -58,11 +58,11 @@ public enum XmlConfigurationParser {
 
   /**
    *
-   * @param resourceLoader
-   * @param basePathBuilder
-   * @param xmlFilePath
-   * @return
-   * @throws java.lang.Exception
+   * @param resourceLoader resource loader to load xml configuration and watermark resource
+   * @param basePathBuilder base url and path builder
+   * @param xmlFilePath string representation of the xml file
+   * @return parsed configuration
+   * @throws java.lang.Exception if exception occur when parse the resource
    */
   public DefaultConfiguration parse(ResourceLoader resourceLoader,
           BasePathBuilder basePathBuilder, String xmlFilePath)
@@ -76,15 +76,15 @@ public enum XmlConfigurationParser {
   /**
    * Initializes configuration from XML file.
    *
-   * @param builder
-   * @param basePathBuilder
-   * @param resourceLoader
-   * @param basePath
-   * @param xmlFilePath
-   * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
-   * @throws java.io.IOException
-   * @throws org.xml.sax.SAXException
-   * @throws javax.xml.parsers.ParserConfigurationException
+   * @param builder configuration builder
+   * @param basePathBuilder base url and path builder
+   * @param resourceLoader resource loader to load xml configuration
+   * @param basePath base path
+   * @param xmlFilePath string representation of the xml file
+   * @throws ConnectorException when error occurs
+   * @throws IOException when IO Exception occurs.
+   * @throws org.xml.sax.SAXException syntax error in xml file
+   * @throws ParserConfigurationException no xml provider is avaliable
    */
   private void init(DefaultConfiguration.Builder builder, ResourceLoader resourceLoader,
           String xmlFilePath, Path basePath, BasePathBuilder basePathBuilder)
@@ -202,8 +202,8 @@ public enum XmlConfigurationParser {
    * Returns XML node contents or empty String instead of null if XML node is
    * empty.
    *
-   * @param childNode
-   * @return
+   * @param childNode the xml node
+   * @return the text content
    */
   private String nullNodeToString(Node childNode) {
     String textContent = childNode.getTextContent();
@@ -213,8 +213,8 @@ public enum XmlConfigurationParser {
   /**
    * Gets absolute path to XML configuration file.
    *
-   * @param resourceLoader
-   * @param xmlFilePath
+   * @param resourceLoader resource loader to load xml configuration and watermark resource
+   * @param xmlFilePath string representation of the xml file
    * @return absolute path to XML configuration file
    * @throws ConnectorException when absolute path cannot be obtained.
    */
@@ -255,7 +255,7 @@ public enum XmlConfigurationParser {
   /**
    * Sets hidden files list defined in XML configuration.
    *
-   * @param builder
+   * @param builder configuration builder
    * @param childNodes list of files nodes.
    */
   private void setHiddenFiles(DefaultConfiguration.Builder builder, NodeList childNodes) {
@@ -273,7 +273,7 @@ public enum XmlConfigurationParser {
   /**
    * Sets hidden folders list defined in XML configuration.
    *
-   * @param builder
+   * @param builder configuration builder
    * @param childNodes list of folder nodes.
    */
   private void setHiddenFolders(DefaultConfiguration.Builder builder, NodeList childNodes) {
@@ -291,7 +291,7 @@ public enum XmlConfigurationParser {
   /**
    * Sets ACL configuration as a list of access control levels.
    *
-   * @param builder
+   * @param builder configuration builder
    * @param childNodes nodes with ACL configuration.
    */
   private void setACLs(DefaultConfiguration.Builder builder, NodeList childNodes) {
@@ -395,10 +395,10 @@ public enum XmlConfigurationParser {
    * creates thumb configuration from XML.
    *
    * @param childNodes list of thumb XML nodes
-   * @param basePathBuilder
-   * @param basePath
-   * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
-   * @throws java.io.IOException
+   * @param basePathBuilder base url and path builder
+   * @param basePath base path
+   * @throws ConnectorException when error occurs
+   * @throws IOException when IO Exception occurs.
    */
   @SuppressWarnings("deprecation")
   private ThumbnailProperties createThumbs(NodeList childNodes, Path basePath, BasePathBuilder basePathBuilder) throws ConnectorException, IOException {
@@ -456,11 +456,11 @@ public enum XmlConfigurationParser {
    * Creates resource types configuration from XML configuration file (from XML
    * element 'types').
    *
-   * @param builder
+   * @param builder configuration builder
    * @param doc XML document.
-   * @param basePathBuilder
-   * @throws java.io.IOException
-   * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
+   * @param basePathBuilder base url and path builder
+   * @throws IOException when IO Exception occurs.
+   * @throws ConnectorException when error occurs
    */
   private void setTypes(DefaultConfiguration.Builder builder, Document doc, BasePathBuilder basePathBuilder,
           ThumbnailProperties thumbnail)
@@ -483,10 +483,10 @@ public enum XmlConfigurationParser {
    *
    * @param typeName name of type.
    * @param childNodes type XML child nodes.
-   * @param basePathBuilder
-   * @return resource type
-   * @throws java.io.IOException
-   * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
+   * @param basePathBuilder base url and path builder
+   * @return parsed resource type
+   * @throws IOException when IO Exception occurs.
+   * @throws ConnectorException when error occurs
    */
   @SuppressWarnings("deprecation")
   private ResourceType createTypeFromXml(String typeName,
@@ -535,7 +535,7 @@ public enum XmlConfigurationParser {
   /**
    * parses max size value from config (ex. 16M to number of bytes).
    *
-   * @param maxSize
+   * @param maxSize string representation of the max size
    * @return number of bytes in max size.
    */
   private long parseMaxSize(String maxSize) {
@@ -562,9 +562,9 @@ public enum XmlConfigurationParser {
   /**
    * Sets plugins list from XML configuration file.
    *
-   * @param builder
+   * @param builder configuration builder
    * @param childNode child of XML node 'plugins'.
-   * @param resourceLoader
+   * @param resourceLoader resource loader to load xml configuration and watermark resource
    */
   private void setPlugins(DefaultConfiguration.Builder builder, Node childNode, ResourceLoader resourceLoader) {
     NodeList nodeList = childNode.getChildNodes();

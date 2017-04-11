@@ -36,7 +36,7 @@ public class RenameFolderCommand extends BaseXmlCommand<RenameFolderParameter> i
    * creates XML node for renamed folder.
    *
    * @param rootElement XML root element.
-   * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
+   * @throws ConnectorException when error occurs
    */
   @Override
   protected void createXml(Connector.Builder rootElement, RenameFolderParameter param, Configuration configuration) throws ConnectorException {
@@ -93,8 +93,8 @@ public class RenameFolderCommand extends BaseXmlCommand<RenameFolderParameter> i
   /**
    * renames thumb folder.
    *
-   * @param param
-   * @throws java.io.IOException
+   * @param param the parameter
+   * @throws IOException when IO Exception occurs.
    */
   private void renameThumb(RenameFolderParameter param) throws IOException {
     Path thumbnailPath = param.getType().getThumbnailPath();
@@ -111,7 +111,7 @@ public class RenameFolderCommand extends BaseXmlCommand<RenameFolderParameter> i
   /**
    * sets new folder name.
    *
-   * @param param
+   * @param param the parameter
    */
   private void setNewFolder(RenameFolderParameter param) {
     String str = param.getCurrentFolder();
@@ -122,8 +122,8 @@ public class RenameFolderCommand extends BaseXmlCommand<RenameFolderParameter> i
 
   /**
    * @param request request
-   * @param configuration connector conf
-   * @return
+   * @param configuration connector configuration
+   * @return the parameter
    * @throws ConnectorException when error occurs.
    */
   @Override

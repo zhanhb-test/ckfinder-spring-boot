@@ -19,7 +19,7 @@ import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 /**
  * Base class to handle XML commands.
  *
- * @param <T>
+ * @param <T> parameter type
  */
 public abstract class BaseXmlCommand<T extends Parameter> extends XmlCommand<T> {
 
@@ -41,9 +41,9 @@ public abstract class BaseXmlCommand<T extends Parameter> extends XmlCommand<T> 
    * abstract method to create XML nodes for commands.
    *
    * @param rootElement XML root node
-   * @param param
+   * @param param the parameter
    * @param configuration connector configuration
-   * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
+   * @throws ConnectorException when error occurs
    */
   protected abstract void createXml(Connector.Builder rootElement, T param, Configuration configuration) throws ConnectorException;
 

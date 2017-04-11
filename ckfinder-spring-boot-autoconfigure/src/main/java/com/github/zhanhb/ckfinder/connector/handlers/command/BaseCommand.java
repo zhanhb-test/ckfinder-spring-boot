@@ -48,11 +48,11 @@ public abstract class BaseCommand<T extends Parameter> implements Command {
   /**
    * initialize params for command handler.
    *
-   * @param <T>
-   * @param param
+   * @param <T> parameter type
+   * @param param the parameter
    * @param request request
    * @param configuration connector configuration
-   * @return
+   * @return the parameter
    * @throws ConnectorException to handle in error handler.
    */
   @SuppressWarnings("FinalMethod")
@@ -84,7 +84,7 @@ public abstract class BaseCommand<T extends Parameter> implements Command {
   /**
    * check if connector is enabled and checks authentication.
    *
-   * @param configuration
+   * @param configuration connector configuration
    * @throws ConnectorException when connector is disabled
    */
   private void checkConnectorEnabled(Configuration configuration) throws ConnectorException {
@@ -96,12 +96,12 @@ public abstract class BaseCommand<T extends Parameter> implements Command {
   /**
    * executes command and writes to response.
    *
-   * @param param
-   * @param response
-   * @param request
-   * @param configuration
+   * @param param the parameter
+   * @param request request
+   * @param response response
+   * @param configuration connector configuration
    * @throws ConnectorException when error occurs
-   * @throws java.io.IOException
+   * @throws IOException when IO Exception occurs.
    */
   abstract void execute(T param, HttpServletRequest request,
           HttpServletResponse response, Configuration configuration)
@@ -127,10 +127,10 @@ public abstract class BaseCommand<T extends Parameter> implements Command {
   }
 
   /**
-   * gets current folder request param or sets default value if it's not set.
+   * gets current folder request parameter or sets default value if it's not set.
    *
    * @param request request
-   * @return
+   * @return current folder, / if empty
    */
   String getCurrentFolder(HttpServletRequest request) {
     String currentFolder = request.getParameter("currentFolder");

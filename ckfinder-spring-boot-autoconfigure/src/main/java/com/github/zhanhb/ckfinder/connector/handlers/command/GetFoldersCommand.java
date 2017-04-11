@@ -68,9 +68,9 @@ public class GetFoldersCommand extends BaseXmlCommand<Parameter> {
    * creates folder data node in XML document.
    *
    * @param rootElement root element in XML document
-   * @param param
-   * @param configuration
-   * @param directories
+   * @param param the parameter
+   * @param configuration connector configuration
+   * @param directories list of children folder
    */
   private void createFoldersData(Connector.Builder rootElement, Parameter param, Configuration configuration, List<Path> directories) {
     Folders.Builder folders = Folders.builder();

@@ -16,7 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  *
  * @author zhanhb
- * @param <T>
+ * @param <T> parameter type
  */
 @SuppressWarnings("FinalMethod")
 public abstract class XmlCommand<T extends Parameter> extends BaseCommand<T> {
@@ -25,12 +25,12 @@ public abstract class XmlCommand<T extends Parameter> extends BaseCommand<T> {
    * executes XML command. Creates XML response and writes it to response output
    * stream.
    *
-   * @param param
-   * @param request
-   * @param response
-   * @param configuration
-   * @throws java.io.IOException
-   * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
+   * @param param the parameter
+   * @param request request
+   * @param response response
+   * @param configuration connector configuration
+   * @throws IOException when IO Exception occurs.
+   * @throws ConnectorException when error occurs
    */
   @Override
   final void execute(T param, HttpServletRequest request, HttpServletResponse response,
@@ -55,7 +55,7 @@ public abstract class XmlCommand<T extends Parameter> extends BaseCommand<T> {
   /**
    * creates <code>CurrentFolder</code> element.
    *
-   * @param param
+   * @param param the parameter
    * @param rootElement XML root node.
    * @param accessControl
    */

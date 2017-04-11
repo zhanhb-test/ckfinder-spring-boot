@@ -23,7 +23,7 @@ public class ErrorListXmlParameter extends Parameter {
   /**
    * save errors node to list.
    *
-   * @param filePostParam
+   * @param filePostParam the file who leads the error
    * @param errorCode error code
    */
   public void appendError(FilePostParam filePostParam, ConnectorError errorCode) {

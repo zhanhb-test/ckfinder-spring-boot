@@ -53,12 +53,12 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
   /**
    * Executes file upload command.
    *
-   * @param param
-   * @param request
+   * @param param the parameter
+   * @param request request
    * @param response
-   * @param configuration
+   * @param configuration connector configuration
    * @throws ConnectorException when error occurs.
-   * @throws java.io.IOException
+   * @throws IOException when IO Exception occurs.
    */
   @Override
   @SuppressWarnings("FinalMethod")
@@ -98,7 +98,7 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
   /**
    * check if func num is set in request.
    *
-   * @param param
+   * @param param the parameter
    * @return true if is.
    */
   protected boolean checkFuncNum(FileUploadParameter param) {
@@ -111,8 +111,8 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
    * @param out response.
    * @param errorMsg error message
    * @param path path
-   * @param param
-   * @throws IOException when error occurs.
+   * @param param the parameter
+   * @throws IOException when IO Exception occurs.
    */
   protected void handleOnUploadCompleteCallFuncResponse(Writer out, String errorMsg, String path, FileUploadParameter param) throws IOException {
     param.setCkFinderFuncNum(param.getCkFinderFuncNum().replaceAll("[^\\d]", ""));
@@ -127,8 +127,8 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
    *
    * @param writer out put stream
    * @param errorMsg error message
-   * @param param
-   * @throws IOException when error occurs
+   * @param param the parameter
+   * @throws IOException when IO Exception occurs.
    */
   protected void handleOnUploadCompleteResponse(Writer writer, String errorMsg, FileUploadParameter param) throws IOException {
     writer.write("<script type=\"text/javascript\">window.parent.OnUploadCompleted('" + FileUtils.escapeJavaScript(param.getNewFileName()) + "', '"
@@ -142,7 +142,7 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
    *
    * @param request request
    * @param configuration connector configuration.
-   * @return
+   * @return the parameter
    */
   @Override
   protected FileUploadParameter popupParams(HttpServletRequest request, Configuration configuration) {
@@ -166,9 +166,9 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
    * uploads file and saves to file.
    *
    * @param request request
-   * @param param
-   * @param configuration
-   * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
+   * @param param the parameter
+   * @param configuration connector configuration
+   * @throws ConnectorException when error occurs
    */
   private void uploadFile(HttpServletRequest request, FileUploadParameter param,
           Configuration configuration) throws ConnectorException {
@@ -183,9 +183,9 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
   /**
    *
    * @param request http request
-   * @param param
-   * @param configuration
-   * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
+   * @param param the parameter
+   * @param configuration connector configuration
+   * @throws ConnectorException when error occurs
    */
   private void fileUpload(HttpServletRequest request, FileUploadParameter param,
           Configuration configuration) throws ConnectorException {
@@ -225,10 +225,10 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
    *
    * @param path path to save file
    * @param item file upload item
-   * @param param
-   * @param configuration
-   * @throws java.io.IOException
-   * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
+   * @param param the parameter
+   * @param configuration connector configuration
+   * @throws IOException when IO Exception occurs.
+   * @throws ConnectorException when error occurs
    */
   private void saveTemporaryFile(Path path, MultipartFile item, FileUploadParameter param, Configuration configuration)
           throws IOException, ConnectorException {
@@ -258,7 +258,7 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
    * if file exists this method adds (number) to file.
    *
    * @param path folder
-   * @param param
+   * @param param the parameter
    * @return new file name.
    */
   private String getFinalFileName(Path path, FileUploadParameter param) {
@@ -291,9 +291,9 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
    *
    * @param item uploaded item.
    * @param path file path
-   * @param param
-   * @param configuration
-   * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
+   * @param param the parameter
+   * @param configuration connector configuration
+   * @throws ConnectorException when error occurs
    */
   private void validateUploadItem(MultipartFile item, Path path,
           FileUploadParameter param, Configuration configuration) throws ConnectorException {

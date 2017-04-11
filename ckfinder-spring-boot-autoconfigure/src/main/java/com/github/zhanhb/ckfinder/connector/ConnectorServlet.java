@@ -48,8 +48,8 @@ public class ConnectorServlet extends HttpServlet {
    *
    * @param request request
    * @param response response
-   * @throws IOException
-   * @throws ServletException
+   * @throws IOException when IO Exception occurs.
+   * @throws ServletException when error occurs.
    */
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -62,8 +62,8 @@ public class ConnectorServlet extends HttpServlet {
    *
    * @param request request
    * @param response response
-   * @throws IOException .
-   * @throws ServletException .
+   * @throws IOException when IO Exception occurs.
+   * @throws ServletException when error occurs.
    */
   @Override
   protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -78,7 +78,7 @@ public class ConnectorServlet extends HttpServlet {
    * @param response response
    * @param post if it's post command.
    * @throws ServletException when error occurs.
-   * @throws java.io.IOException
+   * @throws IOException when IO Exception occurs.
    */
   private void processRequest(HttpServletRequest request,
           HttpServletResponse response, boolean post)
@@ -135,7 +135,7 @@ public class ConnectorServlet extends HttpServlet {
    * @param response response
    * @param configuration connector configuration
    * @param handler exception handler
-   * @throws java.io.IOException
+   * @throws IOException when IO Exception occurs.
    */
   private void handleException(ConnectorException e, Configuration configuration,
           HttpServletRequest request, HttpServletResponse response,

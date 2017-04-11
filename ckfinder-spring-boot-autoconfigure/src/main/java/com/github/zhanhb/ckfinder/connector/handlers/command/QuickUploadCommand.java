@@ -82,8 +82,8 @@ public class QuickUploadCommand extends FileUploadCommand {
    * @param errorMsg string representing error message which indicates that
    * there was an error during upload or uploaded file was renamed
    * @param path path to uploaded file
-   * @param param
-   * @throws java.io.IOException
+   * @param param the parameter
+   * @throws IOException when IO Exception occurs.
    */
   private void handleJSONResponse(Writer writer, String errorMsg, String path, FileUploadParameter param) throws IOException {
     Map<String, Object> jsonObj = new HashMap<>(6);

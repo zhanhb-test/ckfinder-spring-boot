@@ -34,10 +34,10 @@ public class DownloadFileCommand extends BaseCommand<DownloadFileParameter> {
   /**
    * executes the download file command. Writes file to response.
    *
-   * @param param
-   * @param request
+   * @param param the parameter
+   * @param request request
    * @throws ConnectorException when something went wrong during reading file.
-   * @throws java.io.IOException
+   * @throws IOException when IO Exception occurs.
    */
   @Override
   void execute(DownloadFileParameter param, HttpServletRequest request, HttpServletResponse response, Configuration configuration)
@@ -86,7 +86,7 @@ public class DownloadFileCommand extends BaseCommand<DownloadFileParameter> {
    *
    * @param request request
    * @param configuration connector configuration
-   * @return
+   * @return the parameter
    * @throws ConnectorException when error occurs.
    */
   @Override

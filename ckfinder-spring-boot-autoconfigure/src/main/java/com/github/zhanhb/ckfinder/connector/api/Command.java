@@ -18,7 +18,7 @@ public interface Command {
    * @param response response
    * @param configuration connector configuration
    * @throws ConnectorException when error occurred.
-   * @throws java.io.IOException
+   * @throws IOException when IO Exception occurs.
    */
   void runCommand(HttpServletRequest request, HttpServletResponse response,
           Configuration configuration) throws ConnectorException, IOException;

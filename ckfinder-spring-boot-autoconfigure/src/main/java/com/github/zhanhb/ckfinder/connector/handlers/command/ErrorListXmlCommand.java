@@ -20,7 +20,7 @@ import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 /**
  * Base class to handle XML commands with error list.
  *
- * @param <T>
+ * @param <T> parameter type
  */
 public abstract class ErrorListXmlCommand<T extends ErrorListXmlParameter> extends XmlCommand<T> {
 
@@ -47,7 +47,7 @@ public abstract class ErrorListXmlCommand<T extends ErrorListXmlParameter> exten
    * abstract method to create XML nodes for commands.
    *
    * @param rootElement XML root node
-   * @param param
+   * @param param the parameter
    * @param configuration connector configuration
    */
   protected abstract void addResultNode(Connector.Builder rootElement, T param, Configuration configuration);
@@ -55,12 +55,12 @@ public abstract class ErrorListXmlCommand<T extends ErrorListXmlParameter> exten
   /**
    * gets all necessary data to create XML response.
    *
-   * @param param
+   * @param param the parameter
    * @param configuration connector configuration
-   * @return error code
+   * @return the warning code or null if it's correct.
    * {@link com.github.zhanhb.ckfinder.connector.errors.ConnectorError} if no
    * error occurred.
-   * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
+   * @throws ConnectorException when error occurs
    */
   protected abstract ConnectorError getDataForXml(T param, Configuration configuration) throws ConnectorException;
 

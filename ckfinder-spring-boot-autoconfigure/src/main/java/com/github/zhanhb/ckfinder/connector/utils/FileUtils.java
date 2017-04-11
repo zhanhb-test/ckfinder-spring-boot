@@ -57,7 +57,7 @@ public class FileUtils {
    * @param searchDirectory if true method return list of folders, otherwise
    * list of files.
    * @return list of files or subdirectories in selected directory
-   * @throws java.io.IOException
+   * @throws IOException when IO Exception occurs.
    */
   public static List<Path> listChildren(Path dir, boolean searchDirectory)
           throws IOException {
@@ -184,7 +184,7 @@ public class FileUtils {
    *
    * @param fileName filename
    * @param type resource type
-   * @return 0 if ok, 1 if not ok, 2 if rename required
+   * @return true if extension is allowed
    */
   public static boolean isFileExtensionAllowed(String fileName, ResourceType type) {
     if (type == null || fileName == null) {
@@ -346,10 +346,10 @@ public class FileUtils {
    * Checks if folder has any subfolders but respects ACL and hideFolders
    * setting from configuration.
    *
-   * @param accessControl
+   * @param accessControl access control the check the permission
    * @param dirPath path to current folder.
    * @param dir current folder being checked. Represented by File object.
-   * @param configuration configuration object.
+   * @param configuration connector configuration
    * @param resourceType name of resource type, folder is assigned to.
    * @param currentUserRole user role.
    * @return true if there are any allowed and non-hidden subfolders.

@@ -45,10 +45,10 @@ public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> 
   /**
    * gets data for XML and checks all validation.
    *
-   * @param param
+   * @param param the parameter
    * @param configuration connector configuration
-   * @return error code or 0 if it's correct.
-   * @throws com.github.zhanhb.ckfinder.connector.errors.ConnectorException
+   * @return error code or null if it's correct.
+   * @throws ConnectorException when error occurs
    */
   @Override
   protected ConnectorError getDataForXml(RenameFileParameter param, Configuration configuration)
@@ -120,8 +120,8 @@ public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> 
   /**
    * rename thumb file.
    *
-   * @param param
-   * @throws java.io.IOException
+   * @param param the parameter
+   * @throws IOException when IO Exception occurs.
    */
   private void renameThumb(RenameFileParameter param) throws IOException {
     Path thumbnailPath = param.getType().getThumbnailPath();
