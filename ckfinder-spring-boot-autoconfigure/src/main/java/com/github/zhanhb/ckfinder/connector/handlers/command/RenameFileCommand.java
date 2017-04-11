@@ -13,8 +13,8 @@ package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.api.AccessControl;
 import com.github.zhanhb.ckfinder.connector.api.Configuration;
-import com.github.zhanhb.ckfinder.connector.errors.ConnectorError;
-import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
+import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
+import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.RenameFileParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.RenamedFile;
@@ -51,17 +51,17 @@ public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> 
    * @throws ConnectorException when error occurs
    */
   @Override
-  protected ConnectorError getDataForXml(RenameFileParameter param, Configuration configuration)
+  protected ErrorCode getDataForXml(RenameFileParameter param, Configuration configuration)
           throws ConnectorException {
     log.trace("getDataForXml");
     if (param.getType() == null) {
-      throw new ConnectorException(ConnectorError.INVALID_TYPE);
+      throw new ConnectorException(ErrorCode.INVALID_TYPE);
     }
 
     if (!configuration.getAccessControl().hasPermission(param.getType().getName(),
             param.getCurrentFolder(), param.getUserRole(),
             AccessControl.FILE_RENAME)) {
-      param.throwException(ConnectorError.UNAUTHORIZED);
+      param.throwException(ErrorCode.UNAUTHORIZED);
     }
 
     if (configuration.isForceAscii()) {
@@ -74,7 +74,7 @@ public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> 
     }
 
     if (!FileUtils.isFileExtensionAllowed(param.getNewFileName(), param.getType())) {
-      return ConnectorError.INVALID_EXTENSION;
+      return ErrorCode.INVALID_EXTENSION;
     }
     if (configuration.isCheckDoubleFileExtensions()) {
       param.setNewFileName(FileUtils.renameFileWithBadExt(param.getType(),
@@ -83,17 +83,17 @@ public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> 
 
     if (!FileUtils.isFileNameValid(param.getFileName())
             || configuration.isFileHidden(param.getFileName())) {
-      return ConnectorError.INVALID_REQUEST;
+      return ErrorCode.INVALID_REQUEST;
     }
 
     if (!FileUtils.isFileNameValid(param.getNewFileName(), configuration)
             || configuration.isFileHidden(param.getNewFileName())) {
-      return ConnectorError.INVALID_NAME;
+      return ErrorCode.INVALID_NAME;
     }
 
     if (!FileUtils.isFileExtensionAllowed(param.getFileName(),
             param.getType())) {
-      return ConnectorError.INVALID_REQUEST;
+      return ErrorCode.INVALID_REQUEST;
     }
 
     Path dirPath = param.getType().getPath();
@@ -106,13 +106,13 @@ public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> 
       renameThumb(param);
       return null;
     } catch (NoSuchFileException ex) {
-      return ConnectorError.FILE_NOT_FOUND;
+      return ErrorCode.FILE_NOT_FOUND;
     } catch (FileAlreadyExistsException ex) {
-      return ConnectorError.ALREADY_EXIST;
+      return ErrorCode.ALREADY_EXIST;
     } catch (IOException ex) {
       param.setRenamed(false);
       log.error("IOException", ex);
-      return ConnectorError.ACCESS_DENIED;
+      return ErrorCode.ACCESS_DENIED;
     }
 
   }

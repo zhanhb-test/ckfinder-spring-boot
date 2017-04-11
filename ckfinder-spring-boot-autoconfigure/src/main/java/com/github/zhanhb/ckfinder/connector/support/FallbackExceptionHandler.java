@@ -9,9 +9,12 @@
  * modifying or distribute this file or part of its contents. The contents of
  * this file is part of the Source Code of CKFinder.
  */
-package com.github.zhanhb.ckfinder.connector.errors;
+package com.github.zhanhb.ckfinder.connector.support;
 
 import com.github.zhanhb.ckfinder.connector.api.Configuration;
+import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
+import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
+import com.github.zhanhb.ckfinder.connector.api.ExceptionHandler;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -27,7 +30,7 @@ public enum FallbackExceptionHandler implements ExceptionHandler {
   public void handleException(HttpServletRequest request,
           HttpServletResponse response, Configuration configuration,
           ConnectorException connectorException) throws IOException {
-    ConnectorError errorCode = connectorException.getErrorCode();
+    ErrorCode errorCode = connectorException.getErrorCode();
     try {
       response.reset();
     } catch (IllegalStateException ex) {

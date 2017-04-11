@@ -13,14 +13,14 @@ package com.github.zhanhb.ckfinder.connector;
 
 import com.github.zhanhb.ckfinder.connector.api.Command;
 import com.github.zhanhb.ckfinder.connector.api.Configuration;
-import com.github.zhanhb.ckfinder.connector.errors.ConnectorError;
-import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
-import com.github.zhanhb.ckfinder.connector.errors.ExceptionHandler;
-import com.github.zhanhb.ckfinder.connector.errors.FallbackExceptionHandler;
-import com.github.zhanhb.ckfinder.connector.errors.XmlExceptionHandler;
+import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
+import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
+import com.github.zhanhb.ckfinder.connector.api.ExceptionHandler;
 import com.github.zhanhb.ckfinder.connector.handlers.command.FileUploadCommand;
 import com.github.zhanhb.ckfinder.connector.handlers.command.IPostCommand;
 import com.github.zhanhb.ckfinder.connector.handlers.command.XmlCommand;
+import com.github.zhanhb.ckfinder.connector.support.FallbackExceptionHandler;
+import com.github.zhanhb.ckfinder.connector.support.XmlExceptionHandler;
 import java.io.IOException;
 import java.util.Objects;
 import javax.servlet.ServletException;
@@ -89,12 +89,12 @@ public class ConnectorServlet extends HttpServlet {
 
     try {
       if (commandName == null || commandName.isEmpty()) {
-        throw new ConnectorException(ConnectorError.INVALID_COMMAND);
+        throw new ConnectorException(ErrorCode.INVALID_COMMAND);
       }
 
-      Command command = configuration.getCommandFactory().getCommand(commandName);
+      Command command = configuration.getCommand(commandName);
       if (command == null) {
-        throw new ConnectorException(ConnectorError.INVALID_COMMAND);
+        throw new ConnectorException(ErrorCode.INVALID_COMMAND);
       }
       log.debug("command: {}", command);
       if (command instanceof ExceptionHandler) {
@@ -106,20 +106,20 @@ public class ConnectorServlet extends HttpServlet {
       // and it's not upload command
       Class<?> commandClass = command.getClass();
       if (IPostCommand.class.isAssignableFrom(commandClass) != post) {
-        throw new ConnectorException(ConnectorError.INVALID_REQUEST);
+        throw new ConnectorException(ErrorCode.INVALID_REQUEST);
       }
       if (post && !FileUploadCommand.class.isAssignableFrom(commandClass)
               && !"true".equals(request.getParameter("CKFinderCommand"))) {
-        throw new ConnectorException(ConnectorError.INVALID_REQUEST);
+        throw new ConnectorException(ErrorCode.INVALID_REQUEST);
       }
       command.runCommand(request, response, configuration);
     } catch (SecurityException ex) {
       log.info("security exception", ex);
-      handleException(new ConnectorException(ConnectorError.ACCESS_DENIED),
+      handleException(new ConnectorException(ErrorCode.ACCESS_DENIED),
               configuration, request, response, handler);
     } catch (RuntimeException e) {
       log.error("runtime exception", e);
-      handleException(new ConnectorException(ConnectorError.INVALID_COMMAND),
+      handleException(new ConnectorException(ErrorCode.INVALID_COMMAND),
               configuration, request, response, handler);
     } catch (ConnectorException e) {
       log.debug("ConnectorException: {} {}", e.getErrorCode(), e.getMessage());

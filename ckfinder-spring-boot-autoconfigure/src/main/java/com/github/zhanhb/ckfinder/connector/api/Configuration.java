@@ -11,7 +11,6 @@
  */
 package com.github.zhanhb.ckfinder.connector.api;
 
-import com.github.zhanhb.ckfinder.connector.support.Events;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -20,7 +19,7 @@ import javax.annotation.Nullable;
 /**
  * Interface for configuration.
  */
-public interface Configuration {
+public interface Configuration extends CommandFactory, EventHandler, LicenseFactory {
 
   /**
    * gets user role name sets in config.
@@ -35,14 +34,6 @@ public interface Configuration {
    * @return resources map
    */
   Map<String, ResourceType> getTypes();
-
-  /**
-   * returns license.
-   *
-   * @param host the http host
-   * @return license
-   */
-  License getLicense(String host);
 
   /**
    * gets image max width.
@@ -132,13 +123,6 @@ public interface Configuration {
   String getPublicPluginNames();
 
   /**
-   * gets events.
-   *
-   * @return events.
-   */
-  Events getEvents();
-
-  /**
    * gets param SecureImageUploads.
    *
    * @return true if is set
@@ -164,11 +148,5 @@ public interface Configuration {
    * @return the configuration
    */
   AccessControl getAccessControl();
-
-  /**
-   *
-   * @return the command factory
-   */
-  CommandFactory getCommandFactory();
 
 }

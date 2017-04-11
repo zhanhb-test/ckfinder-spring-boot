@@ -13,9 +13,9 @@ package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.api.AccessControl;
 import com.github.zhanhb.ckfinder.connector.api.Configuration;
+import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
+import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.api.ThumbnailProperties;
-import com.github.zhanhb.ckfinder.connector.errors.ConnectorError;
-import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.GetFilesParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.File;
@@ -62,19 +62,19 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
   @Override
   protected void createXml(Connector.Builder rootElement, GetFilesParameter param, Configuration configuration) throws ConnectorException {
     if (param.getType() == null) {
-      throw new ConnectorException(ConnectorError.INVALID_TYPE);
+      throw new ConnectorException(ErrorCode.INVALID_TYPE);
     }
 
     if (!configuration.getAccessControl().hasPermission(param.getType().getName(),
             param.getCurrentFolder(), param.getUserRole(),
             AccessControl.FILE_VIEW)) {
-      param.throwException(ConnectorError.UNAUTHORIZED);
+      param.throwException(ErrorCode.UNAUTHORIZED);
     }
 
     Path dir = getPath(param.getType().getPath(), param.getCurrentFolder());
 
     if (!Files.isDirectory(dir)) {
-      param.throwException(ConnectorError.FOLDER_NOT_FOUND);
+      param.throwException(ErrorCode.FOLDER_NOT_FOUND);
     }
 
     try {
@@ -82,7 +82,7 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
       createFilesData(files, rootElement, param, configuration);
     } catch (IOException e) {
       log.error("", e);
-      param.throwException(ConnectorError.ACCESS_DENIED);
+      param.throwException(ErrorCode.ACCESS_DENIED);
     }
   }
 

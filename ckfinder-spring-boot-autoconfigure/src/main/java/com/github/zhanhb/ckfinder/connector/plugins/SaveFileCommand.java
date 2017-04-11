@@ -13,8 +13,8 @@ package com.github.zhanhb.ckfinder.connector.plugins;
 
 import com.github.zhanhb.ckfinder.connector.api.AccessControl;
 import com.github.zhanhb.ckfinder.connector.api.Configuration;
-import com.github.zhanhb.ckfinder.connector.errors.ConnectorError;
-import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
+import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
+import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.handlers.command.BaseXmlCommand;
 import com.github.zhanhb.ckfinder.connector.handlers.command.IPostCommand;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.SaveFileParameter;
@@ -33,43 +33,43 @@ public class SaveFileCommand extends BaseXmlCommand<SaveFileParameter> implement
   @Override
   protected void createXml(Connector.Builder rootElement, SaveFileParameter param, Configuration configuration) throws ConnectorException {
     if (param.getType() == null) {
-      throw new ConnectorException(ConnectorError.INVALID_TYPE);
+      throw new ConnectorException(ErrorCode.INVALID_TYPE);
     }
 
     if (!configuration.getAccessControl().hasPermission(param.getType().getName(),
             param.getCurrentFolder(), param.getUserRole(),
             AccessControl.FILE_DELETE)) {
-      param.throwException(ConnectorError.UNAUTHORIZED);
+      param.throwException(ErrorCode.UNAUTHORIZED);
     }
 
     if (param.getFileName() == null || param.getFileName().isEmpty()) {
-      param.throwException(ConnectorError.INVALID_NAME);
+      param.throwException(ErrorCode.INVALID_NAME);
     }
 
     if (param.getFileContent() == null || param.getFileContent().isEmpty()) {
-      param.throwException(ConnectorError.INVALID_REQUEST);
+      param.throwException(ErrorCode.INVALID_REQUEST);
     }
 
     if (!FileUtils.isFileExtensionAllowed(param.getFileName(), param.getType())) {
-      param.throwException(ConnectorError.INVALID_EXTENSION);
+      param.throwException(ErrorCode.INVALID_EXTENSION);
     }
 
     if (!FileUtils.isFileNameValid(param.getFileName())) {
-      param.throwException(ConnectorError.INVALID_REQUEST);
+      param.throwException(ErrorCode.INVALID_REQUEST);
     }
 
     Path sourceFile = getPath(param.getType().getPath(),
             param.getCurrentFolder(), param.getFileName());
 
     if (!Files.isRegularFile(sourceFile)) {
-      param.throwException(ConnectorError.FILE_NOT_FOUND);
+      param.throwException(ErrorCode.FILE_NOT_FOUND);
     }
 
     try {
       Files.write(sourceFile, param.getFileContent().getBytes(StandardCharsets.UTF_8));
     } catch (IOException e) {
       log.error("", e);
-      param.throwException(ConnectorError.ACCESS_DENIED);
+      param.throwException(ErrorCode.ACCESS_DENIED);
     }
   }
 

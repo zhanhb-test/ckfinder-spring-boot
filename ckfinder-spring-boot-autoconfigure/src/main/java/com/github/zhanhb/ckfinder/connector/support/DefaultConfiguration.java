@@ -15,7 +15,7 @@ import com.github.zhanhb.ckfinder.connector.api.AccessControl;
 import com.github.zhanhb.ckfinder.connector.api.CommandFactory;
 import com.github.zhanhb.ckfinder.connector.api.Configuration;
 import com.github.zhanhb.ckfinder.connector.api.Constants;
-import com.github.zhanhb.ckfinder.connector.api.License;
+import com.github.zhanhb.ckfinder.connector.api.EventHandler;
 import com.github.zhanhb.ckfinder.connector.api.LicenseFactory;
 import com.github.zhanhb.ckfinder.connector.api.ResourceType;
 import com.github.zhanhb.ckfinder.connector.api.ThumbnailProperties;
@@ -31,6 +31,7 @@ import lombok.Builder;
 import lombok.NonNull;
 import lombok.Singular;
 import lombok.Value;
+import lombok.experimental.Delegate;
 import lombok.experimental.NonFinal;
 
 @Builder(builderClassName = "Builder")
@@ -44,6 +45,8 @@ import lombok.experimental.NonFinal;
 public class DefaultConfiguration implements Configuration {
 
   private boolean enabled;
+  @Delegate
+  @NonNull
   private LicenseFactory licenseFactory;
   private int imgWidth;
   private int imgHeight;
@@ -59,6 +62,7 @@ public class DefaultConfiguration implements Configuration {
   private boolean checkDoubleFileExtensions;
   private boolean forceAscii;
   private boolean checkSizeAfterScaling;
+  @NonNull
   private String userRoleName;
   @Nullable
   private String publicPluginNames;
@@ -68,10 +72,13 @@ public class DefaultConfiguration implements Configuration {
   @Singular
   private Set<String> defaultResourceTypes;
   private boolean disallowUnsafeCharacters;
+  @Delegate
   @NonNull
-  private Events events;
+  private EventHandler events;
+  @Delegate
   @NonNull
   private AccessControl accessControl;
+  @Delegate
   @NonNull
   private CommandFactory commandFactory;
   @NonFinal
@@ -130,11 +137,6 @@ public class DefaultConfiguration implements Configuration {
     return sb.toString();
   }
 
-  @Override
-  public License getLicense(String host) {
-    return licenseFactory.getLicense(host);
-  }
-
   public static class Builder {
 
     Builder() {
@@ -149,7 +151,7 @@ public class DefaultConfiguration implements Configuration {
       for (Plugin plugin : plugins) {
         plugin.regist(register);
       }
-      events(register.buildEvents());
+      events(register.buildEventHandler());
       commandFactory(register.buildCommandFactory());
       publicPluginNames(register.getNames());
       return this;

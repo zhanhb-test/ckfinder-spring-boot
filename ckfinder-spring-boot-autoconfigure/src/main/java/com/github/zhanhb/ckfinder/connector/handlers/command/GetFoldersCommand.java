@@ -13,8 +13,8 @@ package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.api.AccessControl;
 import com.github.zhanhb.ckfinder.connector.api.Configuration;
-import com.github.zhanhb.ckfinder.connector.errors.ConnectorError;
-import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
+import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
+import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.Parameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Folder;
@@ -37,22 +37,22 @@ public class GetFoldersCommand extends BaseXmlCommand<Parameter> {
   @Override
   protected void createXml(Connector.Builder rootElement, Parameter param, Configuration configuration) throws ConnectorException {
     if (param.getType() == null) {
-      throw new ConnectorException(ConnectorError.INVALID_TYPE);
+      throw new ConnectorException(ErrorCode.INVALID_TYPE);
     }
 
     if (!configuration.getAccessControl().hasPermission(param.getType().getName(),
             param.getCurrentFolder(), param.getUserRole(),
             AccessControl.FOLDER_VIEW)) {
-      param.throwException(ConnectorError.UNAUTHORIZED);
+      param.throwException(ErrorCode.UNAUTHORIZED);
     }
     if (configuration.isDirectoryHidden(param.getCurrentFolder())) {
-      param.throwException(ConnectorError.INVALID_REQUEST);
+      param.throwException(ErrorCode.INVALID_REQUEST);
     }
 
     Path dir = getPath(param.getType().getPath(), param.getCurrentFolder());
 
     if (!Files.isDirectory(dir)) {
-      param.throwException(ConnectorError.FOLDER_NOT_FOUND);
+      param.throwException(ErrorCode.FOLDER_NOT_FOUND);
     }
 
     try {
@@ -60,7 +60,7 @@ public class GetFoldersCommand extends BaseXmlCommand<Parameter> {
       createFoldersData(rootElement, param, configuration, directories);
     } catch (IOException e) {
       log.error("", e);
-      param.throwException(ConnectorError.ACCESS_DENIED);
+      param.throwException(ErrorCode.ACCESS_DENIED);
     }
   }
 

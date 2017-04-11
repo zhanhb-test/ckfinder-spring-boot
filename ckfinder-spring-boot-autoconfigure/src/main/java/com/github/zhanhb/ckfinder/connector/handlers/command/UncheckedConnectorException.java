@@ -1,7 +1,7 @@
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
-import com.github.zhanhb.ckfinder.connector.errors.ConnectorError;
-import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
+import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
+import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 
 /**
  *
@@ -15,7 +15,7 @@ class UncheckedConnectorException extends RuntimeException {
     super(cause);
   }
 
-  UncheckedConnectorException(ConnectorError code) {
+  UncheckedConnectorException(ErrorCode code) {
     this(new ConnectorException(code));
   }
 

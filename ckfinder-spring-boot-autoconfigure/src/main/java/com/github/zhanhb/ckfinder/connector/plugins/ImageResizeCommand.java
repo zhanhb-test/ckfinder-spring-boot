@@ -13,8 +13,8 @@ package com.github.zhanhb.ckfinder.connector.plugins;
 
 import com.github.zhanhb.ckfinder.connector.api.AccessControl;
 import com.github.zhanhb.ckfinder.connector.api.Configuration;
-import com.github.zhanhb.ckfinder.connector.errors.ConnectorError;
-import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
+import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
+import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.handlers.command.BaseXmlCommand;
 import com.github.zhanhb.ckfinder.connector.handlers.command.IPostCommand;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.ImageResizeParameter;
@@ -40,63 +40,63 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> imp
   @Override
   protected void createXml(Connector.Builder rootElement, ImageResizeParameter param, Configuration configuration) throws ConnectorException {
     if (param.getType() == null) {
-      throw new ConnectorException(ConnectorError.INVALID_TYPE);
+      throw new ConnectorException(ErrorCode.INVALID_TYPE);
     }
 
     if (!configuration.getAccessControl().hasPermission(param.getType().getName(),
             param.getCurrentFolder(), param.getUserRole(),
             AccessControl.FILE_DELETE
             | AccessControl.FILE_UPLOAD)) {
-      param.throwException(ConnectorError.UNAUTHORIZED);
+      param.throwException(ErrorCode.UNAUTHORIZED);
     }
 
     String fileName = param.getFileName();
     String newFileName = param.getNewFileName();
 
     if (fileName == null || fileName.isEmpty()) {
-      param.throwException(ConnectorError.INVALID_NAME);
+      param.throwException(ErrorCode.INVALID_NAME);
     }
 
     if (!FileUtils.isFileNameValid(fileName) || configuration.isFileHidden(fileName)) {
-      param.throwException(ConnectorError.INVALID_REQUEST);
+      param.throwException(ErrorCode.INVALID_REQUEST);
     }
 
     if (!FileUtils.isFileExtensionAllowed(fileName, param.getType())) {
-      param.throwException(ConnectorError.INVALID_REQUEST);
+      param.throwException(ErrorCode.INVALID_REQUEST);
     }
 
     Path file = getPath(param.getType().getPath(), param.getCurrentFolder(), fileName);
     if (!Files.isRegularFile(file)) {
-      param.throwException(ConnectorError.FILE_NOT_FOUND);
+      param.throwException(ErrorCode.FILE_NOT_FOUND);
     }
 
     if (param.isWrongReqSizesParams()) {
-      param.throwException(ConnectorError.INVALID_REQUEST);
+      param.throwException(ErrorCode.INVALID_REQUEST);
     }
 
     if (param.getWidth() != null && param.getHeight() != null) {
 
       if (!FileUtils.isFileNameValid(newFileName) && configuration.isFileHidden(newFileName)) {
-        param.throwException(ConnectorError.INVALID_NAME);
+        param.throwException(ErrorCode.INVALID_NAME);
       }
 
       if (!FileUtils.isFileExtensionAllowed(newFileName, param.getType())) {
-        param.throwException(ConnectorError.INVALID_EXTENSION);
+        param.throwException(ErrorCode.INVALID_EXTENSION);
       }
 
       Path thumbFile = getPath(param.getType().getPath(), param.getCurrentFolder(), newFileName);
 
       if (Files.exists(thumbFile) && !Files.isWritable(thumbFile)) {
-        param.throwException(ConnectorError.ACCESS_DENIED);
+        param.throwException(ErrorCode.ACCESS_DENIED);
       }
       if (!"1".equals(param.getOverwrite()) && Files.exists(thumbFile)) {
-        param.throwException(ConnectorError.ALREADY_EXIST);
+        param.throwException(ErrorCode.ALREADY_EXIST);
       }
       int maxImageHeight = configuration.getImgHeight();
       int maxImageWidth = configuration.getImgWidth();
       if ((maxImageWidth > 0 && param.getWidth() > maxImageWidth)
               || (maxImageHeight > 0 && param.getHeight() > maxImageHeight)) {
-        param.throwException(ConnectorError.INVALID_REQUEST);
+        param.throwException(ErrorCode.INVALID_REQUEST);
       }
 
       try {
@@ -105,7 +105,7 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> imp
 
       } catch (IOException e) {
         log.error("", e);
-        param.throwException(ConnectorError.ACCESS_DENIED);
+        param.throwException(ErrorCode.ACCESS_DENIED);
       }
     }
 
@@ -122,7 +122,7 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> imp
                     size.getHeight(), configuration.getImgQuality());
           } catch (IOException e) {
             log.error("", e);
-            param.throwException(ConnectorError.ACCESS_DENIED);
+            param.throwException(ErrorCode.ACCESS_DENIED);
           }
         }
       }

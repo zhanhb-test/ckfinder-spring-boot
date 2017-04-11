@@ -23,16 +23,15 @@ public class HostLicenseFactory implements LicenseFactory {
   private String getKey(String name) {
     int index = name.length();
     if (index < keys.length()) {
-      for (;;) {
-        String result = keys.get(index);
+      String result;
+      do {
+        result = this.keys.get(index);
         if (result != null) {
-          return result;
+          break;
         }
-        result = generateKey(name);
-        if (keys.compareAndSet(index, null, result)) {
-          return result;
-        }
-      }
+        result = this.generateKey(name);
+      } while (!this.keys.compareAndSet(index, null, result));
+      return result;
     }
     return generateKey(name);
   }

@@ -11,7 +11,7 @@
  */
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
-import com.github.zhanhb.ckfinder.connector.errors.ConnectorError;
+import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.FileUploadParameter;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import com.google.gson.Gson;
@@ -32,7 +32,7 @@ public class QuickUploadCommand extends FileUploadCommand {
     if ("json".equalsIgnoreCase(param.getResponseType())) {
       handleJSONResponse(writer, errorMsg, null, param);
     } else {
-      ConnectorError errorCode = param.getErrorCode();
+      ErrorCode errorCode = param.getErrorCode();
       int errorNum = errorCode != null ? errorCode.getCode() : 0;
       writer.write("<script type=\"text/javascript\">window.parent.OnUploadCompleted(" + errorNum + ", '");
       if (param.isUploaded()) {
@@ -105,7 +105,7 @@ public class QuickUploadCommand extends FileUploadCommand {
 
     if (errorMsg != null && !errorMsg.isEmpty()) {
       Map<String, Object> jsonErrObj = new HashMap<>(3);
-      ConnectorError error = param.getErrorCode();
+      ErrorCode error = param.getErrorCode();
       jsonErrObj.put("number", error != null ? error.getCode() : 0);
       jsonErrObj.put("message", errorMsg);
       jsonObj.put("error", jsonErrObj);

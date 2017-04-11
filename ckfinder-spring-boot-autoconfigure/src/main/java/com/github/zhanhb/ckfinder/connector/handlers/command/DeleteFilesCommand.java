@@ -13,9 +13,9 @@ package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.api.AccessControl;
 import com.github.zhanhb.ckfinder.connector.api.Configuration;
+import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.Constants;
-import com.github.zhanhb.ckfinder.connector.errors.ConnectorError;
-import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
+import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.DeleteFilesParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.DeleteFiles;
@@ -49,43 +49,43 @@ public class DeleteFilesCommand extends ErrorListXmlCommand<DeleteFilesParameter
    * @throws ConnectorException when error occurs
    */
   @Override
-  protected ConnectorError getDataForXml(DeleteFilesParameter param, Configuration configuration)
+  protected ErrorCode getDataForXml(DeleteFilesParameter param, Configuration configuration)
           throws ConnectorException {
     if (param.getType() == null) {
-      throw new ConnectorException(ConnectorError.INVALID_TYPE);
+      throw new ConnectorException(ErrorCode.INVALID_TYPE);
     }
 
     for (FilePostParam fileItem : param.getFiles()) {
       if (!FileUtils.isFileNameValid(fileItem.getName())) {
-        param.throwException(ConnectorError.INVALID_REQUEST);
+        param.throwException(ErrorCode.INVALID_REQUEST);
       }
 
       if (fileItem.getType() == null) {
-        param.throwException(ConnectorError.INVALID_REQUEST);
+        param.throwException(ErrorCode.INVALID_REQUEST);
       }
 
       if (fileItem.getFolder() == null || fileItem.getFolder().isEmpty()
               || Pattern.compile(Constants.INVALID_PATH_REGEX).matcher(
                       fileItem.getFolder()).find()) {
-        param.throwException(ConnectorError.INVALID_REQUEST);
+        param.throwException(ErrorCode.INVALID_REQUEST);
       }
 
       if (configuration.isDirectoryHidden(fileItem.getFolder())) {
-        param.throwException(ConnectorError.INVALID_REQUEST);
+        param.throwException(ErrorCode.INVALID_REQUEST);
       }
 
       if (configuration.isFileHidden(fileItem.getName())) {
-        param.throwException(ConnectorError.INVALID_REQUEST);
+        param.throwException(ErrorCode.INVALID_REQUEST);
       }
 
       if (!FileUtils.isFileExtensionAllowed(fileItem.getName(), fileItem.getType())) {
-        param.throwException(ConnectorError.INVALID_REQUEST);
+        param.throwException(ErrorCode.INVALID_REQUEST);
 
       }
 
       if (!configuration.getAccessControl().hasPermission(fileItem.getType().getName(), fileItem.getFolder(), param.getUserRole(),
               AccessControl.FILE_DELETE)) {
-        param.throwException(ConnectorError.UNAUTHORIZED);
+        param.throwException(ErrorCode.UNAUTHORIZED);
       }
     }
 
@@ -94,7 +94,7 @@ public class DeleteFilesCommand extends ErrorListXmlCommand<DeleteFilesParameter
 
       param.setAddResultNode(true);
       if (!Files.exists(file)) {
-        param.appendError(fileItem, ConnectorError.FILE_NOT_FOUND);
+        param.appendError(fileItem, ErrorCode.FILE_NOT_FOUND);
         continue;
       }
 
@@ -114,11 +114,11 @@ public class DeleteFilesCommand extends ErrorListXmlCommand<DeleteFilesParameter
           }
         }
       } else { //If access is denied, report error and try to delete rest of files.
-        param.appendError(fileItem, ConnectorError.ACCESS_DENIED);
+        param.appendError(fileItem, ErrorCode.ACCESS_DENIED);
       }
     }
     if (param.hasError()) {
-      return ConnectorError.DELETE_FAILED;
+      return ErrorCode.DELETE_FAILED;
     } else {
       return null;
     }

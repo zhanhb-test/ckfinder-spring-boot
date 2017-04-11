@@ -1,8 +1,8 @@
 package com.github.zhanhb.ckfinder.connector.handlers.parameter;
 
-import com.github.zhanhb.ckfinder.connector.errors.ConnectorError;
-import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
-import com.github.zhanhb.ckfinder.connector.errors.ErrorUtils;
+import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
+import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
+import com.github.zhanhb.ckfinder.connector.utils.MessageUtil;
 import java.util.Objects;
 import lombok.Getter;
 import lombok.Setter;
@@ -46,7 +46,7 @@ public class FileUploadParameter extends Parameter {
   /**
    * Error code number.
    */
-  private ConnectorError errorCode;
+  private ErrorCode errorCode;
 
   public FileUploadParameter() {
     this.fileName = "";
@@ -54,14 +54,14 @@ public class FileUploadParameter extends Parameter {
   }
 
   @Override
-  public void throwException(ConnectorError code) throws ConnectorException {
-    String msg = ErrorUtils.INSTANCE.getErrorMsgByLangAndCode(getLangCode(), code.getCode());
+  public void throwException(ErrorCode code) throws ConnectorException {
+    String msg = MessageUtil.INSTANCE.getErrorMsgByLangAndCode(getLangCode(), code.getCode());
     throw new ConnectorException(code, msg);
   }
 
   public void throwException(String message) throws ConnectorException {
     Objects.requireNonNull(message);
-    throw new ConnectorException(ConnectorError.CUSTOM_ERROR, message);
+    throw new ConnectorException(ErrorCode.CUSTOM_ERROR, message);
   }
 
 }

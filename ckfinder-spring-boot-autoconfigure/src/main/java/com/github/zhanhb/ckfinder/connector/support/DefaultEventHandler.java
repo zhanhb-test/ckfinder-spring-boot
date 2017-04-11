@@ -11,11 +11,12 @@
  */
 package com.github.zhanhb.ckfinder.connector.support;
 
+import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
+import com.github.zhanhb.ckfinder.connector.api.EventHandler;
 import com.github.zhanhb.ckfinder.connector.api.FileUploadEvent;
 import com.github.zhanhb.ckfinder.connector.api.FileUploadListener;
 import com.github.zhanhb.ckfinder.connector.api.InitCommandEvent;
 import com.github.zhanhb.ckfinder.connector.api.PluginInfoRegister;
-import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 
@@ -23,30 +24,25 @@ import lombok.extern.slf4j.Slf4j;
  * Provides support for event handlers.
  */
 @Slf4j
-public class Events {
+public class DefaultEventHandler implements EventHandler {
 
   private final List<FileUploadListener> fileUploadListeners;
   private final List<PluginInfoRegister> pluginInfoRegisters;
 
-  Events(List<FileUploadListener> fileUploadListeners, List<PluginInfoRegister> pluginInfoRegisters) {
+  DefaultEventHandler(List<FileUploadListener> fileUploadListeners, List<PluginInfoRegister> pluginInfoRegisters) {
     this.fileUploadListeners = fileUploadListeners;
     this.pluginInfoRegisters = pluginInfoRegisters;
   }
 
-  @SuppressWarnings({"BroadCatchBlock", "TooBroadCatch", "UseSpecificCatch"})
+  @Override
   public void fireOnFileUpload(FileUploadEvent args) throws ConnectorException {
     log.trace("{}", fileUploadListeners);
-    try {
-      for (FileUploadListener eventHandler : fileUploadListeners) {
-        eventHandler.onFileUploadComplete(args);
-      }
-    } catch (ConnectorException ex) {
-      throw ex;
-    } catch (Exception e) {
-      throw new ConnectorException(e);
+    for (FileUploadListener eventHandler : fileUploadListeners) {
+      eventHandler.onFileUploadComplete(args);
     }
   }
 
+  @Override
   public void fireOnInitCommand(InitCommandEvent event) {
     log.trace("{}", pluginInfoRegisters);
     for (PluginInfoRegister pluginInfoRegister : pluginInfoRegisters) {

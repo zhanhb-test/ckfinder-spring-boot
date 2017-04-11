@@ -9,7 +9,7 @@
  * modifying or distribute this file or part of its contents. The contents of
  * this file is part of the Source Code of CKFinder.
  */
-package com.github.zhanhb.ckfinder.connector.errors;
+package com.github.zhanhb.ckfinder.connector.utils;
 
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -17,11 +17,11 @@ import java.util.ResourceBundle;
 /**
  * Error utils.
  */
-public enum ErrorUtils {
+public enum MessageUtil {
 
   INSTANCE;
 
-  private static final String BUNDLE_NAME = ErrorUtils.class.getPackage()
+  private static final String BUNDLE_NAME = MessageUtil.class.getPackage()
           .getName().concat(".LocalStrings");
 
   /**

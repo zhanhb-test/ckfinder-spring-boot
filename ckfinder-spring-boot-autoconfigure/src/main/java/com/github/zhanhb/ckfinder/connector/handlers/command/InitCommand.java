@@ -13,11 +13,11 @@ package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.api.AccessControl;
 import com.github.zhanhb.ckfinder.connector.api.Configuration;
+import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.InitCommandEvent;
 import com.github.zhanhb.ckfinder.connector.api.License;
 import com.github.zhanhb.ckfinder.connector.api.ResourceType;
 import com.github.zhanhb.ckfinder.connector.api.ThumbnailProperties;
-import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.InitParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.ConnectorInfo;
@@ -145,12 +145,10 @@ public class InitCommand extends XmlCommand<InitParameter> {
    * @param configuration connector configuration
    */
   private void createPluginsData(Connector.Builder rootElement, Configuration configuration) {
-    if (configuration.getEvents() != null) {
-      PluginsInfos.Builder builder = PluginsInfos.builder();
-      InitCommandEvent event = new InitCommandEvent(builder);
-      configuration.getEvents().fireOnInitCommand(event);
-      rootElement.result(builder.build());
-    }
+    PluginsInfos.Builder builder = PluginsInfos.builder();
+    InitCommandEvent event = new InitCommandEvent(builder);
+    configuration.fireOnInitCommand(event);
+    rootElement.result(builder.build());
   }
 
   /**

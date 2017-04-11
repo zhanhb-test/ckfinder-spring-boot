@@ -13,10 +13,10 @@ package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.api.Command;
 import com.github.zhanhb.ckfinder.connector.api.Configuration;
+import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.Constants;
+import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.api.ResourceType;
-import com.github.zhanhb.ckfinder.connector.errors.ConnectorError;
-import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.Parameter;
 import com.github.zhanhb.ckfinder.connector.utils.PathUtils;
 import java.io.IOException;
@@ -66,7 +66,7 @@ public abstract class BaseCommand<T extends Parameter> implements Command {
     checkRequestPathValid(currentFolder);
 
     if (configuration.isDirectoryHidden(currentFolder)) {
-      throw new ConnectorException(ConnectorError.INVALID_REQUEST);
+      throw new ConnectorException(ErrorCode.INVALID_REQUEST);
     }
 
     String typeName = request.getParameter("type");
@@ -74,7 +74,7 @@ public abstract class BaseCommand<T extends Parameter> implements Command {
     if (currentFolder != null && typeName != null && type != null) {
       Path currDir = getPath(type.getPath(), currentFolder);
       if (!Files.isDirectory(currDir)) {
-        throw new ConnectorException(ConnectorError.FOLDER_NOT_FOUND);
+        throw new ConnectorException(ErrorCode.FOLDER_NOT_FOUND);
       }
     }
     param.setType(type);
@@ -89,7 +89,7 @@ public abstract class BaseCommand<T extends Parameter> implements Command {
    */
   private void checkConnectorEnabled(Configuration configuration) throws ConnectorException {
     if (!configuration.isEnabled()) {
-      throw new ConnectorException(ConnectorError.CONNECTOR_DISABLED);
+      throw new ConnectorException(ErrorCode.CONNECTOR_DISABLED);
     }
   }
 
@@ -116,7 +116,7 @@ public abstract class BaseCommand<T extends Parameter> implements Command {
   @SuppressWarnings("FinalMethod")
   final void checkRequestPathValid(String reqParam) throws ConnectorException {
     if (StringUtils.hasLength(reqParam) && Pattern.compile(Constants.INVALID_PATH_REGEX).matcher(reqParam).find()) {
-      throw new ConnectorException(ConnectorError.INVALID_NAME);
+      throw new ConnectorException(ErrorCode.INVALID_NAME);
     }
   }
 

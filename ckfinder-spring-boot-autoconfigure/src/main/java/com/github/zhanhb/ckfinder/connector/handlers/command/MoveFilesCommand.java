@@ -13,9 +13,9 @@ package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.api.AccessControl;
 import com.github.zhanhb.ckfinder.connector.api.Configuration;
+import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.Constants;
-import com.github.zhanhb.ckfinder.connector.errors.ConnectorError;
-import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
+import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.MoveFilesParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.MoveFiles;
@@ -46,10 +46,10 @@ public class MoveFilesCommand extends ErrorListXmlCommand<MoveFilesParameter> im
   }
 
   @Override
-  protected ConnectorError getDataForXml(MoveFilesParameter param, Configuration configuration)
+  protected ErrorCode getDataForXml(MoveFilesParameter param, Configuration configuration)
           throws ConnectorException {
     if (param.getType() == null) {
-      throw new ConnectorException(ConnectorError.INVALID_TYPE);
+      throw new ConnectorException(ErrorCode.INVALID_TYPE);
     }
 
     if (!configuration.getAccessControl().hasPermission(param.getType().getName(),
@@ -58,48 +58,48 @@ public class MoveFilesCommand extends ErrorListXmlCommand<MoveFilesParameter> im
             AccessControl.FILE_RENAME
             | AccessControl.FILE_DELETE
             | AccessControl.FILE_UPLOAD)) {
-      param.throwException(ConnectorError.UNAUTHORIZED);
+      param.throwException(ErrorCode.UNAUTHORIZED);
     }
 
     for (FilePostParam file : param.getFiles()) {
       if (!FileUtils.isFileNameValid(file.getName())) {
-        param.throwException(ConnectorError.INVALID_REQUEST);
+        param.throwException(ErrorCode.INVALID_REQUEST);
       }
       if (Pattern.compile(Constants.INVALID_PATH_REGEX).matcher(
               file.getFolder()).find()) {
-        param.throwException(ConnectorError.INVALID_REQUEST);
+        param.throwException(ErrorCode.INVALID_REQUEST);
       }
       if (file.getType() == null) {
-        param.throwException(ConnectorError.INVALID_REQUEST);
+        param.throwException(ErrorCode.INVALID_REQUEST);
       }
       if (file.getFolder() == null || file.getFolder().isEmpty()) {
-        param.throwException(ConnectorError.INVALID_REQUEST);
+        param.throwException(ErrorCode.INVALID_REQUEST);
       }
 
       if (configuration.isDirectoryHidden(file.getFolder())) {
-        param.throwException(ConnectorError.INVALID_REQUEST);
+        param.throwException(ErrorCode.INVALID_REQUEST);
       }
 
       if (configuration.isFileHidden(file.getName())) {
-        param.throwException(ConnectorError.INVALID_REQUEST);
+        param.throwException(ErrorCode.INVALID_REQUEST);
       }
 
       if (!configuration.getAccessControl().hasPermission(file.getType().getName(),
               file.getFolder(), param.getUserRole(), AccessControl.FILE_VIEW | AccessControl.FILE_DELETE)) {
-        param.throwException(ConnectorError.UNAUTHORIZED);
+        param.throwException(ErrorCode.UNAUTHORIZED);
       }
     }
 
     for (FilePostParam file : param.getFiles()) {
       if (!FileUtils.isFileExtensionAllowed(file.getName(), param.getType())) {
-        param.appendError(file, ConnectorError.INVALID_EXTENSION);
+        param.appendError(file, ErrorCode.INVALID_EXTENSION);
         continue;
       }
       // check #4 (extension) - when move to another resource type,
       //double check extension
       if (param.getType() != file.getType()
               && !FileUtils.isFileExtensionAllowed(file.getName(), file.getType())) {
-        param.appendError(file, ConnectorError.INVALID_EXTENSION);
+        param.appendError(file, ErrorCode.INVALID_EXTENSION);
         continue;
       }
 
@@ -112,23 +112,23 @@ public class MoveFilesCommand extends ErrorListXmlCommand<MoveFilesParameter> im
       try {
         attrs = Files.readAttributes(sourceFile, BasicFileAttributes.class);
       } catch (IOException ex) {
-        param.appendError(file, ConnectorError.FILE_NOT_FOUND);
+        param.appendError(file, ErrorCode.FILE_NOT_FOUND);
         continue;
       }
       if (!attrs.isRegularFile()) {
-        param.appendError(file, ConnectorError.FILE_NOT_FOUND);
+        param.appendError(file, ErrorCode.FILE_NOT_FOUND);
       }
       if (param.getType() != file.getType()) {
         long maxSize = param.getType().getMaxSize();
         if (maxSize != 0 && maxSize < attrs.size()) {
-          param.appendError(file, ConnectorError.UPLOADED_TOO_BIG);
+          param.appendError(file, ErrorCode.UPLOADED_TOO_BIG);
           continue;
         }
         // fail through
       }
       try {
         if (Files.isSameFile(sourceFile, destFile)) {
-          param.appendError(file, ConnectorError.SOURCE_AND_TARGET_PATH_EQUAL);
+          param.appendError(file, ErrorCode.SOURCE_AND_TARGET_PATH_EQUAL);
           continue;
         }
       } catch (IOException ex) {
@@ -143,22 +143,22 @@ public class MoveFilesCommand extends ErrorListXmlCommand<MoveFilesParameter> im
             Files.move(sourceFile, destFile, StandardCopyOption.REPLACE_EXISTING);
           } catch (IOException ex) {
             log.error("move file fail", ex);
-            param.appendError(file, ConnectorError.ACCESS_DENIED);
+            param.appendError(file, ErrorCode.ACCESS_DENIED);
             continue;
           }
         } else if (options != null && options.contains("autorename")) {
           destFile = handleAutoRename(sourceFile, destFile);
           if (destFile == null) {
-            param.appendError(file, ConnectorError.ACCESS_DENIED);
+            param.appendError(file, ErrorCode.ACCESS_DENIED);
             continue;
           }
         } else {
-          param.appendError(file, ConnectorError.ALREADY_EXIST);
+          param.appendError(file, ErrorCode.ALREADY_EXIST);
           continue;
         }
       } catch (IOException e) {
         log.error("", e);
-        param.appendError(file, ConnectorError.ACCESS_DENIED);
+        param.appendError(file, ErrorCode.ACCESS_DENIED);
         continue;
       }
       param.filesMovedPlus();
@@ -167,7 +167,7 @@ public class MoveFilesCommand extends ErrorListXmlCommand<MoveFilesParameter> im
 
     param.setAddResultNode(true);
     if (param.hasError()) {
-      return ConnectorError.MOVE_FAILED;
+      return ErrorCode.MOVE_FAILED;
     } else {
       return null;
     }

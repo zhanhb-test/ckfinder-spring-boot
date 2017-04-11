@@ -13,8 +13,8 @@ package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.api.AccessControl;
 import com.github.zhanhb.ckfinder.connector.api.Configuration;
-import com.github.zhanhb.ckfinder.connector.errors.ConnectorError;
-import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
+import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
+import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.DownloadFileParameter;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import com.github.zhanhb.ckfinder.download.ContentDisposition;
@@ -43,27 +43,27 @@ public class DownloadFileCommand extends BaseCommand<DownloadFileParameter> {
   void execute(DownloadFileParameter param, HttpServletRequest request, HttpServletResponse response, Configuration configuration)
           throws ConnectorException, IOException {
     if (param.getType() == null) {
-      throw new ConnectorException(ConnectorError.INVALID_TYPE);
+      throw new ConnectorException(ErrorCode.INVALID_TYPE);
     }
 
     if (!configuration.getAccessControl().hasPermission(param.getType().getName(),
             param.getCurrentFolder(), param.getUserRole(),
             AccessControl.FILE_VIEW)) {
-      param.throwException(ConnectorError.UNAUTHORIZED);
+      param.throwException(ErrorCode.UNAUTHORIZED);
     }
 
     if (!FileUtils.isFileNameValid(param.getFileName())
             || !FileUtils.isFileExtensionAllowed(param.getFileName(),
                     param.getType())) {
-      param.throwException(ConnectorError.INVALID_REQUEST);
+      param.throwException(ErrorCode.INVALID_REQUEST);
     }
 
     if (configuration.isDirectoryHidden(param.getCurrentFolder())) {
-      param.throwException(ConnectorError.INVALID_REQUEST);
+      param.throwException(ErrorCode.INVALID_REQUEST);
     }
 
     if (configuration.isFileHidden(param.getFileName())) {
-      param.throwException(ConnectorError.FILE_NOT_FOUND);
+      param.throwException(ErrorCode.FILE_NOT_FOUND);
     }
 
     Path file = getPath(param.getType().getPath(), param.getCurrentFolder(), param.getFileName());
@@ -117,7 +117,7 @@ public class DownloadFileCommand extends BaseCommand<DownloadFileParameter> {
                 return mimetype;
               })
               .notFound(context -> {
-                throw new UncheckedConnectorException(ConnectorError.FILE_NOT_FOUND);
+                throw new UncheckedConnectorException(ErrorCode.FILE_NOT_FOUND);
               })
               .contentDisposition(ContentDisposition.attachment())
               .build();

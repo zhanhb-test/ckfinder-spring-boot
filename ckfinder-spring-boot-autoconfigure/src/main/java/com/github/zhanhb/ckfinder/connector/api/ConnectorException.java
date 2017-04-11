@@ -9,10 +9,8 @@
  * modifying or distribute this file or part of its contents. The contents of
  * this file is part of the Source Code of CKFinder.
  */
-package com.github.zhanhb.ckfinder.connector.errors;
+package com.github.zhanhb.ckfinder.connector.api;
 
-import com.github.zhanhb.ckfinder.connector.api.ResourceType;
-import com.github.zhanhb.ckfinder.connector.handlers.parameter.Parameter;
 import java.util.Objects;
 
 /**
@@ -22,21 +20,22 @@ public class ConnectorException extends Exception {
 
   private static final long serialVersionUID = -8643752550259111562L;
 
-  private final ConnectorError errorCode;
+  private final ErrorCode errorCode;
   private final String currentFolder;
   private ResourceType type;
 
   /**
    * standard constructor.
    *
-   * @param param the parameters
+   * @param type resource type
+   * @param currentFolder the parameters
    * @param code error code number
    */
-  public ConnectorException(Parameter param, ConnectorError code) {
+  public ConnectorException(ErrorCode code, ResourceType type, String currentFolder) {
     super(code.name(), null);
     this.errorCode = Objects.requireNonNull(code);
-    this.currentFolder = param.getCurrentFolder();
-    this.type = param.getType();
+    this.type = type;
+    this.currentFolder = currentFolder;
   }
 
   /**
@@ -44,7 +43,7 @@ public class ConnectorException extends Exception {
    *
    * @param code error code number
    */
-  public ConnectorException(ConnectorError code) {
+  public ConnectorException(ErrorCode code) {
     super(code.name(), null);
     this.errorCode = Objects.requireNonNull(code);
     this.currentFolder = null;
@@ -56,7 +55,7 @@ public class ConnectorException extends Exception {
    * @param code error code number
    * @param errorMsg error text message
    */
-  public ConnectorException(ConnectorError code, String errorMsg) {
+  public ConnectorException(ErrorCode code, String errorMsg) {
     super(errorMsg, null);
     this.errorCode = Objects.requireNonNull(code);
     this.currentFolder = null;
@@ -68,7 +67,7 @@ public class ConnectorException extends Exception {
    * @param code error code number
    * @param e exception
    */
-  public ConnectorException(ConnectorError code, Exception e) {
+  public ConnectorException(ErrorCode code, Exception e) {
     super(e.getMessage(), e);
     if (e instanceof ConnectorException) {
       throw new IllegalArgumentException();
@@ -77,22 +76,7 @@ public class ConnectorException extends Exception {
     this.currentFolder = null;
   }
 
-  /**
-   * constructor with exception param.
-   *
-   * @param cause Exception
-   */
-  @SuppressWarnings("deprecation")
-  public ConnectorException(Exception cause) {
-    super(cause.getMessage(), cause);
-    if (cause instanceof ConnectorException) {
-      throw new IllegalArgumentException();
-    }
-    this.currentFolder = null;
-    this.errorCode = ConnectorError.UNKNOWN;
-  }
-
-  public ConnectorError getErrorCode() {
+  public ErrorCode getErrorCode() {
     return errorCode;
   }
 

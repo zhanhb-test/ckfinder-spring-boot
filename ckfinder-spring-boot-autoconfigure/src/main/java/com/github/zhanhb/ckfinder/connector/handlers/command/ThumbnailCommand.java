@@ -13,8 +13,8 @@ package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.api.AccessControl;
 import com.github.zhanhb.ckfinder.connector.api.Configuration;
-import com.github.zhanhb.ckfinder.connector.errors.ConnectorError;
-import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
+import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
+import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.ThumbnailParameter;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import com.github.zhanhb.ckfinder.connector.utils.ImageUtils;
@@ -39,25 +39,25 @@ public class ThumbnailCommand extends BaseCommand<ThumbnailParameter> {
   @SuppressWarnings("FinalMethod")
   final void execute(ThumbnailParameter param, HttpServletRequest request, HttpServletResponse response, Configuration configuration) throws ConnectorException, IOException {
     if (configuration.getThumbnail() == null) {
-      param.throwException(ConnectorError.THUMBNAILS_DISABLED);
+      param.throwException(ErrorCode.THUMBNAILS_DISABLED);
     }
 
     if (param.getType() == null) {
-      throw new ConnectorException(ConnectorError.INVALID_TYPE);
+      throw new ConnectorException(ErrorCode.INVALID_TYPE);
     }
 
     if (!configuration.getAccessControl().hasPermission(param.getType().getName(),
             param.getCurrentFolder(), param.getUserRole(),
             AccessControl.FILE_VIEW)) {
-      param.throwException(ConnectorError.UNAUTHORIZED);
+      param.throwException(ErrorCode.UNAUTHORIZED);
     }
 
     if (!FileUtils.isFileNameValid(param.getFileName())) {
-      param.throwException(ConnectorError.INVALID_REQUEST);
+      param.throwException(ErrorCode.INVALID_REQUEST);
     }
 
     if (configuration.isFileHidden(param.getFileName())) {
-      param.throwException(ConnectorError.FILE_NOT_FOUND);
+      param.throwException(ErrorCode.FILE_NOT_FOUND);
     }
 
     Path fullCurrentPath = getPath(param.getType().getThumbnailPath(), param.getCurrentFolder());
@@ -67,7 +67,7 @@ public class ThumbnailCommand extends BaseCommand<ThumbnailParameter> {
       log.debug("ThumbnailCommand.createThumb({})", fullCurrentPath);
       Files.createDirectories(fullCurrentPath);
     } catch (IOException e) {
-      throw new ConnectorException(ConnectorError.ACCESS_DENIED, e);
+      throw new ConnectorException(ErrorCode.ACCESS_DENIED, e);
     }
     Path thumbFile = getPath(fullCurrentPath, param.getFileName());
     log.debug("thumbFile: {}", thumbFile);
@@ -77,12 +77,12 @@ public class ThumbnailCommand extends BaseCommand<ThumbnailParameter> {
               param.getCurrentFolder(), param.getFileName());
       log.debug("orginFile: {}", orginFile);
       if (!Files.exists(orginFile)) {
-        param.throwException(ConnectorError.FILE_NOT_FOUND);
+        param.throwException(ErrorCode.FILE_NOT_FOUND);
       }
       try {
         boolean success = ImageUtils.createThumb(orginFile, thumbFile, configuration.getThumbnail());
         if (!success) {
-          param.throwException(ConnectorError.FILE_NOT_FOUND);
+          param.throwException(ErrorCode.FILE_NOT_FOUND);
         }
       } catch (IOException | ConnectorException e) {
         try {
@@ -90,7 +90,7 @@ public class ThumbnailCommand extends BaseCommand<ThumbnailParameter> {
         } catch (IOException ex) {
           e.addSuppressed(ex);
         }
-        throw new ConnectorException(ConnectorError.ACCESS_DENIED, e);
+        throw new ConnectorException(ErrorCode.ACCESS_DENIED, e);
       }
     }
 
@@ -103,7 +103,7 @@ public class ThumbnailCommand extends BaseCommand<ThumbnailParameter> {
     } catch (ServletException ex) {
       throw new AssertionError(ex);
     } catch (IOException ex) {
-      throw new ConnectorException(ConnectorError.ACCESS_DENIED, ex);
+      throw new ConnectorException(ErrorCode.ACCESS_DENIED, ex);
     }
   }
 
@@ -123,7 +123,7 @@ public class ThumbnailCommand extends BaseCommand<ThumbnailParameter> {
     static {
       INSTANCE = PathPartial.builder()
               .notFound(context -> {
-                throw new UncheckedConnectorException(ConnectorError.FILE_NOT_FOUND);
+                throw new UncheckedConnectorException(ErrorCode.FILE_NOT_FOUND);
               })
               .contentDisposition(ContentDisposition.inline())
               .build();

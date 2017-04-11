@@ -1,6 +1,7 @@
 package com.github.zhanhb.ckfinder.connector.support;
 
 import com.github.zhanhb.ckfinder.connector.api.Command;
+import com.github.zhanhb.ckfinder.connector.api.CommandFactory;
 import com.github.zhanhb.ckfinder.connector.handlers.command.CopyFilesCommand;
 import com.github.zhanhb.ckfinder.connector.handlers.command.CreateFolderCommand;
 import com.github.zhanhb.ckfinder.connector.handlers.command.DeleteFilesCommand;
@@ -78,7 +79,7 @@ public class CommandFactoryBuilder {
     return this;
   }
 
-  DefaultCommandFactory build() {
+  CommandFactory build() {
     return new DefaultCommandFactory(new TreeMap<>(commands));
   }
 

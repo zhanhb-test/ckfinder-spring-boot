@@ -2,12 +2,12 @@ package com.github.zhanhb.ckfinder.connector.support;
 
 import com.github.zhanhb.ckfinder.connector.api.AccessControl;
 import com.github.zhanhb.ckfinder.connector.api.BasePathBuilder;
+import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.Constants;
+import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.api.License;
 import com.github.zhanhb.ckfinder.connector.api.ResourceType;
 import com.github.zhanhb.ckfinder.connector.api.ThumbnailProperties;
-import com.github.zhanhb.ckfinder.connector.errors.ConnectorError;
-import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.plugins.FileEditorPlugin;
 import com.github.zhanhb.ckfinder.connector.plugins.ImageResizeParam;
 import com.github.zhanhb.ckfinder.connector.plugins.ImageResizePlugin;
@@ -221,7 +221,7 @@ public enum XmlConfigurationParser {
   private Resource getFullConfigPath(ResourceLoader resourceLoader, String xmlFilePath) throws ConnectorException {
     Resource resource = resourceLoader.getResource(xmlFilePath);
     if (!resource.exists()) {
-      throw new ConnectorException(ConnectorError.FILE_NOT_FOUND,
+      throw new ConnectorException(ErrorCode.FILE_NOT_FOUND,
               "Configuration file could not be found under specified location.");
     }
     return resource;
@@ -417,7 +417,7 @@ public enum XmlConfigurationParser {
           String thumbsDir = nullNodeToString(childNode).replace(Constants.BASE_DIR_PLACEHOLDER, "");
           Path file = getPath(basePath, thumbsDir);
           if (file == null) {
-            throw new ConnectorException(ConnectorError.FOLDER_NOT_FOUND,
+            throw new ConnectorException(ErrorCode.FOLDER_NOT_FOUND,
                     "Thumbs directory could not be created using specified path.");
           }
           thumbnail.path(Files.createDirectories(file));
@@ -526,7 +526,7 @@ public enum XmlConfigurationParser {
 
     Path p = getPath(basePathBuilder.getBasePath(), path);
     if (!p.isAbsolute()) {
-      throw new ConnectorException(ConnectorError.FOLDER_NOT_FOUND,
+      throw new ConnectorException(ErrorCode.FOLDER_NOT_FOUND,
               "Resource directory could not be created using specified path.");
     }
     return builder.url(url).path(Files.createDirectories(p)).thumbnailPath(getPath(thumbnail != null ? thumbnail.getPath() : null, path)).build();

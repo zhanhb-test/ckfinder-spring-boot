@@ -13,10 +13,10 @@ package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.api.AccessControl;
 import com.github.zhanhb.ckfinder.connector.api.Configuration;
+import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
+import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.api.FileUploadEvent;
 import com.github.zhanhb.ckfinder.connector.api.ResourceType;
-import com.github.zhanhb.ckfinder.connector.errors.ConnectorError;
-import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.FileUploadParameter;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import com.github.zhanhb.ckfinder.connector.utils.ImageUtils;
@@ -157,7 +157,7 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
     param.setResponseType(request.getParameter("response_type") != null ? request.getParameter("response_type") : request.getParameter("responseType"));
     param.setLangCode(request.getParameter("langCode"));
     if (param.getType() == null) {
-      param.setErrorCode(ConnectorError.INVALID_TYPE);
+      param.setErrorCode(ErrorCode.INVALID_TYPE);
     }
     return param;
   }
@@ -175,7 +175,7 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
     if (!configuration.getAccessControl().hasPermission(param.getType().getName(),
             param.getCurrentFolder(), param.getUserRole(),
             AccessControl.FILE_UPLOAD)) {
-      param.throwException(ConnectorError.UNAUTHORIZED);
+      param.throwException(ErrorCode.UNAUTHORIZED);
     }
     fileUpload(request, param, configuration);
   }
@@ -213,10 +213,10 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
       param.throwException("No file provided in the request.");
     } catch (MultipartException e) {
       log.debug("catch MultipartException", e);
-      param.throwException(ConnectorError.UPLOADED_TOO_BIG);
+      param.throwException(ErrorCode.UPLOADED_TOO_BIG);
     } catch (IOException e) {
       log.debug("catch IOException", e);
-      param.throwException(ConnectorError.ACCESS_DENIED);
+      param.throwException(ErrorCode.ACCESS_DENIED);
     }
   }
 
@@ -237,13 +237,13 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
     if (ImageUtils.isImageExtension(file)) {
       if (!configuration.isCheckSizeAfterScaling()
               && !ImageUtils.checkImageSize(item, configuration)) {
-        param.throwException(ConnectorError.UPLOADED_TOO_BIG);
+        param.throwException(ErrorCode.UPLOADED_TOO_BIG);
       }
       ImageUtils.createTmpThumb(item, file, getFileItemName(item), configuration);
       if (configuration.isCheckSizeAfterScaling()
               && !FileUtils.isFileSizeInRange(param.getType(), Files.size(file))) {
         Files.deleteIfExists(file);
-        param.throwException(ConnectorError.UPLOADED_TOO_BIG);
+        param.throwException(ErrorCode.UPLOADED_TOO_BIG);
       }
     } else {
       try (InputStream in = item.getInputStream()) {
@@ -251,7 +251,7 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
       }
     }
     FileUploadEvent args = new FileUploadEvent(param.getCurrentFolder(), file);
-    configuration.getEvents().fireOnFileUpload(args);
+    configuration.fireOnFileUpload(args);
   }
 
   /**
@@ -280,7 +280,7 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
         sb.setLength(len);
         file = getPath(path, name);
       } while (Files.exists(file));
-      param.setErrorCode(ConnectorError.UPLOADED_FILE_RENAMED);
+      param.setErrorCode(ErrorCode.UPLOADED_FILE_RENAMED);
       param.setNewFileName(name);
     }
     return name;
@@ -298,7 +298,7 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
   private void validateUploadItem(MultipartFile item, Path path,
           FileUploadParameter param, Configuration configuration) throws ConnectorException {
     if (item.getOriginalFilename() == null || item.getOriginalFilename().length() <= 0) {
-      param.throwException(ConnectorError.UPLOADED_INVALID);
+      param.throwException(ErrorCode.UPLOADED_INVALID);
     }
     param.setFileName(getFileItemName(item));
     param.setNewFileName(param.getFileName());
@@ -312,19 +312,19 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
       param.setNewFileName(FileUtils.convertToAscii(param.getNewFileName()));
     }
     if (!param.getNewFileName().equals(param.getFileName())) {
-      param.setErrorCode(ConnectorError.UPLOADED_INVALID_NAME_RENAMED);
+      param.setErrorCode(ErrorCode.UPLOADED_INVALID_NAME_RENAMED);
     }
 
     if (configuration.isDirectoryHidden(param.getCurrentFolder())) {
-      param.throwException(ConnectorError.INVALID_REQUEST);
+      param.throwException(ErrorCode.INVALID_REQUEST);
     }
     if (!FileUtils.isFileNameValid(param.getNewFileName())
             || configuration.isFileHidden(param.getNewFileName())) {
-      param.throwException(ConnectorError.INVALID_NAME);
+      param.throwException(ErrorCode.INVALID_NAME);
     }
     final ResourceType resourceType = param.getType();
     if (!FileUtils.isFileExtensionAllowed(param.getNewFileName(), resourceType)) {
-      param.throwException(ConnectorError.INVALID_EXTENSION);
+      param.throwException(ErrorCode.INVALID_EXTENSION);
     }
     if (configuration.isCheckDoubleFileExtensions()) {
       param.setNewFileName(FileUtils.renameFileWithBadExt(resourceType, param.getNewFileName()));
@@ -334,21 +334,21 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
       Path file = getPath(path, getFinalFileName(path, param));
       if ((!ImageUtils.isImageExtension(file) || !configuration.isCheckSizeAfterScaling())
               && !FileUtils.isFileSizeInRange(resourceType, item.getSize())) {
-        param.throwException(ConnectorError.UPLOADED_TOO_BIG);
+        param.throwException(ErrorCode.UPLOADED_TOO_BIG);
       }
 
       if (configuration.isSecureImageUploads() && ImageUtils.isImageExtension(file)
               && !ImageUtils.isValid(item)) {
-        param.throwException(ConnectorError.UPLOADED_CORRUPT);
+        param.throwException(ErrorCode.UPLOADED_CORRUPT);
       }
 
       if (!FileUtils.isExtensionHtml(file.getFileName().toString(), configuration)
               && FileUtils.hasHtmlContent(item)) {
-        param.throwException(ConnectorError.UPLOADED_WRONG_HTML_FILE);
+        param.throwException(ErrorCode.UPLOADED_WRONG_HTML_FILE);
       }
     } catch (IOException e) {
       log.error("", e);
-      param.throwException(ConnectorError.ACCESS_DENIED);
+      param.throwException(ErrorCode.ACCESS_DENIED);
     }
   }
 
@@ -374,7 +374,7 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
   }
 
   private void checkParam(FileUploadParameter param) throws ConnectorException {
-    ConnectorError code = param.getErrorCode();
+    ErrorCode code = param.getErrorCode();
     if (code != null) {
       param.throwException(code);
     }

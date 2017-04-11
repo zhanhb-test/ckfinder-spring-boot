@@ -1,9 +1,9 @@
-package com.github.zhanhb.ckfinder.connector.errors;
+package com.github.zhanhb.ckfinder.connector.api;
 
 /**
  * Class holding CKFinder error codes.
  */
-public enum ConnectorError {
+public enum ErrorCode {
 
   CUSTOM_ERROR(1),
   INVALID_COMMAND(10),
@@ -35,7 +35,7 @@ public enum ConnectorError {
 
   private final int code;
 
-  ConnectorError(int code) {
+  ErrorCode(int code) {
     this.code = code;
   }
 

@@ -9,14 +9,15 @@
  * modifying or distribute this file or part of its contents. The contents of
  * this file is part of the Source Code of CKFinder.
  */
-package com.github.zhanhb.ckfinder.connector.errors;
+package com.github.zhanhb.ckfinder.connector.support;
 
 import com.github.zhanhb.ckfinder.connector.api.Configuration;
+import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
+import com.github.zhanhb.ckfinder.connector.api.ExceptionHandler;
 import com.github.zhanhb.ckfinder.connector.api.ResourceType;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.CurrentFolder;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Error;
-import com.github.zhanhb.ckfinder.connector.support.XmlCreator;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.servlet.http.HttpServletRequest;
@@ -42,8 +43,6 @@ public enum XmlExceptionHandler implements ExceptionHandler {
     String currentFolder = connectorException.getCurrentFolder();
     ResourceType type = connectorException.getType();
 
-    response.setContentType("text/xml;charset=UTF-8");
-    response.setHeader("Cache-Control", "no-cache");
     int errorNum = connectorException.getErrorCode().getCode();
 
     if (type != null) {
@@ -60,10 +59,11 @@ public enum XmlExceptionHandler implements ExceptionHandler {
     connector.error(Error.builder()
             .number(errorNum)
             .value(connectorException.getMessage()).build());
-    response.setContentType("text/xml;charset=UTF-8");
-    response.setHeader("Cache-Control", "no-cache");
     String result = XmlCreator.INSTANCE.toString(connector.build());
 
+    response.setContentType("text/xml");
+    response.setCharacterEncoding("UTF-8");
+    response.setHeader("Cache-Control", "no-cache");
     try (PrintWriter out = response.getWriter()) {
       out.write(result);
     }

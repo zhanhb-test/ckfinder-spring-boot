@@ -1,6 +1,7 @@
 package com.github.zhanhb.ckfinder.connector.support;
 
 import com.github.zhanhb.ckfinder.connector.api.CommandFactory;
+import com.github.zhanhb.ckfinder.connector.api.EventHandler;
 import com.github.zhanhb.ckfinder.connector.api.FileUploadListener;
 import com.github.zhanhb.ckfinder.connector.api.PluginInfoRegister;
 import com.github.zhanhb.ckfinder.connector.handlers.command.BaseCommand;
@@ -52,8 +53,8 @@ public class PluginRegister {
     return this;
   }
 
-  Events buildEvents() {
-    return new Events(new ArrayList<>(fileUploadListeners), new ArrayList<>(pluginInfoRegisters));
+  EventHandler buildEventHandler() {
+    return new DefaultEventHandler(new ArrayList<>(fileUploadListeners), new ArrayList<>(pluginInfoRegisters));
   }
 
   String getNames() {

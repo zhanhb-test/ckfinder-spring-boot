@@ -13,8 +13,8 @@ package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.api.AccessControl;
 import com.github.zhanhb.ckfinder.connector.api.Configuration;
-import com.github.zhanhb.ckfinder.connector.errors.ConnectorError;
-import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
+import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
+import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.CreateFolderParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.NewFolder;
@@ -42,13 +42,13 @@ public class CreateFolderCommand extends BaseXmlCommand<CreateFolderParameter> i
     checkRequestPathValid(param.getNewFolderName());
 
     if (param.getType() == null) {
-      throw new ConnectorException(ConnectorError.INVALID_TYPE);
+      throw new ConnectorException(ErrorCode.INVALID_TYPE);
     }
 
     if (!configuration.getAccessControl().hasPermission(param.getType().getName(),
             param.getCurrentFolder(), param.getUserRole(),
             AccessControl.FOLDER_CREATE)) {
-      param.throwException(ConnectorError.UNAUTHORIZED);
+      param.throwException(ErrorCode.UNAUTHORIZED);
     }
 
     if (configuration.isForceAscii()) {
@@ -56,24 +56,24 @@ public class CreateFolderCommand extends BaseXmlCommand<CreateFolderParameter> i
     }
 
     if (!FileUtils.isFolderNameValid(param.getNewFolderName(), configuration)) {
-      param.throwException(ConnectorError.INVALID_NAME);
+      param.throwException(ErrorCode.INVALID_NAME);
     }
     if (configuration.isDirectoryHidden(param.getCurrentFolder())) {
-      param.throwException(ConnectorError.INVALID_REQUEST);
+      param.throwException(ErrorCode.INVALID_REQUEST);
     }
     if (configuration.isDirectoryHidden(param.getNewFolderName())) {
-      param.throwException(ConnectorError.INVALID_NAME);
+      param.throwException(ErrorCode.INVALID_NAME);
     }
 
     Path dir = getPath(param.getType().getPath(),
             param.getCurrentFolder(), param.getNewFolderName());
     if (Files.exists(dir)) {
-      param.throwException(ConnectorError.ALREADY_EXIST);
+      param.throwException(ErrorCode.ALREADY_EXIST);
     }
     try {
       Files.createDirectories(dir);
     } catch (IOException ex) {
-      param.throwException(ConnectorError.UNAUTHORIZED);
+      param.throwException(ErrorCode.UNAUTHORIZED);
     }
 
     rootElement.result(NewFolder.builder()

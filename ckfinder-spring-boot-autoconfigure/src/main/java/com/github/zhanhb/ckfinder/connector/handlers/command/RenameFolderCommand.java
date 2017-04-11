@@ -13,8 +13,8 @@ package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.api.AccessControl;
 import com.github.zhanhb.ckfinder.connector.api.Configuration;
-import com.github.zhanhb.ckfinder.connector.errors.ConnectorError;
-import com.github.zhanhb.ckfinder.connector.errors.ConnectorException;
+import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
+import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.RenameFolderParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.RenamedFolder;
@@ -43,14 +43,14 @@ public class RenameFolderCommand extends BaseXmlCommand<RenameFolderParameter> i
     checkRequestPathValid(param.getNewFolderName());
 
     if (param.getType() == null) {
-      throw new ConnectorException(ConnectorError.INVALID_TYPE);
+      throw new ConnectorException(ErrorCode.INVALID_TYPE);
     }
 
     if (!configuration.getAccessControl().hasPermission(param.getType().getName(),
             param.getCurrentFolder(),
             param.getUserRole(),
             AccessControl.FOLDER_RENAME)) {
-      param.throwException(ConnectorError.UNAUTHORIZED);
+      param.throwException(ErrorCode.UNAUTHORIZED);
     }
 
     if (configuration.isForceAscii()) {
@@ -59,29 +59,29 @@ public class RenameFolderCommand extends BaseXmlCommand<RenameFolderParameter> i
 
     if (configuration.isDirectoryHidden(param.getNewFolderName())
             || !FileUtils.isFolderNameValid(param.getNewFolderName(), configuration)) {
-      param.throwException(ConnectorError.INVALID_NAME);
+      param.throwException(ErrorCode.INVALID_NAME);
     }
 
     if (param.getCurrentFolder().equals("/")) {
-      param.throwException(ConnectorError.INVALID_REQUEST);
+      param.throwException(ErrorCode.INVALID_REQUEST);
     }
 
     Path dir = getPath(param.getType().getPath(),
             param.getCurrentFolder());
     if (!Files.isDirectory(dir)) {
-      param.throwException(ConnectorError.INVALID_REQUEST);
+      param.throwException(ErrorCode.INVALID_REQUEST);
     }
     setNewFolder(param);
     Path newDir = getPath(param.getType().getPath(),
             param.getNewFolderPath());
     if (Files.exists(newDir)) {
-      param.throwException(ConnectorError.ALREADY_EXIST);
+      param.throwException(ErrorCode.ALREADY_EXIST);
     }
     try {
       Files.move(dir, newDir);
       renameThumb(param);
     } catch (IOException ex) {
-      param.throwException(ConnectorError.ACCESS_DENIED);
+      param.throwException(ErrorCode.ACCESS_DENIED);
     }
     rootElement.result(RenamedFolder.builder()
             .newName(param.getNewFolderName())
