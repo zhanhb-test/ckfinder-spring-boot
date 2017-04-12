@@ -15,6 +15,7 @@ import com.github.zhanhb.ckfinder.connector.api.AccessControl;
 import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
+import com.github.zhanhb.ckfinder.connector.api.ImageProperties;
 import com.github.zhanhb.ckfinder.connector.handlers.command.BaseXmlCommand;
 import com.github.zhanhb.ckfinder.connector.handlers.command.IPostCommand;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.ImageResizeParameter;
@@ -74,6 +75,7 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> imp
       param.throwException(ErrorCode.INVALID_REQUEST);
     }
 
+    ImageProperties image = context.getImage();
     if (param.getWidth() != null && param.getHeight() != null) {
 
       if (!FileUtils.isFileNameValid(newFileName) && context.isFileHidden(newFileName)) {
@@ -92,8 +94,8 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> imp
       if (!"1".equals(param.getOverwrite()) && Files.exists(thumbFile)) {
         param.throwException(ErrorCode.ALREADY_EXIST);
       }
-      int maxImageHeight = context.getImgHeight();
-      int maxImageWidth = context.getImgWidth();
+      int maxImageHeight = image.getMaxHeight();
+      int maxImageWidth = image.getMaxWidth();
       if ((maxImageWidth > 0 && param.getWidth() > maxImageWidth)
               || (maxImageHeight > 0 && param.getHeight() > maxImageHeight)) {
         param.throwException(ErrorCode.INVALID_REQUEST);
@@ -101,7 +103,7 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> imp
 
       try {
         ImageUtils.createResizedImage(file, thumbFile,
-                param.getWidth(), param.getHeight(), context.getImgQuality());
+                param.getWidth(), param.getHeight(), image.getQuality());
 
       } catch (IOException e) {
         log.error("", e);
@@ -119,7 +121,7 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> imp
         if (size != null) {
           try {
             ImageUtils.createResizedImage(file, thumbFile, size.getWidth(),
-                    size.getHeight(), context.getImgQuality());
+                    size.getHeight(), image.getQuality());
           } catch (IOException e) {
             log.error("", e);
             param.throwException(ErrorCode.ACCESS_DENIED);

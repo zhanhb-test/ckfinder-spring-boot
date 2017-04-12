@@ -69,8 +69,8 @@ public class CKFinderProperties {
   @Setter
   public static class Image {
 
-    private int width = 500;
-    private int height = 400;
+    private int maxWidth = 500;
+    private int maxHeight = 400;
     private float quality = 0.8f;
 
   }

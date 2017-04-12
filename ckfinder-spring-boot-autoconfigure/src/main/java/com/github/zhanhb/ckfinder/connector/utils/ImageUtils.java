@@ -12,6 +12,7 @@
 package com.github.zhanhb.ckfinder.connector.utils;
 
 import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
+import com.github.zhanhb.ckfinder.connector.api.ImageProperties;
 import com.github.zhanhb.ckfinder.connector.api.ThumbnailProperties;
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
@@ -124,15 +125,16 @@ public class ImageUtils {
         throw new IOException("Wrong file");
       }
     }
-    Dimension dimension = createThumbDimension(image, context.getImgWidth(),
-            context.getImgHeight());
+    ImageProperties imageProperties = context.getImage();
+    Dimension dimension = createThumbDimension(image, imageProperties.getMaxWidth(),
+            imageProperties.getMaxHeight());
     if (dimension.width == 0 || dimension.height == 0
             || (image.getHeight() <= dimension.height && image.getWidth() <= dimension.width)) {
       try (InputStream stream = part.getInputStream()) {
         Files.copy(stream, file, StandardCopyOption.REPLACE_EXISTING);
       }
     } else {
-      resizeImage(image, dimension.width, dimension.height, context.getImgQuality(), file);
+      resizeImage(image, dimension.width, dimension.height, imageProperties.getQuality(), file);
     }
     if (log.isTraceEnabled()) {
       log.trace("thumb size: {}", Files.size(file));
@@ -217,8 +219,9 @@ public class ImageUtils {
    */
   public static boolean checkImageSize(InputStreamSource part, CKFinderContext context)
           throws IOException {
-    final int maxWidth = context.getImgWidth();
-    final int maxHeight = context.getImgHeight();
+    ImageProperties image = context.getImage();
+    final int maxWidth = image.getMaxWidth();
+    final int maxHeight = image.getMaxHeight();
     if (maxHeight == 0 && maxWidth == 0) {
       return true;
     }

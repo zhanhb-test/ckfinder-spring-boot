@@ -81,8 +81,8 @@ public class InitCommand extends XmlCommand<InitParameter> {
             .licenseName(getLicenseName(license))
             .licenseKey(createLicenseKey(license.getKey()))
             .uploadCheckImages(!context.isCheckSizeAfterScaling())
-            .imgWidth(context.getImgWidth())
-            .imgHeight(context.getImgHeight())
+            .imgWidth(context.getImage().getMaxWidth())
+            .imgHeight(context.getImage().getMaxHeight())
             .thumbsEnabled(thumbnail != null)
             .plugins(context.getPublicPluginNames());
     if (thumbnail != null) {

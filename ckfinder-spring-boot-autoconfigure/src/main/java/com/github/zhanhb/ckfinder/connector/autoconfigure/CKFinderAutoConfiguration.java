@@ -5,6 +5,7 @@ import com.github.zhanhb.ckfinder.connector.api.AccessControl;
 import com.github.zhanhb.ckfinder.connector.api.BasePathBuilder;
 import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.Constants;
+import com.github.zhanhb.ckfinder.connector.api.ImageProperties;
 import com.github.zhanhb.ckfinder.connector.api.License;
 import com.github.zhanhb.ckfinder.connector.api.LicenseFactory;
 import com.github.zhanhb.ckfinder.connector.api.ResourceType;
@@ -150,9 +151,10 @@ public class CKFinderAutoConfiguration {
               .enabled(properties.getConnector().isEnabled())
               .licenseFactory(createLiceFactory(properties.getLicense()));
       CKFinderProperties.Image image = properties.getImage();
-      builder.imgWidth(image.getWidth())
-              .imgHeight(image.getHeight())
-              .imgQuality(image.getQuality());
+      builder.image(ImageProperties.builder().maxWidth(image.getMaxWidth())
+              .maxHeight(image.getMaxHeight())
+              .quality(image.getQuality())
+              .build());
       if (properties.getDefaultResourceTypes() != null) {
         builder.defaultResourceTypes(Arrays.asList(properties.getDefaultResourceTypes()));
       }

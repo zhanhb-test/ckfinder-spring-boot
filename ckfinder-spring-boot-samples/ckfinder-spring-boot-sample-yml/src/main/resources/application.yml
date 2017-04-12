@@ -7,8 +7,8 @@ ckfinder:
     name:
     key:
   image:
-    width: 1600
-    height: 1200
+    max-width: 1600
+    max-height: 1200
     quality: 0.8
   default-resource-types:
   types:

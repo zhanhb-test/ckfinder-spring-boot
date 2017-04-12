@@ -5,6 +5,7 @@ import com.github.zhanhb.ckfinder.connector.api.BasePathBuilder;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.Constants;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
+import com.github.zhanhb.ckfinder.connector.api.ImageProperties;
 import com.github.zhanhb.ckfinder.connector.api.License;
 import com.github.zhanhb.ckfinder.connector.api.ResourceType;
 import com.github.zhanhb.ckfinder.connector.api.ThumbnailProperties;
@@ -101,6 +102,7 @@ public enum XmlConfigurationParser {
     License.Builder licenseBuilder = License.builder().name("").key("");
     Node node = doc.getFirstChild();
     ThumbnailProperties thumbnail = null;
+    ImageProperties.Builder image = ImageProperties.builder();
     if (node != null) {
       NodeList nodeList = node.getChildNodes();
       for (int i = 0; i < nodeList.getLength(); i++) {
@@ -119,23 +121,23 @@ public enum XmlConfigurationParser {
             String width = nullNodeToString(childNode);
             width = width.replaceAll("\\D", "");
             try {
-              builder.imgWidth(Integer.parseInt(width));
+              image.maxWidth(Integer.parseInt(width));
             } catch (NumberFormatException e) {
-              builder.imgWidth(DEFAULT_IMG_WIDTH);
+              image.maxWidth(DEFAULT_IMG_WIDTH);
             }
             break;
           case "imgQuality":
             String quality = nullNodeToString(childNode);
             quality = quality.replaceAll("\\D", "");
-            builder.imgQuality(adjustQuality(quality));
+            image.quality(adjustQuality(quality));
             break;
           case "imgHeight":
             String height = nullNodeToString(childNode);
             height = height.replaceAll("\\D", "");
             try {
-              builder.imgHeight(Integer.parseInt(height));
+              image.maxHeight(Integer.parseInt(height));
             } catch (NumberFormatException e) {
-              builder.imgHeight(DEFAULT_IMG_HEIGHT);
+              image.maxHeight(DEFAULT_IMG_HEIGHT);
             }
             break;
           case "thumbs":
@@ -195,6 +197,7 @@ public enum XmlConfigurationParser {
         }
       }
     }
+    builder.image(image.build());
     builder.licenseFactory(new FixLicenseFactory(licenseBuilder.build()));
     setTypes(builder.thumbnail(thumbnail), doc, basePathBuilder, thumbnail);
   }

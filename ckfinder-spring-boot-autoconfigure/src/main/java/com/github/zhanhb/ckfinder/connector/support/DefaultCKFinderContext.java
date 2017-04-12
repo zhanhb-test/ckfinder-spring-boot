@@ -14,8 +14,8 @@ package com.github.zhanhb.ckfinder.connector.support;
 import com.github.zhanhb.ckfinder.connector.api.AccessControl;
 import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.CommandFactory;
-import com.github.zhanhb.ckfinder.connector.api.Constants;
 import com.github.zhanhb.ckfinder.connector.api.EventHandler;
+import com.github.zhanhb.ckfinder.connector.api.ImageProperties;
 import com.github.zhanhb.ckfinder.connector.api.LicenseFactory;
 import com.github.zhanhb.ckfinder.connector.api.ResourceType;
 import com.github.zhanhb.ckfinder.connector.api.ThumbnailProperties;
@@ -28,6 +28,7 @@ import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 import lombok.Builder;
+import lombok.Builder.Default;
 import lombok.NonNull;
 import lombok.Singular;
 import lombok.Value;
@@ -48,9 +49,8 @@ public class DefaultCKFinderContext implements CKFinderContext {
   @Delegate
   @NonNull
   private LicenseFactory licenseFactory;
-  private int imgWidth;
-  private int imgHeight;
-  private float imgQuality;
+  @NonNull
+  private ImageProperties image;
   @Singular
   private Map<String, ResourceType> types;
   @Nullable
@@ -62,8 +62,9 @@ public class DefaultCKFinderContext implements CKFinderContext {
   private boolean checkDoubleFileExtensions;
   private boolean forceAscii;
   private boolean checkSizeAfterScaling;
+  @Default
   @NonNull
-  private String userRoleName;
+  private String userRoleName = "";
   @Nullable
   private String publicPluginNames;
   private boolean secureImageUploads;
@@ -138,13 +139,6 @@ public class DefaultCKFinderContext implements CKFinderContext {
   }
 
   public static class Builder {
-
-    Builder() {
-      imgWidth = Constants.DEFAULT_IMG_WIDTH;
-      imgHeight = Constants.DEFAULT_IMG_HEIGHT;
-      imgQuality = Constants.DEFAULT_IMG_QUALITY;
-      userRoleName = "";
-    }
 
     public Builder eventsFromPlugins(Collection<? extends Plugin> plugins) {
       PluginRegister register = new PluginRegister();

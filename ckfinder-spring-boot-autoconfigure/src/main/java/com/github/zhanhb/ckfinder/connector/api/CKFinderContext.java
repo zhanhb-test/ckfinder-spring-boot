@@ -36,25 +36,11 @@ public interface CKFinderContext extends CommandFactory, EventHandler, LicenseFa
   Map<String, ResourceType> getTypes();
 
   /**
-   * gets image max width.
+   * gets image properties
    *
-   * @return max image height
+   * @return image properties
    */
-  int getImgWidth();
-
-  /**
-   * get image max height.
-   *
-   * @return max image height
-   */
-  int getImgHeight();
-
-  /**
-   * get image quality.
-   *
-   * @return image quality
-   */
-  float getImgQuality();
+  ImageProperties getImage();
 
   /**
    * check if connector is enabled.
