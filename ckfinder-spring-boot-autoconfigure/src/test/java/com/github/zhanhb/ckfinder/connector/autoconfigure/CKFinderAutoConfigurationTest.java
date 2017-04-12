@@ -1,6 +1,6 @@
 package com.github.zhanhb.ckfinder.connector.autoconfigure;
 
-import com.github.zhanhb.ckfinder.connector.api.Configuration;
+import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,7 +30,7 @@ public class CKFinderAutoConfigurationTest {
   public void test() {
     context.register(MockServlecContextConfiguration.class);
     context.refresh();
-    context.getBean(Configuration.class);
+    context.getBean(CKFinderContext.class);
   }
 
 }

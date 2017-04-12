@@ -17,9 +17,9 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 /**
- * Interface for configuration.
+ * Interface of context
  */
-public interface Configuration extends CommandFactory, EventHandler, LicenseFactory {
+public interface CKFinderContext extends CommandFactory, EventHandler, LicenseFactory {
 
   /**
    * gets user role name sets in config.
@@ -72,7 +72,7 @@ public interface Configuration extends CommandFactory, EventHandler, LicenseFact
   ThumbnailProperties getThumbnail();
 
   /**
-   * check if dirname matches configuration hidden folder regex.
+   * check if dirname matches hidden folder regex.
    *
    * @param dirName dir name
    * @return true if matches.
@@ -80,7 +80,7 @@ public interface Configuration extends CommandFactory, EventHandler, LicenseFact
   boolean isDirectoryHidden(String dirName);
 
   /**
-   * check if filename matches configuration hidden file regex.
+   * check if filename matches hidden file regex.
    *
    * @param fileName file name
    * @return true if matches.
@@ -88,9 +88,9 @@ public interface Configuration extends CommandFactory, EventHandler, LicenseFact
   boolean isFileHidden(String fileName);
 
   /**
-   * get double extensions configuration.
+   * if check double extensions.
    *
-   * @return configuration value.
+   * @return check double extensions
    */
   boolean isCheckDoubleFileExtensions();
 
@@ -145,7 +145,7 @@ public interface Configuration extends CommandFactory, EventHandler, LicenseFact
 
   /**
    *
-   * @return the configuration
+   * @return the access control
    */
   AccessControl getAccessControl();
 

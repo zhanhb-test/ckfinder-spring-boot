@@ -11,7 +11,7 @@
  */
 package com.github.zhanhb.ckfinder.connector.support;
 
-import com.github.zhanhb.ckfinder.connector.api.Configuration;
+import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.api.ExceptionHandler;
@@ -28,7 +28,7 @@ public enum FallbackExceptionHandler implements ExceptionHandler {
 
   @Override
   public void handleException(HttpServletRequest request,
-          HttpServletResponse response, Configuration configuration,
+          HttpServletResponse response, CKFinderContext context,
           ConnectorException connectorException) throws IOException {
     ErrorCode errorCode = connectorException.getErrorCode();
     try {

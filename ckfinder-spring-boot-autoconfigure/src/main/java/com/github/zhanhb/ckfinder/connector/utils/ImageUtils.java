@@ -11,7 +11,7 @@
  */
 package com.github.zhanhb.ckfinder.connector.utils;
 
-import com.github.zhanhb.ckfinder.connector.api.Configuration;
+import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ThumbnailProperties;
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
@@ -112,11 +112,11 @@ public class ImageUtils {
    * @param part servlet part
    * @param file file name
    * @param fileName name of file
-   * @param conf connector configuration
+   * @param context ckfinder context
    * @throws IOException when IO Exception occurs.
    */
   public static void createTmpThumb(InputStreamSource part, Path file, String fileName,
-          Configuration conf) throws IOException {
+          CKFinderContext context) throws IOException {
     BufferedImage image;
     try (InputStream stream = part.getInputStream()) {
       image = ImageIO.read(stream);
@@ -124,15 +124,15 @@ public class ImageUtils {
         throw new IOException("Wrong file");
       }
     }
-    Dimension dimension = createThumbDimension(image, conf.getImgWidth(),
-            conf.getImgHeight());
+    Dimension dimension = createThumbDimension(image, context.getImgWidth(),
+            context.getImgHeight());
     if (dimension.width == 0 || dimension.height == 0
             || (image.getHeight() <= dimension.height && image.getWidth() <= dimension.width)) {
       try (InputStream stream = part.getInputStream()) {
         Files.copy(stream, file, StandardCopyOption.REPLACE_EXISTING);
       }
     } else {
-      resizeImage(image, dimension.width, dimension.height, conf.getImgQuality(), file);
+      resizeImage(image, dimension.width, dimension.height, context.getImgQuality(), file);
     }
     if (log.isTraceEnabled()) {
       log.trace("thumb size: {}", Files.size(file));
@@ -211,14 +211,14 @@ public class ImageUtils {
    * check if image size isn't bigger then biggest allowed.
    *
    * @param part servlet part
-   * @param conf connector configuration.
+   * @param context ckfinder context.
    * @return true if image size isn't bigger then biggest allowed.
    * @throws IOException when IO Exception occurs during reading image.
    */
-  public static boolean checkImageSize(InputStreamSource part, Configuration conf)
+  public static boolean checkImageSize(InputStreamSource part, CKFinderContext context)
           throws IOException {
-    final int maxWidth = conf.getImgWidth();
-    final int maxHeight = conf.getImgHeight();
+    final int maxWidth = context.getImgWidth();
+    final int maxHeight = context.getImgHeight();
     if (maxHeight == 0 && maxWidth == 0) {
       return true;
     }

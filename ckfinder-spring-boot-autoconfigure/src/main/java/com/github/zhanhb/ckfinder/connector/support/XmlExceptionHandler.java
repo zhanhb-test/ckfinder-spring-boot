@@ -11,7 +11,7 @@
  */
 package com.github.zhanhb.ckfinder.connector.support;
 
-import com.github.zhanhb.ckfinder.connector.api.Configuration;
+import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ExceptionHandler;
 import com.github.zhanhb.ckfinder.connector.api.ResourceType;
@@ -34,10 +34,10 @@ public enum XmlExceptionHandler implements ExceptionHandler {
 
   @Override
   public void handleException(HttpServletRequest request,
-          HttpServletResponse response, Configuration configuration,
+          HttpServletResponse response, CKFinderContext context,
           ConnectorException connectorException) throws IOException {
     HttpSession session = request.getSession(false);
-    String userRole = session == null ? null : (String) session.getAttribute(configuration.getUserRoleName());
+    String userRole = session == null ? null : (String) session.getAttribute(context.getUserRoleName());
 
     Connector.Builder connector = Connector.builder();
     String currentFolder = connectorException.getCurrentFolder();
@@ -52,7 +52,7 @@ public enum XmlExceptionHandler implements ExceptionHandler {
         connector.currentFolder(CurrentFolder.builder()
                 .path(currentFolder)
                 .url(type.getUrl() + currentFolder)
-                .acl(configuration.getAccessControl().getAcl(typeName, currentFolder, userRole))
+                .acl(context.getAccessControl().getAcl(typeName, currentFolder, userRole))
                 .build());
       }
     }

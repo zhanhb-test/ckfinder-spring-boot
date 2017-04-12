@@ -12,7 +12,7 @@
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.api.AccessControl;
-import com.github.zhanhb.ckfinder.connector.api.Configuration;
+import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.DownloadFileParameter;
@@ -40,13 +40,13 @@ public class DownloadFileCommand extends BaseCommand<DownloadFileParameter> {
    * @throws IOException when IO Exception occurs.
    */
   @Override
-  void execute(DownloadFileParameter param, HttpServletRequest request, HttpServletResponse response, Configuration configuration)
+  void execute(DownloadFileParameter param, HttpServletRequest request, HttpServletResponse response, CKFinderContext context)
           throws ConnectorException, IOException {
     if (param.getType() == null) {
       throw new ConnectorException(ErrorCode.INVALID_TYPE);
     }
 
-    if (!configuration.getAccessControl().hasPermission(param.getType().getName(),
+    if (!context.getAccessControl().hasPermission(param.getType().getName(),
             param.getCurrentFolder(), param.getUserRole(),
             AccessControl.FILE_VIEW)) {
       param.throwException(ErrorCode.UNAUTHORIZED);
@@ -58,11 +58,11 @@ public class DownloadFileCommand extends BaseCommand<DownloadFileParameter> {
       param.throwException(ErrorCode.INVALID_REQUEST);
     }
 
-    if (configuration.isDirectoryHidden(param.getCurrentFolder())) {
+    if (context.isDirectoryHidden(param.getCurrentFolder())) {
       param.throwException(ErrorCode.INVALID_REQUEST);
     }
 
-    if (configuration.isFileHidden(param.getFileName())) {
+    if (context.isFileHidden(param.getFileName())) {
       param.throwException(ErrorCode.FILE_NOT_FOUND);
     }
 
@@ -85,14 +85,14 @@ public class DownloadFileCommand extends BaseCommand<DownloadFileParameter> {
    * inits params for download file command.
    *
    * @param request request
-   * @param configuration connector configuration
+   * @param context ckfinder context
    * @return the parameter
    * @throws ConnectorException when error occurs.
    */
   @Override
-  protected DownloadFileParameter popupParams(HttpServletRequest request, Configuration configuration)
+  protected DownloadFileParameter popupParams(HttpServletRequest request, CKFinderContext context)
           throws ConnectorException {
-    DownloadFileParameter param = doInitParam(new DownloadFileParameter(), request, configuration);
+    DownloadFileParameter param = doInitParam(new DownloadFileParameter(), request, context);
     // problem with showing filename when dialog window appear
     param.setFileName(request.getParameter("FileName"));
     return param;

@@ -12,7 +12,7 @@
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.api.AccessControl;
-import com.github.zhanhb.ckfinder.connector.api.Configuration;
+import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.RenameFileParameter;
@@ -34,7 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> implements IPostCommand {
 
   @Override
-  protected void addResultNode(Connector.Builder rootElement, RenameFileParameter param, Configuration configuration) {
+  protected void addResultNode(Connector.Builder rootElement, RenameFileParameter param, CKFinderContext context) {
     RenamedFile.Builder element = RenamedFile.builder().name(param.getFileName());
     if (param.isRenamed()) {
       element.newName(param.getNewFileName());
@@ -46,25 +46,25 @@ public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> 
    * gets data for XML and checks all validation.
    *
    * @param param the parameter
-   * @param configuration connector configuration
+   * @param context ckfinder context
    * @return error code or null if it's correct.
    * @throws ConnectorException when error occurs
    */
   @Override
-  protected ErrorCode getDataForXml(RenameFileParameter param, Configuration configuration)
+  protected ErrorCode getDataForXml(RenameFileParameter param, CKFinderContext context)
           throws ConnectorException {
     log.trace("getDataForXml");
     if (param.getType() == null) {
       throw new ConnectorException(ErrorCode.INVALID_TYPE);
     }
 
-    if (!configuration.getAccessControl().hasPermission(param.getType().getName(),
+    if (!context.getAccessControl().hasPermission(param.getType().getName(),
             param.getCurrentFolder(), param.getUserRole(),
             AccessControl.FILE_RENAME)) {
       param.throwException(ErrorCode.UNAUTHORIZED);
     }
 
-    if (configuration.isForceAscii()) {
+    if (context.isForceAscii()) {
       param.setNewFileName(FileUtils.convertToAscii(param.getNewFileName()));
     }
 
@@ -76,18 +76,18 @@ public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> 
     if (!FileUtils.isFileExtensionAllowed(param.getNewFileName(), param.getType())) {
       return ErrorCode.INVALID_EXTENSION;
     }
-    if (configuration.isCheckDoubleFileExtensions()) {
+    if (context.isCheckDoubleFileExtensions()) {
       param.setNewFileName(FileUtils.renameFileWithBadExt(param.getType(),
               param.getNewFileName()));
     }
 
     if (!FileUtils.isFileNameValid(param.getFileName())
-            || configuration.isFileHidden(param.getFileName())) {
+            || context.isFileHidden(param.getFileName())) {
       return ErrorCode.INVALID_REQUEST;
     }
 
-    if (!FileUtils.isFileNameValid(param.getNewFileName(), configuration)
-            || configuration.isFileHidden(param.getNewFileName())) {
+    if (!FileUtils.isFileNameValid(param.getNewFileName(), context)
+            || context.isFileHidden(param.getNewFileName())) {
       return ErrorCode.INVALID_NAME;
     }
 
@@ -139,9 +139,9 @@ public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> 
   }
 
   @Override
-  protected RenameFileParameter popupParams(HttpServletRequest request, Configuration configuration)
+  protected RenameFileParameter popupParams(HttpServletRequest request, CKFinderContext context)
           throws ConnectorException {
-    RenameFileParameter param = doInitParam(new RenameFileParameter(), request, configuration);
+    RenameFileParameter param = doInitParam(new RenameFileParameter(), request, context);
     param.setFileName(request.getParameter("fileName"));
     param.setNewFileName(request.getParameter("newFileName"));
     return param;

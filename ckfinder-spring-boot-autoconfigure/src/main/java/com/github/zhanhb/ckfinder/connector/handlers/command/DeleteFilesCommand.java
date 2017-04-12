@@ -12,7 +12,7 @@
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.api.AccessControl;
-import com.github.zhanhb.ckfinder.connector.api.Configuration;
+import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.Constants;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
@@ -34,7 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 public class DeleteFilesCommand extends ErrorListXmlCommand<DeleteFilesParameter> implements IPostCommand {
 
   @Override
-  protected void addResultNode(Connector.Builder rootElement, DeleteFilesParameter param, Configuration configuration) {
+  protected void addResultNode(Connector.Builder rootElement, DeleteFilesParameter param, CKFinderContext context) {
     rootElement.result(DeleteFiles.builder()
             .deleted(param.getFilesDeleted())
             .build());
@@ -44,12 +44,12 @@ public class DeleteFilesCommand extends ErrorListXmlCommand<DeleteFilesParameter
    * Prepares data for XML response.
    *
    * @param param the parameter
-   * @param configuration connector configuration
+   * @param context ckfinder context
    * @return error code or null if action ended with success.
    * @throws ConnectorException when error occurs
    */
   @Override
-  protected ErrorCode getDataForXml(DeleteFilesParameter param, Configuration configuration)
+  protected ErrorCode getDataForXml(DeleteFilesParameter param, CKFinderContext context)
           throws ConnectorException {
     if (param.getType() == null) {
       throw new ConnectorException(ErrorCode.INVALID_TYPE);
@@ -70,11 +70,11 @@ public class DeleteFilesCommand extends ErrorListXmlCommand<DeleteFilesParameter
         param.throwException(ErrorCode.INVALID_REQUEST);
       }
 
-      if (configuration.isDirectoryHidden(fileItem.getFolder())) {
+      if (context.isDirectoryHidden(fileItem.getFolder())) {
         param.throwException(ErrorCode.INVALID_REQUEST);
       }
 
-      if (configuration.isFileHidden(fileItem.getName())) {
+      if (context.isFileHidden(fileItem.getName())) {
         param.throwException(ErrorCode.INVALID_REQUEST);
       }
 
@@ -83,7 +83,7 @@ public class DeleteFilesCommand extends ErrorListXmlCommand<DeleteFilesParameter
 
       }
 
-      if (!configuration.getAccessControl().hasPermission(fileItem.getType().getName(), fileItem.getFolder(), param.getUserRole(),
+      if (!context.getAccessControl().hasPermission(fileItem.getType().getName(), fileItem.getFolder(), param.getUserRole(),
               AccessControl.FILE_DELETE)) {
         param.throwException(ErrorCode.UNAUTHORIZED);
       }
@@ -128,15 +128,15 @@ public class DeleteFilesCommand extends ErrorListXmlCommand<DeleteFilesParameter
    * Initializes parameters for command handler.
    *
    * @param request current response object
-   * @param configuration connector configuration object
+   * @param context ckfinder context object
    * @return the parameter
    * @throws ConnectorException when initialization parameters can't be loaded
    * for command handler.
    */
   @Override
-  protected DeleteFilesParameter popupParams(HttpServletRequest request, Configuration configuration) throws ConnectorException {
-    DeleteFilesParameter param = doInitParam(new DeleteFilesParameter(), request, configuration);
-    RequestFileHelper.addFilesListFromRequest(request, param.getFiles(), configuration);
+  protected DeleteFilesParameter popupParams(HttpServletRequest request, CKFinderContext context) throws ConnectorException {
+    DeleteFilesParameter param = doInitParam(new DeleteFilesParameter(), request, context);
+    RequestFileHelper.addFilesListFromRequest(request, param.getFiles(), context);
     return param;
   }
 

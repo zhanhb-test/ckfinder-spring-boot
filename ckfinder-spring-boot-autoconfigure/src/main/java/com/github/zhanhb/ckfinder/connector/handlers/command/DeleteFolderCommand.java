@@ -12,7 +12,7 @@
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.api.AccessControl;
-import com.github.zhanhb.ckfinder.connector.api.Configuration;
+import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.ErrorListXmlParameter;
@@ -30,12 +30,12 @@ import lombok.extern.slf4j.Slf4j;
 public class DeleteFolderCommand extends BaseXmlCommand<ErrorListXmlParameter> implements IPostCommand {
 
   @Override
-  protected void createXml(Connector.Builder rootElement, ErrorListXmlParameter param, Configuration configuration) throws ConnectorException {
+  protected void createXml(Connector.Builder rootElement, ErrorListXmlParameter param, CKFinderContext context) throws ConnectorException {
     if (param.getType() == null) {
       throw new ConnectorException(ErrorCode.INVALID_TYPE);
     }
 
-    if (!configuration.getAccessControl().hasPermission(param.getType().getName(),
+    if (!context.getAccessControl().hasPermission(param.getType().getName(),
             param.getCurrentFolder(),
             param.getUserRole(),
             AccessControl.FOLDER_DELETE)) {
@@ -45,7 +45,7 @@ public class DeleteFolderCommand extends BaseXmlCommand<ErrorListXmlParameter> i
       param.throwException(ErrorCode.INVALID_REQUEST);
     }
 
-    if (configuration.isDirectoryHidden(param.getCurrentFolder())) {
+    if (context.isDirectoryHidden(param.getCurrentFolder())) {
       param.throwException(ErrorCode.INVALID_REQUEST);
     }
 
@@ -67,8 +67,8 @@ public class DeleteFolderCommand extends BaseXmlCommand<ErrorListXmlParameter> i
   }
 
   @Override
-  protected ErrorListXmlParameter popupParams(HttpServletRequest request, Configuration configuration) throws ConnectorException {
-    return doInitParam(new ErrorListXmlParameter(), request, configuration);
+  protected ErrorListXmlParameter popupParams(HttpServletRequest request, CKFinderContext context) throws ConnectorException {
+    return doInitParam(new ErrorListXmlParameter(), request, context);
   }
 
 }

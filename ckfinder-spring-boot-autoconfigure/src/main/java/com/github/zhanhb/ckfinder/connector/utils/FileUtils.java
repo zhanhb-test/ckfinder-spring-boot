@@ -12,12 +12,11 @@
 package com.github.zhanhb.ckfinder.connector.utils;
 
 import com.github.zhanhb.ckfinder.connector.api.AccessControl;
-import com.github.zhanhb.ckfinder.connector.api.Configuration;
+import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.Constants;
 import com.github.zhanhb.ckfinder.connector.api.ResourceType;
 import com.github.zhanhb.ckfinder.download.URLEncoder;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -32,7 +31,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import javax.annotation.Nullable;
-import org.springframework.core.io.InputStreamSource;
 
 /**
  * Utils for files.
@@ -272,95 +270,24 @@ public class FileUtils {
   }
 
   /**
-   * check if file has html file extension.
-   *
-   * @param file file name
-   * @param configuration connector configuration
-   * @return true if has
-   */
-  public static boolean isExtensionHtml(String file,
-          Configuration configuration) {
-    String extension = getExtension(file);
-    return extension != null && configuration.getHtmlExtensions().contains(
-            extension.toLowerCase());
-  }
-
-  /**
-   * Detect HTML in the first KB to prevent against potential security issue
-   * with IE/Safari/Opera file type auto detection bug. Returns true if file
-   * contain insecure HTML code at the beginning.
-   *
-   * @param item file upload item
-   * @return true if detected.
-   * @throws IOException when IO Exception occurs.
-   */
-  public static boolean hasHtmlContent(InputStreamSource item) throws IOException {
-    byte[] buff = new byte[MAX_BUFFER_SIZE];
-    try (InputStream is = item.getInputStream()) {
-      is.read(buff, 0, MAX_BUFFER_SIZE);
-      String content = new String(buff);
-      content = content.toLowerCase().trim();
-
-      if (Pattern.compile("<!DOCTYPE\\W+X?HTML.+",
-              Pattern.CASE_INSENSITIVE
-              | Pattern.DOTALL
-              | Pattern.MULTILINE).matcher(content).matches()) {
-        return true;
-      }
-
-      String[] tags = {"<body", "<head", "<html", "<img", "<pre",
-        "<script", "<table", "<title"};
-
-      for (String tag : tags) {
-        if (content.contains(tag)) {
-          return true;
-        }
-      }
-
-      if (Pattern.compile("type\\s*=\\s*['\"]?\\s*(?:\\w*/)?(?:ecma|java)",
-              Pattern.CASE_INSENSITIVE
-              | Pattern.DOTALL
-              | Pattern.MULTILINE).matcher(content).find()) {
-        return true;
-      }
-
-      if (Pattern.compile(
-              "(?:href|src|data)\\s*=\\s*['\"]?\\s*(?:ecma|java)script:",
-              Pattern.CASE_INSENSITIVE
-              | Pattern.DOTALL
-              | Pattern.MULTILINE).matcher(content).find()) {
-        return true;
-      }
-
-      if (Pattern.compile("url\\s*\\(\\s*['\"]?\\s*(?:ecma|java)script:",
-              Pattern.CASE_INSENSITIVE
-              | Pattern.DOTALL
-              | Pattern.MULTILINE).matcher(content).find()) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  /**
-   * Checks if folder has any subfolders but respects ACL and hideFolders
-   * setting from configuration.
+   * Checks if folder has any sub directory but respects ACL and hide directory
+   * setting from context.
    *
    * @param accessControl access control the check the permission
    * @param dirPath path to current folder.
    * @param dir current folder being checked. Represented by File object.
-   * @param configuration connector configuration
+   * @param context ckfinder context
    * @param resourceType name of resource type, folder is assigned to.
    * @param currentUserRole user role.
    * @return true if there are any allowed and non-hidden subfolders.
    */
   public static boolean hasChildren(AccessControl accessControl, String dirPath,
-          Path dir, Configuration configuration, String resourceType,
+          Path dir, CKFinderContext context, String resourceType,
           String currentUserRole) {
     try (DirectoryStream<Path> list = Files.newDirectoryStream(dir, Files::isDirectory)) {
       for (Path path : list) {
         String subDirName = path.getFileName().toString();
-        if (!configuration.isDirectoryHidden(subDirName)
+        if (!context.isDirectoryHidden(subDirName)
                 && accessControl.hasPermission(resourceType,
                         dirPath + subDirName, currentUserRole, AccessControl.FOLDER_VIEW)) {
           return true;
@@ -411,14 +338,14 @@ public class FileUtils {
     return URI_COMPONENT.encode(fileName);
   }
 
-  public static boolean isFolderNameValid(String folderName, Configuration configuration) {
-    return (!configuration.isDisallowUnsafeCharacters()
+  public static boolean isFolderNameValid(String folderName, CKFinderContext context) {
+    return (!context.isDisallowUnsafeCharacters()
             || !folderName.contains(".") && !folderName.contains(";"))
             && !hasInvalidCharacter(folderName);
   }
 
-  public static boolean isFileNameValid(String fileName, Configuration configuration) {
-    return (!configuration.isDisallowUnsafeCharacters() || !fileName.contains(";"))
+  public static boolean isFileNameValid(String fileName, CKFinderContext context) {
+    return (!context.isDisallowUnsafeCharacters() || !fileName.contains(";"))
             && isFileNameValid(fileName);
   }
 

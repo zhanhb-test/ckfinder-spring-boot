@@ -12,8 +12,8 @@
 package com.github.zhanhb.ckfinder.connector.support;
 
 import com.github.zhanhb.ckfinder.connector.api.AccessControl;
+import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.CommandFactory;
-import com.github.zhanhb.ckfinder.connector.api.Configuration;
 import com.github.zhanhb.ckfinder.connector.api.Constants;
 import com.github.zhanhb.ckfinder.connector.api.EventHandler;
 import com.github.zhanhb.ckfinder.connector.api.LicenseFactory;
@@ -42,7 +42,7 @@ import lombok.experimental.NonFinal;
   "PublicInnerClass"
 })
 @Value
-public class DefaultConfiguration implements Configuration {
+public class DefaultCKFinderContext implements CKFinderContext {
 
   private boolean enabled;
   @Delegate

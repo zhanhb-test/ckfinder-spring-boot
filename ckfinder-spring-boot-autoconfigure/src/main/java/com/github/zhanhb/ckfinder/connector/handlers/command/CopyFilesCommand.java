@@ -12,7 +12,7 @@
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.api.AccessControl;
-import com.github.zhanhb.ckfinder.connector.api.Configuration;
+import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.Constants;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
@@ -38,7 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 public class CopyFilesCommand extends ErrorListXmlCommand<CopyFilesParameter> implements IPostCommand {
 
   @Override
-  protected void addResultNode(Connector.Builder rootElement, CopyFilesParameter param, Configuration configuration) {
+  protected void addResultNode(Connector.Builder rootElement, CopyFilesParameter param, CKFinderContext context) {
     rootElement.result(CopyFiles.builder()
             .copied(param.getFilesCopied())
             .copiedTotal(param.getCopiedAll() + param.getFilesCopied())
@@ -46,13 +46,13 @@ public class CopyFilesCommand extends ErrorListXmlCommand<CopyFilesParameter> im
   }
 
   @Override
-  protected ErrorCode getDataForXml(CopyFilesParameter param, Configuration configuration)
+  protected ErrorCode getDataForXml(CopyFilesParameter param, CKFinderContext context)
           throws ConnectorException {
     if (param.getType() == null) {
       throw new ConnectorException(ErrorCode.INVALID_TYPE);
     }
 
-    if (!configuration.getAccessControl().hasPermission(param.getType().getName(),
+    if (!context.getAccessControl().hasPermission(param.getType().getName(),
             param.getCurrentFolder(),
             param.getUserRole(),
             AccessControl.FILE_RENAME
@@ -76,15 +76,15 @@ public class CopyFilesCommand extends ErrorListXmlCommand<CopyFilesParameter> im
         param.throwException(ErrorCode.INVALID_REQUEST);
       }
 
-      if (configuration.isDirectoryHidden(file.getFolder())) {
+      if (context.isDirectoryHidden(file.getFolder())) {
         param.throwException(ErrorCode.INVALID_REQUEST);
       }
 
-      if (configuration.isFileHidden(file.getName())) {
+      if (context.isFileHidden(file.getName())) {
         param.throwException(ErrorCode.INVALID_REQUEST);
       }
 
-      if (!configuration.getAccessControl().hasPermission(file.getType().getName(),
+      if (!context.getAccessControl().hasPermission(file.getType().getName(),
               file.getFolder(), param.getUserRole(), AccessControl.FILE_VIEW)) {
         param.throwException(ErrorCode.UNAUTHORIZED);
       }
@@ -223,11 +223,11 @@ public class CopyFilesCommand extends ErrorListXmlCommand<CopyFilesParameter> im
   }
 
   @Override
-  protected CopyFilesParameter popupParams(HttpServletRequest request, Configuration configuration) throws ConnectorException {
-    CopyFilesParameter param = doInitParam(new CopyFilesParameter(), request, configuration);
+  protected CopyFilesParameter popupParams(HttpServletRequest request, CKFinderContext context) throws ConnectorException {
+    CopyFilesParameter param = doInitParam(new CopyFilesParameter(), request, context);
     param.setCopiedAll(request.getParameter("copied") != null ? Integer.parseInt(request.getParameter("copied")) : 0);
 
-    RequestFileHelper.addFilesListFromRequest(request, param.getFiles(), configuration);
+    RequestFileHelper.addFilesListFromRequest(request, param.getFiles(), context);
     return param;
   }
 

@@ -11,7 +11,7 @@
  */
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
-import com.github.zhanhb.ckfinder.connector.api.Configuration;
+import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.Parameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
@@ -25,15 +25,15 @@ public abstract class BaseXmlCommand<T extends Parameter> extends XmlCommand<T> 
 
   @Override
   @SuppressWarnings("FinalMethod")
-  final Connector buildConnector(T param, Configuration configuration)
+  final Connector buildConnector(T param, CKFinderContext context)
           throws ConnectorException {
     Connector.Builder connector = Connector.builder();
     if (param.getType() != null) {
       connector.resourceType(param.getType().getName());
     }
-    createCurrentFolderNode(param, connector, configuration.getAccessControl());
+    createCurrentFolderNode(param, connector, context.getAccessControl());
     createErrorNode(connector, 0);
-    createXml(connector, param, configuration);
+    createXml(connector, param, context);
     return connector.build();
   }
 
@@ -42,9 +42,9 @@ public abstract class BaseXmlCommand<T extends Parameter> extends XmlCommand<T> 
    *
    * @param rootElement XML root node
    * @param param the parameter
-   * @param configuration connector configuration
+   * @param context ckfinder context
    * @throws ConnectorException when error occurs
    */
-  protected abstract void createXml(Connector.Builder rootElement, T param, Configuration configuration) throws ConnectorException;
+  protected abstract void createXml(Connector.Builder rootElement, T param, CKFinderContext context) throws ConnectorException;
 
 }

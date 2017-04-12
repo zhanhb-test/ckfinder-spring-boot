@@ -3,6 +3,7 @@ package com.github.zhanhb.ckfinder.connector.autoconfigure;
 import com.github.zhanhb.ckfinder.connector.ConnectorServlet;
 import com.github.zhanhb.ckfinder.connector.api.AccessControl;
 import com.github.zhanhb.ckfinder.connector.api.BasePathBuilder;
+import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.Constants;
 import com.github.zhanhb.ckfinder.connector.api.License;
 import com.github.zhanhb.ckfinder.connector.api.LicenseFactory;
@@ -15,7 +16,7 @@ import com.github.zhanhb.ckfinder.connector.plugins.ImageResizeSize;
 import com.github.zhanhb.ckfinder.connector.plugins.WatermarkPlugin;
 import com.github.zhanhb.ckfinder.connector.plugins.WatermarkSettings;
 import com.github.zhanhb.ckfinder.connector.support.AccessControlLevel;
-import com.github.zhanhb.ckfinder.connector.support.DefaultConfiguration;
+import com.github.zhanhb.ckfinder.connector.support.DefaultCKFinderContext;
 import com.github.zhanhb.ckfinder.connector.support.DefaultPathBuilder;
 import com.github.zhanhb.ckfinder.connector.support.FixLicenseFactory;
 import com.github.zhanhb.ckfinder.connector.support.HostLicenseFactory;
@@ -132,7 +133,7 @@ public class CKFinderAutoConfiguration {
   }
 
   @Configuration
-  @ConditionalOnMissingBean(com.github.zhanhb.ckfinder.connector.api.Configuration.class)
+  @ConditionalOnMissingBean(CKFinderContext.class)
   public static class DefaultConfigurationConfigurer {
 
     private static String toString(String[] array) {
@@ -140,12 +141,12 @@ public class CKFinderAutoConfiguration {
     }
 
     @Bean
-    public com.github.zhanhb.ckfinder.connector.api.Configuration ckfinderConfiguration(CKFinderProperties properties,
+    public CKFinderContext ckfinderConfiguration(CKFinderProperties properties,
             BasePathBuilder basePathBuilder,
             AccessControl defaultAccessControl,
             ObjectProvider<Collection<Plugin>> pluginsProvider) throws IOException {
       Collection<Plugin> plugins = pluginsProvider.getIfAvailable();
-      DefaultConfiguration.Builder builder = DefaultConfiguration.builder()
+      DefaultCKFinderContext.Builder builder = DefaultCKFinderContext.builder()
               .enabled(properties.getConnector().isEnabled())
               .licenseFactory(createLiceFactory(properties.getLicense()));
       CKFinderProperties.Image image = properties.getImage();
@@ -183,7 +184,7 @@ public class CKFinderAutoConfiguration {
     }
 
     @SuppressWarnings("deprecation")
-    private void setTypes(DefaultConfiguration.Builder builder,
+    private void setTypes(DefaultCKFinderContext.Builder builder,
             BasePathBuilder basePathBuilder, Map<String, CKFinderProperties.Type> types,
             ThumbnailProperties thumbnail) throws IOException {
       Path basePath = basePathBuilder.getBasePath();
@@ -317,8 +318,8 @@ public class CKFinderAutoConfiguration {
     @Bean
     public ServletRegistrationBean connectorServlet(CKFinderProperties properties,
             MultipartConfigElement multipartConfigElement,
-            com.github.zhanhb.ckfinder.connector.api.Configuration configuration) {
-      ConnectorServlet servlet = new ConnectorServlet(configuration);
+            CKFinderContext context) {
+      ConnectorServlet servlet = new ConnectorServlet(context);
       ServletRegistrationBean servletRegistrationBean = new ServletRegistrationBean(servlet, false, properties.getServlet().getPath());
       servletRegistrationBean.setMultipartConfig(multipartConfigElement);
       return servletRegistrationBean;

@@ -11,8 +11,8 @@
  */
 package com.github.zhanhb.ckfinder.connector;
 
+import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.Command;
-import com.github.zhanhb.ckfinder.connector.api.Configuration;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.api.ExceptionHandler;
@@ -37,10 +37,10 @@ public class ConnectorServlet extends HttpServlet {
 
   private static final long serialVersionUID = 2960665641425153638L;
 
-  private final Configuration configuration;
+  private final CKFinderContext context;
 
-  public ConnectorServlet(Configuration configuration) {
-    this.configuration = Objects.requireNonNull(configuration);
+  public ConnectorServlet(CKFinderContext context) {
+    this.context = Objects.requireNonNull(context);
   }
 
   /**
@@ -92,7 +92,7 @@ public class ConnectorServlet extends HttpServlet {
         throw new ConnectorException(ErrorCode.INVALID_COMMAND);
       }
 
-      Command command = configuration.getCommand(commandName);
+      Command command = context.getCommand(commandName);
       if (command == null) {
         throw new ConnectorException(ErrorCode.INVALID_COMMAND);
       }
@@ -112,18 +112,18 @@ public class ConnectorServlet extends HttpServlet {
               && !"true".equals(request.getParameter("CKFinderCommand"))) {
         throw new ConnectorException(ErrorCode.INVALID_REQUEST);
       }
-      command.runCommand(request, response, configuration);
+      command.runCommand(request, response, context);
     } catch (SecurityException ex) {
       log.info("security exception", ex);
       handleException(new ConnectorException(ErrorCode.ACCESS_DENIED),
-              configuration, request, response, handler);
+              context, request, response, handler);
     } catch (RuntimeException e) {
       log.error("runtime exception", e);
       handleException(new ConnectorException(ErrorCode.INVALID_COMMAND),
-              configuration, request, response, handler);
+              context, request, response, handler);
     } catch (ConnectorException e) {
       log.debug("ConnectorException: {} {}", e.getErrorCode(), e.getMessage());
-      handleException(e, configuration, request, response, handler);
+      handleException(e, context, request, response, handler);
     }
   }
 
@@ -133,14 +133,14 @@ public class ConnectorServlet extends HttpServlet {
    * @param e exception
    * @param request request
    * @param response response
-   * @param configuration connector configuration
+   * @param context ckfinder context
    * @param handler exception handler
    * @throws IOException when IO Exception occurs.
    */
-  private void handleException(ConnectorException e, Configuration configuration,
+  private void handleException(ConnectorException e, CKFinderContext context,
           HttpServletRequest request, HttpServletResponse response,
           ExceptionHandler handler) throws IOException {
-    handler.handleException(request, response, configuration, e);
+    handler.handleException(request, response, context, e);
   }
 
 }

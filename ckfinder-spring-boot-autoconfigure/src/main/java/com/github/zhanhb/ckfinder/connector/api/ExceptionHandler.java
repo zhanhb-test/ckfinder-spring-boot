@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 public interface ExceptionHandler {
 
-  void handleException(HttpServletRequest request, HttpServletResponse response, Configuration configuration, ConnectorException connectorException) throws IOException;
+  void handleException(HttpServletRequest request, HttpServletResponse response,
+          CKFinderContext context, ConnectorException connectorException) throws IOException;
 
 }

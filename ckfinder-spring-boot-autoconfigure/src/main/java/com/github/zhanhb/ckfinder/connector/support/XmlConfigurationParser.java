@@ -58,16 +58,17 @@ public enum XmlConfigurationParser {
 
   /**
    *
-   * @param resourceLoader resource loader to load xml configuration and watermark resource
+   * @param resourceLoader resource loader to load xml configuration and
+   * watermark resource
    * @param basePathBuilder base url and path builder
    * @param xmlFilePath string representation of the xml file
    * @return parsed configuration
    * @throws java.lang.Exception if exception occur when parse the resource
    */
-  public DefaultConfiguration parse(ResourceLoader resourceLoader,
+  public DefaultCKFinderContext parse(ResourceLoader resourceLoader,
           BasePathBuilder basePathBuilder, String xmlFilePath)
           throws Exception {
-    DefaultConfiguration.Builder builder = DefaultConfiguration.builder();
+    DefaultCKFinderContext.Builder builder = DefaultCKFinderContext.builder();
     Path basePath = basePathBuilder.getBasePath();
     init(builder, resourceLoader, xmlFilePath, basePath, basePathBuilder);
     return builder.build();
@@ -76,7 +77,7 @@ public enum XmlConfigurationParser {
   /**
    * Initializes configuration from XML file.
    *
-   * @param builder configuration builder
+   * @param builder context builder
    * @param basePathBuilder base url and path builder
    * @param resourceLoader resource loader to load xml configuration
    * @param basePath base path
@@ -86,7 +87,7 @@ public enum XmlConfigurationParser {
    * @throws org.xml.sax.SAXException syntax error in xml file
    * @throws ParserConfigurationException no xml provider is avaliable
    */
-  private void init(DefaultConfiguration.Builder builder, ResourceLoader resourceLoader,
+  private void init(DefaultCKFinderContext.Builder builder, ResourceLoader resourceLoader,
           String xmlFilePath, Path basePath, BasePathBuilder basePathBuilder)
           throws ConnectorException, IOException, ParserConfigurationException, SAXException {
     Resource resource = getFullConfigPath(resourceLoader, xmlFilePath);
@@ -213,7 +214,8 @@ public enum XmlConfigurationParser {
   /**
    * Gets absolute path to XML configuration file.
    *
-   * @param resourceLoader resource loader to load xml configuration and watermark resource
+   * @param resourceLoader resource loader to load xml configuration and
+   * watermark resource
    * @param xmlFilePath string representation of the xml file
    * @return absolute path to XML configuration file
    * @throws ConnectorException when absolute path cannot be obtained.
@@ -255,10 +257,10 @@ public enum XmlConfigurationParser {
   /**
    * Sets hidden files list defined in XML configuration.
    *
-   * @param builder configuration builder
+   * @param builder context builder
    * @param childNodes list of files nodes.
    */
-  private void setHiddenFiles(DefaultConfiguration.Builder builder, NodeList childNodes) {
+  private void setHiddenFiles(DefaultCKFinderContext.Builder builder, NodeList childNodes) {
     for (int i = 0, j = childNodes.getLength(); i < j; i++) {
       Node node = childNodes.item(i);
       if (node.getNodeName().equals("file")) {
@@ -273,10 +275,10 @@ public enum XmlConfigurationParser {
   /**
    * Sets hidden folders list defined in XML configuration.
    *
-   * @param builder configuration builder
+   * @param builder context builder
    * @param childNodes list of folder nodes.
    */
-  private void setHiddenFolders(DefaultConfiguration.Builder builder, NodeList childNodes) {
+  private void setHiddenFolders(DefaultCKFinderContext.Builder builder, NodeList childNodes) {
     for (int i = 0, j = childNodes.getLength(); i < j; i++) {
       Node node = childNodes.item(i);
       if (node.getNodeName().equals("folder")) {
@@ -291,10 +293,10 @@ public enum XmlConfigurationParser {
   /**
    * Sets ACL configuration as a list of access control levels.
    *
-   * @param builder configuration builder
+   * @param builder context builder
    * @param childNodes nodes with ACL configuration.
    */
-  private void setACLs(DefaultConfiguration.Builder builder, NodeList childNodes) {
+  private void setACLs(DefaultCKFinderContext.Builder builder, NodeList childNodes) {
     InMemoryAccessController accessControl = new InMemoryAccessController();
     for (int i = 0, j = childNodes.getLength(); i < j; i++) {
       Node childNode = childNodes.item(i);
@@ -392,7 +394,7 @@ public enum XmlConfigurationParser {
   }
 
   /**
-   * creates thumb configuration from XML.
+   * creates thumb properties from XML.
    *
    * @param childNodes list of thumb XML nodes
    * @param basePathBuilder base url and path builder
@@ -456,13 +458,13 @@ public enum XmlConfigurationParser {
    * Creates resource types configuration from XML configuration file (from XML
    * element 'types').
    *
-   * @param builder configuration builder
+   * @param builder context builder
    * @param doc XML document.
    * @param basePathBuilder base url and path builder
    * @throws IOException when IO Exception occurs.
    * @throws ConnectorException when error occurs
    */
-  private void setTypes(DefaultConfiguration.Builder builder, Document doc, BasePathBuilder basePathBuilder,
+  private void setTypes(DefaultCKFinderContext.Builder builder, Document doc, BasePathBuilder basePathBuilder,
           ThumbnailProperties thumbnail)
           throws IOException, ConnectorException {
     NodeList list = doc.getElementsByTagName("type");
@@ -562,11 +564,12 @@ public enum XmlConfigurationParser {
   /**
    * Sets plugins list from XML configuration file.
    *
-   * @param builder configuration builder
+   * @param builder context builder
    * @param childNode child of XML node 'plugins'.
-   * @param resourceLoader resource loader to load xml configuration and watermark resource
+   * @param resourceLoader resource loader to load xml configuration and
+   * watermark resource
    */
-  private void setPlugins(DefaultConfiguration.Builder builder, Node childNode, ResourceLoader resourceLoader) {
+  private void setPlugins(DefaultCKFinderContext.Builder builder, Node childNode, ResourceLoader resourceLoader) {
     NodeList nodeList = childNode.getChildNodes();
     int length = nodeList.getLength();
     List<Plugin> plugins = new ArrayList<>(length);

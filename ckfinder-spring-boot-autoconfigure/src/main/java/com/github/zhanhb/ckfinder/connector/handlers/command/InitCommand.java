@@ -12,7 +12,7 @@
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.api.AccessControl;
-import com.github.zhanhb.ckfinder.connector.api.Configuration;
+import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.InitCommandEvent;
 import com.github.zhanhb.ckfinder.connector.api.License;
@@ -52,15 +52,15 @@ public class InitCommand extends XmlCommand<InitParameter> {
   private static final char[] hexChars = "0123456789abcdef".toCharArray();
 
   @Override
-  Connector buildConnector(InitParameter param, Configuration configuration) {
+  Connector buildConnector(InitParameter param, CKFinderContext context) {
     Connector.Builder rootElement = Connector.builder();
     if (param.getType() != null) {
       rootElement.resourceType(param.getType().getName());
     }
     createErrorNode(rootElement, 0);
-    createConnectorData(rootElement, param, configuration);
-    createResouceTypesData(rootElement, param, configuration);
-    createPluginsData(rootElement, configuration);
+    createConnectorData(rootElement, param, context);
+    createResouceTypesData(rootElement, param, context);
+    createPluginsData(rootElement, context);
     return rootElement.build();
   }
 
@@ -69,22 +69,22 @@ public class InitCommand extends XmlCommand<InitParameter> {
    *
    * @param rootElement root element in XML
    * @param param the parameter
-   * @param configuration connector configuration
+   * @param context connector context
    */
-  private void createConnectorData(Connector.Builder rootElement, InitParameter param, Configuration configuration) {
-    ThumbnailProperties thumbnail = configuration.getThumbnail();
-    License license = configuration.getLicense(param.getHost());
+  private void createConnectorData(Connector.Builder rootElement, InitParameter param, CKFinderContext context) {
+    ThumbnailProperties thumbnail = context.getThumbnail();
+    License license = context.getLicense(param.getHost());
 
     // connector info
     ConnectorInfo.Builder element = ConnectorInfo.builder()
-            .enabled(configuration.isEnabled())
+            .enabled(context.isEnabled())
             .licenseName(getLicenseName(license))
             .licenseKey(createLicenseKey(license.getKey()))
-            .uploadCheckImages(!configuration.isCheckSizeAfterScaling())
-            .imgWidth(configuration.getImgWidth())
-            .imgHeight(configuration.getImgHeight())
+            .uploadCheckImages(!context.isCheckSizeAfterScaling())
+            .imgWidth(context.getImgWidth())
+            .imgHeight(context.getImgHeight())
             .thumbsEnabled(thumbnail != null)
-            .plugins(configuration.getPublicPluginNames());
+            .plugins(context.getPublicPluginNames());
     if (thumbnail != null) {
       element.thumbsUrl(PathUtils.addSlashToEnd(thumbnail.getUrl()))
               .thumbsDirectAccess(thumbnail.isDirectAccess())
@@ -142,12 +142,12 @@ public class InitCommand extends XmlCommand<InitParameter> {
    * Creates plugins node in XML.
    *
    * @param rootElement root element in XML
-   * @param configuration connector configuration
+   * @param context ckfinder context
    */
-  private void createPluginsData(Connector.Builder rootElement, Configuration configuration) {
+  private void createPluginsData(Connector.Builder rootElement, CKFinderContext context) {
     PluginsInfos.Builder builder = PluginsInfos.builder();
     InitCommandEvent event = new InitCommandEvent(builder);
-    configuration.fireOnInitCommand(event);
+    context.fireOnInitCommand(event);
     rootElement.result(builder.build());
   }
 
@@ -156,24 +156,24 @@ public class InitCommand extends XmlCommand<InitParameter> {
    *
    * @param rootElement root element in XML
    * @param param the parameter
-   * @param configuration connector configuration
+   * @param context ckfinder context
    */
-  private void createResouceTypesData(Connector.Builder rootElement, InitParameter param, Configuration configuration) {
+  private void createResouceTypesData(Connector.Builder rootElement, InitParameter param, CKFinderContext context) {
     //resurcetypes
     ResourceTypes.Builder resourceTypes = ResourceTypes.builder();
     Collection<ResourceType> types;
     if (param.getType() != null) {
       types = Collections.singleton(param.getType());
     } else {
-      types = getTypes(configuration);
+      types = getTypes(context);
     }
 
     for (ResourceType resourceType : types) {
       String name = resourceType.getName();
-      int acl = configuration.getAccessControl().getAcl(name, "/", param.getUserRole());
+      int acl = context.getAccessControl().getAcl(name, "/", param.getUserRole());
       if ((acl & AccessControl.FOLDER_VIEW) != 0) {
         long maxSize = resourceType.getMaxSize();
-        boolean hasChildren = FileUtils.hasChildren(configuration.getAccessControl(), "/", getPath(resourceType.getPath()), configuration, resourceType.getName(), param.getUserRole());
+        boolean hasChildren = FileUtils.hasChildren(context.getAccessControl(), "/", getPath(resourceType.getPath()), context, resourceType.getName(), param.getUserRole());
         resourceTypes.resourceType(com.github.zhanhb.ckfinder.connector.handlers.response.ResourceType.builder()
                 .name(name)
                 .acl(acl)
@@ -191,22 +191,22 @@ public class InitCommand extends XmlCommand<InitParameter> {
   /**
    * gets list of types names.
    *
-   * @param configuration connector configuration
+   * @param context ckfinder context
    * @return list of types names.
    */
-  private Collection<ResourceType> getTypes(Configuration configuration) {
-    if (configuration.getDefaultResourceTypes().size() > 0) {
-      Set<String> defaultResourceTypes = configuration.getDefaultResourceTypes();
+  private Collection<ResourceType> getTypes(CKFinderContext context) {
+    if (context.getDefaultResourceTypes().size() > 0) {
+      Set<String> defaultResourceTypes = context.getDefaultResourceTypes();
       ArrayList<ResourceType> arrayList = new ArrayList<>(defaultResourceTypes.size());
       for (String key : defaultResourceTypes) {
-        ResourceType resourceType = configuration.getTypes().get(key);
+        ResourceType resourceType = context.getTypes().get(key);
         if (resourceType != null) {
           arrayList.add(resourceType);
         }
       }
       return arrayList;
     } else {
-      return configuration.getTypes().values();
+      return context.getTypes().values();
     }
   }
 
@@ -235,9 +235,9 @@ public class InitCommand extends XmlCommand<InitParameter> {
   }
 
   @Override
-  protected InitParameter popupParams(HttpServletRequest request, Configuration configuration)
+  protected InitParameter popupParams(HttpServletRequest request, CKFinderContext context)
           throws ConnectorException {
-    InitParameter param = doInitParam(new InitParameter(), request, configuration);
+    InitParameter param = doInitParam(new InitParameter(), request, context);
     param.setHost(request.getServerName());
     return param;
   }

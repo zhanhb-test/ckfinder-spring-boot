@@ -12,7 +12,7 @@
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.api.AccessControl;
-import com.github.zhanhb.ckfinder.connector.api.Configuration;
+import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.Parameter;
@@ -35,17 +35,17 @@ import lombok.extern.slf4j.Slf4j;
 public class GetFoldersCommand extends BaseXmlCommand<Parameter> {
 
   @Override
-  protected void createXml(Connector.Builder rootElement, Parameter param, Configuration configuration) throws ConnectorException {
+  protected void createXml(Connector.Builder rootElement, Parameter param, CKFinderContext context) throws ConnectorException {
     if (param.getType() == null) {
       throw new ConnectorException(ErrorCode.INVALID_TYPE);
     }
 
-    if (!configuration.getAccessControl().hasPermission(param.getType().getName(),
+    if (!context.getAccessControl().hasPermission(param.getType().getName(),
             param.getCurrentFolder(), param.getUserRole(),
             AccessControl.FOLDER_VIEW)) {
       param.throwException(ErrorCode.UNAUTHORIZED);
     }
-    if (configuration.isDirectoryHidden(param.getCurrentFolder())) {
+    if (context.isDirectoryHidden(param.getCurrentFolder())) {
       param.throwException(ErrorCode.INVALID_REQUEST);
     }
 
@@ -57,7 +57,7 @@ public class GetFoldersCommand extends BaseXmlCommand<Parameter> {
 
     try {
       List<Path> directories = FileUtils.listChildren(dir, true);
-      createFoldersData(rootElement, param, configuration, directories);
+      createFoldersData(rootElement, param, context, directories);
     } catch (IOException e) {
       log.error("", e);
       param.throwException(ErrorCode.ACCESS_DENIED);
@@ -69,28 +69,28 @@ public class GetFoldersCommand extends BaseXmlCommand<Parameter> {
    *
    * @param rootElement root element in XML document
    * @param param the parameter
-   * @param configuration connector configuration
+   * @param context ckfinder context
    * @param directories list of children folder
    */
-  private void createFoldersData(Connector.Builder rootElement, Parameter param, Configuration configuration, List<Path> directories) {
+  private void createFoldersData(Connector.Builder rootElement, Parameter param, CKFinderContext context, List<Path> directories) {
     Folders.Builder folders = Folders.builder();
     for (Path dir : directories) {
       String dirName = dir.getFileName().toString();
-      if (!configuration.getAccessControl().hasPermission(param.getType().getName(), param.getCurrentFolder() + dirName, param.getUserRole(),
+      if (!context.getAccessControl().hasPermission(param.getType().getName(), param.getCurrentFolder() + dirName, param.getUserRole(),
               AccessControl.FOLDER_VIEW)) {
         continue;
       }
-      if (configuration.isDirectoryHidden(dirName)) {
+      if (context.isDirectoryHidden(dirName)) {
         continue;
       }
-      boolean hasChildren = FileUtils.hasChildren(configuration.getAccessControl(),
+      boolean hasChildren = FileUtils.hasChildren(context.getAccessControl(),
               param.getCurrentFolder() + dirName + "/", dir,
-              configuration, param.getType().getName(), param.getUserRole());
+              context, param.getType().getName(), param.getUserRole());
 
       folders.folder(Folder.builder()
               .name(dirName)
               .hasChildren(hasChildren)
-              .acl(configuration.getAccessControl()
+              .acl(context.getAccessControl()
                       .getAcl(param.getType().getName(),
                               param.getCurrentFolder()
                               + dirName, param.getUserRole())).build());
@@ -99,8 +99,8 @@ public class GetFoldersCommand extends BaseXmlCommand<Parameter> {
   }
 
   @Override
-  protected Parameter popupParams(HttpServletRequest request, Configuration configuration) throws ConnectorException {
-    return doInitParam(new Parameter(), request, configuration);
+  protected Parameter popupParams(HttpServletRequest request, CKFinderContext context) throws ConnectorException {
+    return doInitParam(new Parameter(), request, context);
   }
 
 }

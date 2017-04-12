@@ -12,7 +12,7 @@
 package com.github.zhanhb.ckfinder.connector.plugins;
 
 import com.github.zhanhb.ckfinder.connector.api.AccessControl;
-import com.github.zhanhb.ckfinder.connector.api.Configuration;
+import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.handlers.command.BaseXmlCommand;
@@ -33,12 +33,12 @@ import lombok.extern.slf4j.Slf4j;
 public class ImageResizeInfoCommand extends BaseXmlCommand<ImageResizeInfoParameter> {
 
   @Override
-  protected void createXml(Connector.Builder rootElement, ImageResizeInfoParameter param, Configuration configuration) throws ConnectorException {
+  protected void createXml(Connector.Builder rootElement, ImageResizeInfoParameter param, CKFinderContext context) throws ConnectorException {
     if (param.getType() == null) {
       throw new ConnectorException(ErrorCode.INVALID_TYPE);
     }
 
-    if (!configuration.getAccessControl().hasPermission(param.getType().getName(),
+    if (!context.getAccessControl().hasPermission(param.getType().getName(),
             param.getCurrentFolder(), param.getUserRole(),
             AccessControl.FILE_VIEW)) {
       param.throwException(ErrorCode.UNAUTHORIZED);
@@ -46,7 +46,7 @@ public class ImageResizeInfoCommand extends BaseXmlCommand<ImageResizeInfoParame
 
     if (param.getFileName() == null || param.getFileName().isEmpty()
             || !FileUtils.isFileNameValid(param.getFileName())
-            || configuration.isFileHidden(param.getFileName())) {
+            || context.isFileHidden(param.getFileName())) {
       param.throwException(ErrorCode.INVALID_REQUEST);
     }
 
@@ -79,9 +79,9 @@ public class ImageResizeInfoCommand extends BaseXmlCommand<ImageResizeInfoParame
   }
 
   @Override
-  protected ImageResizeInfoParameter popupParams(HttpServletRequest request, Configuration configuration)
+  protected ImageResizeInfoParameter popupParams(HttpServletRequest request, CKFinderContext context)
           throws ConnectorException {
-    ImageResizeInfoParameter param = doInitParam(new ImageResizeInfoParameter(), request, configuration);
+    ImageResizeInfoParameter param = doInitParam(new ImageResizeInfoParameter(), request, context);
     param.setFileName(request.getParameter("fileName"));
     return param;
   }

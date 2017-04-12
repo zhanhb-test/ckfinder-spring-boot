@@ -12,7 +12,7 @@
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.api.AccessControl;
-import com.github.zhanhb.ckfinder.connector.api.Configuration;
+import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.RenameFolderParameter;
@@ -36,29 +36,30 @@ public class RenameFolderCommand extends BaseXmlCommand<RenameFolderParameter> i
    * creates XML node for renamed folder.
    *
    * @param rootElement XML root element.
+   * @param context ckfinder context
    * @throws ConnectorException when error occurs
    */
   @Override
-  protected void createXml(Connector.Builder rootElement, RenameFolderParameter param, Configuration configuration) throws ConnectorException {
+  protected void createXml(Connector.Builder rootElement, RenameFolderParameter param, CKFinderContext context) throws ConnectorException {
     checkRequestPathValid(param.getNewFolderName());
 
     if (param.getType() == null) {
       throw new ConnectorException(ErrorCode.INVALID_TYPE);
     }
 
-    if (!configuration.getAccessControl().hasPermission(param.getType().getName(),
+    if (!context.getAccessControl().hasPermission(param.getType().getName(),
             param.getCurrentFolder(),
             param.getUserRole(),
             AccessControl.FOLDER_RENAME)) {
       param.throwException(ErrorCode.UNAUTHORIZED);
     }
 
-    if (configuration.isForceAscii()) {
+    if (context.isForceAscii()) {
       param.setNewFolderName(FileUtils.convertToAscii(param.getNewFolderName()));
     }
 
-    if (configuration.isDirectoryHidden(param.getNewFolderName())
-            || !FileUtils.isFolderNameValid(param.getNewFolderName(), configuration)) {
+    if (context.isDirectoryHidden(param.getNewFolderName())
+            || !FileUtils.isFolderNameValid(param.getNewFolderName(), context)) {
       param.throwException(ErrorCode.INVALID_NAME);
     }
 
@@ -122,13 +123,13 @@ public class RenameFolderCommand extends BaseXmlCommand<RenameFolderParameter> i
 
   /**
    * @param request request
-   * @param configuration connector configuration
+   * @param context ckfinder context
    * @return the parameter
    * @throws ConnectorException when error occurs.
    */
   @Override
-  protected RenameFolderParameter popupParams(HttpServletRequest request, Configuration configuration) throws ConnectorException {
-    RenameFolderParameter param = doInitParam(new RenameFolderParameter(), request, configuration);
+  protected RenameFolderParameter popupParams(HttpServletRequest request, CKFinderContext context) throws ConnectorException {
+    RenameFolderParameter param = doInitParam(new RenameFolderParameter(), request, context);
     param.setNewFolderName(request.getParameter("NewFolderName"));
     return param;
   }

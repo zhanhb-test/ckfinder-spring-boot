@@ -12,7 +12,7 @@
 package com.github.zhanhb.ckfinder.connector.plugins;
 
 import com.github.zhanhb.ckfinder.connector.api.AccessControl;
-import com.github.zhanhb.ckfinder.connector.api.Configuration;
+import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.handlers.command.BaseXmlCommand;
@@ -38,12 +38,12 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> imp
   }
 
   @Override
-  protected void createXml(Connector.Builder rootElement, ImageResizeParameter param, Configuration configuration) throws ConnectorException {
+  protected void createXml(Connector.Builder rootElement, ImageResizeParameter param, CKFinderContext context) throws ConnectorException {
     if (param.getType() == null) {
       throw new ConnectorException(ErrorCode.INVALID_TYPE);
     }
 
-    if (!configuration.getAccessControl().hasPermission(param.getType().getName(),
+    if (!context.getAccessControl().hasPermission(param.getType().getName(),
             param.getCurrentFolder(), param.getUserRole(),
             AccessControl.FILE_DELETE
             | AccessControl.FILE_UPLOAD)) {
@@ -57,7 +57,7 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> imp
       param.throwException(ErrorCode.INVALID_NAME);
     }
 
-    if (!FileUtils.isFileNameValid(fileName) || configuration.isFileHidden(fileName)) {
+    if (!FileUtils.isFileNameValid(fileName) || context.isFileHidden(fileName)) {
       param.throwException(ErrorCode.INVALID_REQUEST);
     }
 
@@ -76,7 +76,7 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> imp
 
     if (param.getWidth() != null && param.getHeight() != null) {
 
-      if (!FileUtils.isFileNameValid(newFileName) && configuration.isFileHidden(newFileName)) {
+      if (!FileUtils.isFileNameValid(newFileName) && context.isFileHidden(newFileName)) {
         param.throwException(ErrorCode.INVALID_NAME);
       }
 
@@ -92,8 +92,8 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> imp
       if (!"1".equals(param.getOverwrite()) && Files.exists(thumbFile)) {
         param.throwException(ErrorCode.ALREADY_EXIST);
       }
-      int maxImageHeight = configuration.getImgHeight();
-      int maxImageWidth = configuration.getImgWidth();
+      int maxImageHeight = context.getImgHeight();
+      int maxImageWidth = context.getImgWidth();
       if ((maxImageWidth > 0 && param.getWidth() > maxImageWidth)
               || (maxImageHeight > 0 && param.getHeight() > maxImageHeight)) {
         param.throwException(ErrorCode.INVALID_REQUEST);
@@ -101,7 +101,7 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> imp
 
       try {
         ImageUtils.createResizedImage(file, thumbFile,
-                param.getWidth(), param.getHeight(), configuration.getImgQuality());
+                param.getWidth(), param.getHeight(), context.getImgQuality());
 
       } catch (IOException e) {
         log.error("", e);
@@ -119,7 +119,7 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> imp
         if (size != null) {
           try {
             ImageUtils.createResizedImage(file, thumbFile, size.getWidth(),
-                    size.getHeight(), configuration.getImgQuality());
+                    size.getHeight(), context.getImgQuality());
           } catch (IOException e) {
             log.error("", e);
             param.throwException(ErrorCode.ACCESS_DENIED);
@@ -131,8 +131,8 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> imp
 
   @Override
   @SuppressWarnings("CollectionWithoutInitialCapacity")
-  protected ImageResizeParameter popupParams(HttpServletRequest request, Configuration configuration) throws ConnectorException {
-    ImageResizeParameter param = doInitParam(new ImageResizeParameter(), request, configuration);
+  protected ImageResizeParameter popupParams(HttpServletRequest request, CKFinderContext context) throws ConnectorException {
+    ImageResizeParameter param = doInitParam(new ImageResizeParameter(), request, context);
     param.setFileName(request.getParameter("fileName"));
     param.setNewFileName(request.getParameter("newFileName"));
     param.setOverwrite(request.getParameter("overwrite"));

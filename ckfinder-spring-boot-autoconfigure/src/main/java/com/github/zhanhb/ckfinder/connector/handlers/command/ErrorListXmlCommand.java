@@ -11,7 +11,7 @@
  */
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
-import com.github.zhanhb.ckfinder.connector.api.Configuration;
+import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.ErrorListXmlParameter;
@@ -26,19 +26,19 @@ public abstract class ErrorListXmlCommand<T extends ErrorListXmlParameter> exten
 
   @Override
   @SuppressWarnings("FinalMethod")
-  final Connector buildConnector(T param, Configuration configuration)
+  final Connector buildConnector(T param, CKFinderContext context)
           throws ConnectorException {
     Connector.Builder connector = Connector.builder();
-    ErrorCode error = getDataForXml(param, configuration);
+    ErrorCode error = getDataForXml(param, context);
     int errorNum = error != null ? error.getCode() : 0;
     if (param.getType() != null) {
       connector.resourceType(param.getType().getName());
     }
-    createCurrentFolderNode(param, connector, configuration.getAccessControl());
+    createCurrentFolderNode(param, connector, context.getAccessControl());
     createErrorNode(connector, errorNum);
     param.addErrorsTo(connector);
     if (param.isAddResultNode()) {
-      addResultNode(connector, param, configuration);
+      addResultNode(connector, param, context);
     }
     return connector.build();
   }
@@ -48,20 +48,20 @@ public abstract class ErrorListXmlCommand<T extends ErrorListXmlParameter> exten
    *
    * @param rootElement XML root node
    * @param param the parameter
-   * @param configuration connector configuration
+   * @param context ckfinder context
    */
-  protected abstract void addResultNode(Connector.Builder rootElement, T param, Configuration configuration);
+  protected abstract void addResultNode(Connector.Builder rootElement, T param, CKFinderContext context);
 
   /**
    * gets all necessary data to create XML response.
    *
    * @param param the parameter
-   * @param configuration connector configuration
+   * @param context ckfinder context
    * @return the warning code or null if it's correct.
    * {@link com.github.zhanhb.ckfinder.connector.api.ErrorCode} if no
    * error occurred.
    * @throws ConnectorException when error occurs
    */
-  protected abstract ErrorCode getDataForXml(T param, Configuration configuration) throws ConnectorException;
+  protected abstract ErrorCode getDataForXml(T param, CKFinderContext context) throws ConnectorException;
 
 }

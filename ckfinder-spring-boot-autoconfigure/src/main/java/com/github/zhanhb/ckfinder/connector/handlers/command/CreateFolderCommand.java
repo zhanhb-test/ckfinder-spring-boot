@@ -12,7 +12,7 @@
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.api.AccessControl;
-import com.github.zhanhb.ckfinder.connector.api.Configuration;
+import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.CreateFolderParameter;
@@ -35,33 +35,34 @@ public class CreateFolderCommand extends BaseXmlCommand<CreateFolderParameter> i
    * creates current folder XML node.
    *
    * @param rootElement XML root element.
+   * @param context ckfinder context
    * @throws ConnectorException when error occurs
    */
   @Override
-  protected void createXml(Connector.Builder rootElement, CreateFolderParameter param, Configuration configuration) throws ConnectorException {
+  protected void createXml(Connector.Builder rootElement, CreateFolderParameter param, CKFinderContext context) throws ConnectorException {
     checkRequestPathValid(param.getNewFolderName());
 
     if (param.getType() == null) {
       throw new ConnectorException(ErrorCode.INVALID_TYPE);
     }
 
-    if (!configuration.getAccessControl().hasPermission(param.getType().getName(),
+    if (!context.getAccessControl().hasPermission(param.getType().getName(),
             param.getCurrentFolder(), param.getUserRole(),
             AccessControl.FOLDER_CREATE)) {
       param.throwException(ErrorCode.UNAUTHORIZED);
     }
 
-    if (configuration.isForceAscii()) {
+    if (context.isForceAscii()) {
       param.setNewFolderName(FileUtils.convertToAscii(param.getNewFolderName()));
     }
 
-    if (!FileUtils.isFolderNameValid(param.getNewFolderName(), configuration)) {
+    if (!FileUtils.isFolderNameValid(param.getNewFolderName(), context)) {
       param.throwException(ErrorCode.INVALID_NAME);
     }
-    if (configuration.isDirectoryHidden(param.getCurrentFolder())) {
+    if (context.isDirectoryHidden(param.getCurrentFolder())) {
       param.throwException(ErrorCode.INVALID_REQUEST);
     }
-    if (configuration.isDirectoryHidden(param.getNewFolderName())) {
+    if (context.isDirectoryHidden(param.getNewFolderName())) {
       param.throwException(ErrorCode.INVALID_NAME);
     }
 
@@ -82,9 +83,9 @@ public class CreateFolderCommand extends BaseXmlCommand<CreateFolderParameter> i
   }
 
   @Override
-  protected CreateFolderParameter popupParams(HttpServletRequest request, Configuration configuration)
+  protected CreateFolderParameter popupParams(HttpServletRequest request, CKFinderContext context)
           throws ConnectorException {
-    CreateFolderParameter param = doInitParam(new CreateFolderParameter(), request, configuration);
+    CreateFolderParameter param = doInitParam(new CreateFolderParameter(), request, context);
     param.setNewFolderName(request.getParameter("NewFolderName"));
     return param;
   }

@@ -12,7 +12,7 @@
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.api.AccessControl;
-import com.github.zhanhb.ckfinder.connector.api.Configuration;
+import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.Constants;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
@@ -38,7 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 public class MoveFilesCommand extends ErrorListXmlCommand<MoveFilesParameter> implements IPostCommand {
 
   @Override
-  protected void addResultNode(Connector.Builder rootElement, MoveFilesParameter param, Configuration configuration) {
+  protected void addResultNode(Connector.Builder rootElement, MoveFilesParameter param, CKFinderContext context) {
     rootElement.result(MoveFiles.builder()
             .moved(param.getFilesMoved())
             .movedTotal(param.getMovedAll() + param.getFilesMoved())
@@ -46,13 +46,13 @@ public class MoveFilesCommand extends ErrorListXmlCommand<MoveFilesParameter> im
   }
 
   @Override
-  protected ErrorCode getDataForXml(MoveFilesParameter param, Configuration configuration)
+  protected ErrorCode getDataForXml(MoveFilesParameter param, CKFinderContext context)
           throws ConnectorException {
     if (param.getType() == null) {
       throw new ConnectorException(ErrorCode.INVALID_TYPE);
     }
 
-    if (!configuration.getAccessControl().hasPermission(param.getType().getName(),
+    if (!context.getAccessControl().hasPermission(param.getType().getName(),
             param.getCurrentFolder(),
             param.getUserRole(),
             AccessControl.FILE_RENAME
@@ -76,15 +76,15 @@ public class MoveFilesCommand extends ErrorListXmlCommand<MoveFilesParameter> im
         param.throwException(ErrorCode.INVALID_REQUEST);
       }
 
-      if (configuration.isDirectoryHidden(file.getFolder())) {
+      if (context.isDirectoryHidden(file.getFolder())) {
         param.throwException(ErrorCode.INVALID_REQUEST);
       }
 
-      if (configuration.isFileHidden(file.getName())) {
+      if (context.isFileHidden(file.getName())) {
         param.throwException(ErrorCode.INVALID_REQUEST);
       }
 
-      if (!configuration.getAccessControl().hasPermission(file.getType().getName(),
+      if (!context.getAccessControl().hasPermission(file.getType().getName(),
               file.getFolder(), param.getUserRole(), AccessControl.FILE_VIEW | AccessControl.FILE_DELETE)) {
         param.throwException(ErrorCode.UNAUTHORIZED);
       }
@@ -224,11 +224,11 @@ public class MoveFilesCommand extends ErrorListXmlCommand<MoveFilesParameter> im
   }
 
   @Override
-  protected MoveFilesParameter popupParams(HttpServletRequest request, Configuration configuration)
+  protected MoveFilesParameter popupParams(HttpServletRequest request, CKFinderContext context)
           throws ConnectorException {
-    MoveFilesParameter param = doInitParam(new MoveFilesParameter(), request, configuration);
+    MoveFilesParameter param = doInitParam(new MoveFilesParameter(), request, context);
     param.setMovedAll(request.getParameter("moved") != null ? Integer.parseInt(request.getParameter("moved")) : 0);
-    RequestFileHelper.addFilesListFromRequest(request, param.getFiles(), configuration);
+    RequestFileHelper.addFilesListFromRequest(request, param.getFiles(), context);
     return param;
   }
 

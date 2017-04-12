@@ -1,7 +1,7 @@
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.api.AccessControl;
-import com.github.zhanhb.ckfinder.connector.api.Configuration;
+import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.Parameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
@@ -28,14 +28,14 @@ public abstract class XmlCommand<T extends Parameter> extends BaseCommand<T> {
    * @param param the parameter
    * @param request request
    * @param response response
-   * @param configuration connector configuration
+   * @param context ckfinder context
    * @throws IOException when IO Exception occurs.
    * @throws ConnectorException when error occurs
    */
   @Override
   final void execute(T param, HttpServletRequest request, HttpServletResponse response,
-          Configuration configuration) throws IOException, ConnectorException {
-    Connector connector = buildConnector(param, configuration);
+          CKFinderContext context) throws IOException, ConnectorException {
+    Connector connector = buildConnector(param, context);
     String result = XmlCreator.INSTANCE.toString(connector);
 
     response.setContentType("text/xml;charset=UTF-8");
@@ -45,7 +45,7 @@ public abstract class XmlCommand<T extends Parameter> extends BaseCommand<T> {
     }
   }
 
-  abstract Connector buildConnector(T param, Configuration configuration)
+  abstract Connector buildConnector(T param, CKFinderContext context)
           throws ConnectorException;
 
   final void createErrorNode(Connector.Builder rootElement, int code) {

@@ -15,11 +15,11 @@ public interface Command {
    *
    * @param request request
    * @param response response
-   * @param configuration connector configuration
+   * @param context ckfinder context
    * @throws ConnectorException when error occurred.
    * @throws IOException when IO Exception occurs.
    */
   void runCommand(HttpServletRequest request, HttpServletResponse response,
-          Configuration configuration) throws ConnectorException, IOException;
+          CKFinderContext context) throws ConnectorException, IOException;
 
 }

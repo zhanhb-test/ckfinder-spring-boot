@@ -11,8 +11,8 @@
  */
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
+import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.Command;
-import com.github.zhanhb.ckfinder.connector.api.Configuration;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.Constants;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
@@ -38,12 +38,12 @@ public abstract class BaseCommand<T extends Parameter> implements Command {
   @SuppressWarnings("FinalMethod")
   @Override
   public final void runCommand(HttpServletRequest request,
-          HttpServletResponse response, Configuration configuration)
+          HttpServletResponse response, CKFinderContext context)
           throws ConnectorException, IOException {
-    execute(popupParams(request, configuration), request, response, configuration);
+    execute(popupParams(request, context), request, response, context);
   }
 
-  protected abstract T popupParams(HttpServletRequest request, Configuration configuration) throws ConnectorException;
+  protected abstract T popupParams(HttpServletRequest request, CKFinderContext context) throws ConnectorException;
 
   /**
    * initialize params for command handler.
@@ -51,26 +51,26 @@ public abstract class BaseCommand<T extends Parameter> implements Command {
    * @param <T> parameter type
    * @param param the parameter
    * @param request request
-   * @param configuration connector configuration
+   * @param context ckfinder context
    * @return the parameter
    * @throws ConnectorException to handle in error handler.
    */
   @SuppressWarnings("FinalMethod")
   protected final <T extends Parameter> T doInitParam(T param, HttpServletRequest request,
-          Configuration configuration) throws ConnectorException {
-    checkConnectorEnabled(configuration);
-    setUserRole(param, request, configuration);
+          CKFinderContext context) throws ConnectorException {
+    checkConnectorEnabled(context);
+    setUserRole(param, request, context);
     String currentFolder = getCurrentFolder(request);
     param.setCurrentFolder(currentFolder);
 
     checkRequestPathValid(currentFolder);
 
-    if (configuration.isDirectoryHidden(currentFolder)) {
+    if (context.isDirectoryHidden(currentFolder)) {
       throw new ConnectorException(ErrorCode.INVALID_REQUEST);
     }
 
     String typeName = request.getParameter("type");
-    ResourceType type = configuration.getTypes().get(typeName);
+    ResourceType type = context.getTypes().get(typeName);
     if (currentFolder != null && typeName != null && type != null) {
       Path currDir = getPath(type.getPath(), currentFolder);
       if (!Files.isDirectory(currDir)) {
@@ -84,11 +84,11 @@ public abstract class BaseCommand<T extends Parameter> implements Command {
   /**
    * check if connector is enabled and checks authentication.
    *
-   * @param configuration connector configuration
+   * @param context ckfinder context
    * @throws ConnectorException when connector is disabled
    */
-  private void checkConnectorEnabled(Configuration configuration) throws ConnectorException {
-    if (!configuration.isEnabled()) {
+  private void checkConnectorEnabled(CKFinderContext context) throws ConnectorException {
+    if (!context.isEnabled()) {
       throw new ConnectorException(ErrorCode.CONNECTOR_DISABLED);
     }
   }
@@ -99,12 +99,12 @@ public abstract class BaseCommand<T extends Parameter> implements Command {
    * @param param the parameter
    * @param request request
    * @param response response
-   * @param configuration connector configuration
+   * @param context ckfinder context
    * @throws ConnectorException when error occurs
    * @throws IOException when IO Exception occurs.
    */
   abstract void execute(T param, HttpServletRequest request,
-          HttpServletResponse response, Configuration configuration)
+          HttpServletResponse response, CKFinderContext context)
           throws ConnectorException, IOException;
 
   /**
@@ -120,9 +120,9 @@ public abstract class BaseCommand<T extends Parameter> implements Command {
     }
   }
 
-  private void setUserRole(Parameter param, HttpServletRequest request, Configuration configuration) {
+  private void setUserRole(Parameter param, HttpServletRequest request, CKFinderContext context) {
     HttpSession session = request.getSession(false);
-    String userRole = session == null ? null : (String) session.getAttribute(configuration.getUserRoleName());
+    String userRole = session == null ? null : (String) session.getAttribute(context.getUserRoleName());
     param.setUserRole(userRole);
   }
 

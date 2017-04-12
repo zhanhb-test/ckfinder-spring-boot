@@ -12,7 +12,7 @@
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.api.AccessControl;
-import com.github.zhanhb.ckfinder.connector.api.Configuration;
+import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.api.ThumbnailProperties;
@@ -47,25 +47,25 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
    * initializing parameters for command handler.
    *
    * @param request request
-   * @param configuration connector configuration
+   * @param context ckfinder context
    * @return the parameter
    * @throws ConnectorException when error occurs
    */
   @Override
-  protected GetFilesParameter popupParams(HttpServletRequest request, Configuration configuration)
+  protected GetFilesParameter popupParams(HttpServletRequest request, CKFinderContext context)
           throws ConnectorException {
-    GetFilesParameter param = doInitParam(new GetFilesParameter(), request, configuration);
+    GetFilesParameter param = doInitParam(new GetFilesParameter(), request, context);
     param.setShowThumbs(request.getParameter("showThumbs"));
     return param;
   }
 
   @Override
-  protected void createXml(Connector.Builder rootElement, GetFilesParameter param, Configuration configuration) throws ConnectorException {
+  protected void createXml(Connector.Builder rootElement, GetFilesParameter param, CKFinderContext context) throws ConnectorException {
     if (param.getType() == null) {
       throw new ConnectorException(ErrorCode.INVALID_TYPE);
     }
 
-    if (!configuration.getAccessControl().hasPermission(param.getType().getName(),
+    if (!context.getAccessControl().hasPermission(param.getType().getName(),
             param.getCurrentFolder(), param.getUserRole(),
             AccessControl.FILE_VIEW)) {
       param.throwException(ErrorCode.UNAUTHORIZED);
@@ -79,7 +79,7 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
 
     try {
       List<Path> files = FileUtils.listChildren(dir, false);
-      createFilesData(files, rootElement, param, configuration);
+      createFilesData(files, rootElement, param, context);
     } catch (IOException e) {
       log.error("", e);
       param.throwException(ErrorCode.ACCESS_DENIED);
@@ -92,16 +92,16 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
    * @param list
    * @param rootElement root element from XML.
    * @param param the parameter
-   * @param configuration connector configuration
+   * @param context ckfinder context
    */
-  private void createFilesData(List<Path> list, Connector.Builder rootElement, GetFilesParameter param, Configuration configuration) {
+  private void createFilesData(List<Path> list, Connector.Builder rootElement, GetFilesParameter param, CKFinderContext context) {
     com.github.zhanhb.ckfinder.connector.handlers.response.Files.Builder files = com.github.zhanhb.ckfinder.connector.handlers.response.Files.builder();
     for (Path file : list) {
       String fileName = file.getFileName().toString();
       if (!FileUtils.isFileExtensionAllowed(fileName, param.getType())) {
         continue;
       }
-      if (configuration.isFileHidden(fileName)) {
+      if (context.isFileHidden(fileName)) {
         continue;
       }
       BasicFileAttributes attrs;
@@ -114,7 +114,7 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
               .name(file.getFileName().toString())
               .date(FileUtils.parseLastModifiedDate(attrs))
               .size(getSizeInKB(attrs).longValue())
-              .thumb(createThumbAttr(file, param, configuration))
+              .thumb(createThumbAttr(file, param, context))
               .build());
     }
     rootElement.result(files.build());
@@ -125,11 +125,11 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
    *
    * @param file file to check if has thumb.
    * @param param the parameter
-   * @param configuration connector configuration
+   * @param context ckfinder context
    * @return thumb attribute values
    */
-  private String createThumbAttr(Path file, GetFilesParameter param, Configuration configuration) {
-    if (ImageUtils.isImageExtension(file) && isAddThumbsAttr(param, configuration.getThumbnail())) {
+  private String createThumbAttr(Path file, GetFilesParameter param, CKFinderContext context) {
+    if (ImageUtils.isImageExtension(file) && isAddThumbsAttr(param, context.getThumbnail())) {
       Path thumbFile = getPath(param.getType().getThumbnailPath(), param.getCurrentFolder(),
               file.getFileName().toString());
       if (Files.exists(thumbFile)) {

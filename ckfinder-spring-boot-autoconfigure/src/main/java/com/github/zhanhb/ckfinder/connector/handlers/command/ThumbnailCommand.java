@@ -12,7 +12,7 @@
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.api.AccessControl;
-import com.github.zhanhb.ckfinder.connector.api.Configuration;
+import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.ThumbnailParameter;
@@ -37,8 +37,8 @@ public class ThumbnailCommand extends BaseCommand<ThumbnailParameter> {
 
   @Override
   @SuppressWarnings("FinalMethod")
-  final void execute(ThumbnailParameter param, HttpServletRequest request, HttpServletResponse response, Configuration configuration) throws ConnectorException, IOException {
-    if (configuration.getThumbnail() == null) {
+  final void execute(ThumbnailParameter param, HttpServletRequest request, HttpServletResponse response, CKFinderContext context) throws ConnectorException, IOException {
+    if (context.getThumbnail() == null) {
       param.throwException(ErrorCode.THUMBNAILS_DISABLED);
     }
 
@@ -46,7 +46,7 @@ public class ThumbnailCommand extends BaseCommand<ThumbnailParameter> {
       throw new ConnectorException(ErrorCode.INVALID_TYPE);
     }
 
-    if (!configuration.getAccessControl().hasPermission(param.getType().getName(),
+    if (!context.getAccessControl().hasPermission(param.getType().getName(),
             param.getCurrentFolder(), param.getUserRole(),
             AccessControl.FILE_VIEW)) {
       param.throwException(ErrorCode.UNAUTHORIZED);
@@ -56,7 +56,7 @@ public class ThumbnailCommand extends BaseCommand<ThumbnailParameter> {
       param.throwException(ErrorCode.INVALID_REQUEST);
     }
 
-    if (configuration.isFileHidden(param.getFileName())) {
+    if (context.isFileHidden(param.getFileName())) {
       param.throwException(ErrorCode.FILE_NOT_FOUND);
     }
 
@@ -80,7 +80,7 @@ public class ThumbnailCommand extends BaseCommand<ThumbnailParameter> {
         param.throwException(ErrorCode.FILE_NOT_FOUND);
       }
       try {
-        boolean success = ImageUtils.createThumb(orginFile, thumbFile, configuration.getThumbnail());
+        boolean success = ImageUtils.createThumb(orginFile, thumbFile, context.getThumbnail());
         if (!success) {
           param.throwException(ErrorCode.FILE_NOT_FOUND);
         }
@@ -108,9 +108,9 @@ public class ThumbnailCommand extends BaseCommand<ThumbnailParameter> {
   }
 
   @Override
-  protected ThumbnailParameter popupParams(HttpServletRequest request, Configuration configuration)
+  protected ThumbnailParameter popupParams(HttpServletRequest request, CKFinderContext context)
           throws ConnectorException {
-    ThumbnailParameter param = doInitParam(new ThumbnailParameter(), request, configuration);
+    ThumbnailParameter param = doInitParam(new ThumbnailParameter(), request, context);
     param.setFileName(request.getParameter("FileName"));
     return param;
   }
