@@ -35,7 +35,7 @@ public class DefaultEventHandler implements EventHandler {
   }
 
   @Override
-  public void fireOnFileUpload(FileUploadEvent args) throws ConnectorException {
+  public void fireOnFileUpload(FileUploadEvent args) {
     log.trace("{}", fileUploadListeners);
     for (FileUploadListener eventHandler : fileUploadListeners) {
       eventHandler.onFileUploadComplete(args);

@@ -8,6 +8,6 @@ import java.util.EventListener;
  */
 public interface FileUploadListener extends EventListener {
 
-  void onFileUploadComplete(FileUploadEvent event) throws ConnectorException;
+  void onFileUploadComplete(FileUploadEvent event);
 
 }
