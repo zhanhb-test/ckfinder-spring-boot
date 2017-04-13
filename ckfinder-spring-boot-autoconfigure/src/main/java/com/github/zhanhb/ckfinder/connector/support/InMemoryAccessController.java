@@ -1,7 +1,6 @@
 package com.github.zhanhb.ckfinder.connector.support;
 
 import com.github.zhanhb.ckfinder.connector.api.AccessControl;
-import java.io.Serializable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.EqualsAndHashCode;
@@ -11,9 +10,7 @@ import lombok.RequiredArgsConstructor;
  *
  * @author zhanhb
  */
-public class InMemoryAccessController implements AccessControl, Serializable {
-
-  private static final long serialVersionUID = 1L;
+public class InMemoryAccessController implements AccessControl {
 
   private final Map<CheckEntry, AclContext> aclMap = new ConcurrentHashMap<>(4);
 

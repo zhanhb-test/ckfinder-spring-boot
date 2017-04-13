@@ -12,18 +12,19 @@
 package com.github.zhanhb.ckfinder.connector.support;
 
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Value;
 
 /**
  * Access control level entity.
  */
 @Builder(builderClassName = "Builder")
-@Getter
+@SuppressWarnings("FinalClass")
+@Value
 public class AccessControlLevel {
 
-  private final String role;
-  private final String resourceType;
-  private final String folder;
-  private final int mask;
+  private String role;
+  private String resourceType;
+  private String folder;
+  private int mask;
 
 }

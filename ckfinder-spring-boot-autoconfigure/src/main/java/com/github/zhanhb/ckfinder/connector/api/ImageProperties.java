@@ -1,19 +1,20 @@
 package com.github.zhanhb.ckfinder.connector.api;
 
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Value;
 
 /**
  *
  * @author zhanhb
  */
 @Builder(builderClassName = "Builder")
-@Getter
+@SuppressWarnings("FinalClass")
+@Value
 public class ImageProperties {
 
-  private final int maxWidth;
-  private final int maxHeight;
-  private final float quality;
+  private int maxWidth;
+  private int maxHeight;
+  private float quality;
 
   @SuppressWarnings("PublicInnerClass")
   public static class Builder {

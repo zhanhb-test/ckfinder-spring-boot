@@ -23,13 +23,13 @@ public interface BasePathBuilder {
    *
    * @return value of base directory
    */
-  public Path getBasePath();
+  Path getBasePath();
 
   /**
    * create baseURL value.
    *
    * @return value of baseURL
    */
-  public String getBaseUrl();
+  String getBaseUrl();
 
 }

@@ -75,17 +75,17 @@ public class ImageUtils {
   /**
    * create thumb file.
    *
-   * @param orginFile origin image file.
+   * @param originFile origin image file.
    * @param file file to save thumb
    * @param thumbnail connector thumbnail properties
    * @return true if success
    * @throws IOException when IO Exception occurs.
    */
-  public static boolean createThumb(Path orginFile, Path file, ThumbnailProperties thumbnail)
+  public static boolean createThumb(Path originFile, Path file, ThumbnailProperties thumbnail)
           throws IOException {
     log.debug("createThumb");
     BufferedImage image;
-    try (InputStream is = Files.newInputStream(orginFile)) {
+    try (InputStream is = Files.newInputStream(originFile)) {
       image = ImageIO.read(is);
     }
     if (image != null) {
@@ -94,7 +94,7 @@ public class ImageUtils {
       FileUtils.createPath(file, true);
       if (image.getHeight() <= dimension.height
               && image.getWidth() <= dimension.width) {
-        writeUntouchedImage(orginFile, file);
+        writeUntouchedImage(originFile, file);
       } else {
         resizeImage(image, dimension.width, dimension.height,
                 thumbnail.getQuality(), file);

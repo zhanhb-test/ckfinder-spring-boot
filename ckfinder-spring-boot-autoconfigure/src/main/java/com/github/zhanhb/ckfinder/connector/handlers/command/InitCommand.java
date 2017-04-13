@@ -97,7 +97,7 @@ public class InitCommand extends XmlCommand<InitParameter> {
   /**
    * checks license key.
    *
-   * @param license
+   * @param license license from configuration
    * @return license name if key is ok, or empty string if not.
    */
   private String getLicenseName(License license) {

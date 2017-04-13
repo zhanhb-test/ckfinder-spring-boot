@@ -73,14 +73,14 @@ public class ThumbnailCommand extends BaseCommand<ThumbnailParameter> {
     log.debug("thumbFile: {}", thumbFile);
 
     if (!Files.exists(thumbFile)) {
-      Path orginFile = getPath(param.getType().getPath(),
+      Path originFile = getPath(param.getType().getPath(),
               param.getCurrentFolder(), param.getFileName());
-      log.debug("orginFile: {}", orginFile);
-      if (!Files.exists(orginFile)) {
+      log.debug("orginFile: {}", originFile);
+      if (!Files.exists(originFile)) {
         param.throwException(ErrorCode.FILE_NOT_FOUND);
       }
       try {
-        boolean success = ImageUtils.createThumb(orginFile, thumbFile, context.getThumbnail());
+        boolean success = ImageUtils.createThumb(originFile, thumbFile, context.getThumbnail());
         if (!success) {
           param.throwException(ErrorCode.FILE_NOT_FOUND);
         }

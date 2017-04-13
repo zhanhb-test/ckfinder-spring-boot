@@ -14,19 +14,20 @@ package com.github.zhanhb.ckfinder.connector.support;
 import com.github.zhanhb.ckfinder.connector.api.BasePathBuilder;
 import java.nio.file.Path;
 import lombok.Builder;
-import lombok.Getter;
 import lombok.NonNull;
+import lombok.Value;
 
 /**
  * Path builder that creates default values of base directory and baseURL.
  */
 @Builder(builderClassName = "Builder")
-@Getter
+@SuppressWarnings("FinalClass")
+@Value
 public class DefaultPathBuilder implements BasePathBuilder {
 
   @NonNull
-  private final Path basePath;
+  private Path basePath;
   @NonNull
-  private final String baseUrl;
+  private String baseUrl;
 
 }

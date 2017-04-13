@@ -37,11 +37,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import static com.github.zhanhb.ckfinder.connector.api.Constants.DEFAULT_IMG_HEIGHT;
-import static com.github.zhanhb.ckfinder.connector.api.Constants.DEFAULT_IMG_QUALITY;
-import static com.github.zhanhb.ckfinder.connector.api.Constants.DEFAULT_IMG_WIDTH;
-import static com.github.zhanhb.ckfinder.connector.api.Constants.DEFAULT_THUMB_MAX_WIDTH;
-
 /**
  * Class loads configuration from XML file.
  *
@@ -123,7 +118,7 @@ public enum XmlConfigurationParser {
             try {
               image.maxWidth(Integer.parseInt(width));
             } catch (NumberFormatException e) {
-              image.maxWidth(DEFAULT_IMG_WIDTH);
+              image.maxWidth(Constants.DEFAULT_IMG_WIDTH);
             }
             break;
           case "imgQuality":
@@ -137,7 +132,7 @@ public enum XmlConfigurationParser {
             try {
               image.maxHeight(Integer.parseInt(height));
             } catch (NumberFormatException e) {
-              image.maxHeight(DEFAULT_IMG_HEIGHT);
+              image.maxHeight(Constants.DEFAULT_IMG_HEIGHT);
             }
             break;
           case "thumbs":
@@ -243,7 +238,7 @@ public enum XmlConfigurationParser {
     try {
       helper = Math.abs(Float.parseFloat(imgQuality));
     } catch (NumberFormatException e) {
-      return DEFAULT_IMG_QUALITY;
+      return Constants.DEFAULT_IMG_QUALITY;
     }
     if (helper == 0 || helper == 1) {
       return helper;
@@ -252,7 +247,7 @@ public enum XmlConfigurationParser {
     } else if (helper > 1 && helper <= MAX_QUALITY) {
       helper = (Math.round(helper) / MAX_QUALITY);
     } else {
-      helper = DEFAULT_IMG_QUALITY;
+      helper = Constants.DEFAULT_IMG_QUALITY;
     }
     return helper;
   }
@@ -436,7 +431,7 @@ public enum XmlConfigurationParser {
           try {
             thumbnail.maxHeight(Integer.valueOf(width));
           } catch (NumberFormatException e) {
-            thumbnail.maxHeight(DEFAULT_THUMB_MAX_WIDTH);
+            thumbnail.maxHeight(Constants.DEFAULT_THUMB_MAX_WIDTH);
           }
           break;
         case "maxWidth":
@@ -445,7 +440,7 @@ public enum XmlConfigurationParser {
           try {
             thumbnail.maxWidth(Integer.valueOf(width));
           } catch (NumberFormatException e) {
-            thumbnail.maxWidth(DEFAULT_IMG_WIDTH);
+            thumbnail.maxWidth(Constants.DEFAULT_THUMB_MAX_HEIGHT);
           }
           break;
         case "quality":
@@ -595,7 +590,7 @@ public enum XmlConfigurationParser {
               }
               break;
             case "watermark":
-              WatermarkSettings watermarkSettings = checkPluginInfo(pluginInfo, resourceLoader);
+              WatermarkSettings watermarkSettings = parseWatermarkSettings(pluginInfo, resourceLoader);
               plugin = new WatermarkPlugin(watermarkSettings);
               break;
             case "fileeditor":
@@ -611,7 +606,7 @@ public enum XmlConfigurationParser {
     builder.eventsFromPlugins(plugins);
   }
 
-  private WatermarkSettings checkPluginInfo(PluginInfo pluginInfo, ResourceLoader resourceLoader) {
+  private WatermarkSettings parseWatermarkSettings(PluginInfo pluginInfo, ResourceLoader resourceLoader) {
     WatermarkSettings.Builder settings = WatermarkSettings.builder();
     for (Map.Entry<String, String> entry : pluginInfo.getParams().entrySet()) {
       final String name = entry.getKey();

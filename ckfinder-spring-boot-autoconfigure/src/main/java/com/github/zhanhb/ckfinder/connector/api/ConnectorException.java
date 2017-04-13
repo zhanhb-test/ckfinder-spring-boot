@@ -21,8 +21,8 @@ public class ConnectorException extends Exception {
   private static final long serialVersionUID = -8643752550259111562L;
 
   private final ErrorCode errorCode;
+  private final ResourceType type;
   private final String currentFolder;
-  private ResourceType type;
 
   /**
    * standard constructor.
@@ -33,7 +33,7 @@ public class ConnectorException extends Exception {
    */
   public ConnectorException(ErrorCode code, ResourceType type, String currentFolder) {
     super(code.name(), null);
-    this.errorCode = Objects.requireNonNull(code);
+    this.errorCode = code;
     this.type = type;
     this.currentFolder = currentFolder;
   }
@@ -45,7 +45,8 @@ public class ConnectorException extends Exception {
    */
   public ConnectorException(ErrorCode code) {
     super(code.name(), null);
-    this.errorCode = Objects.requireNonNull(code);
+    this.errorCode = code;
+    this.type = null;
     this.currentFolder = null;
   }
 
@@ -58,6 +59,7 @@ public class ConnectorException extends Exception {
   public ConnectorException(ErrorCode code, String errorMsg) {
     super(errorMsg, null);
     this.errorCode = Objects.requireNonNull(code);
+    this.type = null;
     this.currentFolder = null;
   }
 
@@ -73,6 +75,7 @@ public class ConnectorException extends Exception {
       throw new IllegalArgumentException();
     }
     this.errorCode = Objects.requireNonNull(code);
+    this.type = null;
     this.currentFolder = null;
   }
 

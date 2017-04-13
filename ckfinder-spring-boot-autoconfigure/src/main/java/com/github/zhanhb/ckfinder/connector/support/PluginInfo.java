@@ -2,15 +2,16 @@ package com.github.zhanhb.ckfinder.connector.support;
 
 import java.util.Map;
 import lombok.Builder;
-import lombok.Getter;
 import lombok.Singular;
+import lombok.Value;
 
 @Builder(builderClassName = "Builder")
-@Getter
+@SuppressWarnings("FinalClass")
+@Value
 class PluginInfo {
 
-  private final String name;
+  private String name;
   @Singular
-  private final Map<String, String> params;
+  private Map<String, String> params;
 
 }

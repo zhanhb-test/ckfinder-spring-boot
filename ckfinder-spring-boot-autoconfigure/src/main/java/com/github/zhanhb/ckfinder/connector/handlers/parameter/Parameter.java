@@ -15,8 +15,8 @@ import lombok.Setter;
 public class Parameter {
 
   private String userRole;
-  private String currentFolder;
   private ResourceType type;
+  private String currentFolder;
 
   public void throwException(ErrorCode code) throws ConnectorException {
     throw new ConnectorException(code, type, currentFolder);

@@ -19,44 +19,44 @@ import lombok.Value;
  * Resource type entity.
  */
 @Builder(builderClassName = "Builder")
-@Value
 @SuppressWarnings("FinalClass")
+@Value
 public class ResourceType {
 
   /**
    * resource name.
    */
-  private final String name;
+  private String name;
 
   /**
    * resource url.
    */
-  private final String url;
+  private String url;
 
   /**
    * resource directory.
    */
-  private final Path path;
+  private Path path;
 
   /**
    * max file size in resource.
    */
-  private final long maxSize;
+  private long maxSize;
 
   /**
    * resource directory.
    */
-  private final Path thumbnailPath;
+  private Path thumbnailPath;
 
   /**
    * list of allowed extensions in resource (separated with comma).
    */
-  private final String allowedExtensions;
+  private String allowedExtensions;
 
   /**
    * list of denied extensions in resource (separated with comma).
    */
-  private final String deniedExtensions;
+  private String deniedExtensions;
 
   @SuppressWarnings("PublicInnerClass")
   public static class Builder {

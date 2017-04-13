@@ -58,8 +58,8 @@ public abstract class ErrorListXmlCommand<T extends ErrorListXmlParameter> exten
    * @param param the parameter
    * @param context ckfinder context
    * @return the warning code or null if it's correct.
-   * {@link com.github.zhanhb.ckfinder.connector.api.ErrorCode} if no
-   * error occurred.
+   * {@link com.github.zhanhb.ckfinder.connector.api.ErrorCode} if no error
+   * occurred.
    * @throws ConnectorException when error occurs
    */
   protected abstract ErrorCode getDataForXml(T param, CKFinderContext context) throws ConnectorException;

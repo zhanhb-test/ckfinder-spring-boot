@@ -12,27 +12,24 @@
 package com.github.zhanhb.ckfinder.connector.plugins;
 
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Value;
 import org.springframework.core.io.InputStreamSource;
 
 @Builder(builderClassName = "Builder")
-@Getter
+@SuppressWarnings({"FinalClass", "PublicInnerClass"})
+@Value
 public class WatermarkSettings {
 
-  private final InputStreamSource source;
-  private final float transparency;
-  private final float quality;
-  private final int marginBottom;
-  private final int marginRight;
+  private InputStreamSource source;
+  private float transparency;
+  private float quality;
+  private int marginBottom;
+  private int marginRight;
 
-  @SuppressWarnings("PublicInnerClass")
   public static class Builder {
 
     Builder() {
-      this.source = null;
-      this.marginRight = 0;
-      this.marginBottom = 0;
-      this.quality = 90;
+      this.quality = 0.9f;
       this.transparency = 1.0f;
     }
 

@@ -13,18 +13,19 @@ package com.github.zhanhb.ckfinder.connector.support;
 
 import com.github.zhanhb.ckfinder.connector.api.ResourceType;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Value;
 
 /**
  * File from param entity.
  */
 @Builder(builderClassName = "Builder")
-@Getter
+@SuppressWarnings("FinalClass")
+@Value
 public class FilePostParam {
 
-  private final String folder;
-  private final String name;
-  private final String options;
-  private final ResourceType type;
+  private String folder;
+  private String name;
+  private String options;
+  private ResourceType type;
 
 }

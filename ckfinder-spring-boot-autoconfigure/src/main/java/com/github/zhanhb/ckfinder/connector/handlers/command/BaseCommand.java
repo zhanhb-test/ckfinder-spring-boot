@@ -48,7 +48,7 @@ public abstract class BaseCommand<T extends Parameter> implements Command {
   /**
    * initialize params for command handler.
    *
-   * @param <T> parameter type
+   * @param <P> parameter type
    * @param param the parameter
    * @param request request
    * @param context ckfinder context
@@ -56,7 +56,7 @@ public abstract class BaseCommand<T extends Parameter> implements Command {
    * @throws ConnectorException to handle in error handler.
    */
   @SuppressWarnings("FinalMethod")
-  protected final <T extends Parameter> T doInitParam(T param, HttpServletRequest request,
+  protected final <P extends Parameter> P doInitParam(P param, HttpServletRequest request,
           CKFinderContext context) throws ConnectorException {
     checkConnectorEnabled(context);
     setUserRole(param, request, context);
@@ -127,7 +127,8 @@ public abstract class BaseCommand<T extends Parameter> implements Command {
   }
 
   /**
-   * gets current folder request parameter or sets default value if it's not set.
+   * gets current folder request parameter or sets default value if it's not
+   * set.
    *
    * @param request request
    * @return current folder, / if empty

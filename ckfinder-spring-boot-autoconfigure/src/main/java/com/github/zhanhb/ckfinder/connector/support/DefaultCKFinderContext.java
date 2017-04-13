@@ -28,7 +28,6 @@ import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 import lombok.Builder;
-import lombok.Builder.Default;
 import lombok.NonNull;
 import lombok.Singular;
 import lombok.Value;
@@ -36,12 +35,7 @@ import lombok.experimental.Delegate;
 import lombok.experimental.NonFinal;
 
 @Builder(builderClassName = "Builder")
-@SuppressWarnings({
-  "CollectionWithoutInitialCapacity",
-  "ReturnOfCollectionOrArrayField",
-  "FinalClass",
-  "PublicInnerClass"
-})
+@SuppressWarnings({"FinalClass", "PublicInnerClass"})
 @Value
 public class DefaultCKFinderContext implements CKFinderContext {
 
@@ -62,9 +56,8 @@ public class DefaultCKFinderContext implements CKFinderContext {
   private boolean checkDoubleFileExtensions;
   private boolean forceAscii;
   private boolean checkSizeAfterScaling;
-  @Default
   @NonNull
-  private String userRoleName = "";
+  private String userRoleName;
   @Nullable
   private String publicPluginNames;
   private boolean secureImageUploads;
@@ -139,6 +132,10 @@ public class DefaultCKFinderContext implements CKFinderContext {
   }
 
   public static class Builder {
+
+    Builder() {
+      userRoleName = "";
+    }
 
     public Builder eventsFromPlugins(Collection<? extends Plugin> plugins) {
       PluginRegister register = new PluginRegister();

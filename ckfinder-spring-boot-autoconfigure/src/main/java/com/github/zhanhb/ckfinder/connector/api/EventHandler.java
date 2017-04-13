@@ -6,8 +6,8 @@ package com.github.zhanhb.ckfinder.connector.api;
  */
 public interface EventHandler {
 
-  public void fireOnFileUpload(FileUploadEvent args) throws ConnectorException;
+  void fireOnFileUpload(FileUploadEvent args) throws ConnectorException;
 
-  public void fireOnInitCommand(InitCommandEvent event);
+  void fireOnInitCommand(InitCommandEvent event);
 
 }
