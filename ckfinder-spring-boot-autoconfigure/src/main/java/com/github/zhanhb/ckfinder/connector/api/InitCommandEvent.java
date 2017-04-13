@@ -13,21 +13,23 @@ package com.github.zhanhb.ckfinder.connector.api;
 
 import com.github.zhanhb.ckfinder.connector.handlers.response.PluginsInfos;
 import com.github.zhanhb.ckfinder.connector.support.PluginRegister;
-import java.util.Objects;
 
 /**
  * Event data for {@link PluginRegister#addPluginInfoRegister} event.
  */
 public class InitCommandEvent {
 
-  private final PluginsInfos.Builder builder;
-
-  public InitCommandEvent(PluginsInfos.Builder connector) {
-    this.builder = Objects.requireNonNull(connector);
-  }
+  private PluginsInfos.Builder builder;
 
   public PluginsInfos.Builder getBuilder() {
+    if (builder == null) {
+      builder = PluginsInfos.builder();
+    }
     return builder;
+  }
+
+  public PluginsInfos build() {
+    return builder == null ? builder.build() : null;
   }
 
 }

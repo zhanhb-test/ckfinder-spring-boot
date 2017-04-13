@@ -21,7 +21,6 @@ import com.github.zhanhb.ckfinder.connector.api.ThumbnailProperties;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.InitParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.ConnectorInfo;
-import com.github.zhanhb.ckfinder.connector.handlers.response.PluginsInfos;
 import com.github.zhanhb.ckfinder.connector.handlers.response.ResourceTypes;
 import com.github.zhanhb.ckfinder.connector.support.KeyGenerator;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
@@ -145,10 +144,9 @@ public class InitCommand extends XmlCommand<InitParameter> {
    * @param context ckfinder context
    */
   private void createPluginsData(Connector.Builder rootElement, CKFinderContext context) {
-    PluginsInfos.Builder builder = PluginsInfos.builder();
-    InitCommandEvent event = new InitCommandEvent(builder);
+    InitCommandEvent event = new InitCommandEvent();
     context.fireOnInitCommand(event);
-    rootElement.result(builder.build());
+    rootElement.result(event.build());
   }
 
   /**
