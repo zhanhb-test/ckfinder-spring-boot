@@ -14,7 +14,7 @@ package com.github.zhanhb.ckfinder.connector.plugins;
 import com.github.zhanhb.ckfinder.connector.support.Plugin;
 import com.github.zhanhb.ckfinder.connector.support.PluginRegister;
 
-public class FileEditorPlugin extends Plugin {
+public class FileEditorPlugin implements Plugin {
 
   @Override
   public void regist(PluginRegister register) {

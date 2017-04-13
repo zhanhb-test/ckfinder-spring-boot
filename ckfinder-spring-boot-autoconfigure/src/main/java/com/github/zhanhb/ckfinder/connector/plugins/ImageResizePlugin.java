@@ -17,7 +17,7 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class ImageResizePlugin extends Plugin {
+public class ImageResizePlugin implements Plugin {
 
   private final Map<ImageResizeParam, ImageResizeSize> params;
 

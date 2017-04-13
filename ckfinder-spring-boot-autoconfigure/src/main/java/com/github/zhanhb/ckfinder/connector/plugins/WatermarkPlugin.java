@@ -16,7 +16,7 @@ import com.github.zhanhb.ckfinder.connector.support.PluginRegister;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class WatermarkPlugin extends Plugin {
+public class WatermarkPlugin implements Plugin {
 
   private final WatermarkSettings watermarkSettings;
 

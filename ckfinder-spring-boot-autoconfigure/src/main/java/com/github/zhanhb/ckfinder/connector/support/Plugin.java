@@ -14,8 +14,8 @@ package com.github.zhanhb.ckfinder.connector.support;
 /**
  * Base class for plugins.
  */
-public abstract class Plugin {
+public interface Plugin {
 
-  protected abstract void regist(PluginRegister register);
+  void regist(PluginRegister register);
 
 }
