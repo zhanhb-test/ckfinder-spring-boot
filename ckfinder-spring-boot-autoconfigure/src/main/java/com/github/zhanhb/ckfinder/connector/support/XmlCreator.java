@@ -13,6 +13,8 @@ package com.github.zhanhb.ckfinder.connector.support;
 
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 
@@ -22,9 +24,17 @@ import javax.xml.bind.JAXBException;
 public enum XmlCreator {
   INSTANCE;
 
+  private final ConcurrentMap<Class<?>, JAXBContext> contexts = new ConcurrentHashMap<>(4);
+
   public void writeTo(Object obj, Writer writer) {
     try {
-      JAXBContext.newInstance(obj.getClass()).createMarshaller().marshal(obj, writer);
+      contexts.computeIfAbsent(obj.getClass(), classToBeBound -> {
+        try {
+          return JAXBContext.newInstance(classToBeBound);
+        } catch (JAXBException ex) {
+          throw new IllegalStateException("fail to instance xml transformer", ex);
+        }
+      }).createMarshaller().marshal(obj, writer);
     } catch (JAXBException e) {
       throw new IllegalStateException("fail to instance xml transformer", e);
     }
