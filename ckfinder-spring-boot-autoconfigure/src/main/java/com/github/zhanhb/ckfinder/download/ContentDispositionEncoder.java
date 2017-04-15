@@ -25,21 +25,20 @@ import java.util.function.Function;
  * @see
  * <a href="https://tools.ietf.org/html/rfc6266#section-4.1">RFC6266#section-4.1</a>
  */
-enum ContentDispositionEncoder {
-
-  INSTANCE;
+@SuppressWarnings("UtilityClassWithoutPrivateConstructor")
+class ContentDispositionEncoder {
 
   // https://tools.ietf.org/html/rfc5987#section-3.2.1
   // we will encoding + for some browser will decode + to a space
-  private final URLEncoder CONTENT_DISPOSITION = new URLEncoder("!#$&-.^_`|~");
+  private static final URLEncoder CONTENT_DISPOSITION = new URLEncoder("!#$&-.^_`|~");
 
   static ContentDisposition wrapper(String type, Function<Path, String> nameMapper) {
     Objects.requireNonNull(nameMapper, "nameMapper");
-    return context -> type + INSTANCE
-            .encode(nameMapper.apply(context.get(Path.class)));
+    return context -> type
+            + encode(nameMapper.apply(context.get(Path.class)));
   }
 
-  public String encode(String filename) {
+  private static String encode(String filename) {
     if (filename == null || filename.length() == 0) {
       return "";
     } else if (isToken(filename)) { // already a token
@@ -50,7 +49,7 @@ enum ContentDispositionEncoder {
     }
   }
 
-  private boolean isToken(String filename) {
+  private static boolean isToken(String filename) {
     if (filename == null || filename.length() == 0) {
       return false;
     }

@@ -54,6 +54,7 @@ public class ConnectorServlet extends HttpServlet {
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
           throws ServletException, IOException {
+    log.trace("query string={}", request.getQueryString());
     processRequest(request, response, false);
   }
 

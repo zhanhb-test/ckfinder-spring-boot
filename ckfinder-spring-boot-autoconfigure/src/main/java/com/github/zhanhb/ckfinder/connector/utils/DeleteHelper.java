@@ -25,6 +25,7 @@ import java.nio.file.SimpleFileVisitor;
  *
  * @author zhanhb
  */
+@SuppressWarnings("UtilityClassWithoutPrivateConstructor")
 class DeleteHelper {
 
   private static final SimpleFileVisitor<Path> VISITOR = new DeleteVisitor();

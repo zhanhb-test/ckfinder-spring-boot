@@ -29,7 +29,7 @@ public class InitCommandEvent {
   }
 
   public PluginsInfos build() {
-    return builder == null ? builder.build() : null;
+    return builder != null ? builder.build() : null;
   }
 
 }

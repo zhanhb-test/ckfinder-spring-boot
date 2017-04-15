@@ -231,7 +231,7 @@ public class ImageUtils {
     }
     if (bi != null) {
       log.debug("image size: {} {}", bi.getWidth(), bi.getHeight());
-      return bi.getHeight() <= maxHeight && bi.getWidth() <= maxWidth;
+      return (maxHeight == 0 || bi.getHeight() <= maxHeight) && (maxWidth == 0 || bi.getWidth() <= maxWidth);
     }
     return false;
   }

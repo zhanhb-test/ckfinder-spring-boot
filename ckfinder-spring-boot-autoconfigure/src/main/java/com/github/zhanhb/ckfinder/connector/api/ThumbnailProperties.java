@@ -26,7 +26,7 @@ public class ThumbnailProperties {
 
   public static class Builder {
 
-    public Builder() {
+    Builder() {
       url = "";
       maxHeight = Constants.DEFAULT_THUMB_MAX_HEIGHT;
       maxWidth = Constants.DEFAULT_THUMB_MAX_WIDTH;

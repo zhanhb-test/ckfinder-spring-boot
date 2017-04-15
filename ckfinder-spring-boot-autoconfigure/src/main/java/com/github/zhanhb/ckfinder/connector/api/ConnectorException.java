@@ -12,10 +12,12 @@
 package com.github.zhanhb.ckfinder.connector.api;
 
 import java.util.Objects;
+import lombok.Getter;
 
 /**
  * Connector Exception.
  */
+@Getter
 public class ConnectorException extends Exception {
 
   private static final long serialVersionUID = -8643752550259111562L;
@@ -67,28 +69,16 @@ public class ConnectorException extends Exception {
    * constructor with error code and error message parameters.
    *
    * @param code error code number
-   * @param e exception
+   * @param cause cause
    */
-  public ConnectorException(ErrorCode code, Exception e) {
-    super(e.getMessage(), e);
-    if (e instanceof ConnectorException) {
+  public ConnectorException(ErrorCode code, Throwable cause) {
+    super(cause.getMessage(), cause);
+    if (cause instanceof ConnectorException) {
       throw new IllegalArgumentException();
     }
     this.errorCode = Objects.requireNonNull(code);
     this.type = null;
     this.currentFolder = null;
-  }
-
-  public ErrorCode getErrorCode() {
-    return errorCode;
-  }
-
-  public String getCurrentFolder() {
-    return currentFolder;
-  }
-
-  public ResourceType getType() {
-    return type;
   }
 
   @Override

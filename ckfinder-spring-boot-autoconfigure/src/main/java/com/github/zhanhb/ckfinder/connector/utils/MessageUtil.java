@@ -31,7 +31,7 @@ public enum MessageUtil {
    * @param lang connector language code
    * @return localized error message.
    */
-  public String getErrorMsgByLangAndCode(String lang, int errorCode) {
+  public String getMessage(String lang, int errorCode) {
     try {
       return ResourceBundle.getBundle(BUNDLE_NAME, new Locale(lang)).getString(Integer.toString(errorCode));
     } catch (RuntimeException ex) {

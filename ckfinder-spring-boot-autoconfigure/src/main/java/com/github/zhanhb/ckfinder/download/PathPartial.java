@@ -42,6 +42,8 @@ public class PathPartial {
 
   private static final Logger log = LoggerFactory.getLogger(PathPartial.class);
 
+  private static final boolean HAS_METHOD_CONTENT_LENGTH_LONG;
+
   /**
    * Full range marker.
    */
@@ -52,6 +54,17 @@ public class PathPartial {
    * MIME multipart separation string
    */
   private static final String MIME_SEPARATION = "PATH_PARTIAL_MIME_BOUNDARY";
+
+  static {
+    boolean hasContentLong;
+    try {
+      HttpServletResponse.class.getMethod("setContentLengthLong", long.class);
+      hasContentLong = true;
+    } catch (NoSuchMethodException | SecurityException ex) {
+      hasContentLong = false;
+    }
+    HAS_METHOD_CONTENT_LENGTH_LONG = hasContentLong;
+  }
 
   public static PathPartialBuilder builder() {
     return new PathPartialBuilder();
@@ -126,7 +139,7 @@ public class PathPartial {
       checkIfNoneMatch(request, etag);
       checkIfModifiedSince(request, attr);
       return true;
-    } catch (CheckException ex) {
+    } catch (UncheckException ex) {
       if (ex.isError()) {
         response.sendError(ex.getCode());
       } else {
@@ -354,7 +367,7 @@ public class PathPartial {
             && !anyMatches(headerValue, etag)) {
       // If none of the given ETags match, 412 Precodition failed is
       // sent back
-      throw new CheckException(HttpServletResponse.SC_PRECONDITION_FAILED);
+      throw new UncheckException(HttpServletResponse.SC_PRECONDITION_FAILED);
     }
   }
 
@@ -375,7 +388,7 @@ public class PathPartial {
               && attr.lastModifiedTime().toMillis() < headerValue + 1000) {
         // The entity has not been modified since the date
         // specified by the client. This is not an error case.
-        throw new CheckException(HttpServletResponse.SC_NOT_MODIFIED);
+        throw new UncheckException(HttpServletResponse.SC_NOT_MODIFIED);
       }
     } catch (IllegalArgumentException ex) {
     }
@@ -396,9 +409,9 @@ public class PathPartial {
       // back.
       String method = request.getMethod();
       if ("GET".equals(method) || "HEAD".equals(method)) {
-        throw new CheckException(HttpServletResponse.SC_NOT_MODIFIED);
+        throw new UncheckException(HttpServletResponse.SC_NOT_MODIFIED);
       } else {
-        throw new CheckException(HttpServletResponse.SC_PRECONDITION_FAILED);
+        throw new UncheckException(HttpServletResponse.SC_PRECONDITION_FAILED);
       }
     }
   }
@@ -417,10 +430,10 @@ public class PathPartial {
         if (headerValue != -1 && lastModified >= headerValue + 1000) {
           // The entity has not been modified since the date
           // specified by the client. This is not an error case.
-          throw new CheckException(HttpServletResponse.SC_PRECONDITION_FAILED);
+          throw new UncheckException(HttpServletResponse.SC_PRECONDITION_FAILED);
         }
       } catch (IllegalArgumentException ex) {
-        throw new CheckException(HttpServletResponse.SC_PRECONDITION_FAILED);
+        throw new UncheckException(HttpServletResponse.SC_PRECONDITION_FAILED);
       }
     }
   }
@@ -491,7 +504,9 @@ public class PathPartial {
   }
 
   private void setContentLengthLong(HttpServletResponse response, long length) {
-    if (length <= Integer.MAX_VALUE) {
+    if (HAS_METHOD_CONTENT_LENGTH_LONG) {
+      response.setContentLengthLong(length);
+    } else if (length <= Integer.MAX_VALUE) {
       response.setContentLength((int) length);
     } else {
       response.setHeader(HttpHeaders.CONTENT_LENGTH, Long.toString(length));
@@ -524,13 +539,13 @@ public class PathPartial {
 
   }
 
-  private static class CheckException extends RuntimeException {
+  private static class UncheckException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 
     private final int code;
 
-    CheckException(int code) {
+    UncheckException(int code) {
       this.code = code;
     }
 

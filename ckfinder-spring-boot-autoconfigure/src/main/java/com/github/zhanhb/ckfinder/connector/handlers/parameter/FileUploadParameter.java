@@ -55,7 +55,7 @@ public class FileUploadParameter extends Parameter {
 
   @Override
   public void throwException(ErrorCode code) throws ConnectorException {
-    String msg = MessageUtil.INSTANCE.getErrorMsgByLangAndCode(getLangCode(), code.getCode());
+    String msg = MessageUtil.INSTANCE.getMessage(getLangCode(), code.getCode());
     throw new ConnectorException(code, msg);
   }
 

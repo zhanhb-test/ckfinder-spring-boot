@@ -48,18 +48,20 @@ class IOUtils {
     }
     int len = buffer.length, n;
     long rem = length;
-    for (; rem >= len; rem -= n) {
+    for (;; rem -= n) {
+      if (rem < len) {
+        for (len = (int) rem; len > 0 && (n = input.read(buffer, 0, len)) != -1; len -= n) {
+          output.write(buffer, 0, n);
+        }
+        rem = len;
+        break;
+      }
       if ((n = input.read(buffer)) == -1) {
-        return length == rem ? -1 : length - rem;
+        break;
       }
       output.write(buffer, 0, n);
     }
-    len = (int) rem;
-    for (; len > 0
-            && (n = input.read(buffer, 0, len)) != -1; len -= n) {
-      output.write(buffer, 0, n);
-    }
-    return length == len ? -1 : length - len;
+    return length == rem ? -1 : length - rem;
   }
 
 }
