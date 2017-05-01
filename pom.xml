@@ -14,6 +14,7 @@
   <name>CKFinder Spring Boot</name>
   <description>Spring Boot Support for CKFinder</description>
   <url>https://github.com/zhanhb/ckfinder-spring-boot</url>
+  <inceptionYear>2016</inceptionYear>
 
   <organization>
     <name>zhanhb</name>
