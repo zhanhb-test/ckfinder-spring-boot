@@ -47,13 +47,17 @@
                 <if>
                   <available file="${ckfinder.cache.path}" />
                   <else>
-                    <get dest="${ckfinder.cache.path}" src="https://download.cksource.com/CKFinder/CKFinder%20for%20Java/${ckfinder.version}/${ckfinder.zip.name}" />
+                    <delete file="${ckfinder.cache.path}.tmp" />
+                    <get dest="${ckfinder.cache.path}.tmp" src="https://download.cksource.com/CKFinder/CKFinder%20for%20Java/${ckfinder.version}/${ckfinder.zip.name}" />
+                    <move file="${ckfinder.cache.path}.tmp" tofile="${ckfinder.cache.path}" />
                   </else>
                 </if>
                 <if>
                   <available file="${ckfinder.cache.path.php}" />
                   <else>
-                    <get dest="${ckfinder.cache.path.php}" src="https://download.cksource.com/CKFinder/CKFinder%20for%20PHP/${ckfinder.version}/${ckfinder.zip.name.php}" />
+                    <delete file="${ckfinder.cache.path.php}.tmp" />
+                    <get dest="${ckfinder.cache.path.php}.tmp" src="https://download.cksource.com/CKFinder/CKFinder%20for%20PHP/${ckfinder.version}/${ckfinder.zip.name.php}" />
+                    <move file="${ckfinder.cache.path.php}.tmp" tofile="${ckfinder.cache.path.php}" />
                   </else>
                 </if>
 
