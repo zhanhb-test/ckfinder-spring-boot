@@ -52,7 +52,7 @@ public class ErrorListXmlParameter extends Parameter {
    * @param rootElement XML root element
    */
   public void addErrorsTo(Connector.Builder rootElement) {
-    if (errorsBuilder != null) {
+    if (hasError()) {
       rootElement.errors(errorsBuilder.build());
     }
   }

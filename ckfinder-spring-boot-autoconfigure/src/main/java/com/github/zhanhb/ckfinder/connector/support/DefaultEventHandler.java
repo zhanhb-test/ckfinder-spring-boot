@@ -11,7 +11,6 @@
  */
 package com.github.zhanhb.ckfinder.connector.support;
 
-import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.EventHandler;
 import com.github.zhanhb.ckfinder.connector.api.FileUploadEvent;
 import com.github.zhanhb.ckfinder.connector.api.FileUploadListener;
