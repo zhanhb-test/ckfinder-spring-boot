@@ -149,11 +149,8 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
    */
   private BigDecimal getSizeInKB(BasicFileAttributes attributes) {
     long size = attributes.size();
-    if (size > 0) {
-      return size > 0 && size <= 1024 ? BigDecimal.ONE
-              : BigDecimal.valueOf(size).divide(BYTES, 0, RoundingMode.HALF_EVEN);
-    }
-    return BigDecimal.ZERO;
+    return size > 0 && size <= 1024 ? BigDecimal.ONE
+            : BigDecimal.valueOf(size).divide(BYTES, 0, RoundingMode.HALF_EVEN);
   }
 
   /**

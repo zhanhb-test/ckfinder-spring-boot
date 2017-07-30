@@ -225,20 +225,21 @@ class Utf8AccentsHolder {
 
   public static String convert(String raw) {
     int len = raw.length();
-    StringBuilder sb = new StringBuilder(len);
+    StringBuilder sb = null;
+
     Map<Character, String> map = MAP;
-    boolean changed = false;
+    int pos = 0;
     for (int i = 0; i < len; i++) {
-      char ch = raw.charAt(i);
-      String str = map.get(ch);
+      String str = map.get(raw.charAt(i));
       if (str != null) {
-        sb.append(str);
-        changed = true;
-      } else {
-        sb.append(ch);
+        if (sb == null) {
+          sb = new StringBuilder(len);
+        }
+        sb.append(raw, pos, i).append(str);
+        pos = i + 1;
       }
     }
-    return changed ? sb.toString() : raw;
+    return sb != null ? sb.append(raw, pos, len).toString() : raw;
   }
 
 }
