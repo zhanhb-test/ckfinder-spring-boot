@@ -223,23 +223,29 @@ class Utf8AccentsHolder {
     MAP = map;
   }
 
+  @SuppressWarnings("NestedAssignment")
   public static String convert(String raw) {
-    int len = raw.length();
-    StringBuilder sb = null;
-
     Map<Character, String> map = MAP;
-    int pos = 0;
-    for (int i = 0; i < len; i++) {
-      String str = map.get(raw.charAt(i));
-      if (str != null) {
-        if (sb == null) {
-          sb = new StringBuilder(len);
+
+    for (int i = 0, len = raw.length(); i < len; ++i) {
+      String str;
+      if ((str = map.get(raw.charAt(i))) != null) {
+        StringBuilder sb = new StringBuilder(i + (len - i) * 2);
+        for (int pos = 0;;) {
+          sb.append(raw, pos, i).append(str);
+          ++i;
+          for (pos = i;; ++i) {
+            if (i >= len) {
+              return sb.append(raw, pos, len).toString();
+            }
+            if ((str = map.get(raw.charAt(i))) != null) {
+              break;
+            }
+          }
         }
-        sb.append(raw, pos, i).append(str);
-        pos = i + 1;
       }
     }
-    return sb != null ? sb.append(raw, pos, len).toString() : raw;
+    return raw;
   }
 
 }
