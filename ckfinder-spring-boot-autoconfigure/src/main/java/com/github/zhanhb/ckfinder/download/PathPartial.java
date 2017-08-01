@@ -19,6 +19,8 @@ package com.github.zhanhb.ckfinder.download;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -58,9 +60,9 @@ public class PathPartial {
   static {
     boolean hasContentLong;
     try {
-      HttpServletResponse.class.getMethod("setContentLengthLong", long.class);
+      MethodHandles.lookup().findVirtual(HttpServletResponse.class, "setContentLengthLong", MethodType.methodType(void.class, long.class));
       hasContentLong = true;
-    } catch (NoSuchMethodException | SecurityException ex) {
+    } catch (NoSuchMethodException | IllegalAccessException ex) {
       hasContentLong = false;
     }
     HAS_METHOD_CONTENT_LENGTH_LONG = hasContentLong;
