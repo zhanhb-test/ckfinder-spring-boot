@@ -4,7 +4,7 @@
   <parent>
     <artifactId>platform-bom</artifactId>
     <groupId>io.spring.platform</groupId>
-    <version>Brussels-SR3</version>
+    <version>Brussels-SR4</version>
     <relativePath />
   </parent>
   <groupId>com.github.zhanhb</groupId>
@@ -70,10 +70,9 @@
     <delombok.directory>${project.build.directory}/delombok</delombok.directory>
     <jacoco-maven-plugin.version>0.7.9</jacoco-maven-plugin.version>
     <java.version>1.8</java.version>
-    <lombok.version>1.16.18</lombok.version>
     <maven-compiler-plugin.version>3.6.1</maven-compiler-plugin.version>
     <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
-    <spring-boot.version>1.5.4.RELEASE</spring-boot.version>
+    <spring-boot.version>1.5.6.RELEASE</spring-boot.version>
     <thumbnailator.version>0.4.8</thumbnailator.version>
   </properties>
 
