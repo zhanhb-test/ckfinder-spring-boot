@@ -11,16 +11,17 @@
  */
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.FileUploadParameter;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 /**
  * Class to handle <code>QuickUpload</code> command.
@@ -111,13 +112,13 @@ public class QuickUploadCommand extends FileUploadCommand {
       jsonObj.put("error", jsonErrObj);
     }
 
-    writer.write(GsonHolder.GSON.toJson(jsonObj));
+    ObjectMapperHolder.MAPPER.writeValue(writer, jsonObj);
   }
 
   @SuppressWarnings("UtilityClassWithoutPrivateConstructor")
-  private static class GsonHolder {
+  private static class ObjectMapperHolder {
 
-    static final Gson GSON = new GsonBuilder().serializeNulls().create();
+    static final ObjectMapper MAPPER = new Jackson2ObjectMapperBuilder().serializationInclusion(JsonInclude.Include.ALWAYS).build();
 
   }
 
