@@ -181,6 +181,10 @@ public class PathPartial {
       return;
     }
     context.put(BasicFileAttributes.class, attr);
+    if (attr.isDirectory()) {
+      notFound.handle(context);
+      return;
+    }
 
     boolean isError = response.getStatus() >= HttpServletResponse.SC_BAD_REQUEST;
     // Check if the conditions specified in the optional If headers are
