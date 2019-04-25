@@ -147,4 +147,9 @@ public abstract class BaseCommand<T extends Parameter> implements Command {
     return first.getFileSystem().getPath(first.toString(), more);
   }
 
+  @Override
+  public String toString() {
+    return getClass().getSimpleName();
+  }
+
 }
