@@ -1,10 +1,10 @@
 package com.github.zhanhb.ckfinder.connector.support;
 
+import com.github.zhanhb.ckfinder.connector.api.Command;
 import com.github.zhanhb.ckfinder.connector.api.CommandFactory;
 import com.github.zhanhb.ckfinder.connector.api.EventHandler;
 import com.github.zhanhb.ckfinder.connector.api.FileUploadListener;
 import com.github.zhanhb.ckfinder.connector.api.PluginInfoRegister;
-import com.github.zhanhb.ckfinder.connector.handlers.command.BaseCommand;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -43,12 +43,12 @@ public class PluginRegister {
     return this;
   }
 
-  public PluginRegister registCommands(BaseCommand<?>... commands) {
+  public PluginRegister registCommands(Command... commands) {
     commandFactory.registCommands(commands);
     return this;
   }
 
-  public PluginRegister registCommand(String name, BaseCommand<?> command) {
+  public PluginRegister registCommand(String name, Command command) {
     commandFactory.registCommand(name, command);
     return this;
   }
