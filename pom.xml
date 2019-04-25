@@ -2,9 +2,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <artifactId>platform-bom</artifactId>
-    <groupId>io.spring.platform</groupId>
-    <version>Cairo-SR6</version>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <groupId>org.springframework.boot</groupId>
+    <version>2.1.4.RELEASE</version>
     <relativePath />
   </parent>
   <groupId>com.github.zhanhb</groupId>
@@ -68,17 +68,50 @@
 
   <properties>
     <delombok.directory>${project.build.directory}/delombok</delombok.directory>
+    <findbugs-jsr305.version>3.0.2</findbugs-jsr305.version>
+    <guava.version>27.1-jre</guava.version>
     <jacoco-maven-plugin.version>0.8.2</jacoco-maven-plugin.version>
-    <java.version>1.8</java.version>
-    <lombok.version>1.18.0</lombok.version>
-    <maven-compiler-plugin.version>3.7.0</maven-compiler-plugin.version>
-    <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
-    <spring-boot.version>2.0.5.RELEASE</spring-boot.version>
     <thumbnailator.version>0.4.8</thumbnailator.version>
   </properties>
 
   <dependencyManagement>
     <dependencies>
+      <dependency>
+        <groupId>com.google.code.findbugs</groupId>
+        <artifactId>jsr305</artifactId>
+        <version>${findbugs-jsr305.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
+        <version>${guava.version}</version>
+        <exclusions>
+          <exclusion>
+            <artifactId>error_prone_annotations</artifactId>
+            <groupId>com.google.errorprone</groupId>
+          </exclusion>
+          <exclusion>
+            <artifactId>j2objc-annotations</artifactId>
+            <groupId>com.google.j2objc</groupId>
+          </exclusion>
+          <exclusion>
+            <artifactId>animal-sniffer-annotations</artifactId>
+            <groupId>org.codehaus.mojo</groupId>
+          </exclusion>
+          <exclusion>
+            <artifactId>checker-qual</artifactId>
+            <groupId>org.checkerframework</groupId>
+          </exclusion>
+          <exclusion>
+            <artifactId>checker-compat-qual</artifactId>
+            <groupId>org.checkerframework</groupId>
+          </exclusion>
+          <exclusion>
+            <artifactId>listenablefuture</artifactId>
+            <groupId>com.google.guava</groupId>
+          </exclusion>
+        </exclusions>
+      </dependency>
       <dependency>
         <groupId>net.coobird</groupId>
         <artifactId>thumbnailator</artifactId>
