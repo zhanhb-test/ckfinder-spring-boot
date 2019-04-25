@@ -72,6 +72,7 @@
     <guava.version>27.1-jre</guava.version>
     <jacoco-maven-plugin.version>0.8.2</jacoco-maven-plugin.version>
     <thumbnailator.version>0.4.8</thumbnailator.version>
+    <unbescape.version>1.1.6.RELEASE</unbescape.version>
   </properties>
 
   <dependencyManagement>
@@ -116,6 +117,11 @@
         <groupId>net.coobird</groupId>
         <artifactId>thumbnailator</artifactId>
         <version>${thumbnailator.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.unbescape</groupId>
+        <artifactId>unbescape</artifactId>
+        <version>${unbescape.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
