@@ -198,6 +198,9 @@
             </goals>
             <configuration>
               <archive>
+                <manifestEntries>
+                  <Built-By>zhanhb</Built-By>
+                </manifestEntries>
                 <manifest>
                   <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
                 </manifest>
