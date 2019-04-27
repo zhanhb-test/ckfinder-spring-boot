@@ -4,7 +4,7 @@
   <parent>
     <artifactId>ckfinder-spring-boot-samples</artifactId>
     <groupId>com.github.zhanhb</groupId>
-    <version>0.0.1.BUILD-SNAPSHOT</version>
+    <version>${revision}</version>
   </parent>
   <artifactId>ckfinder-spring-boot-sample-yml</artifactId>
   <name>CKFinder Spring Boot Sample yml</name>

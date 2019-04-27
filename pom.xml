@@ -9,7 +9,7 @@
   </parent>
   <groupId>com.github.zhanhb</groupId>
   <artifactId>ckfinder-spring-boot</artifactId>
-  <version>0.0.1.BUILD-SNAPSHOT</version>
+  <version>${revision}</version>
   <packaging>pom</packaging>
   <name>CKFinder Spring Boot</name>
   <description>Spring Boot Support for CKFinder</description>
@@ -69,8 +69,10 @@
   <properties>
     <delombok.directory>${project.build.directory}/delombok</delombok.directory>
     <findbugs-jsr305.version>3.0.2</findbugs-jsr305.version>
+    <flatten-maven-plugin.version>1.1.0</flatten-maven-plugin.version>
     <guava.version>27.1-jre</guava.version>
     <jacoco-maven-plugin.version>0.8.2</jacoco-maven-plugin.version>
+    <revision>0.0.1.BUILD-SNAPSHOT</revision>
     <thumbnailator.version>0.4.8</thumbnailator.version>
     <unbescape.version>1.1.6.RELEASE</unbescape.version>
   </properties>
@@ -234,6 +236,19 @@
             <id>attach-sources</id>
             <goals>
               <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>flatten-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>flatten</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>flatten</goal>
             </goals>
           </execution>
         </executions>
