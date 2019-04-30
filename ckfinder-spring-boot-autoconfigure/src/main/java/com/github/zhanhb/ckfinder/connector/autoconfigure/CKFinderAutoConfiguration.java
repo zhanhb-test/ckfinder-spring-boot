@@ -209,7 +209,7 @@ public class CKFinderAutoConfiguration {
         path = path.replace(Constants.BASE_DIR_PLACEHOLDER, "");
         url = url.replace(Constants.BASE_URL_PLACEHOLDER, "");
 
-        builder.type(typeName, resourceType.maxSize(type.getMaxSize())
+        builder.type(typeName, resourceType.maxSize(type.getMaxSize().toBytes())
                 .path(Files.createDirectories(getPath(basePath, path)))
                 .url(PathUtils.normalizeUrl(baseUrl + url))
                 .thumbnailPath(getPath(thumbnail != null ? thumbnail.getPath() : null, path)).build());

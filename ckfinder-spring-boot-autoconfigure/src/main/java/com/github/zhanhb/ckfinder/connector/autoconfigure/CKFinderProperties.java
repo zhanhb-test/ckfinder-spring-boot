@@ -4,7 +4,10 @@ import com.github.zhanhb.ckfinder.connector.plugins.ImageResizeParam;
 import com.github.zhanhb.ckfinder.connector.plugins.ImageResizeSize;
 import java.util.Map;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.convert.DataSizeUnit;
 import org.springframework.util.Assert;
+import org.springframework.util.unit.DataSize;
+import org.springframework.util.unit.DataUnit;
 
 /**
  * @author zhanhb
@@ -297,7 +300,8 @@ public class CKFinderProperties {
 
     private String url;
     private String directory;
-    private int maxSize = 0;
+    @DataSizeUnit(DataUnit.BYTES)
+    private DataSize maxSize = DataSize.ofBytes(0);
     private String[] allowedExtensions = {};
     private String[] deniedExtensions = {};
 
@@ -309,7 +313,7 @@ public class CKFinderProperties {
       return this.directory;
     }
 
-    public int getMaxSize() {
+    public DataSize getMaxSize() {
       return this.maxSize;
     }
 
@@ -329,7 +333,7 @@ public class CKFinderProperties {
       this.directory = directory;
     }
 
-    public void setMaxSize(final int maxSize) {
+    public void setMaxSize(final DataSize maxSize) {
       this.maxSize = maxSize;
     }
 
