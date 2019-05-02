@@ -19,23 +19,19 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
 
 /**
  *
  * @author zhanhb
  */
-@SuppressWarnings("UtilityClassWithoutPrivateConstructor")
-class DeleteHelper {
+public interface DeleteHelper {
 
-  private static final SimpleFileVisitor<Path> VISITOR = new DeleteVisitor();
-
-  public static Path delete(Path path) throws IOException {
-    try {
-      return Files.walkFileTree(path, VISITOR);
-    } catch (NoSuchFileException ignore) {
-      return path;
+    static Path delete(Path path) throws IOException {
+        try {
+            return Files.walkFileTree(path, DeleteFileVisitor.INSTANCE);
+        } catch (NoSuchFileException ignore) {
+            return path;
+        }
     }
-  }
 
 }

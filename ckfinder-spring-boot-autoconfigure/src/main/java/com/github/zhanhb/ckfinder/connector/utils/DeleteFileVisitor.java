@@ -11,7 +11,9 @@ import java.nio.file.attribute.BasicFileAttributes;
  *
  * @author zhanhb
  */
-class DeleteVisitor extends SimpleFileVisitor<Path> {
+class DeleteFileVisitor extends SimpleFileVisitor<Path> {
+
+  public static final DeleteFileVisitor INSTANCE = new DeleteFileVisitor();
 
   @Override
   public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
@@ -31,9 +33,7 @@ class DeleteVisitor extends SimpleFileVisitor<Path> {
 
   @Override
   public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-    if (exc != null) {
-      throw exc;
-    }
+    super.postVisitDirectory(dir, exc);
     Files.deleteIfExists(dir);
     return FileVisitResult.CONTINUE;
   }
