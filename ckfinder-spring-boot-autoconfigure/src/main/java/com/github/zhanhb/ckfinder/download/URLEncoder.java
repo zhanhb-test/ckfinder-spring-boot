@@ -29,6 +29,17 @@ public class URLEncoder {
 
   private static final char[] HEX_CHARS = "0123456789ABCDEF".toCharArray();
 
+  private static StringBuilder append(StringBuilder out, byte[] bytes) {
+    char[] hexChars = HEX_CHARS;
+    char[] buf = new char[]{'%', 0, 0};
+    for (byte b : bytes) {
+      buf[1] = hexChars[b >> 4 & 15];
+      buf[2] = hexChars[b & 15];
+      out.append(buf);
+    }
+    return out;
+  }
+
   private final BitSet dontNeedEncoding;
 
   public URLEncoder(@Nonnull String dontNeedEncoding) {
@@ -50,35 +61,37 @@ public class URLEncoder {
    * @see java.net.URLEncoder#encode(java.lang.String, java.lang.String)
    * @throws NullPointerException s or charset is null
    */
+  @SuppressWarnings("AssignmentToForLoopParameter")
   public String encode(String s, Charset charset) {
-    boolean needToChange = false;
     final int length = s.length();
     Objects.requireNonNull(charset, "charset");
-    StringBuilder out = new StringBuilder(length);
+    BitSet bs = dontNeedEncoding;
 
-    for (int i = 0; i < length;) {
-      int start = i;
-      while (i < length && dontNeedEncoding.get(s.charAt(i))) {
-        ++i;
-      }
-      if (start != i) {
-        out.append(s, start, i);
-        start = i;
-      }
-      while (i < length && !dontNeedEncoding.get(s.charAt(i))) {
-        ++i;
-      }
-      if (start != i) {
-        // convert to external encoding before hex conversion
-        byte[] bytes = s.substring(start, i).getBytes(charset);
-        for (int j = 0, limit = bytes.length; j < limit; ++j) {
-          byte b = bytes[j];
-          out.append('%').append(HEX_CHARS[b >> 4 & 0xF]).append(HEX_CHARS[b & 0xF]);
+    for (int i = 0; i < length; ++i) {
+      if (!bs.get(s.charAt(i))) {
+        StringBuilder out = new StringBuilder(s.substring(0, i));
+        for (int k = i;;) {
+          do {
+            ++k;
+            if (k == length) {
+              return append(out, s.substring(i).getBytes(charset)).toString();
+            }
+          } while (!bs.get(s.charAt(k)));
+          append(out, s.substring(i, k).getBytes(charset));
+          i = k;
+          do {
+            ++k;
+            if (k == length) {
+              return out.append(s, i, k).toString();
+            }
+          } while (bs.get(s.charAt(k)));
+          out.append(s, i, k);
+          i = k;
         }
-        needToChange = true;
       }
     }
-    return needToChange ? out.toString() : s;
+
+    return s;
   }
 
   /**
