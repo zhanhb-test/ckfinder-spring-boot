@@ -116,13 +116,6 @@ public interface CKFinderContext extends CommandFactory, EventHandler, LicenseFa
   boolean isSecureImageUploads();
 
   /**
-   * gets html extensions.
-   *
-   * @return list of html extensions.
-   */
-  List<String> getHtmlExtensions();
-
-  /**
    * gets a list of default resource types.
    *
    * @return list of default resource types

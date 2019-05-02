@@ -171,9 +171,6 @@ public class CKFinderAutoConfiguration {
       if (properties.getTypes() != null) {
         setTypes(builder, basePathBuilder, properties.getTypes(), thumbnail);
       }
-      if (properties.getHtmlExtensions() != null) {
-        builder.htmlExtensions(Arrays.asList(properties.getHtmlExtensions()));
-      }
       builder.forceAscii(properties.isForceAscii());
       if (properties.getHiddenFolders() != null) {
         builder.hiddenFolders(Arrays.asList(properties.getHiddenFolders()));

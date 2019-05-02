@@ -63,8 +63,6 @@ public class DefaultCKFinderContext implements CKFinderContext {
   private String publicPluginNames;
   private boolean secureImageUploads;
   @Singular
-  private List<String> htmlExtensions;
-  @Singular
   private Set<String> defaultResourceTypes;
   private boolean disallowUnsafeCharacters;
   @Delegate

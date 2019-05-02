@@ -55,7 +55,6 @@ ckfinder:
   check-double-extension: true
   check-size-after-scaling: true
   secure-image-uploads: true
-  html-extensions: html,htm,xml,js
   force-ascii: false
   hidden-folders: '.*,CVS'
   hidden-files: '.*'

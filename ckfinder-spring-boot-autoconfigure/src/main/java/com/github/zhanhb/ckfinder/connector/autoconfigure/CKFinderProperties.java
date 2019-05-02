@@ -33,7 +33,6 @@ public class CKFinderProperties {
   private boolean checkDoubleExtension = true;
   private boolean checkSizeAfterScaling = true;
   private boolean secureImageUploads = true;
-  private String[] htmlExtensions = {"html", "htm", "xml", "js"};
   private boolean forceAscii = false;
   private String[] hiddenFolders = {".*", "CVS"};
   private String[] hiddenFiles = {".*"};
@@ -99,10 +98,6 @@ public class CKFinderProperties {
 
   public boolean isSecureImageUploads() {
     return this.secureImageUploads;
-  }
-
-  public String[] getHtmlExtensions() {
-    return this.htmlExtensions;
   }
 
   public boolean isForceAscii() {
@@ -187,10 +182,6 @@ public class CKFinderProperties {
 
   public void setSecureImageUploads(final boolean secureImageUploads) {
     this.secureImageUploads = secureImageUploads;
-  }
-
-  public void setHtmlExtensions(final String[] htmlExtensions) {
-    this.htmlExtensions = htmlExtensions;
   }
 
   public void setForceAscii(final boolean forceAscii) {

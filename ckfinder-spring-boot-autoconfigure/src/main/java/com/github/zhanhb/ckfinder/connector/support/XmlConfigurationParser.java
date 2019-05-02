@@ -159,16 +159,6 @@ public enum XmlConfigurationParser {
           case "checkSizeAfterScaling":
             builder.checkSizeAfterScaling(Boolean.parseBoolean(nullNodeToString(childNode)));
             break;
-          case "htmlExtensions":
-            String htmlExt = nullNodeToString(childNode);
-            StringTokenizer scanner = new StringTokenizer(htmlExt, ",");
-            while (scanner.hasMoreTokens()) {
-              String val = scanner.nextToken();
-              if (val != null && !val.isEmpty()) {
-                builder.htmlExtension(val.trim().toLowerCase());
-              }
-            }
-            break;
           case "secureImageUploads":
             builder.secureImageUploads(Boolean.parseBoolean(nullNodeToString(childNode)));
             break;
