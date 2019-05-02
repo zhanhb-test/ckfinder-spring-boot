@@ -19,8 +19,6 @@ package com.github.zhanhb.ckfinder.download;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -44,8 +42,6 @@ public class PathPartial {
 
   private static final Logger log = LoggerFactory.getLogger(PathPartial.class);
 
-  private static final boolean HAS_METHOD_CONTENT_LENGTH_LONG;
-
   /**
    * Full range marker.
    */
@@ -56,17 +52,6 @@ public class PathPartial {
    * MIME multipart separation string
    */
   private static final String MIME_SEPARATION = "PATH_PARTIAL_MIME_BOUNDARY";
-
-  static {
-    boolean hasContentLong;
-    try {
-      MethodHandles.lookup().findVirtual(HttpServletResponse.class, "setContentLengthLong", MethodType.methodType(void.class, long.class));
-      hasContentLong = true;
-    } catch (NoSuchMethodException | IllegalAccessException ex) {
-      hasContentLong = false;
-    }
-    HAS_METHOD_CONTENT_LENGTH_LONG = hasContentLong;
-  }
 
   public static PathPartialBuilder builder() {
     return new PathPartialBuilder();
@@ -235,7 +220,7 @@ public class PathPartial {
         response.setContentType(contentType);
       }
       if (contentLength >= 0) {
-        setContentLengthLong(response, contentLength);
+        response.setContentLengthLong(contentLength);
       }
       // Copy the input stream to our output stream (if requested)
       if (serveContent) {
@@ -249,7 +234,7 @@ public class PathPartial {
         Range range = ranges[0];
         response.addHeader(HttpHeaders.CONTENT_RANGE, range.toString());
         long length = range.end - range.start + 1;
-        setContentLengthLong(response, length);
+        response.setContentLengthLong(length);
         if (contentType != null) {
           log.debug("serveFile: contentType='{}'", contentType);
           response.setContentType(contentType);
@@ -507,16 +492,6 @@ public class PathPartial {
       }
     }
     return false;
-  }
-
-  private void setContentLengthLong(HttpServletResponse response, long length) {
-    if (HAS_METHOD_CONTENT_LENGTH_LONG) {
-      response.setContentLengthLong(length);
-    } else if (length <= Integer.MAX_VALUE) {
-      response.setContentLength((int) length);
-    } else {
-      response.setHeader(HttpHeaders.CONTENT_LENGTH, Long.toString(length));
-    }
   }
 
   private static class Range {
