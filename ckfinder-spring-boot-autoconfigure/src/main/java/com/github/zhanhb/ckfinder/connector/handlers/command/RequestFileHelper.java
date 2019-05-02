@@ -18,7 +18,7 @@ class RequestFileHelper {
    * get file list to copy from request.
    *
    * @param request request
-   * @param files
+   * @param files uploaded files
    * @param context ckfinder context
    */
   static void addFilesListFromRequest(HttpServletRequest request, List<FilePostParam> files,

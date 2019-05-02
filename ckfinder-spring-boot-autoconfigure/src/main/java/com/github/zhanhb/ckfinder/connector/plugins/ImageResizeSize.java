@@ -22,7 +22,7 @@ public class ImageResizeSize {
         height = Integer.parseInt(matcher.group(2));
         this.strVal = width + "x" + height;
         return;
-      } catch (NumberFormatException ex) {
+      } catch (NumberFormatException ignored) {
       }
     }
     throw new IllegalArgumentException(value);

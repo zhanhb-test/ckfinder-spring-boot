@@ -34,7 +34,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.ServletContext;
 import org.springframework.beans.factory.ObjectProvider;
@@ -88,7 +87,7 @@ public class CKFinderAutoConfiguration {
             path = Paths.get(basePath).normalize();
           }
         }
-      } catch (IllegalArgumentException ex) {
+      } catch (IllegalArgumentException ignored) {
       }
       return DefaultPathBuilder.builder().basePath(path).baseUrl(servletContext.getContextPath() + PathUtils.addSlashToEnd(baseUrl)).build();
     }
@@ -138,7 +137,7 @@ public class CKFinderAutoConfiguration {
   public static class DefaultConfigurationConfigurer {
 
     private static String toString(String[] array) {
-      return Arrays.stream(array).collect(Collectors.joining(","));
+      return String.join(",", array);
     }
 
     @Bean
@@ -290,7 +289,7 @@ public class CKFinderAutoConfiguration {
 
   @Configuration
   @ConditionalOnMissingBean(WatermarkPlugin.class)
-  @ConditionalOnProperty(prefix = CKFinderProperties.CKFINDER_PREFIX + ".watermark", name = "enabled", havingValue = "true", matchIfMissing = false)
+  @ConditionalOnProperty(prefix = CKFinderProperties.CKFINDER_PREFIX + ".watermark", name = "enabled", havingValue = "true")
   public static class DefaultWatermarkConfigurer {
 
     @Bean
@@ -315,11 +314,11 @@ public class CKFinderAutoConfiguration {
   public static class DefaultConnectorServletConfigurer {
 
     @Bean
-    public ServletRegistrationBean connectorServlet(CKFinderProperties properties,
+    public ServletRegistrationBean<ConnectorServlet> connectorServlet(CKFinderProperties properties,
             MultipartConfigElement multipartConfigElement,
             CKFinderContext context) {
       ConnectorServlet servlet = new ConnectorServlet(context);
-      ServletRegistrationBean servletRegistrationBean = new ServletRegistrationBean(servlet, false, properties.getServlet().getPath());
+      ServletRegistrationBean<ConnectorServlet> servletRegistrationBean = new ServletRegistrationBean<>(servlet, false, properties.getServlet().getPath());
       servletRegistrationBean.setMultipartConfig(multipartConfigElement);
       return servletRegistrationBean;
     }

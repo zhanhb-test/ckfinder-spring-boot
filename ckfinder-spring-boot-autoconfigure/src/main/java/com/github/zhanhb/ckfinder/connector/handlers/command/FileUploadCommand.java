@@ -29,6 +29,7 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -57,13 +58,12 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
    * @param request request
    * @param response
    * @param context ckfinder context
-   * @throws ConnectorException when error occurs.
    * @throws IOException when IO Exception occurs.
    */
   @Override
   @SuppressWarnings("FinalMethod")
   final void execute(FileUploadParameter param, HttpServletRequest request,
-          HttpServletResponse response, CKFinderContext context) throws ConnectorException, IOException {
+          HttpServletResponse response, CKFinderContext context) throws IOException {
     String errorMsg = "";
     try {
       checkParam(param); // set in method initParams
@@ -349,11 +349,17 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
    */
   private String getFileItemName(MultipartFile item) {
     Pattern p = Pattern.compile("[^\\\\/]+$");
-    Matcher m = p.matcher(item.getOriginalFilename());
-    return m.find() ? m.group() : "";
+    String filename = item.getOriginalFilename();
+    if (filename != null) {
+      Matcher m = p.matcher(filename);
+      if (m.find()) {
+        return m.group();
+      }
+    }
+    return "";
   }
 
-  private boolean isProtectedName(String nameWithoutExtension) {
+  private boolean isProtectedName(@Nonnull String nameWithoutExtension) {
     return Pattern.compile("^(AUX|COM\\d|CLOCK\\$|CON|NUL|PRN|LPT\\d)$",
             Pattern.CASE_INSENSITIVE).matcher(nameWithoutExtension).matches();
   }

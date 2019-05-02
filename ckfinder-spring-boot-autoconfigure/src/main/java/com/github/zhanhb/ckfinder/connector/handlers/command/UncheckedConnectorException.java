@@ -11,7 +11,7 @@ class UncheckedConnectorException extends RuntimeException {
 
   private static final long serialVersionUID = 1L;
 
-  UncheckedConnectorException(ConnectorException cause) {
+  private UncheckedConnectorException(ConnectorException cause) {
     super(cause);
   }
 
@@ -25,7 +25,7 @@ class UncheckedConnectorException extends RuntimeException {
   }
 
   @Override
-  public synchronized ConnectorException getCause() {
+  public ConnectorException getCause() {
     return (ConnectorException) super.getCause();
   }
 

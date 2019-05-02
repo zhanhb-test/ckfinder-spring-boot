@@ -121,9 +121,8 @@ public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> 
    * rename thumb file.
    *
    * @param param the parameter
-   * @throws IOException when IO Exception occurs.
    */
-  private void renameThumb(RenameFileParameter param) throws IOException {
+  private void renameThumb(RenameFileParameter param) {
     Path thumbnailPath = param.getType().getThumbnailPath();
     if (thumbnailPath != null) {
       Path thumbFile = getPath(thumbnailPath, param.getCurrentFolder(),
@@ -133,7 +132,7 @@ public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> 
 
       try {
         Files.move(thumbFile, newThumbFile);
-      } catch (IOException ex) {
+      } catch (IOException ignored) {
       }
     }
   }

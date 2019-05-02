@@ -30,9 +30,7 @@ public class Mask {
     if (childrenList == null) {
       return null;
     } else {
-      int len = this.childrenList.size();
-      for (int i = 0; i < len; i++) {
-        final Mask childMask_i = childrenList.get(i);
+      for (final Mask childMask_i : this.childrenList) {
         final String childPath_i = childMask_i.getPath();
 
         if (childPath.equals(childPath_i)) {
@@ -57,9 +55,7 @@ public class Mask {
     }
 
     if (childrenList != null) {
-      int len = childrenList.size();
-      for (int i = 0; i < len; i++) {
-        Mask child = childrenList.get(i);
+      for (Mask child : childrenList) {
         child.handleParentValueChange(effectiveValue);
       }
     }
@@ -75,9 +71,7 @@ public class Mask {
 
       // propagate the parent levelInt change to this logger's children
       if (childrenList != null) {
-        int len = childrenList.size();
-        for (int i = 0; i < len; i++) {
-          Mask child = childrenList.get(i);
+        for (Mask child : childrenList) {
           child.handleParentValueChange(newParentValue);
         }
       }

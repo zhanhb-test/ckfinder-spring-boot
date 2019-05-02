@@ -34,7 +34,7 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> imp
 
   private final Map<ImageResizeParam, ImageResizeSize> pluginParams;
 
-  public ImageResizeCommand(Map<ImageResizeParam, ImageResizeSize> params) {
+  ImageResizeCommand(Map<ImageResizeParam, ImageResizeSize> params) {
     this.pluginParams = params;
   }
 

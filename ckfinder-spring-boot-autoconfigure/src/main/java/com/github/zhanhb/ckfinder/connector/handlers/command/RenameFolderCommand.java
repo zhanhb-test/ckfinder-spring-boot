@@ -95,16 +95,15 @@ public class RenameFolderCommand extends BaseXmlCommand<RenameFolderParameter> i
    * renames thumb folder.
    *
    * @param param the parameter
-   * @throws IOException when IO Exception occurs.
    */
-  private void renameThumb(RenameFolderParameter param) throws IOException {
+  private void renameThumb(RenameFolderParameter param) {
     Path thumbnailPath = param.getType().getThumbnailPath();
     if (thumbnailPath != null) {
       Path thumbDir = getPath(thumbnailPath, param.getCurrentFolder());
       Path newThumbDir = getPath(param.getType().getThumbnailPath(), param.getNewFolderPath());
       try {
         Files.move(thumbDir, newThumbDir);
-      } catch (IOException ex) {
+      } catch (IOException ignored) {
       }
     }
   }

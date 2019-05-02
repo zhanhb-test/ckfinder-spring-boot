@@ -13,7 +13,7 @@ public class AclContext {
   private final Map<String, Mask> aclCache;
   private final Mask root;
 
-  public AclContext() {
+  AclContext() {
     aclCache = new ConcurrentHashMap<>(10);
     root = new Mask("/", null, 0);
     aclCache.put(root.getPath(), root);
@@ -27,7 +27,7 @@ public class AclContext {
     return root;
   }
 
-  public Mask getMask(String path) {
+  Mask getMask(String path) {
     Objects.requireNonNull(path);
     if (!path.startsWith("/")) {
       throw new IllegalArgumentException("name must starts with slash");
@@ -56,6 +56,7 @@ public class AclContext {
       }
       // move i left of the last point
       i = h + 1;
+      //noinspection SynchronizationOnLocalVariableOrMethodParameter
       synchronized (mask) {
         childMask = mask.getChildByName(childName);
         if (childMask == null) {
@@ -70,7 +71,7 @@ public class AclContext {
     }
   }
 
-  public Mask closest(String path) {
+  Mask closest(String path) {
     Objects.requireNonNull(path);
     if (!path.startsWith("/")) {
       throw new IllegalArgumentException("name must starts with slash");

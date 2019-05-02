@@ -37,7 +37,8 @@ public class ThumbnailCommand extends BaseCommand<ThumbnailParameter> {
 
   @Override
   @SuppressWarnings("FinalMethod")
-  final void execute(ThumbnailParameter param, HttpServletRequest request, HttpServletResponse response, CKFinderContext context) throws ConnectorException, IOException {
+  final void execute(ThumbnailParameter param, HttpServletRequest request, HttpServletResponse response, CKFinderContext context)
+          throws ConnectorException {
     if (context.getThumbnail() == null) {
       param.throwException(ErrorCode.THUMBNAILS_DISABLED);
     }

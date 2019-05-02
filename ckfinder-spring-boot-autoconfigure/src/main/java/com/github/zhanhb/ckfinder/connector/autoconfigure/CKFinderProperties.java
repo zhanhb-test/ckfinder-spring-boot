@@ -16,7 +16,7 @@ import org.springframework.util.unit.DataUnit;
 @SuppressWarnings({"PublicInnerClass", "ReturnOfCollectionOrArrayField", "AssignmentToCollectionOrArrayFieldFromParameter"})
 public class CKFinderProperties {
 
-  public static final String CKFINDER_PREFIX = "ckfinder";
+  static final String CKFINDER_PREFIX = "ckfinder";
 
   private boolean enabled = true;
   private Connector connector = new Connector();
@@ -250,10 +250,6 @@ public class CKFinderProperties {
     public void setKey(final String key) {
       this.key = key;
     }
-  }
-
-  public static enum LicenseStrategy {
-    NONE, HOST, AUTH;
   }
 
   public static class Image {
@@ -612,6 +608,10 @@ public class CKFinderProperties {
     public void setEnabled(final boolean enabled) {
       this.enabled = enabled;
     }
+  }
+
+  public enum LicenseStrategy {
+    NONE, HOST, AUTH
   }
 
 }

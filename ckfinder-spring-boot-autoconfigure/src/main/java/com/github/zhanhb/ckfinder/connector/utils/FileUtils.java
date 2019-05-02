@@ -30,6 +30,7 @@ import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
@@ -165,7 +166,7 @@ public class FileUtils {
    * @param fileName file name
    * @return true if it does contain disallowed characters.
    */
-  private static boolean hasInvalidCharacter(String fileName) {
+  private static boolean hasInvalidCharacter(@Nonnull String fileName) {
     return InvalidFileNamePatternHolder.INVALID_FILENAME_PATTERN.matcher(fileName).find();
   }
 
