@@ -345,19 +345,19 @@ public class FileUtils {
     return fileName.replace("'", "\\'");
   }
 
-  private static class InvalidFileNamePatternHolder {
+  private interface InvalidFileNamePatternHolder {
 
-    private static final Pattern INVALID_FILENAME_PATTERN = Pattern.compile(Constants.INVALID_FILE_NAME_REGEX);
-
-  }
-
-  private static class UriComponentHolder {
-
-    private static final URLEncoder URI_COMPONENT = new URLEncoder("-_.*!'()~");
+    static Pattern INVALID_FILENAME_PATTERN = Pattern.compile(Constants.INVALID_FILE_NAME_REGEX);
 
   }
 
-  private static class DateTimeFormatterHolder {
+  private interface UriComponentHolder {
+
+    static URLEncoder URI_COMPONENT = new URLEncoder("-_.*!'()~");
+
+  }
+
+  private interface DateTimeFormatterHolder {
 
     static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmm", Locale.US)
             .withZone(ZoneId.systemDefault());

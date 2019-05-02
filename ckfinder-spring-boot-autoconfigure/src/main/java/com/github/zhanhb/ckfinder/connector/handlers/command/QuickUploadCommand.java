@@ -115,10 +115,9 @@ public class QuickUploadCommand extends FileUploadCommand {
     ObjectMapperHolder.MAPPER.writeValue(writer, jsonObj);
   }
 
-  @SuppressWarnings("UtilityClassWithoutPrivateConstructor")
-  private static class ObjectMapperHolder {
+  private interface ObjectMapperHolder {
 
-    static final ObjectMapper MAPPER = new Jackson2ObjectMapperBuilder().serializationInclusion(JsonInclude.Include.ALWAYS).build();
+    ObjectMapper MAPPER = new Jackson2ObjectMapperBuilder().serializationInclusion(JsonInclude.Include.ALWAYS).build();
 
   }
 

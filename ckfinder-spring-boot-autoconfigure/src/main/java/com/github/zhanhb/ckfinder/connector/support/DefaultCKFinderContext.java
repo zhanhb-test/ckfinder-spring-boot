@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import lombok.Builder;
 import lombok.NonNull;
@@ -117,18 +118,9 @@ public class DefaultCKFinderContext implements CKFinderContext {
    * @return full folder regex pattern
    */
   private String buildHiddenFileOrFolderRegex(List<String> hiddenList) {
-    StringBuilder sb = new StringBuilder("(");
-    for (String item : hiddenList) {
-      if (sb.length() > 3) {
-        sb.append("|");
-      }
-
-      sb.append("(");
-      sb.append(item.replace(".", "\\.").replace("*", ".+").replace("?", "."));
-      sb.append(")");
-    }
-    sb.append(")+");
-    return sb.toString();
+    return hiddenList.stream()
+            .map(item->item.replace(".", "\\.").replace("*", ".+").replace("?", "."))
+            .collect(Collectors.joining("|", "(", ")"));
   }
 
   public static class Builder {

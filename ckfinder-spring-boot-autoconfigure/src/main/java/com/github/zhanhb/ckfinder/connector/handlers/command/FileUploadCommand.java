@@ -250,8 +250,7 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
         Files.copy(in, file);
       }
     }
-    FileUploadEvent args = new FileUploadEvent(param.getCurrentFolder(), file);
-    context.fireOnFileUpload(args);
+    context.fireOnFileUpload(new FileUploadEvent(param.getCurrentFolder(), file));
   }
 
   /**
@@ -370,10 +369,9 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
     }
   }
 
-  @SuppressWarnings("UtilityClassWithoutPrivateConstructor")
-  private static class StandardHolder {
+  private interface StandardHolder {
 
-    static final MultipartResolver RESOLVER = new StandardServletMultipartResolver();
+    MultipartResolver RESOLVER = new StandardServletMultipartResolver();
 
   }
 
