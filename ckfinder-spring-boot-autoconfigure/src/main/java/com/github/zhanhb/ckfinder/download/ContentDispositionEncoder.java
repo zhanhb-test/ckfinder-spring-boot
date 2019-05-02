@@ -15,6 +15,7 @@
  */
 package com.github.zhanhb.ckfinder.download;
 
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.function.Function;
@@ -22,71 +23,15 @@ import java.util.function.Function;
 /**
  *
  * @author zhanhb
- * @see
- * <a href="https://tools.ietf.org/html/rfc6266#section-4.1">RFC6266#section-4.1</a>
+ * @see <a href="https://tools.ietf.org/html/rfc6266#section-4.1">RFC6266#section-4.1</a>
  */
-@SuppressWarnings("UtilityClassWithoutPrivateConstructor")
-class ContentDispositionEncoder {
-
-  // https://tools.ietf.org/html/rfc5987#section-3.2.1
-  // we will encoding + for some browser will decode + to a space
-  private static final URLEncoder CONTENT_DISPOSITION = new URLEncoder("!#$&-.^_`|~");
+interface ContentDispositionEncoder {
 
   static ContentDisposition wrapper(String type, Function<Path, String> nameMapper) {
     Objects.requireNonNull(nameMapper, "nameMapper");
-    return context -> type
-            + encode(nameMapper.apply(context.get(Path.class)));
-  }
-
-  private static String encode(String filename) {
-    if (filename == null || filename.length() == 0) {
-      return "";
-    } else if (isToken(filename)) { // already a token
-      return "; filename=" + filename;
-    } else {
-      String encoded = CONTENT_DISPOSITION.encode(filename);
-      return "; filename=\"" + encoded + "\"; filename*=utf-8''" + encoded;
-    }
-  }
-
-  private static boolean isToken(String filename) {
-    if (filename == null || filename.length() == 0) {
-      return false;
-    }
-    for (int i = 0, len = filename.length(); i < len; ++i) {
-      char ch = filename.charAt(i);
-      if (ch >= 0x7F || ch < ' ') { // CHAR predicate
-        return false;
-      }
-      switch (ch) {
-        // token separators
-        // @see https://tools.ietf.org/html/rfc2616#section-2.2
-        case '(':
-        case ')':
-        case '<':
-        case '>':
-        case '@':
-        case ',':
-        case ';':
-        case ':':
-        case '\\':
-        case '"':
-        case '/':
-        case '[':
-        case ']':
-        case '?':
-        case '=':
-        case '{':
-        case '}':
-        case ' ':
-        case '\t':
-        // should percent be a valid token???
-        // here we are different from the rfc
-        case '%':
-          return false;
-      }
-    }
-    return true;
+    return context -> org.springframework.http.ContentDisposition.builder(type)
+            .filename(nameMapper.apply(context.get(Path.class)), StandardCharsets.UTF_8)
+            .build().toString();
   }
 
 }
