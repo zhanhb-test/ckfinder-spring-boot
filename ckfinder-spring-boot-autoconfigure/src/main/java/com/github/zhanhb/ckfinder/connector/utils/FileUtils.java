@@ -40,14 +40,6 @@ import javax.annotation.Nullable;
 public class FileUtils {
 
   /**
-   * max read file buffer size.
-   */
-  private static final int MAX_BUFFER_SIZE = 1024;
-  private static final Pattern INVALID_FILENAME_PATTERN = Pattern.compile(Constants.INVALID_FILE_NAME_REGEX);
-
-  private static final URLEncoder URI_COMPONENT = new URLEncoder("-_.*!'()~");
-
-  /**
    * Gets list of children folder or files for dir, according to searchDirectory
    * param.
    *
@@ -174,7 +166,7 @@ public class FileUtils {
    * @return true if it does contain disallowed characters.
    */
   private static boolean hasInvalidCharacter(String fileName) {
-    return INVALID_FILENAME_PATTERN.matcher(fileName).find();
+    return InvalidFileNamePatternHolder.INVALID_FILENAME_PATTERN.matcher(fileName).find();
   }
 
   /**
@@ -335,7 +327,7 @@ public class FileUtils {
   }
 
   public static String encodeURIComponent(String fileName) {
-    return URI_COMPONENT.encode(fileName);
+    return UriComponentHolder.URI_COMPONENT.encode(fileName);
   }
 
   public static boolean isFolderNameValid(String folderName, CKFinderContext context) {
@@ -351,6 +343,18 @@ public class FileUtils {
 
   public static String escapeJavaScript(String fileName) {
     return fileName.replace("'", "\\'");
+  }
+
+  private static class InvalidFileNamePatternHolder {
+
+    private static final Pattern INVALID_FILENAME_PATTERN = Pattern.compile(Constants.INVALID_FILE_NAME_REGEX);
+
+  }
+
+  private static class UriComponentHolder {
+
+    private static final URLEncoder URI_COMPONENT = new URLEncoder("-_.*!'()~");
+
   }
 
   private static class DateTimeFormatterHolder {
