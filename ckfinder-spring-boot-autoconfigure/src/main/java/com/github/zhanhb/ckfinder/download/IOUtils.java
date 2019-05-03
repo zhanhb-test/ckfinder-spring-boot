@@ -21,11 +21,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-@SuppressWarnings("UtilityClassWithoutPrivateConstructor")
-class IOUtils {
+interface IOUtils {
 
   @SuppressWarnings({"NestedAssignment", "ValueOfIncrementOrDecrementUsed"})
-  public static long copy(final InputStream input, final OutputStream output,
+  static long copy(final InputStream input, final OutputStream output,
           final long inputOffset, final long length,
           final byte[] buffer) throws IOException {
     if (inputOffset > 0) {
