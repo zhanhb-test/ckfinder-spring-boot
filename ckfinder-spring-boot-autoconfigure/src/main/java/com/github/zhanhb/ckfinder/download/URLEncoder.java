@@ -61,7 +61,7 @@ public class URLEncoder {
    * @see java.net.URLEncoder#encode(java.lang.String, java.lang.String)
    * @throws NullPointerException s or charset is null
    */
-  @SuppressWarnings("AssignmentToForLoopParameter")
+  @SuppressWarnings({"AssignmentToForLoopParameter", "ValueOfIncrementOrDecrementUsed"})
   public String encode(String s, Charset charset) {
     final int length = s.length();
     Objects.requireNonNull(charset, "charset");
@@ -72,16 +72,14 @@ public class URLEncoder {
         StringBuilder out = new StringBuilder(s.substring(0, i));
         for (int k = i;;) {
           do {
-            ++k;
-            if (k == length) {
+            if (++k == length) {
               return append(out, s.substring(i).getBytes(charset)).toString();
             }
           } while (!bs.get(s.charAt(k)));
           append(out, s.substring(i, k).getBytes(charset));
           i = k;
           do {
-            ++k;
-            if (k == length) {
+            if (++k == length) {
               return out.append(s, i, k).toString();
             }
           } while (bs.get(s.charAt(k)));
