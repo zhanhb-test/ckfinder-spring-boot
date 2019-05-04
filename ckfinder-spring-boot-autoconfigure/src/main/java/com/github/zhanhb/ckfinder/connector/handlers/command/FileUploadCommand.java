@@ -120,11 +120,12 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
    */
   protected void handleOnUploadCompleteCallFuncResponse(Writer out, String errorMsg, String path, FileUploadParameter param) throws IOException {
     param.setCkFinderFuncNum(param.getCkFinderFuncNum().replaceAll("[^\\d]", ""));
-    out.write("<script type=\"text/javascript\">window.parent.CKFinder.tools.callFunction("
+    String name = param.getNewFileName();
+    String uri = path + FileUtils.encodeURIComponent(name);
+    out.write("<script>//<![CDATA[\nwindow.parent.CKFinder.tools.callFunction("
             + param.getCkFinderFuncNum() + ", '"
-            + path
-            + FileUtils.escapeJavaScript(param.getNewFileName())
-            + "', '" + errorMsg + "');</script>");
+            + FileUtils.escapeJavaScript(uri)
+            + "', '" + errorMsg + "')//]]></script>");
   }
 
   /**
@@ -135,10 +136,10 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
    * @throws IOException when IO Exception occurs.
    */
   protected void handleOnUploadCompleteResponse(Writer writer, String errorMsg, FileUploadParameter param, String path) throws IOException {
-    writer.write("<script type=\"text/javascript\">window.parent.OnUploadCompleted('" + FileUtils.escapeJavaScript(param.getNewFileName()) + "', '"
-            + (param.getErrorCode()
-            != null ? errorMsg
-                    : "") + "');</script>");
+    writer.write("<script>//<![CDATA[\nwindow.parent.OnUploadCompleted('"
+            + FileUtils.escapeJavaScript(param.getNewFileName()) + "', '"
+            + (param.getErrorCode() != null ? errorMsg : "")
+            + "')//]]></script>");
   }
 
   /**

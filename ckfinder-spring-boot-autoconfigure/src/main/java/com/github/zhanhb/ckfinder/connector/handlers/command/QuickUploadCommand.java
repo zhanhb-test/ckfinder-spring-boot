@@ -37,15 +37,16 @@ public class QuickUploadCommand extends FileUploadCommand {
       ErrorCode errorCode = param.getErrorCode();
       int errorNum = errorCode != null ? errorCode.getCode() : 0;
       boolean success = !StringUtils.isEmpty(path);
-      writer.write("<script type=\"text/javascript\">window.parent.OnUploadCompleted(" + errorNum + ", '");
+      writer.write("<script>//<![CDATA[\nwindow.parent.OnUploadCompleted(" + errorNum + ", '");
       if (success) {
-        writer.write(path
-                + FileUtils.escapeJavaScript(FileUtils.encodeURIComponent(param.getNewFileName()))
-                + "', '" + FileUtils.escapeJavaScript(param.getNewFileName()));
+        String name = param.getNewFileName();
+        String uri = path + FileUtils.encodeURIComponent(name);
+        writer.write(FileUtils.escapeJavaScript(uri) + "', '"
+                + FileUtils.escapeJavaScript(name));
       } else {
         writer.write("', '");
       }
-      writer.write("', '');</script>");
+      writer.write("', '')//]]></script>");
     }
   }
 
@@ -55,10 +56,10 @@ public class QuickUploadCommand extends FileUploadCommand {
       handleJSONResponse(writer, errorMsg, path, param);
     } else {
       param.setCkEditorFuncNum(param.getCkEditorFuncNum().replaceAll("\\D", ""));
-      writer.write("<script type=\"text/javascript\">window.parent.CKEDITOR.tools.callFunction(" + param.getCkEditorFuncNum() + ", '"
-              + path
-              + FileUtils.escapeJavaScript(FileUtils.encodeURIComponent(param.getNewFileName()))
-              + "', '" + errorMsg + "');</script>");
+      writer.write("<script>//<![CDATA[\nwindow.parent.CKEDITOR.tools.callFunction("
+              + param.getCkEditorFuncNum() + ", '"
+              + FileUtils.escapeJavaScript(path + FileUtils.encodeURIComponent(param.getNewFileName()))
+              + "', '" + errorMsg + "')//]]></script>");
     }
   }
 
@@ -89,17 +90,18 @@ public class QuickUploadCommand extends FileUploadCommand {
    */
   private void handleJSONResponse(Writer writer, String errorMsg, String path,
           FileUploadParameter param) throws IOException {
-    Map<String, Object> jsonObj = new HashMap<>(6);
+    Map<String, Object> jsonObj = new HashMap<>(4);
 
     boolean success = !StringUtils.isEmpty(path);
-    jsonObj.put("fileName", param.getNewFileName());
+    String fileName = param.getNewFileName();
+    jsonObj.put("fileName", fileName);
     jsonObj.put("uploaded", success ? 1 : 0);
 
     if (success) {
-      jsonObj.put("url", path + FileUtils.escapeJavaScript(FileUtils.encodeURIComponent(param.getNewFileName())));
+      jsonObj.put("url", path + FileUtils.encodeURIComponent(fileName));
     }
 
-    if (errorMsg != null && !errorMsg.isEmpty()) {
+    if (!StringUtils.isEmpty(errorMsg)) {
       Map<String, Object> jsonErrObj = new HashMap<>(3);
       ErrorCode error = param.getErrorCode();
       jsonErrObj.put("number", error != null ? error.getCode() : 0);
