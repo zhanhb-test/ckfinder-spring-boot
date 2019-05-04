@@ -1,5 +1,6 @@
 package com.github.zhanhb.ckfinder.connector.autoconfigure;
 
+import com.github.zhanhb.ckfinder.connector.api.Constants;
 import com.github.zhanhb.ckfinder.connector.plugins.ImageResizeParam;
 import com.github.zhanhb.ckfinder.connector.plugins.ImageResizeSize;
 import java.util.Map;
@@ -336,8 +337,8 @@ public class CKFinderProperties {
   public static class Thumbs {
 
     private boolean enabled = true;
-    private String url = "_thumbs";
-    private String directory = "_thumbs";
+    private String url = Constants.DEFAULT_THUMBS_URL;
+    private String directory = Constants.DEFAULT_THUMBS_DIR;
     private boolean directAccess = false;
     private int maxHeight = 100;
     private int maxWidth = 100;

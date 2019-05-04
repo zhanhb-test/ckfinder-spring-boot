@@ -91,7 +91,7 @@ public class ImageUtils {
     if (image != null) {
       Dimension dimension = createThumbDimension(image,
               thumbnail.getMaxWidth(), thumbnail.getMaxHeight());
-      FileUtils.createPath(file, true);
+      FileUtils.createPath(file);
       if (image.getHeight() <= dimension.height
               && image.getWidth() <= dimension.width) {
         writeUntouchedImage(originFile, file);
@@ -112,12 +112,11 @@ public class ImageUtils {
    *
    * @param part servlet part
    * @param file file name
-   * @param fileName name of file
    * @param context ckfinder context
    * @throws IOException when IO Exception occurs.
    */
-  public static void createTmpThumb(InputStreamSource part, Path file, String fileName,
-          CKFinderContext context) throws IOException {
+  public static void createTmpThumb(InputStreamSource part, Path file,
+                                    CKFinderContext context) throws IOException {
     BufferedImage image;
     try (InputStream stream = part.getInputStream()) {
       image = ImageIO.read(stream);

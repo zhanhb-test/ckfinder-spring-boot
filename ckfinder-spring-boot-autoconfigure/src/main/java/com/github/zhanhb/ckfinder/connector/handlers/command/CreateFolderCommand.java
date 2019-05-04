@@ -56,7 +56,7 @@ public class CreateFolderCommand extends BaseXmlCommand<CreateFolderParameter> i
       param.setNewFolderName(FileUtils.convertToAscii(param.getNewFolderName()));
     }
 
-    if (!FileUtils.isFolderNameValid(param.getNewFolderName(), context)) {
+    if (FileUtils.isFolderNameInvalid(param.getNewFolderName(), context)) {
       param.throwException(ErrorCode.INVALID_NAME);
     }
     if (context.isDirectoryHidden(param.getCurrentFolder())) {

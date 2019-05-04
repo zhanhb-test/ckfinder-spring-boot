@@ -235,19 +235,14 @@ public class FileUtils {
    * creates file and all above folders that do not exist.
    *
    * @param file file to create.
-   * @param asFile if it is path to folder.
    * @throws IOException when IO Exception occurs.
    */
-  public static void createPath(Path file, boolean asFile) throws IOException {
-    if (asFile) {
-      Path dir = file.getParent();
-      if (dir != null) {
-        Files.createDirectories(dir);
-      }
-      Files.createFile(file);
-    } else {
-      Files.createDirectories(file);
+  static void createPath(Path file) throws IOException {
+    Path dir = file.getParent();
+    if (dir != null) {
+      Files.createDirectories(dir);
     }
+    Files.createFile(file);
   }
 
   /**
@@ -257,9 +252,9 @@ public class FileUtils {
    * @param fileSize file size
    * @return true if file size isn't bigger then max size for type.
    */
-  public static boolean isFileSizeInRange(ResourceType type, long fileSize) {
+  public static boolean isFileSizeOutOfRange(ResourceType type, long fileSize) {
     final long maxSize = type.getMaxSize();
-    return maxSize == 0 || maxSize > fileSize;
+    return maxSize != 0 && maxSize <= fileSize;
   }
 
   /**
@@ -286,7 +281,7 @@ public class FileUtils {
           return true;
         }
       }
-    } catch (IOException ex) {
+    } catch (IOException ignored) {
     }
     return false;
   }
@@ -331,10 +326,10 @@ public class FileUtils {
     return UriComponentHolder.URI_COMPONENT.encode(fileName);
   }
 
-  public static boolean isFolderNameValid(String folderName, CKFinderContext context) {
-    return (!context.isDisallowUnsafeCharacters()
-            || !folderName.contains(".") && !folderName.contains(";"))
-            && !hasInvalidCharacter(folderName);
+  public static boolean isFolderNameInvalid(String folderName, CKFinderContext context) {
+    return (context.isDisallowUnsafeCharacters()
+            && (folderName.contains(".") || folderName.contains(";")))
+            || hasInvalidCharacter(folderName);
   }
 
   public static boolean isFileNameValid(String fileName, CKFinderContext context) {
@@ -348,19 +343,19 @@ public class FileUtils {
 
   private interface InvalidFileNamePatternHolder {
 
-    static Pattern INVALID_FILENAME_PATTERN = Pattern.compile(Constants.INVALID_FILE_NAME_REGEX);
+    Pattern INVALID_FILENAME_PATTERN = Pattern.compile(Constants.INVALID_FILE_NAME_REGEX);
 
   }
 
   private interface UriComponentHolder {
 
-    static URLEncoder URI_COMPONENT = new URLEncoder("-_.*!'()~");
+    URLEncoder URI_COMPONENT = new URLEncoder("-_.*!'()~");
 
   }
 
   private interface DateTimeFormatterHolder {
 
-    static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmm", Locale.US)
+    DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmm", Locale.US)
             .withZone(ZoneId.systemDefault());
 
   }

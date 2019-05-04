@@ -56,7 +56,7 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
    *
    * @param param the parameter
    * @param request request
-   * @param response
+   * @param response response
    * @param context ckfinder context
    * @throws IOException when IO Exception occurs.
    */
@@ -198,6 +198,7 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
         log.debug("finish resolveMultipart");
         try {
           Collection<MultipartFile> parts = resolveMultipart.getFileMap().values();
+          //noinspection LoopStatementThatDoesntLoop
           for (MultipartFile part : parts) {
             Path path = getPath(param.getType().getPath(),
                     param.getCurrentFolder());
@@ -239,9 +240,9 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
               && !ImageUtils.checkImageSize(item, context)) {
         param.throwException(ErrorCode.UPLOADED_TOO_BIG);
       }
-      ImageUtils.createTmpThumb(item, file, getFileItemName(item), context);
+      ImageUtils.createTmpThumb(item, file, context);
       if (context.isCheckSizeAfterScaling()
-              && !FileUtils.isFileSizeInRange(param.getType(), Files.size(file))) {
+              && FileUtils.isFileSizeOutOfRange(param.getType(), Files.size(file))) {
         Files.deleteIfExists(file);
         param.throwException(ErrorCode.UPLOADED_TOO_BIG);
       }
@@ -331,7 +332,7 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
 
     Path file = getPath(path, getFinalFileName(path, param));
     if ((!ImageUtils.isImageExtension(file) || !context.isCheckSizeAfterScaling())
-            && !FileUtils.isFileSizeInRange(resourceType, item.getSize())) {
+            && FileUtils.isFileSizeOutOfRange(resourceType, item.getSize())) {
       param.throwException(ErrorCode.UPLOADED_TOO_BIG);
     }
 
