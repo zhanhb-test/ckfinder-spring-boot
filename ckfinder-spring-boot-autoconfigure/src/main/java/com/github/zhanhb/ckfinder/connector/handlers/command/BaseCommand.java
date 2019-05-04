@@ -71,7 +71,7 @@ public abstract class BaseCommand<T> implements Command {
     }
 
     String typeName = request.getParameter("type");
-    ResourceType type = context.getTypes().get(typeName);
+    ResourceType type = context.getResource(typeName);
     if (currentFolder != null && typeName != null && type != null) {
       Path currDir = getPath(type.getPath(), currentFolder);
       if (!Files.isDirectory(currDir)) {

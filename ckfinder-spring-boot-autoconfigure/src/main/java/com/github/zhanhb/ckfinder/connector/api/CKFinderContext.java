@@ -11,6 +11,7 @@
  */
 package com.github.zhanhb.ckfinder.connector.api;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import javax.annotation.Nullable;
@@ -28,11 +29,17 @@ public interface CKFinderContext extends CommandFactory, EventHandler, LicenseFa
   String getUserRoleName();
 
   /**
-   * gets resources map types with names as map keys.
+   * null if not exists
    *
-   * @return resources map
+   * @param typeName the type name of the resource
+   * @return resource configuration
    */
-  Map<String, ResourceType> getTypes();
+  ResourceType getResource(String typeName);
+
+  /**
+   * @return all the resources
+   */
+  Collection<ResourceType> getResources();
 
   /**
    * gets image properties

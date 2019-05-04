@@ -54,7 +54,7 @@ public class InitCommand extends XmlCommand<String> {
     cmdContext.setResourceType(rootElement);
     createErrorNode(rootElement, 0);
     createConnectorData(rootElement, host, context);
-    createResouceTypesData(rootElement, cmdContext, context);
+    createResourceTypesData(rootElement, cmdContext, context);
     createPluginsData(rootElement, context);
     return rootElement.build();
   }
@@ -154,8 +154,8 @@ public class InitCommand extends XmlCommand<String> {
    * @param rootElement root element in XML
    * @param context ckfinder context
    */
-  private void createResouceTypesData(Connector.Builder rootElement, CommandContext cmdContext, CKFinderContext context) {
-    //resurcetypes
+  private void createResourceTypesData(Connector.Builder rootElement, CommandContext cmdContext, CKFinderContext context) {
+    //resource types
     ResourceTypes.Builder resourceTypes = ResourceTypes.builder();
     Collection<ResourceType> types = cmdContext.typeToCollection();
 

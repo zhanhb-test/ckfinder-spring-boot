@@ -22,7 +22,6 @@ interface RequestFileHelper {
    */
   static void addFilesListFromRequest(HttpServletRequest request, List<FilePostParam> files,
           CKFinderContext context) {
-    Map<String, ResourceType> types = context.getTypes();
     for (int i = 0;; ++i) {
       String paramName = "files[" + i + "][name]";
       String name = request.getParameter(paramName);
@@ -32,7 +31,8 @@ interface RequestFileHelper {
       String folder = request.getParameter("files[" + i + "][folder]");
       String options = request.getParameter("files[" + i + "][options]");
       String type = request.getParameter("files[" + i + "][type]");
-      files.add(FilePostParam.builder().name(name).folder(folder).options(options).type(types.get(type)).build());
+      files.add(FilePostParam.builder().name(name).folder(folder)
+              .options(options).type(context.getResource(type)).build());
     }
   }
 

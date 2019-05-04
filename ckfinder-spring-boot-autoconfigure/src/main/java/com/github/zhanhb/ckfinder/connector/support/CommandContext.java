@@ -41,18 +41,18 @@ public class CommandContext {
     if (type != null) {
       return Collections.singleton(type);
     } else {
-      if (cfCtx.getDefaultResourceTypes().size() > 0) {
+      if (!cfCtx.getDefaultResourceTypes().isEmpty()) {
         Set<String> defaultResourceTypes = cfCtx.getDefaultResourceTypes();
         ArrayList<ResourceType> list = new ArrayList<>(defaultResourceTypes.size());
         for (String key : defaultResourceTypes) {
-          ResourceType resourceType = cfCtx.getTypes().get(key);
+          ResourceType resourceType = cfCtx.getResource(key);
           if (resourceType != null) {
             list.add(resourceType);
           }
         }
         return list;
       } else {
-        return cfCtx.getTypes().values();
+        return cfCtx.getResources();
       }
     }
   }

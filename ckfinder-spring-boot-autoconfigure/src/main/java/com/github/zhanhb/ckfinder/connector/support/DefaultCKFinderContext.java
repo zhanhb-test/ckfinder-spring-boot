@@ -80,6 +80,16 @@ public class DefaultCKFinderContext implements CKFinderContext {
   private transient Pattern directoryHiddenPattern;
 
   @Override
+  public ResourceType getResource(String typeName) {
+    return types.get(typeName);
+  }
+
+  @Override
+  public Collection<ResourceType> getResources() {
+    return types.values();
+  }
+
+  @Override
   public boolean isDirectoryHidden(String dirName) {
     if (dirName == null || dirName.isEmpty()) {
       return false;
