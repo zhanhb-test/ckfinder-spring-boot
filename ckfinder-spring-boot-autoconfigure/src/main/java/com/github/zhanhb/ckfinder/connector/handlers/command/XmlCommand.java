@@ -1,6 +1,5 @@
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
-import com.github.zhanhb.ckfinder.connector.api.AccessControl;
 import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.Parameter;
@@ -60,15 +59,13 @@ public abstract class XmlCommand<T extends Parameter> extends BaseCommand<T> {
    * @param rootElement XML root node.
    * @param accessControl
    */
-  final void createCurrentFolderNode(T param, Connector.Builder rootElement, AccessControl accessControl) {
-    CommandContext cmdContext = param.getContext();
+  final void createCurrentFolderNode(CommandContext cmdContext, Connector.Builder rootElement) {
     if (cmdContext.getType() != null && cmdContext.getCurrentFolder() != null) {
       rootElement.currentFolder(CurrentFolder.builder()
               .path(cmdContext.getCurrentFolder())
               .url(cmdContext.getType().getUrl()
                       + cmdContext.getCurrentFolder())
-              .acl(accessControl.getAcl(cmdContext.getType().getName(),
-                      cmdContext.getCurrentFolder(), cmdContext.getUserRole()))
+              .acl(cmdContext.getAcl())
               .build());
     }
   }

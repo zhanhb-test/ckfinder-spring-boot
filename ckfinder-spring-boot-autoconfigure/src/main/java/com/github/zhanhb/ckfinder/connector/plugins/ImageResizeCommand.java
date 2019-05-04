@@ -43,13 +43,7 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> imp
   protected void createXml(Connector.Builder rootElement, ImageResizeParameter param, CKFinderContext context) throws ConnectorException {
     CommandContext cmdContext = param.getContext();
     cmdContext.checkType();
-
-    if (!context.getAccessControl().hasPermission(cmdContext.getType().getName(),
-            cmdContext.getCurrentFolder(), cmdContext.getUserRole(),
-            AccessControl.FILE_DELETE
-            | AccessControl.FILE_UPLOAD)) {
-      cmdContext.throwException(ErrorCode.UNAUTHORIZED);
-    }
+    cmdContext.checkAllPermission(AccessControl.FILE_DELETE | AccessControl.FILE_UPLOAD);
 
     String fileName = param.getFileName();
     String newFileName = param.getNewFileName();

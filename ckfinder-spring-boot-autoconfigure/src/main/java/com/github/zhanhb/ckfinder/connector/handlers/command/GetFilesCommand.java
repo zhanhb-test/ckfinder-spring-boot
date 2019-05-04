@@ -64,12 +64,7 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
   protected void createXml(Connector.Builder rootElement, GetFilesParameter param, CKFinderContext context) throws ConnectorException {
     CommandContext cmdContext = param.getContext();
     cmdContext.checkType();
-
-    if (!context.getAccessControl().hasPermission(cmdContext.getType().getName(),
-            cmdContext.getCurrentFolder(), cmdContext.getUserRole(),
-            AccessControl.FILE_VIEW)) {
-      cmdContext.throwException(ErrorCode.UNAUTHORIZED);
-    }
+    cmdContext.checkAllPermission(AccessControl.FILE_VIEW);
 
     Path dir = getPath(cmdContext.getType().getPath(), cmdContext.getCurrentFolder());
 

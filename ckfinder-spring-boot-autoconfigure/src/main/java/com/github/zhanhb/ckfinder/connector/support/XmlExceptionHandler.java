@@ -42,17 +42,18 @@ public enum XmlExceptionHandler implements ExceptionHandler {
     Connector.Builder connector = Connector.builder();
     String currentFolder = connectorException.getCurrentFolder();
     ResourceType type = connectorException.getType();
+    CommandContext cmdContext = CommandContext.builder().cfCtx(context).type(type)
+            .currentFolder(currentFolder).userRole(userRole).build();
 
     int errorNum = connectorException.getErrorCode().getCode();
 
     if (type != null) {
-      String typeName = type.getName();
-      connector.resourceType(typeName);
+      cmdContext.setResourceType(connector);
       if (StringUtils.hasLength(currentFolder)) {
         connector.currentFolder(CurrentFolder.builder()
                 .path(currentFolder)
                 .url(type.getUrl() + currentFolder)
-                .acl(context.getAccessControl().getAcl(typeName, currentFolder, userRole))
+                .acl(cmdContext.getAcl())
                 .build());
       }
     }

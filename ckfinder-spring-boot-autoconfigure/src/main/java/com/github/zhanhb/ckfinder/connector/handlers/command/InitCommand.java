@@ -55,8 +55,8 @@ public class InitCommand extends XmlCommand<InitParameter> {
     CommandContext cmdContext = param.getContext();
     cmdContext.setResourceType(rootElement);
     createErrorNode(rootElement, 0);
-    createConnectorData(rootElement, param, context);
-    createResouceTypesData(rootElement, param, context);
+    createConnectorData(rootElement, param.getHost(), context);
+    createResouceTypesData(rootElement, param.getContext(), context);
     createPluginsData(rootElement, context);
     return rootElement.build();
   }
@@ -68,9 +68,9 @@ public class InitCommand extends XmlCommand<InitParameter> {
    * @param param the parameter
    * @param context connector context
    */
-  private void createConnectorData(Connector.Builder rootElement, InitParameter param, CKFinderContext context) {
+  private void createConnectorData(Connector.Builder rootElement, String host, CKFinderContext context) {
     ThumbnailProperties thumbnail = context.getThumbnail();
-    License license = context.getLicense(param.getHost());
+    License license = context.getLicense(host);
 
     // connector info
     ConnectorInfo.Builder element = ConnectorInfo.builder()
@@ -157,20 +157,18 @@ public class InitCommand extends XmlCommand<InitParameter> {
    * @param param the parameter
    * @param context ckfinder context
    */
-  private void createResouceTypesData(Connector.Builder rootElement, InitParameter param, CKFinderContext context) {
+  private void createResouceTypesData(Connector.Builder rootElement, CommandContext cmdContext, CKFinderContext context) {
     //resurcetypes
     ResourceTypes.Builder resourceTypes = ResourceTypes.builder();
-    CommandContext cmdContext = param.getContext();
     Collection<ResourceType> types = cmdContext.typeToCollection();
 
     for (ResourceType resourceType : types) {
-      String name = resourceType.getName();
-      int acl = context.getAccessControl().getAcl(name, "/", cmdContext.getUserRole());
+      int acl = cmdContext.getAcl(resourceType, "/");
       if ((acl & AccessControl.FOLDER_VIEW) != 0) {
         long maxSize = resourceType.getMaxSize();
         boolean hasChildren = FileUtils.hasChildren(context.getAccessControl(), "/", getPath(resourceType.getPath()), context, resourceType.getName(), cmdContext.getUserRole());
         resourceTypes.resourceType(com.github.zhanhb.ckfinder.connector.handlers.response.ResourceType.builder()
-                .name(name)
+                .name(resourceType.getName())
                 .acl(acl)
                 .hash(randomHash(resourceType.getPath()))
                 .allowedExtensions(resourceType.getAllowedExtensions())

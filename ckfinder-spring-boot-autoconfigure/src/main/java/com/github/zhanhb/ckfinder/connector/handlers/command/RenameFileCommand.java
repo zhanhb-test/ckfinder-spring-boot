@@ -57,12 +57,7 @@ public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> 
     log.trace("getDataForXml");
     CommandContext cmdContext = param.getContext();
     cmdContext.checkType();
-
-    if (!context.getAccessControl().hasPermission(cmdContext.getType().getName(),
-            cmdContext.getCurrentFolder(), cmdContext.getUserRole(),
-            AccessControl.FILE_RENAME)) {
-      cmdContext.throwException(ErrorCode.UNAUTHORIZED);
-    }
+    cmdContext.checkAllPermission(AccessControl.FILE_RENAME);
 
     if (context.isForceAscii()) {
       param.setNewFileName(FileUtils.convertToAscii(param.getNewFileName()));

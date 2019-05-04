@@ -31,7 +31,7 @@ public abstract class BaseXmlCommand<T extends Parameter> extends XmlCommand<T> 
     Connector.Builder connector = Connector.builder();
     CommandContext cmdContext = param.getContext();
     cmdContext.setResourceType(connector);
-    createCurrentFolderNode(param, connector, context.getAccessControl());
+    createCurrentFolderNode(cmdContext, connector);
     createErrorNode(connector, 0);
     createXml(connector, param, context);
     return connector.build();

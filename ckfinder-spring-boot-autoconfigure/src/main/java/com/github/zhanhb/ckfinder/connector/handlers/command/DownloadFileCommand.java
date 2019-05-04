@@ -45,12 +45,7 @@ public class DownloadFileCommand extends BaseCommand<DownloadFileParameter> {
           throws ConnectorException, IOException {
     CommandContext cmdContext = param.getContext();
     cmdContext.checkType();
-
-    if (!context.getAccessControl().hasPermission(cmdContext.getType().getName(),
-            cmdContext.getCurrentFolder(), cmdContext.getUserRole(),
-            AccessControl.FILE_VIEW)) {
-      cmdContext.throwException(ErrorCode.UNAUTHORIZED);
-    }
+    cmdContext.checkAllPermission(AccessControl.FILE_VIEW);
 
     if (!FileUtils.isFileNameValid(param.getFileName())
             || !FileUtils.isFileExtensionAllowed(param.getFileName(),

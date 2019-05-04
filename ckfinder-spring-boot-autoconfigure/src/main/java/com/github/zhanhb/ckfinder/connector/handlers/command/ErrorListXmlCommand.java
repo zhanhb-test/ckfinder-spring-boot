@@ -34,7 +34,7 @@ public abstract class ErrorListXmlCommand<T extends ErrorListXmlParameter> exten
     int errorCode = error != null ? error.getCode() : 0;
     CommandContext cmdContext = param.getContext();
     cmdContext.setResourceType(connector);
-    createCurrentFolderNode(param, connector, context.getAccessControl());
+    createCurrentFolderNode(cmdContext, connector);
     createErrorNode(connector, errorCode);
     param.addErrorsTo(connector);
     if (param.isAddResultNode()) {

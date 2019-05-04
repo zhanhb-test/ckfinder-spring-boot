@@ -45,12 +45,7 @@ public class CreateFolderCommand extends BaseXmlCommand<CreateFolderParameter> i
 
     CommandContext cmdContext = param.getContext();
     cmdContext.checkType();
-
-    if (!context.getAccessControl().hasPermission(cmdContext.getType().getName(),
-            cmdContext.getCurrentFolder(), cmdContext.getUserRole(),
-            AccessControl.FOLDER_CREATE)) {
-      cmdContext.throwException(ErrorCode.UNAUTHORIZED);
-    }
+    cmdContext.checkAllPermission(AccessControl.FOLDER_CREATE);
 
     if (context.isForceAscii()) {
       param.setNewFolderName(FileUtils.convertToAscii(param.getNewFolderName()));

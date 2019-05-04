@@ -83,10 +83,7 @@ public class DeleteFilesCommand extends ErrorListXmlCommand<DeleteFilesParameter
 
       }
 
-      if (!context.getAccessControl().hasPermission(fileItem.getType().getName(), fileItem.getFolder(), cmdContext.getUserRole(),
-              AccessControl.FILE_DELETE)) {
-        cmdContext.throwException(ErrorCode.UNAUTHORIZED);
-      }
+      cmdContext.checkAllPermission(fileItem.getType(), fileItem.getName(), AccessControl.FILE_DELETE);
     }
 
     for (FilePostParam fileItem : param.getFiles()) {

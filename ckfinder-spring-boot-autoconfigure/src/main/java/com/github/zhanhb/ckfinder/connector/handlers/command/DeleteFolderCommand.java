@@ -34,13 +34,8 @@ public class DeleteFolderCommand extends BaseXmlCommand<ErrorListXmlParameter> i
   protected void createXml(Connector.Builder rootElement, ErrorListXmlParameter param, CKFinderContext context) throws ConnectorException {
     CommandContext cmdContext = param.getContext();
     cmdContext.checkType();
+    cmdContext.checkAllPermission(AccessControl.FOLDER_DELETE);
 
-    if (!context.getAccessControl().hasPermission(cmdContext.getType().getName(),
-            cmdContext.getCurrentFolder(),
-            cmdContext.getUserRole(),
-            AccessControl.FOLDER_DELETE)) {
-      cmdContext.throwException(ErrorCode.UNAUTHORIZED);
-    }
     if (cmdContext.getCurrentFolder().equals("/")) {
       cmdContext.throwException(ErrorCode.INVALID_REQUEST);
     }

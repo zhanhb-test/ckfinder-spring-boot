@@ -51,15 +51,9 @@ public class MoveFilesCommand extends ErrorListXmlCommand<CopyMoveParameter> imp
           throws ConnectorException {
     CommandContext cmdContext = param.getContext();
     cmdContext.checkType();
-
-    if (!context.getAccessControl().hasPermission(cmdContext.getType().getName(),
-            cmdContext.getCurrentFolder(),
-            cmdContext.getUserRole(),
-            AccessControl.FILE_RENAME
+    cmdContext.checkAllPermission(AccessControl.FILE_RENAME
             | AccessControl.FILE_DELETE
-            | AccessControl.FILE_UPLOAD)) {
-      cmdContext.throwException(ErrorCode.UNAUTHORIZED);
-    }
+            | AccessControl.FILE_UPLOAD);
 
     for (FilePostParam file : param.getFiles()) {
       if (!FileUtils.isFileNameValid(file.getName())) {
@@ -84,10 +78,8 @@ public class MoveFilesCommand extends ErrorListXmlCommand<CopyMoveParameter> imp
         cmdContext.throwException(ErrorCode.INVALID_REQUEST);
       }
 
-      if (!context.getAccessControl().hasPermission(file.getType().getName(),
-              file.getFolder(), cmdContext.getUserRole(), AccessControl.FILE_VIEW | AccessControl.FILE_DELETE)) {
-        cmdContext.throwException(ErrorCode.UNAUTHORIZED);
-      }
+      cmdContext.checkAllPermission(file.getType(), file.getFolder(),
+              AccessControl.FILE_VIEW | AccessControl.FILE_DELETE);
     }
 
     for (FilePostParam file : param.getFiles()) {

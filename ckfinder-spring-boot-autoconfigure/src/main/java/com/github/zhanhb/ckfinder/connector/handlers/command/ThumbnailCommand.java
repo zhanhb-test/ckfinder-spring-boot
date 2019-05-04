@@ -46,12 +46,7 @@ public class ThumbnailCommand extends BaseCommand<ThumbnailParameter> {
     }
 
     cmdContext.checkType();
-
-    if (!context.getAccessControl().hasPermission(cmdContext.getType().getName(),
-            cmdContext.getCurrentFolder(), cmdContext.getUserRole(),
-            AccessControl.FILE_VIEW)) {
-      cmdContext.throwException(ErrorCode.UNAUTHORIZED);
-    }
+    cmdContext.checkAllPermission(AccessControl.FILE_VIEW);
 
     if (!FileUtils.isFileNameValid(param.getFileName())) {
       cmdContext.throwException(ErrorCode.INVALID_REQUEST);

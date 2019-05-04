@@ -36,11 +36,7 @@ public class SaveFileCommand extends BaseXmlCommand<SaveFileParameter> implement
     CommandContext cmdContext = param.getContext();
     cmdContext.checkType();
 
-    if (!context.getAccessControl().hasPermission(cmdContext.getType().getName(),
-            cmdContext.getCurrentFolder(), cmdContext.getUserRole(),
-            AccessControl.FILE_DELETE)) {
-      cmdContext.throwException(ErrorCode.UNAUTHORIZED);
-    }
+    cmdContext.checkAllPermission(AccessControl.FILE_DELETE);
 
     if (param.getFileName() == null || param.getFileName().isEmpty()) {
       cmdContext.throwException(ErrorCode.INVALID_NAME);

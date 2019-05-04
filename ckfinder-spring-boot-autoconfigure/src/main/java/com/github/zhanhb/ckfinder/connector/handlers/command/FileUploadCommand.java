@@ -179,11 +179,7 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
   private void uploadFile(HttpServletRequest request, FileUploadParameter param,
           CKFinderContext context) throws ConnectorException {
     CommandContext cmdContext = param.getContext();
-    if (!context.getAccessControl().hasPermission(cmdContext.getType().getName(),
-            cmdContext.getCurrentFolder(), cmdContext.getUserRole(),
-            AccessControl.FILE_UPLOAD)) {
-      param.throwException(ErrorCode.UNAUTHORIZED);
-    }
+    cmdContext.checkAllPermission(AccessControl.FILE_UPLOAD);
     fileUpload(request, param, context);
   }
 

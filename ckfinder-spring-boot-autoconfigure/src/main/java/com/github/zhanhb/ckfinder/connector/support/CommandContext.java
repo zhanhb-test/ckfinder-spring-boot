@@ -57,4 +57,27 @@ public class CommandContext {
     }
   }
 
+  public int getAcl(ResourceType resourceType, String path) {
+    return cfCtx.getAccessControl().getAcl(resourceType.getName(), path, userRole);
+  }
+
+  public boolean hasAllPermission(ResourceType resourceType, String path, int acl) {
+    return (getAcl(resourceType, path) & acl) == acl;
+  }
+
+  public int getAcl() {
+    return getAcl(type, currentFolder);
+  }
+
+  public void checkAllPermission(ResourceType type, String currentFolder, int acl)
+          throws ConnectorException {
+    if (!hasAllPermission(type, currentFolder, acl)) {
+      throwException(ErrorCode.UNAUTHORIZED);
+    }
+  }
+
+  public void checkAllPermission(int acl) throws ConnectorException {
+    checkAllPermission(type, currentFolder, acl);
+  }
+
 }

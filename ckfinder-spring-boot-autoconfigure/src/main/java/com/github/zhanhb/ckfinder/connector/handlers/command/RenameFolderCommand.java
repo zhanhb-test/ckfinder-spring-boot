@@ -45,13 +45,7 @@ public class RenameFolderCommand extends BaseXmlCommand<RenameFolderParameter> i
     checkRequestPath(param.getNewFolderName());
     CommandContext cmdContext = param.getContext();
     cmdContext.checkType();
-
-    if (!context.getAccessControl().hasPermission(cmdContext.getType().getName(),
-            cmdContext.getCurrentFolder(),
-            cmdContext.getUserRole(),
-            AccessControl.FOLDER_RENAME)) {
-      cmdContext.throwException(ErrorCode.UNAUTHORIZED);
-    }
+    cmdContext.checkAllPermission(AccessControl.FOLDER_RENAME);
 
     if (context.isForceAscii()) {
       param.setNewFolderName(FileUtils.convertToAscii(param.getNewFolderName()));

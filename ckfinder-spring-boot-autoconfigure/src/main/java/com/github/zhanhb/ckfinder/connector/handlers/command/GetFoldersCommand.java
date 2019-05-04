@@ -39,12 +39,8 @@ public class GetFoldersCommand extends BaseXmlCommand<Parameter> {
   protected void createXml(Connector.Builder rootElement, Parameter param, CKFinderContext context) throws ConnectorException {
     CommandContext cmdContext = param.getContext();
     cmdContext.checkType();
+    cmdContext.checkAllPermission(AccessControl.FOLDER_VIEW);
 
-    if (!context.getAccessControl().hasPermission(cmdContext.getType().getName(),
-            cmdContext.getCurrentFolder(), cmdContext.getUserRole(),
-            AccessControl.FOLDER_VIEW)) {
-      cmdContext.throwException(ErrorCode.UNAUTHORIZED);
-    }
     if (context.isDirectoryHidden(cmdContext.getCurrentFolder())) {
       cmdContext.throwException(ErrorCode.INVALID_REQUEST);
     }
