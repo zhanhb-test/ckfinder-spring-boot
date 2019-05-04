@@ -77,7 +77,7 @@ public interface CKFinderContext extends CommandFactory, EventHandler, LicenseFa
    *
    * @return check double extensions
    */
-  boolean isCheckDoubleFileExtensions();
+  boolean isDoubleFileExtensionsAllowed();
 
   /**
    * flag to check if force ASCII.

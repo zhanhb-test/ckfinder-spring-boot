@@ -54,7 +54,7 @@ public class DefaultCKFinderContext implements CKFinderContext {
   private List<String> hiddenFolders;
   @Singular
   private List<String> hiddenFiles;
-  private boolean checkDoubleFileExtensions;
+  private boolean doubleFileExtensionsAllowed;
   private boolean forceAscii;
   private boolean checkSizeAfterScaling;
   @NonNull

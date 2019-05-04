@@ -164,7 +164,7 @@ public class CKFinderAutoConfiguration {
       ThumbnailProperties thumbnail = createThumbs(properties.getThumbs(), basePathBuilder);
       builder.thumbnail(thumbnail)
               .disallowUnsafeCharacters(properties.isDisallowUnsafeCharacters())
-              .checkDoubleFileExtensions(properties.isCheckDoubleExtension())
+              .doubleFileExtensionsAllowed(properties.isAllowDoubleExtension())
               .checkSizeAfterScaling(properties.isCheckSizeAfterScaling())
               .secureImageUploads(properties.isSecureImageUploads());
       if (properties.getTypes() != null) {

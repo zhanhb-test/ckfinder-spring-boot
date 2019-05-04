@@ -31,7 +31,7 @@ public class CKFinderProperties {
   private AccessControl[] accessControls;
   private Thumbs thumbs = new Thumbs();
   private boolean disallowUnsafeCharacters = false;
-  private boolean checkDoubleExtension = true;
+  private boolean allowDoubleExtension = false;
   private boolean checkSizeAfterScaling = true;
   private boolean secureImageUploads = true;
   private boolean forceAscii = false;
@@ -89,8 +89,8 @@ public class CKFinderProperties {
     return this.disallowUnsafeCharacters;
   }
 
-  public boolean isCheckDoubleExtension() {
-    return this.checkDoubleExtension;
+  public boolean isAllowDoubleExtension() {
+    return allowDoubleExtension;
   }
 
   public boolean isCheckSizeAfterScaling() {
@@ -173,8 +173,8 @@ public class CKFinderProperties {
     this.disallowUnsafeCharacters = disallowUnsafeCharacters;
   }
 
-  public void setCheckDoubleExtension(final boolean checkDoubleExtension) {
-    this.checkDoubleExtension = checkDoubleExtension;
+  public void setAllowDoubleExtension(boolean allowDoubleExtension) {
+    this.allowDoubleExtension = allowDoubleExtension;
   }
 
   public void setCheckSizeAfterScaling(final boolean checkSizeAfterScaling) {

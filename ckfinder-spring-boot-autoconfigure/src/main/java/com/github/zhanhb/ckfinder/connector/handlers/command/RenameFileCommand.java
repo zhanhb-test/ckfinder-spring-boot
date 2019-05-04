@@ -71,7 +71,7 @@ public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> 
     if (!FileUtils.isFileExtensionAllowed(param.getNewFileName(), cmdContext.getType())) {
       return ErrorCode.INVALID_EXTENSION;
     }
-    if (context.isCheckDoubleFileExtensions()) {
+    if (!context.isDoubleFileExtensionsAllowed()) {
       param.setNewFileName(FileUtils.renameFileWithBadExt(cmdContext.getType(),
               param.getNewFileName()));
     }

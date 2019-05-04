@@ -52,7 +52,7 @@ ckfinder:
     max-width: 100
     quality: 0.8
   disallow-unsafe-characters: false
-  check-double-extension: true
+  allow-double-extension: false
   check-size-after-scaling: true
   secure-image-uploads: true
   force-ascii: false

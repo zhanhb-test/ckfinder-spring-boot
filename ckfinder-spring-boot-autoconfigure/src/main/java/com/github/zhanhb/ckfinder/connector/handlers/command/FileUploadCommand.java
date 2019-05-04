@@ -314,7 +314,7 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
     if (!FileUtils.isFileExtensionAllowed(param.getNewFileName(), resourceType)) {
       param.throwException(ErrorCode.INVALID_EXTENSION);
     }
-    if (context.isCheckDoubleFileExtensions()) {
+    if (!context.isDoubleFileExtensionsAllowed()) {
       param.setNewFileName(FileUtils.renameFileWithBadExt(resourceType, param.getNewFileName()));
     }
 

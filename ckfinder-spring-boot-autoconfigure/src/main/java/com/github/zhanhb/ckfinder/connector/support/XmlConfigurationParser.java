@@ -148,7 +148,7 @@ public enum XmlConfigurationParser {
             setHiddenFiles(builder, childNode.getChildNodes());
             break;
           case "checkDoubleExtension":
-            builder.checkDoubleFileExtensions(Boolean.parseBoolean(nullNodeToString(childNode)));
+            builder.doubleFileExtensionsAllowed(!Boolean.parseBoolean(nullNodeToString(childNode)));
             break;
           case "disallowUnsafeCharacters":
             builder.disallowUnsafeCharacters(Boolean.parseBoolean(nullNodeToString(childNode)));
