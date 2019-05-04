@@ -120,7 +120,7 @@ public class ConnectorServlet extends HttpServlet {
               context, request, response, handler);
     } catch (RuntimeException e) {
       log.error("runtime exception", e);
-      handleException(new ConnectorException(ErrorCode.INVALID_COMMAND),
+      handleException(new ConnectorException(ErrorCode.UNKNOWN),
               context, request, response, handler);
     } catch (ConnectorException e) {
       log.debug("ConnectorException: {} {}", e.getErrorCode(), e.getMessage());

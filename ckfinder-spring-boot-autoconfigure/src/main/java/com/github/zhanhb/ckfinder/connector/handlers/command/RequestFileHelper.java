@@ -11,8 +11,7 @@ import javax.servlet.http.HttpServletRequest;
  *
  * @author zhanhb
  */
-@SuppressWarnings("UtilityClassWithoutPrivateConstructor")
-class RequestFileHelper {
+interface RequestFileHelper {
 
   /**
    * get file list to copy from request.

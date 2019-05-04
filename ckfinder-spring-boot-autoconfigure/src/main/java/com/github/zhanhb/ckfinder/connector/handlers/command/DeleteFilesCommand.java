@@ -83,7 +83,7 @@ public class DeleteFilesCommand extends ErrorListXmlCommand<DeleteFilesParameter
 
       }
 
-      cmdContext.checkAllPermission(fileItem.getType(), fileItem.getName(), AccessControl.FILE_DELETE);
+      cmdContext.checkAllPermission(fileItem.getType(), fileItem.getFolder(), AccessControl.FILE_DELETE);
     }
 
     for (FilePostParam fileItem : param.getFiles()) {

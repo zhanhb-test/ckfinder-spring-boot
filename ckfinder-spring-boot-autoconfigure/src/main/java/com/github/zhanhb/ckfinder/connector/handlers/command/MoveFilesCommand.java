@@ -218,7 +218,8 @@ public class MoveFilesCommand extends ErrorListXmlCommand<CopyMoveParameter> imp
   @Override
   protected CopyMoveParameter popupParams(HttpServletRequest request, CKFinderContext context) {
     CopyMoveParameter param = new CopyMoveParameter();
-    param.setAll(request.getParameter("moved") != null ? Integer.parseInt(request.getParameter("moved")) : 0);
+    String moved = request.getParameter("moved");
+    param.setAll(moved != null ? Integer.parseInt(moved) : 0);
     RequestFileHelper.addFilesListFromRequest(request, param.getFiles(), context);
     return param;
   }
