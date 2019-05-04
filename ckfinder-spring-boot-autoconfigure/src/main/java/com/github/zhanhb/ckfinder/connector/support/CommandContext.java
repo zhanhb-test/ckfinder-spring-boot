@@ -5,6 +5,7 @@ import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.api.ResourceType;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -115,6 +116,22 @@ public class CommandContext {
 
   public Optional<Path> resolveThumbnail(String name) {
     return type.resolveThumbnail(currentFolder, name);
+  }
+
+  public Path checkDirectory() throws ConnectorException {
+    Path dir = toPath();
+    if (!Files.isDirectory(dir)) {
+      if ("/".equals(currentFolder)) {
+        try {
+          Files.createDirectories(dir);
+        } catch (IOException ex) {
+          throwException(ErrorCode.FOLDER_NOT_FOUND);
+        }
+      } else {
+        throwException(ErrorCode.FOLDER_NOT_FOUND);
+      }
+    }
+    return dir;
   }
 
 }

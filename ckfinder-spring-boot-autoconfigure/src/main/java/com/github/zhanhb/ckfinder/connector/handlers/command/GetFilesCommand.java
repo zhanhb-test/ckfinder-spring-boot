@@ -60,11 +60,7 @@ public class GetFilesCommand extends BaseXmlCommand<String> {
     cmdContext.checkType();
     cmdContext.checkAllPermission(AccessControl.FILE_VIEW);
 
-    Path dir = cmdContext.toPath();
-
-    if (!Files.isDirectory(dir)) {
-      cmdContext.throwException(ErrorCode.FOLDER_NOT_FOUND);
-    }
+    Path dir = cmdContext.checkDirectory();
 
     try {
       List<Path> files = FileUtils.listChildren(dir, false);

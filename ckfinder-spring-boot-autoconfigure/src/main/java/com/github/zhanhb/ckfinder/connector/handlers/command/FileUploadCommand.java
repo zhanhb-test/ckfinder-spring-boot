@@ -67,23 +67,30 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
           HttpServletResponse response, CKFinderContext context) throws IOException {
     String errorMsg = "";
     String path = "";
+
+    boolean uploaded = false;
     try {
       CommandContext cmdContext = populateCommandContext(request, context);
       cmdContext.checkType();
       uploadFile(request, param, cmdContext);
-      checkParam(param); // set in method uploadFile
       path = cmdContext.getType().getUrl() + cmdContext.getCurrentFolder();
+      uploaded = true;
+      checkParam(param);
     } catch (ConnectorException ex) {
+      log.info("got ConnectorException", ex);
       param.setErrorCode(ex.getErrorCode());
       errorMsg = ex.getMessage();
-      param.setNewFileName("");
+      if (!uploaded) {
+        param.setNewFileName("");
+      }
     }
-    errorMsg = errorMsg.replace("%1", param.getNewFileName());
+    String newFileName = param.getNewFileName();
+    errorMsg = errorMsg.replace("%1", newFileName);
 
     setContentType(param, response);
     PrintWriter writer = response.getWriter();
     if ("txt".equals(param.getResponseType())) {
-      writer.write(param.getNewFileName() + "|" + errorMsg);
+      writer.write(newFileName + "|" + errorMsg);
     } else if (checkFuncNum(param)) {
       handleOnUploadCompleteCallFuncResponse(writer, errorMsg, path, param);
     } else {
@@ -146,7 +153,11 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
     FileUploadParameter param = new FileUploadParameter();
     param.setCkFinderFuncNum(request.getParameter("CKFinderFuncNum"));
     param.setCkEditorFuncNum(request.getParameter("CKEditorFuncNum"));
-    param.setResponseType(request.getParameter("response_type") != null ? request.getParameter("response_type") : request.getParameter("responseType"));
+    String responseType = request.getParameter("response_type");
+    if (responseType == null) {
+      responseType = request.getParameter("responseType");
+    }
+    param.setResponseType(responseType);
     param.setLangCode(request.getParameter("langCode"));
     return param;
   }
@@ -185,7 +196,6 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
           Collection<MultipartFile> parts = resolveMultipart.getFileMap().values();
           //noinspection LoopStatementThatDoesntLoop
           for (MultipartFile part : parts) {
-            Path path = cmdContext.toPath();
             param.setFileName(getFileItemName(part));
             validateUploadItem(part, param, cmdContext);
             saveTemporaryFile(part, param, cmdContext);
@@ -208,7 +218,7 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
   /**
    * saves temporary file in the correct file path.
    *
-=   * @param item file upload item
+   * @param item file upload item
    * @param param the parameter
    * @param cmdContext command context
    * @throws IOException when IO Exception occurs.
@@ -282,39 +292,38 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
   private void validateUploadItem(MultipartFile item,
           FileUploadParameter param, CommandContext cmdContext) throws ConnectorException {
     CKFinderContext context = cmdContext.getCfCtx();
-    if (item.getOriginalFilename() == null || item.getOriginalFilename().length() <= 0) {
+    if (item.getOriginalFilename() == null || item.getOriginalFilename().length() == 0) {
       param.throwException(ErrorCode.UPLOADED_INVALID);
     }
-    param.setFileName(getFileItemName(item));
-    param.setNewFileName(param.getFileName());
 
-    param.setNewFileName(UNSAFE_FILE_NAME_PATTERN.matcher(param.getNewFileName()).replaceAll("_"));
-
+    String fileName = param.getFileName();
+    String newFileName = UNSAFE_FILE_NAME_PATTERN.matcher(fileName).replaceAll("_");
     if (context.isDisallowUnsafeCharacters()) {
-      param.setNewFileName(param.getNewFileName().replace(';', '_'));
+      newFileName = newFileName.replace(';', '_');
     }
     if (context.isForceAscii()) {
-      param.setNewFileName(FileUtils.convertToAscii(param.getNewFileName()));
+      newFileName = FileUtils.convertToAscii(newFileName);
     }
-    if (!param.getNewFileName().equals(param.getFileName())) {
+    if (!newFileName.equals(fileName)) {
       param.setErrorCode(ErrorCode.UPLOADED_INVALID_NAME_RENAMED);
     }
 
     if (context.isDirectoryHidden(cmdContext.getCurrentFolder())) {
       param.throwException(ErrorCode.INVALID_REQUEST);
     }
-    if (!FileUtils.isFileNameValid(param.getNewFileName())
-            || context.isFileHidden(param.getNewFileName())) {
+    if (!FileUtils.isFileNameValid(newFileName)
+            || context.isFileHidden(newFileName)) {
       param.throwException(ErrorCode.INVALID_NAME);
     }
     final ResourceType resourceType = cmdContext.getType();
-    if (!FileUtils.isFileExtensionAllowed(param.getNewFileName(), resourceType)) {
+    if (!FileUtils.isFileExtensionAllowed(newFileName, resourceType)) {
       param.throwException(ErrorCode.INVALID_EXTENSION);
     }
     if (!context.isDoubleFileExtensionsAllowed()) {
-      param.setNewFileName(FileUtils.renameFileWithBadExt(resourceType, param.getNewFileName()));
+      newFileName = FileUtils.renameFileWithBadExt(resourceType, newFileName);
     }
 
+    param.setNewFileName(newFileName);
     Path file = cmdContext.resolve(getFinalFileName(cmdContext, param));
     if ((!ImageUtils.isImageExtension(file) || !context.isCheckSizeAfterScaling())
             && FileUtils.isFileSizeOutOfRange(resourceType, item.getSize())) {

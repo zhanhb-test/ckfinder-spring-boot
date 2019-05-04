@@ -36,7 +36,7 @@ public class PluginRegister {
   }
 
   public PluginRegister addName(String name) {
-    if (name.matches("\\s+")) {
+    if (name.matches("\\s*")) {
       throw new IllegalArgumentException("name should not be empty");
     }
     names.add(name);
