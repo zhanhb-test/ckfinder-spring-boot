@@ -16,7 +16,7 @@ import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.Constants;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
-import com.github.zhanhb.ckfinder.connector.handlers.parameter.CopyFilesParameter;
+import com.github.zhanhb.ckfinder.connector.handlers.parameter.CopyMoveParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.CopyFiles;
 import com.github.zhanhb.ckfinder.connector.support.FilePostParam;
@@ -35,18 +35,18 @@ import lombok.extern.slf4j.Slf4j;
  * Class to handle <code>CopyFiles</code> command.
  */
 @Slf4j
-public class CopyFilesCommand extends ErrorListXmlCommand<CopyFilesParameter> implements IPostCommand {
+public class CopyFilesCommand extends ErrorListXmlCommand<CopyMoveParameter> implements IPostCommand {
 
   @Override
-  protected void addResultNode(Connector.Builder rootElement, CopyFilesParameter param, CKFinderContext context) {
+  protected void addResultNode(Connector.Builder rootElement, CopyMoveParameter param, CKFinderContext context) {
     rootElement.result(CopyFiles.builder()
-            .copied(param.getFilesCopied())
-            .copiedTotal(param.getCopiedAll() + param.getFilesCopied())
+            .copied(param.getNfiles())
+            .copiedTotal(param.getAll() + param.getNfiles())
             .build());
   }
 
   @Override
-  protected ErrorCode getDataForXml(CopyFilesParameter param, CKFinderContext context)
+  protected ErrorCode getDataForXml(CopyMoveParameter param, CKFinderContext context)
           throws ConnectorException {
     if (param.getType() == null) {
       throw new ConnectorException(ErrorCode.INVALID_TYPE);
@@ -161,7 +161,7 @@ public class CopyFilesCommand extends ErrorListXmlCommand<CopyFilesParameter> im
         param.appendError(file, ErrorCode.ACCESS_DENIED);
         continue;
       }
-      param.filesCopiedPlus();
+      param.increase();
       copyThumb(file, sourceFile.relativize(destFile));
     }
     param.setAddResultNode(true);
@@ -194,7 +194,7 @@ public class CopyFilesCommand extends ErrorListXmlCommand<CopyFilesParameter> im
         // can't be in one if=, because when error in
         // copy file occurs then it will be infinity loop
         return newDestFile;
-      } catch (FileAlreadyExistsException ex) {
+      } catch (FileAlreadyExistsException ignored) {
       } catch (IOException ex) {
         return null;
       }
@@ -223,9 +223,9 @@ public class CopyFilesCommand extends ErrorListXmlCommand<CopyFilesParameter> im
   }
 
   @Override
-  protected CopyFilesParameter popupParams(HttpServletRequest request, CKFinderContext context) throws ConnectorException {
-    CopyFilesParameter param = doInitParam(new CopyFilesParameter(), request, context);
-    param.setCopiedAll(request.getParameter("copied") != null ? Integer.parseInt(request.getParameter("copied")) : 0);
+  protected CopyMoveParameter popupParams(HttpServletRequest request, CKFinderContext context) throws ConnectorException {
+    CopyMoveParameter param = doInitParam(new CopyMoveParameter(), request, context);
+    param.setAll(request.getParameter("copied") != null ? Integer.parseInt(request.getParameter("copied")) : 0);
 
     RequestFileHelper.addFilesListFromRequest(request, param.getFiles(), context);
     return param;

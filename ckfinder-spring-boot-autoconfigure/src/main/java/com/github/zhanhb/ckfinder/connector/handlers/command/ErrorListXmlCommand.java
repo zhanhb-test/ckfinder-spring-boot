@@ -30,12 +30,12 @@ public abstract class ErrorListXmlCommand<T extends ErrorListXmlParameter> exten
           throws ConnectorException {
     Connector.Builder connector = Connector.builder();
     ErrorCode error = getDataForXml(param, context);
-    int errorNum = error != null ? error.getCode() : 0;
+    int errorCode = error != null ? error.getCode() : 0;
     if (param.getType() != null) {
       connector.resourceType(param.getType().getName());
     }
     createCurrentFolderNode(param, connector, context.getAccessControl());
-    createErrorNode(connector, errorNum);
+    createErrorNode(connector, errorCode);
     param.addErrorsTo(connector);
     if (param.isAddResultNode()) {
       addResultNode(connector, param, context);

@@ -16,7 +16,7 @@ import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.Constants;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
-import com.github.zhanhb.ckfinder.connector.handlers.parameter.MoveFilesParameter;
+import com.github.zhanhb.ckfinder.connector.handlers.parameter.CopyMoveParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.MoveFiles;
 import com.github.zhanhb.ckfinder.connector.support.FilePostParam;
@@ -35,18 +35,18 @@ import lombok.extern.slf4j.Slf4j;
  * Class to handle <code>MoveFiles</code> command.
  */
 @Slf4j
-public class MoveFilesCommand extends ErrorListXmlCommand<MoveFilesParameter> implements IPostCommand {
+public class MoveFilesCommand extends ErrorListXmlCommand<CopyMoveParameter> implements IPostCommand {
 
   @Override
-  protected void addResultNode(Connector.Builder rootElement, MoveFilesParameter param, CKFinderContext context) {
+  protected void addResultNode(Connector.Builder rootElement, CopyMoveParameter param, CKFinderContext context) {
     rootElement.result(MoveFiles.builder()
-            .moved(param.getFilesMoved())
-            .movedTotal(param.getMovedAll() + param.getFilesMoved())
+            .moved(param.getNfiles())
+            .movedTotal(param.getAll() + param.getNfiles())
             .build());
   }
 
   @Override
-  protected ErrorCode getDataForXml(MoveFilesParameter param, CKFinderContext context)
+  protected ErrorCode getDataForXml(CopyMoveParameter param, CKFinderContext context)
           throws ConnectorException {
     if (param.getType() == null) {
       throw new ConnectorException(ErrorCode.INVALID_TYPE);
@@ -161,7 +161,7 @@ public class MoveFilesCommand extends ErrorListXmlCommand<MoveFilesParameter> im
         param.appendError(file, ErrorCode.ACCESS_DENIED);
         continue;
       }
-      param.filesMovedPlus();
+      param.increase();
       moveThumb(file, sourceFile.relativize(destFile));
     }
 
@@ -195,7 +195,7 @@ public class MoveFilesCommand extends ErrorListXmlCommand<MoveFilesParameter> im
         // can't be in one if=, because when error in
         // move file occurs then it will be infinity loop
         return newDestFile;
-      } catch (FileAlreadyExistsException ex) {
+      } catch (FileAlreadyExistsException ignored) {
       } catch (IOException ex) {
         return null;
       }
@@ -224,10 +224,10 @@ public class MoveFilesCommand extends ErrorListXmlCommand<MoveFilesParameter> im
   }
 
   @Override
-  protected MoveFilesParameter popupParams(HttpServletRequest request, CKFinderContext context)
+  protected CopyMoveParameter popupParams(HttpServletRequest request, CKFinderContext context)
           throws ConnectorException {
-    MoveFilesParameter param = doInitParam(new MoveFilesParameter(), request, context);
-    param.setMovedAll(request.getParameter("moved") != null ? Integer.parseInt(request.getParameter("moved")) : 0);
+    CopyMoveParameter param = doInitParam(new CopyMoveParameter(), request, context);
+    param.setAll(request.getParameter("moved") != null ? Integer.parseInt(request.getParameter("moved")) : 0);
     RequestFileHelper.addFilesListFromRequest(request, param.getFiles(), context);
     return param;
   }
