@@ -32,7 +32,7 @@ public class QuickUploadCommand extends FileUploadCommand {
   @Override
   protected void handleOnUploadCompleteResponse(Writer writer, String errorMsg, FileUploadParameter param, String path) throws IOException {
     if ("json".equalsIgnoreCase(param.getResponseType())) {
-      handleJSONResponse(writer, errorMsg, null, param);
+      handleJSONResponse(writer, errorMsg, path, param);
     } else {
       ErrorCode errorCode = param.getErrorCode();
       int errorNum = errorCode != null ? errorCode.getCode() : 0;
