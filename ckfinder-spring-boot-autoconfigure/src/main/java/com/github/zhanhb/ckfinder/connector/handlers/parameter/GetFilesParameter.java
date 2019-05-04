@@ -9,7 +9,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class GetFilesParameter extends Parameter {
+public class GetFilesParameter {
 
   /**
    * show thumb post param.

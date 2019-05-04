@@ -9,7 +9,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class DownloadFileParameter extends Parameter {
+public class DownloadFileParameter {
 
   /**
    * filename request param.

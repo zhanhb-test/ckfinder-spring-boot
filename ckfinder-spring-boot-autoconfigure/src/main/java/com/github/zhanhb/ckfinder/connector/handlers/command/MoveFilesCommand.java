@@ -39,7 +39,7 @@ import lombok.extern.slf4j.Slf4j;
 public class MoveFilesCommand extends ErrorListXmlCommand<CopyMoveParameter> implements IPostCommand {
 
   @Override
-  protected void addResultNode(Connector.Builder rootElement, CopyMoveParameter param, CKFinderContext context) {
+  protected void addResultNode(Connector.Builder rootElement, CopyMoveParameter param) {
     rootElement.result(MoveFiles.builder()
             .moved(param.getNfiles())
             .movedTotal(param.getAll() + param.getNfiles())
@@ -47,9 +47,9 @@ public class MoveFilesCommand extends ErrorListXmlCommand<CopyMoveParameter> imp
   }
 
   @Override
-  protected ErrorCode getDataForXml(CopyMoveParameter param, CKFinderContext context)
+  protected ErrorCode getDataForXml(CopyMoveParameter param, CommandContext cmdContext)
           throws ConnectorException {
-    CommandContext cmdContext = param.getContext();
+    CKFinderContext context = cmdContext.getCfCtx();
     cmdContext.checkType();
     cmdContext.checkAllPermission(AccessControl.FILE_RENAME
             | AccessControl.FILE_DELETE
@@ -218,7 +218,7 @@ public class MoveFilesCommand extends ErrorListXmlCommand<CopyMoveParameter> imp
   @Override
   protected CopyMoveParameter popupParams(HttpServletRequest request, CKFinderContext context)
           throws ConnectorException {
-    CopyMoveParameter param = doInitParam(new CopyMoveParameter(), request, context);
+    CopyMoveParameter param = new CopyMoveParameter();
     param.setAll(request.getParameter("moved") != null ? Integer.parseInt(request.getParameter("moved")) : 0);
     RequestFileHelper.addFilesListFromRequest(request, param.getFiles(), context);
     return param;

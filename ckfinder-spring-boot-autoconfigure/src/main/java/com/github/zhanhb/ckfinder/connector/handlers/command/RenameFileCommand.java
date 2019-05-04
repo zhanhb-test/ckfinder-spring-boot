@@ -35,7 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> implements IPostCommand {
 
   @Override
-  protected void addResultNode(Connector.Builder rootElement, RenameFileParameter param, CKFinderContext context) {
+  protected void addResultNode(Connector.Builder rootElement, RenameFileParameter param) {
     RenamedFile.Builder element = RenamedFile.builder().name(param.getFileName());
     if (param.isRenamed()) {
       element.newName(param.getNewFileName());
@@ -52,10 +52,10 @@ public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> 
    * @throws ConnectorException when error occurs
    */
   @Override
-  protected ErrorCode getDataForXml(RenameFileParameter param, CKFinderContext context)
+  protected ErrorCode getDataForXml(RenameFileParameter param, CommandContext cmdContext)
           throws ConnectorException {
     log.trace("getDataForXml");
-    CommandContext cmdContext = param.getContext();
+    CKFinderContext context = cmdContext.getCfCtx();
     cmdContext.checkType();
     cmdContext.checkAllPermission(AccessControl.FILE_RENAME);
 
@@ -98,7 +98,7 @@ public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> 
     try {
       Files.move(file, newFile);
       param.setRenamed(true);
-      renameThumb(param);
+      renameThumb(param, cmdContext);
       return null;
     } catch (NoSuchFileException ex) {
       return ErrorCode.FILE_NOT_FOUND;
@@ -117,8 +117,7 @@ public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> 
    *
    * @param param the parameter
    */
-  private void renameThumb(RenameFileParameter param) {
-    CommandContext cmdContext = param.getContext();
+  private void renameThumb(RenameFileParameter param, CommandContext cmdContext) {
     Path thumbnailPath = cmdContext.getType().getThumbnailPath();
     if (thumbnailPath != null) {
       Path thumbFile = getPath(thumbnailPath, cmdContext.getCurrentFolder(),
@@ -136,7 +135,7 @@ public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> 
   @Override
   protected RenameFileParameter popupParams(HttpServletRequest request, CKFinderContext context)
           throws ConnectorException {
-    RenameFileParameter param = doInitParam(new RenameFileParameter(), request, context);
+    RenameFileParameter param = new RenameFileParameter();
     param.setFileName(request.getParameter("fileName"));
     param.setNewFileName(request.getParameter("newFileName"));
     return param;

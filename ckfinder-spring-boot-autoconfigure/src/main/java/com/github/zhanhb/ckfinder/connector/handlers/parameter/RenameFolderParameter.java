@@ -9,7 +9,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class RenameFolderParameter extends Parameter {
+public class RenameFolderParameter {
 
   private String newFolderName;
   private String newFolderPath;

@@ -43,7 +43,7 @@ public class DownloadFileCommand extends BaseCommand<DownloadFileParameter> {
   @Override
   void execute(DownloadFileParameter param, HttpServletRequest request, HttpServletResponse response, CKFinderContext context)
           throws ConnectorException, IOException {
-    CommandContext cmdContext = param.getContext();
+    CommandContext cmdContext = populateCommandContext(request, context);
     cmdContext.checkType();
     cmdContext.checkAllPermission(AccessControl.FILE_VIEW);
 
@@ -87,7 +87,7 @@ public class DownloadFileCommand extends BaseCommand<DownloadFileParameter> {
   @Override
   protected DownloadFileParameter popupParams(HttpServletRequest request, CKFinderContext context)
           throws ConnectorException {
-    DownloadFileParameter param = doInitParam(new DownloadFileParameter(), request, context);
+    DownloadFileParameter param = new DownloadFileParameter();
     // problem with showing filename when dialog window appear
     param.setFileName(request.getParameter("FileName"));
     return param;

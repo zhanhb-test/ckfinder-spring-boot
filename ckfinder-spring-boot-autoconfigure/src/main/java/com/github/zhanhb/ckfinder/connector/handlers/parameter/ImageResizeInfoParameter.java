@@ -9,7 +9,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class ImageResizeInfoParameter extends Parameter {
+public class ImageResizeInfoParameter {
 
   private int imageWidth;
   private int imageHeight;

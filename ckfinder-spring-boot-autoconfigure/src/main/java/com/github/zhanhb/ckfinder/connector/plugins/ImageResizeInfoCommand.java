@@ -34,8 +34,8 @@ import lombok.extern.slf4j.Slf4j;
 public class ImageResizeInfoCommand extends BaseXmlCommand<ImageResizeInfoParameter> {
 
   @Override
-  protected void createXml(Connector.Builder rootElement, ImageResizeInfoParameter param, CKFinderContext context) throws ConnectorException {
-    CommandContext cmdContext = param.getContext();
+  protected void createXml(Connector.Builder rootElement, ImageResizeInfoParameter param, CommandContext cmdContext) throws ConnectorException {
+    CKFinderContext context = cmdContext.getCfCtx();
     cmdContext.checkType();
 
     cmdContext.checkAllPermission(AccessControl.FILE_VIEW);
@@ -77,7 +77,7 @@ public class ImageResizeInfoCommand extends BaseXmlCommand<ImageResizeInfoParame
   @Override
   protected ImageResizeInfoParameter popupParams(HttpServletRequest request, CKFinderContext context)
           throws ConnectorException {
-    ImageResizeInfoParameter param = doInitParam(new ImageResizeInfoParameter(), request, context);
+    ImageResizeInfoParameter param = new ImageResizeInfoParameter();
     param.setFileName(request.getParameter("fileName"));
     return param;
   }

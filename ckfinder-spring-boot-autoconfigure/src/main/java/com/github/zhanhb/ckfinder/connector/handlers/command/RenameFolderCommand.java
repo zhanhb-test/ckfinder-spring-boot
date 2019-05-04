@@ -41,9 +41,9 @@ public class RenameFolderCommand extends BaseXmlCommand<RenameFolderParameter> i
    * @throws ConnectorException when error occurs
    */
   @Override
-  protected void createXml(Connector.Builder rootElement, RenameFolderParameter param, CKFinderContext context) throws ConnectorException {
+  protected void createXml(Connector.Builder rootElement, RenameFolderParameter param, CommandContext cmdContext) throws ConnectorException {
     checkRequestPath(param.getNewFolderName());
-    CommandContext cmdContext = param.getContext();
+    CKFinderContext context = cmdContext.getCfCtx();
     cmdContext.checkType();
     cmdContext.checkAllPermission(AccessControl.FOLDER_RENAME);
 
@@ -65,7 +65,7 @@ public class RenameFolderCommand extends BaseXmlCommand<RenameFolderParameter> i
     if (!Files.isDirectory(dir)) {
       cmdContext.throwException(ErrorCode.INVALID_REQUEST);
     }
-    setNewFolder(param);
+    param.setNewFolderName(toNewFolder(param.getNewFolderName(), cmdContext));
     Path newDir = getPath(cmdContext.getType().getPath(),
             param.getNewFolderPath());
     if (Files.exists(newDir)) {
@@ -73,7 +73,7 @@ public class RenameFolderCommand extends BaseXmlCommand<RenameFolderParameter> i
     }
     try {
       Files.move(dir, newDir);
-      renameThumb(param);
+      renameThumb(param, cmdContext);
     } catch (IOException ex) {
       cmdContext.throwException(ErrorCode.ACCESS_DENIED);
     }
@@ -89,8 +89,7 @@ public class RenameFolderCommand extends BaseXmlCommand<RenameFolderParameter> i
    *
    * @param param the parameter
    */
-  private void renameThumb(RenameFolderParameter param) {
-    CommandContext cmdContext = param.getContext();
+  private void renameThumb(RenameFolderParameter param, CommandContext cmdContext) {
     Path thumbnailPath = cmdContext.getType().getThumbnailPath();
     if (thumbnailPath != null) {
       Path thumbDir = getPath(thumbnailPath, cmdContext.getCurrentFolder());
@@ -103,16 +102,12 @@ public class RenameFolderCommand extends BaseXmlCommand<RenameFolderParameter> i
   }
 
   /**
-   * sets new folder name.
-   *
-   * @param param the parameter
+   * calculate new folder path.
    */
-  private void setNewFolder(RenameFolderParameter param) {
-    CommandContext cmdContext = param.getContext();
+  private String toNewFolder(String newFolderName, CommandContext cmdContext) {
     String str = cmdContext.getCurrentFolder();
     int index = str.lastIndexOf('/', str.lastIndexOf('/') - 1);
-    String path = PathUtils.addSlashToEnd(str.substring(0, index + 1).concat(param.getNewFolderName()));
-    param.setNewFolderPath(path);
+    return PathUtils.addSlashToEnd(str.substring(0, index + 1).concat(newFolderName));
   }
 
   /**
@@ -123,7 +118,7 @@ public class RenameFolderCommand extends BaseXmlCommand<RenameFolderParameter> i
    */
   @Override
   protected RenameFolderParameter popupParams(HttpServletRequest request, CKFinderContext context) throws ConnectorException {
-    RenameFolderParameter param = doInitParam(new RenameFolderParameter(), request, context);
+    RenameFolderParameter param = new RenameFolderParameter();
     param.setNewFolderName(request.getParameter("NewFolderName"));
     return param;
   }

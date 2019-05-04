@@ -2,7 +2,6 @@ package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
-import com.github.zhanhb.ckfinder.connector.handlers.parameter.Parameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.CurrentFolder;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Error;
@@ -19,7 +18,7 @@ import javax.servlet.http.HttpServletResponse;
  * @param <T> parameter type
  */
 @SuppressWarnings("FinalMethod")
-public abstract class XmlCommand<T extends Parameter> extends BaseCommand<T> {
+public abstract class XmlCommand<T> extends BaseCommand<T> {
 
   /**
    * executes XML command. Creates XML response and writes it to response output
@@ -35,7 +34,8 @@ public abstract class XmlCommand<T extends Parameter> extends BaseCommand<T> {
   @Override
   final void execute(T param, HttpServletRequest request, HttpServletResponse response,
           CKFinderContext context) throws IOException, ConnectorException {
-    Connector connector = buildConnector(param, context);
+    CommandContext cmdContext = populateCommandContext(request, context);
+    Connector connector = buildConnector(param, cmdContext);
     String result = XmlCreator.INSTANCE.toString(connector);
 
     response.setContentType("text/xml;charset=UTF-8");
@@ -45,7 +45,7 @@ public abstract class XmlCommand<T extends Parameter> extends BaseCommand<T> {
     }
   }
 
-  abstract Connector buildConnector(T param, CKFinderContext context)
+  abstract Connector buildConnector(T param, CommandContext cmdContext)
           throws ConnectorException;
 
   final void createErrorNode(Connector.Builder rootElement, int code) {

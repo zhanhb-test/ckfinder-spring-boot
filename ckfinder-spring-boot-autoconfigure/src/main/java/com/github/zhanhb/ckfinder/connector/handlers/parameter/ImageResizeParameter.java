@@ -13,7 +13,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @SuppressWarnings({"AssignmentToCollectionOrArrayFieldFromParameter", "ReturnOfCollectionOrArrayField"})
-public class ImageResizeParameter extends Parameter {
+public class ImageResizeParameter {
 
   /**
    * file name

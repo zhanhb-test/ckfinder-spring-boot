@@ -40,10 +40,10 @@ public class CreateFolderCommand extends BaseXmlCommand<CreateFolderParameter> i
    * @throws ConnectorException when error occurs
    */
   @Override
-  protected void createXml(Connector.Builder rootElement, CreateFolderParameter param, CKFinderContext context) throws ConnectorException {
+  protected void createXml(Connector.Builder rootElement, CreateFolderParameter param, CommandContext cmdContext) throws ConnectorException {
     checkRequestPath(param.getNewFolderName());
 
-    CommandContext cmdContext = param.getContext();
+    CKFinderContext context = cmdContext.getCfCtx();
     cmdContext.checkType();
     cmdContext.checkAllPermission(AccessControl.FOLDER_CREATE);
 
@@ -80,7 +80,7 @@ public class CreateFolderCommand extends BaseXmlCommand<CreateFolderParameter> i
   @Override
   protected CreateFolderParameter popupParams(HttpServletRequest request, CKFinderContext context)
           throws ConnectorException {
-    CreateFolderParameter param = doInitParam(new CreateFolderParameter(), request, context);
+    CreateFolderParameter param = new CreateFolderParameter();
     param.setNewFolderName(request.getParameter("NewFolderName"));
     return param;
   }

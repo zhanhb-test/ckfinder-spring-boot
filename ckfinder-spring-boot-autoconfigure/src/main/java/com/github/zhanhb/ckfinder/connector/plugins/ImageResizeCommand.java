@@ -40,8 +40,8 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> imp
   }
 
   @Override
-  protected void createXml(Connector.Builder rootElement, ImageResizeParameter param, CKFinderContext context) throws ConnectorException {
-    CommandContext cmdContext = param.getContext();
+  protected void createXml(Connector.Builder rootElement, ImageResizeParameter param, CommandContext cmdContext) throws ConnectorException {
+    CKFinderContext context = cmdContext.getCfCtx();
     cmdContext.checkType();
     cmdContext.checkAllPermission(AccessControl.FILE_DELETE | AccessControl.FILE_UPLOAD);
 
@@ -128,7 +128,7 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> imp
   @Override
   @SuppressWarnings("CollectionWithoutInitialCapacity")
   protected ImageResizeParameter popupParams(HttpServletRequest request, CKFinderContext context) throws ConnectorException {
-    ImageResizeParameter param = doInitParam(new ImageResizeParameter(), request, context);
+    ImageResizeParameter param = new ImageResizeParameter();
     param.setFileName(request.getParameter("fileName"));
     param.setNewFileName(request.getParameter("newFileName"));
     param.setOverwrite(request.getParameter("overwrite"));

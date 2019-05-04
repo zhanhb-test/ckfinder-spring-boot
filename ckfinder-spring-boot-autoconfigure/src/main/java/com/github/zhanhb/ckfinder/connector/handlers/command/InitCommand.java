@@ -50,13 +50,13 @@ public class InitCommand extends XmlCommand<InitParameter> {
   private static final char[] hexChars = "0123456789abcdef".toCharArray();
 
   @Override
-  Connector buildConnector(InitParameter param, CKFinderContext context) {
+  Connector buildConnector(InitParameter param, CommandContext cmdContext) {
     Connector.Builder rootElement = Connector.builder();
-    CommandContext cmdContext = param.getContext();
+    CKFinderContext context = cmdContext.getCfCtx();
     cmdContext.setResourceType(rootElement);
     createErrorNode(rootElement, 0);
     createConnectorData(rootElement, param.getHost(), context);
-    createResouceTypesData(rootElement, param.getContext(), context);
+    createResouceTypesData(rootElement, cmdContext, context);
     createPluginsData(rootElement, context);
     return rootElement.build();
   }
@@ -208,7 +208,7 @@ public class InitCommand extends XmlCommand<InitParameter> {
   @Override
   protected InitParameter popupParams(HttpServletRequest request, CKFinderContext context)
           throws ConnectorException {
-    InitParameter param = doInitParam(new InitParameter(), request, context);
+    InitParameter param = new InitParameter();
     param.setHost(request.getServerName());
     return param;
   }

@@ -55,14 +55,13 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
   @Override
   protected GetFilesParameter popupParams(HttpServletRequest request, CKFinderContext context)
           throws ConnectorException {
-    GetFilesParameter param = doInitParam(new GetFilesParameter(), request, context);
+    GetFilesParameter param = new GetFilesParameter();
     param.setShowThumbs(request.getParameter("showThumbs"));
     return param;
   }
 
   @Override
-  protected void createXml(Connector.Builder rootElement, GetFilesParameter param, CKFinderContext context) throws ConnectorException {
-    CommandContext cmdContext = param.getContext();
+  protected void createXml(Connector.Builder rootElement, GetFilesParameter param, CommandContext cmdContext) throws ConnectorException {
     cmdContext.checkType();
     cmdContext.checkAllPermission(AccessControl.FILE_VIEW);
 
@@ -74,7 +73,7 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
 
     try {
       List<Path> files = FileUtils.listChildren(dir, false);
-      createFilesData(files, rootElement, param, context);
+      createFilesData(files, rootElement, param, cmdContext);
     } catch (IOException e) {
       log.error("", e);
       cmdContext.throwException(ErrorCode.ACCESS_DENIED);
@@ -89,9 +88,9 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
    * @param param the parameter
    * @param context ckfinder context
    */
-  private void createFilesData(List<Path> list, Connector.Builder rootElement, GetFilesParameter param, CKFinderContext context) {
+  private void createFilesData(List<Path> list, Connector.Builder rootElement, GetFilesParameter param, CommandContext cmdContext) {
+    CKFinderContext context = cmdContext.getCfCtx();
     com.github.zhanhb.ckfinder.connector.handlers.response.Files.Builder files = com.github.zhanhb.ckfinder.connector.handlers.response.Files.builder();
-    CommandContext cmdContext = param.getContext();
     for (Path file : list) {
       String fileName = file.getFileName().toString();
       if (!FileUtils.isFileExtensionAllowed(fileName, cmdContext.getType())) {
@@ -110,7 +109,7 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
               .name(file.getFileName().toString())
               .date(FileUtils.parseLastModifiedDate(attrs))
               .size(getSizeInKB(attrs).longValue())
-              .thumb(createThumbAttr(file, param, context))
+              .thumb(createThumbAttr(file, param, cmdContext))
               .build());
     }
     rootElement.result(files.build());
@@ -124,9 +123,8 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
    * @param context ckfinder context
    * @return thumb attribute values
    */
-  private String createThumbAttr(Path file, GetFilesParameter param, CKFinderContext context) {
-    CommandContext cmdContext = param.getContext();
-    if (ImageUtils.isImageExtension(file) && isAddThumbsAttr(param, context.getThumbnail())) {
+  private String createThumbAttr(Path file, GetFilesParameter param, CommandContext cmdContext) {
+    if (ImageUtils.isImageExtension(file) && isAddThumbsAttr(param, cmdContext.getCfCtx().getThumbnail())) {
       Path thumbFile = getPath(cmdContext.getType().getThumbnailPath(), cmdContext.getCurrentFolder(),
               file.getFileName().toString());
       if (Files.exists(thumbFile)) {

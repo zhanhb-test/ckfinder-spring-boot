@@ -66,26 +66,20 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
   final void execute(FileUploadParameter param, HttpServletRequest request,
           HttpServletResponse response, CKFinderContext context) throws IOException {
     String errorMsg = "";
+    String path = "";
     try {
-      checkParam(param); // set in method initParams
-      uploadFile(request, param, context);
-      param.setUploaded(true);
+      CommandContext cmdContext = populateCommandContext(request, context);
+      cmdContext.checkType();
+      uploadFile(request, param, cmdContext);
       checkParam(param); // set in method uploadFile
+      path = cmdContext.getType().getUrl() + cmdContext.getCurrentFolder();
     } catch (ConnectorException ex) {
       param.setErrorCode(ex.getErrorCode());
       errorMsg = ex.getMessage();
+      param.setNewFileName("");
     }
     errorMsg = errorMsg.replace("%1", param.getNewFileName());
-    String path = "";
 
-    CommandContext cmdContext = param.getContext();
-    if (!param.isUploaded()) {
-      cmdContext = cmdContext.toBuilder().currentFolder("").build();
-      param.setNewFileName("");
-      param.setContext(cmdContext);
-    } else {
-      path = cmdContext.getType().getUrl() + cmdContext.getCurrentFolder();
-    }
     setContentType(param, response);
     PrintWriter writer = response.getWriter();
     if ("txt".equals(param.getResponseType())) {
@@ -93,7 +87,7 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
     } else if (checkFuncNum(param)) {
       handleOnUploadCompleteCallFuncResponse(writer, errorMsg, path, param);
     } else {
-      handleOnUploadCompleteResponse(writer, errorMsg, param);
+      handleOnUploadCompleteResponse(writer, errorMsg, param, path);
     }
     writer.flush();
   }
@@ -133,7 +127,7 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
    * @param param the parameter
    * @throws IOException when IO Exception occurs.
    */
-  protected void handleOnUploadCompleteResponse(Writer writer, String errorMsg, FileUploadParameter param) throws IOException {
+  protected void handleOnUploadCompleteResponse(Writer writer, String errorMsg, FileUploadParameter param, String path) throws IOException {
     writer.write("<script type=\"text/javascript\">window.parent.OnUploadCompleted('" + FileUtils.escapeJavaScript(param.getNewFileName()) + "', '"
             + (param.getErrorCode()
             != null ? errorMsg
@@ -150,21 +144,10 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
   @Override
   protected FileUploadParameter popupParams(HttpServletRequest request, CKFinderContext context) {
     FileUploadParameter param = new FileUploadParameter();
-    try {
-      doInitParam(param, request, context);
-    } catch (ConnectorException ex) {
-      param.setErrorCode(ex.getErrorCode());
-    }
     param.setCkFinderFuncNum(request.getParameter("CKFinderFuncNum"));
     param.setCkEditorFuncNum(request.getParameter("CKEditorFuncNum"));
     param.setResponseType(request.getParameter("response_type") != null ? request.getParameter("response_type") : request.getParameter("responseType"));
     param.setLangCode(request.getParameter("langCode"));
-    CommandContext cmdContext = param.getContext();
-    try {
-      cmdContext.checkType();
-    } catch (ConnectorException ex) {
-      param.setErrorCode(ex.getErrorCode());
-    }
     return param;
   }
 
@@ -177,10 +160,9 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
    * @throws ConnectorException when error occurs
    */
   private void uploadFile(HttpServletRequest request, FileUploadParameter param,
-          CKFinderContext context) throws ConnectorException {
-    CommandContext cmdContext = param.getContext();
+          CommandContext cmdContext) throws ConnectorException {
     cmdContext.checkAllPermission(AccessControl.FILE_UPLOAD);
-    fileUpload(request, param, context);
+    fileUpload(request, param, cmdContext);
   }
 
   /**
@@ -191,8 +173,7 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
    * @throws ConnectorException when error occurs
    */
   private void fileUpload(HttpServletRequest request, FileUploadParameter param,
-          CKFinderContext context) throws ConnectorException {
-    CommandContext cmdContext = param.getContext();
+          CommandContext cmdContext) throws ConnectorException {
     MultipartResolver multipartResolver = StandardHolder.RESOLVER;
     try {
       boolean multipart = multipartResolver.isMultipart(request);
@@ -207,8 +188,8 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
             Path path = getPath(cmdContext.getType().getPath(),
                     cmdContext.getCurrentFolder());
             param.setFileName(getFileItemName(part));
-            validateUploadItem(part, path, param, context);
-            saveTemporaryFile(path, part, param, context);
+            validateUploadItem(part, path, param, cmdContext);
+            saveTemporaryFile(path, part, param, cmdContext);
             return;
           }
         } finally {
@@ -235,9 +216,10 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
    * @throws IOException when IO Exception occurs.
    * @throws ConnectorException when error occurs
    */
-  private void saveTemporaryFile(Path path, MultipartFile item, FileUploadParameter param, CKFinderContext context)
+  private void saveTemporaryFile(Path path, MultipartFile item,
+          FileUploadParameter param, CommandContext cmdContext)
           throws IOException, ConnectorException {
-    CommandContext cmdContext = param.getContext();
+    CKFinderContext context = cmdContext.getCfCtx();
     Path file = getPath(path, param.getNewFileName());
 
     if (ImageUtils.isImageExtension(file)) {
@@ -301,8 +283,8 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
    * @throws ConnectorException when error occurs
    */
   private void validateUploadItem(MultipartFile item, Path path,
-          FileUploadParameter param, CKFinderContext context) throws ConnectorException {
-    CommandContext cmdContext = param.getContext();
+          FileUploadParameter param, CommandContext cmdContext) throws ConnectorException {
+    CKFinderContext context = cmdContext.getCfCtx();
     if (item.getOriginalFilename() == null || item.getOriginalFilename().length() <= 0) {
       param.throwException(ErrorCode.UPLOADED_INVALID);
     }

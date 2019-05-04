@@ -9,7 +9,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class ThumbnailParameter extends Parameter {
+public class ThumbnailParameter {
 
   /**
    * File name.

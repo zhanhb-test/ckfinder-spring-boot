@@ -11,7 +11,6 @@
  */
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
-import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.ErrorListXmlParameter;
@@ -27,18 +26,17 @@ public abstract class ErrorListXmlCommand<T extends ErrorListXmlParameter> exten
 
   @Override
   @SuppressWarnings("FinalMethod")
-  final Connector buildConnector(T param, CKFinderContext context)
+  final Connector buildConnector(T param, CommandContext cmdContext)
           throws ConnectorException {
     Connector.Builder connector = Connector.builder();
-    ErrorCode error = getDataForXml(param, context);
+    ErrorCode error = getDataForXml(param, cmdContext);
     int errorCode = error != null ? error.getCode() : 0;
-    CommandContext cmdContext = param.getContext();
     cmdContext.setResourceType(connector);
     createCurrentFolderNode(cmdContext, connector);
     createErrorNode(connector, errorCode);
     param.addErrorsTo(connector);
     if (param.isAddResultNode()) {
-      addResultNode(connector, param, context);
+      addResultNode(connector, param);
     }
     return connector.build();
   }
@@ -50,7 +48,7 @@ public abstract class ErrorListXmlCommand<T extends ErrorListXmlParameter> exten
    * @param param the parameter
    * @param context ckfinder context
    */
-  protected abstract void addResultNode(Connector.Builder rootElement, T param, CKFinderContext context);
+  protected abstract void addResultNode(Connector.Builder rootElement, T param);
 
   /**
    * gets all necessary data to create XML response.
@@ -62,6 +60,6 @@ public abstract class ErrorListXmlCommand<T extends ErrorListXmlParameter> exten
    * occurred.
    * @throws ConnectorException when error occurs
    */
-  protected abstract ErrorCode getDataForXml(T param, CKFinderContext context) throws ConnectorException;
+  protected abstract ErrorCode getDataForXml(T param, CommandContext cmdContext) throws ConnectorException;
 
 }

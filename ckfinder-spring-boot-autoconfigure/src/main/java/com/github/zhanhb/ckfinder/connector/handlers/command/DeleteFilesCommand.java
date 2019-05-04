@@ -35,7 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 public class DeleteFilesCommand extends ErrorListXmlCommand<DeleteFilesParameter> implements IPostCommand {
 
   @Override
-  protected void addResultNode(Connector.Builder rootElement, DeleteFilesParameter param, CKFinderContext context) {
+  protected void addResultNode(Connector.Builder rootElement, DeleteFilesParameter param) {
     rootElement.result(DeleteFiles.builder()
             .deleted(param.getFilesDeleted())
             .build());
@@ -50,9 +50,9 @@ public class DeleteFilesCommand extends ErrorListXmlCommand<DeleteFilesParameter
    * @throws ConnectorException when error occurs
    */
   @Override
-  protected ErrorCode getDataForXml(DeleteFilesParameter param, CKFinderContext context)
+  protected ErrorCode getDataForXml(DeleteFilesParameter param, CommandContext cmdContext)
           throws ConnectorException {
-    CommandContext cmdContext = param.getContext();
+    CKFinderContext context = cmdContext.getCfCtx();
     cmdContext.checkType();
 
     for (FilePostParam fileItem : param.getFiles()) {
@@ -132,7 +132,7 @@ public class DeleteFilesCommand extends ErrorListXmlCommand<DeleteFilesParameter
    */
   @Override
   protected DeleteFilesParameter popupParams(HttpServletRequest request, CKFinderContext context) throws ConnectorException {
-    DeleteFilesParameter param = doInitParam(new DeleteFilesParameter(), request, context);
+    DeleteFilesParameter param = new DeleteFilesParameter();
     RequestFileHelper.addFilesListFromRequest(request, param.getFiles(), context);
     return param;
   }

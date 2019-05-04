@@ -15,7 +15,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.FileUploadParameter;
-import com.github.zhanhb.ckfinder.connector.support.CommandContext;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import java.io.IOException;
 import java.io.Writer;
@@ -23,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+import org.springframework.util.StringUtils;
 
 /**
  * Class to handle <code>QuickUpload</code> command.
@@ -30,17 +30,16 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 public class QuickUploadCommand extends FileUploadCommand {
 
   @Override
-  protected void handleOnUploadCompleteResponse(Writer writer, String errorMsg, FileUploadParameter param) throws IOException {
-    CommandContext cmdContext = param.getContext();
+  protected void handleOnUploadCompleteResponse(Writer writer, String errorMsg, FileUploadParameter param, String path) throws IOException {
     if ("json".equalsIgnoreCase(param.getResponseType())) {
       handleJSONResponse(writer, errorMsg, null, param);
     } else {
       ErrorCode errorCode = param.getErrorCode();
       int errorNum = errorCode != null ? errorCode.getCode() : 0;
+      boolean success = !StringUtils.isEmpty(path);
       writer.write("<script type=\"text/javascript\">window.parent.OnUploadCompleted(" + errorNum + ", '");
-      if (param.isUploaded()) {
-        writer.write(cmdContext.getType().getUrl()
-                + cmdContext.getCurrentFolder()
+      if (success) {
+        writer.write(path
                 + FileUtils.escapeJavaScript(FileUtils.encodeURIComponent(param.getNewFileName()))
                 + "', '" + FileUtils.escapeJavaScript(param.getNewFileName()));
       } else {
@@ -88,23 +87,16 @@ public class QuickUploadCommand extends FileUploadCommand {
    * @param param the parameter
    * @throws IOException when IO Exception occurs.
    */
-  private void handleJSONResponse(Writer writer, String errorMsg, String path, FileUploadParameter param) throws IOException {
-    CommandContext cmdContext = param.getContext();
+  private void handleJSONResponse(Writer writer, String errorMsg, String path,
+          FileUploadParameter param) throws IOException {
     Map<String, Object> jsonObj = new HashMap<>(6);
 
+    boolean success = !StringUtils.isEmpty(path);
     jsonObj.put("fileName", param.getNewFileName());
-    jsonObj.put("uploaded", param.isUploaded() ? 1 : 0);
+    jsonObj.put("uploaded", success ? 1 : 0);
 
-    if (param.isUploaded()) {
-      if (path != null && !path.isEmpty()) {
-        jsonObj.put("url", path + FileUtils.escapeJavaScript(FileUtils.encodeURIComponent(param.getNewFileName())));
-      } else {
-        jsonObj.put("url",
-                cmdContext.getType().getUrl()
-                + cmdContext.getCurrentFolder()
-                + FileUtils.escapeJavaScript(FileUtils
-                        .encodeURIComponent(param.getNewFileName())));
-      }
+    if (success) {
+      jsonObj.put("url", path + FileUtils.escapeJavaScript(FileUtils.encodeURIComponent(param.getNewFileName())));
     }
 
     if (errorMsg != null && !errorMsg.isEmpty()) {

@@ -40,7 +40,7 @@ public class ThumbnailCommand extends BaseCommand<ThumbnailParameter> {
   @SuppressWarnings("FinalMethod")
   final void execute(ThumbnailParameter param, HttpServletRequest request, HttpServletResponse response, CKFinderContext context)
           throws ConnectorException {
-    CommandContext cmdContext = param.getContext();
+    CommandContext cmdContext = populateCommandContext(request, context);
     if (context.getThumbnail() == null) {
       cmdContext.throwException(ErrorCode.THUMBNAILS_DISABLED);
     }
@@ -106,7 +106,7 @@ public class ThumbnailCommand extends BaseCommand<ThumbnailParameter> {
   @Override
   protected ThumbnailParameter popupParams(HttpServletRequest request, CKFinderContext context)
           throws ConnectorException {
-    ThumbnailParameter param = doInitParam(new ThumbnailParameter(), request, context);
+    ThumbnailParameter param = new ThumbnailParameter();
     param.setFileName(request.getParameter("FileName"));
     return param;
   }

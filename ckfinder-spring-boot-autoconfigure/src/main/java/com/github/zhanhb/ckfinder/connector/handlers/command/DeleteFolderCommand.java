@@ -31,8 +31,8 @@ import lombok.extern.slf4j.Slf4j;
 public class DeleteFolderCommand extends BaseXmlCommand<ErrorListXmlParameter> implements IPostCommand {
 
   @Override
-  protected void createXml(Connector.Builder rootElement, ErrorListXmlParameter param, CKFinderContext context) throws ConnectorException {
-    CommandContext cmdContext = param.getContext();
+  protected void createXml(Connector.Builder rootElement, ErrorListXmlParameter param, CommandContext cmdContext) throws ConnectorException {
+    CKFinderContext context = cmdContext.getCfCtx();
     cmdContext.checkType();
     cmdContext.checkAllPermission(AccessControl.FOLDER_DELETE);
 
@@ -63,7 +63,7 @@ public class DeleteFolderCommand extends BaseXmlCommand<ErrorListXmlParameter> i
 
   @Override
   protected ErrorListXmlParameter popupParams(HttpServletRequest request, CKFinderContext context) throws ConnectorException {
-    return doInitParam(new ErrorListXmlParameter(), request, context);
+    return new ErrorListXmlParameter();
   }
 
 }

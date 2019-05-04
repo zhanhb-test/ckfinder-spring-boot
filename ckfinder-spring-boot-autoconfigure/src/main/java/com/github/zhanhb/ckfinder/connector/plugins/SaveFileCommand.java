@@ -32,8 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 public class SaveFileCommand extends BaseXmlCommand<SaveFileParameter> implements IPostCommand {
 
   @Override
-  protected void createXml(Connector.Builder rootElement, SaveFileParameter param, CKFinderContext context) throws ConnectorException {
-    CommandContext cmdContext = param.getContext();
+  protected void createXml(Connector.Builder rootElement, SaveFileParameter param, CommandContext cmdContext) throws ConnectorException {
     cmdContext.checkType();
 
     cmdContext.checkAllPermission(AccessControl.FILE_DELETE);
@@ -70,12 +69,11 @@ public class SaveFileCommand extends BaseXmlCommand<SaveFileParameter> implement
   }
 
   @Override
-  protected SaveFileParameter popupParams(HttpServletRequest request, CKFinderContext context)
-          throws ConnectorException {
-    SaveFileParameter param = doInitParam(new SaveFileParameter(), request, context);
-    param.setFileContent(request.getParameter("content"));
-    param.setFileName(request.getParameter("fileName"));
-    return param;
+  protected SaveFileParameter popupParams(HttpServletRequest request, CKFinderContext context) {
+    return SaveFileParameter.builder()
+            .fileContent(request.getParameter("content"))
+            .fileName(request.getParameter("fileName"))
+            .build();
   }
 
 }

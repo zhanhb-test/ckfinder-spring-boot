@@ -17,7 +17,6 @@ import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.Constants;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.api.ResourceType;
-import com.github.zhanhb.ckfinder.connector.handlers.parameter.Parameter;
 import com.github.zhanhb.ckfinder.connector.support.CommandContext;
 import com.github.zhanhb.ckfinder.connector.utils.PathUtils;
 import java.io.IOException;
@@ -34,7 +33,7 @@ import org.springframework.util.StringUtils;
  *
  * @param <T> parameter type
  */
-public abstract class BaseCommand<T extends Parameter> implements Command {
+public abstract class BaseCommand<T> implements Command {
 
   /**
    * check request for security issue.
@@ -60,7 +59,8 @@ public abstract class BaseCommand<T extends Parameter> implements Command {
 
   protected abstract T popupParams(HttpServletRequest request, CKFinderContext context) throws ConnectorException;
 
-  private CommandContext populateCommandContext(HttpServletRequest request,
+  @SuppressWarnings("FinalMethod")
+  protected final CommandContext populateCommandContext(HttpServletRequest request,
           CKFinderContext context) throws ConnectorException {
     checkConnectorEnabled(context);
     String userRole = getUserRole(request, context);
@@ -80,23 +80,6 @@ public abstract class BaseCommand<T extends Parameter> implements Command {
     }
     return CommandContext.builder().cfCtx(context).userRole(userRole)
             .currentFolder(currentFolder).type(type).build();
-  }
-
-  /**
-   * initialize params for command handler.
-   *
-   * @param <P> parameter type
-   * @param param the parameter
-   * @param request request
-   * @param context ckfinder context
-   * @return the parameter
-   * @throws ConnectorException to handle in error handler.
-   */
-  @SuppressWarnings("FinalMethod")
-  protected final <P extends Parameter> P doInitParam(P param, HttpServletRequest request,
-          CKFinderContext context) throws ConnectorException {
-    param.setContext(populateCommandContext(request, context));
-    return param;
   }
 
   /**

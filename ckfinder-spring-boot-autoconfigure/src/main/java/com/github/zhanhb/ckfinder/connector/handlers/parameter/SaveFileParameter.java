@@ -1,17 +1,17 @@
 package com.github.zhanhb.ckfinder.connector.handlers.parameter;
 
+import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 
 /**
  *
  * @author zhanhb
  */
+@Builder
 @Getter
-@Setter
-public class SaveFileParameter extends Parameter {
+public class SaveFileParameter {
 
-  private String fileName;
-  private String fileContent;
+  private final String fileName;
+  private final String fileContent;
 
 }

@@ -13,7 +13,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class FileUploadParameter extends Parameter {
+public class FileUploadParameter {
 
   /**
    * Uploading file name request.
@@ -39,10 +39,6 @@ public class FileUploadParameter extends Parameter {
    * Language (locale) code.
    */
   private String langCode;
-  /**
-   * Flag informing if file was uploaded correctly.
-   */
-  private boolean uploaded;
   /**
    * Error code number.
    */

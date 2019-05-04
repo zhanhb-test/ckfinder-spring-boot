@@ -15,7 +15,6 @@ import com.github.zhanhb.ckfinder.connector.api.AccessControl;
 import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
-import com.github.zhanhb.ckfinder.connector.handlers.parameter.Parameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Folder;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Folders;
@@ -33,11 +32,11 @@ import lombok.extern.slf4j.Slf4j;
  * location command.
  */
 @Slf4j
-public class GetFoldersCommand extends BaseXmlCommand<Parameter> {
+public class GetFoldersCommand extends BaseXmlCommand<Void> {
 
   @Override
-  protected void createXml(Connector.Builder rootElement, Parameter param, CKFinderContext context) throws ConnectorException {
-    CommandContext cmdContext = param.getContext();
+  protected void createXml(Connector.Builder rootElement, Void param, CommandContext cmdContext) throws ConnectorException {
+    CKFinderContext context = cmdContext.getCfCtx();
     cmdContext.checkType();
     cmdContext.checkAllPermission(AccessControl.FOLDER_VIEW);
 
@@ -53,7 +52,7 @@ public class GetFoldersCommand extends BaseXmlCommand<Parameter> {
 
     try {
       List<Path> directories = FileUtils.listChildren(dir, true);
-      createFoldersData(rootElement, param, context, directories);
+      createFoldersData(rootElement, cmdContext, directories);
     } catch (IOException e) {
       log.error("", e);
       cmdContext.throwException(ErrorCode.ACCESS_DENIED);
@@ -68,8 +67,8 @@ public class GetFoldersCommand extends BaseXmlCommand<Parameter> {
    * @param context ckfinder context
    * @param directories list of children folder
    */
-  private void createFoldersData(Connector.Builder rootElement, Parameter param, CKFinderContext context, List<Path> directories) {
-    CommandContext cmdContext = param.getContext();
+  private void createFoldersData(Connector.Builder rootElement, CommandContext cmdContext, List<Path> directories) {
+    CKFinderContext context = cmdContext.getCfCtx();
     Folders.Builder folders = Folders.builder();
     for (Path dir : directories) {
       String dirName = dir.getFileName().toString();
@@ -96,8 +95,8 @@ public class GetFoldersCommand extends BaseXmlCommand<Parameter> {
   }
 
   @Override
-  protected Parameter popupParams(HttpServletRequest request, CKFinderContext context) throws ConnectorException {
-    return doInitParam(new Parameter(), request, context);
+  protected Void popupParams(HttpServletRequest request, CKFinderContext context) throws ConnectorException {
+    return null;
   }
 
 }

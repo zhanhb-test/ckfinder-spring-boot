@@ -9,7 +9,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class InitParameter extends Parameter {
+public class InitParameter {
 
   private String host;
 

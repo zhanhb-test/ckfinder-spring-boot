@@ -10,7 +10,7 @@ import com.github.zhanhb.ckfinder.connector.support.FilePostParam;
  *
  * @author zhanhb
  */
-public class ErrorListXmlParameter extends Parameter {
+public class ErrorListXmlParameter {
 
   /**
    *
