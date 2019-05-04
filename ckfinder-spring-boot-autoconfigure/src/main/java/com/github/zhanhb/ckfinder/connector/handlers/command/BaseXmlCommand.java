@@ -39,7 +39,7 @@ public abstract class BaseXmlCommand<T> extends XmlCommand<T> {
    *
    * @param rootElement XML root node
    * @param param the parameter
-   * @param context ckfinder context
+   * @param cmdContext command context
    * @throws ConnectorException when error occurs
    */
   protected abstract void createXml(Connector.Builder rootElement, T param, CommandContext cmdContext) throws ConnectorException;

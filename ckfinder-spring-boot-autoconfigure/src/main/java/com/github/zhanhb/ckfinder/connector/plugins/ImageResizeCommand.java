@@ -127,7 +127,7 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> imp
 
   @Override
   @SuppressWarnings("CollectionWithoutInitialCapacity")
-  protected ImageResizeParameter popupParams(HttpServletRequest request, CKFinderContext context) throws ConnectorException {
+  protected ImageResizeParameter popupParams(HttpServletRequest request, CKFinderContext context) {
     ImageResizeParameter param = new ImageResizeParameter();
     param.setFileName(request.getParameter("fileName"));
     param.setNewFileName(request.getParameter("newFileName"));

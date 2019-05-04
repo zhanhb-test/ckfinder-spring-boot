@@ -15,7 +15,6 @@ import com.github.zhanhb.ckfinder.connector.api.AccessControl;
 import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
-import com.github.zhanhb.ckfinder.connector.handlers.parameter.ThumbnailParameter;
 import com.github.zhanhb.ckfinder.connector.support.CommandContext;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import com.github.zhanhb.ckfinder.connector.utils.ImageUtils;
@@ -34,11 +33,11 @@ import lombok.extern.slf4j.Slf4j;
  * command.
  */
 @Slf4j
-public class ThumbnailCommand extends BaseCommand<ThumbnailParameter> {
+public class ThumbnailCommand extends BaseCommand<String> {
 
   @Override
   @SuppressWarnings("FinalMethod")
-  final void execute(ThumbnailParameter param, HttpServletRequest request, HttpServletResponse response, CKFinderContext context)
+  final void execute(String fileName, HttpServletRequest request, HttpServletResponse response, CKFinderContext context)
           throws ConnectorException {
     CommandContext cmdContext = populateCommandContext(request, context);
     if (context.getThumbnail() == null) {
@@ -48,11 +47,11 @@ public class ThumbnailCommand extends BaseCommand<ThumbnailParameter> {
     cmdContext.checkType();
     cmdContext.checkAllPermission(AccessControl.FILE_VIEW);
 
-    if (!FileUtils.isFileNameValid(param.getFileName())) {
+    if (!FileUtils.isFileNameValid(fileName)) {
       cmdContext.throwException(ErrorCode.INVALID_REQUEST);
     }
 
-    if (context.isFileHidden(param.getFileName())) {
+    if (context.isFileHidden(fileName)) {
       cmdContext.throwException(ErrorCode.FILE_NOT_FOUND);
     }
 
@@ -65,12 +64,12 @@ public class ThumbnailCommand extends BaseCommand<ThumbnailParameter> {
     } catch (IOException e) {
       throw new ConnectorException(ErrorCode.ACCESS_DENIED, e);
     }
-    Path thumbFile = getPath(fullCurrentPath, param.getFileName());
+    Path thumbFile = getPath(fullCurrentPath, fileName);
     log.debug("thumbFile: {}", thumbFile);
 
     if (!Files.exists(thumbFile)) {
       Path originFile = getPath(cmdContext.getType().getPath(),
-              cmdContext.getCurrentFolder(), param.getFileName());
+              cmdContext.getCurrentFolder(), fileName);
       log.debug("orginFile: {}", originFile);
       if (!Files.exists(originFile)) {
         cmdContext.throwException(ErrorCode.FILE_NOT_FOUND);
@@ -104,11 +103,8 @@ public class ThumbnailCommand extends BaseCommand<ThumbnailParameter> {
   }
 
   @Override
-  protected ThumbnailParameter popupParams(HttpServletRequest request, CKFinderContext context)
-          throws ConnectorException {
-    ThumbnailParameter param = new ThumbnailParameter();
-    param.setFileName(request.getParameter("FileName"));
-    return param;
+  protected String popupParams(HttpServletRequest request, CKFinderContext context) {
+    return request.getParameter("FileName");
   }
 
   @SuppressWarnings("UtilityClassWithoutPrivateConstructor")

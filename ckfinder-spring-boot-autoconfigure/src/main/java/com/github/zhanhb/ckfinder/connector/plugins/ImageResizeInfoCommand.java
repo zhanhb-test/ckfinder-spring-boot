@@ -16,7 +16,6 @@ import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.handlers.command.BaseXmlCommand;
-import com.github.zhanhb.ckfinder.connector.handlers.parameter.ImageResizeInfoParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.ImageInfo;
 import com.github.zhanhb.ckfinder.connector.support.CommandContext;
@@ -31,28 +30,28 @@ import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class ImageResizeInfoCommand extends BaseXmlCommand<ImageResizeInfoParameter> {
+public class ImageResizeInfoCommand extends BaseXmlCommand<String> {
 
   @Override
-  protected void createXml(Connector.Builder rootElement, ImageResizeInfoParameter param, CommandContext cmdContext) throws ConnectorException {
+  protected void createXml(Connector.Builder rootElement, String fileName, CommandContext cmdContext) throws ConnectorException {
     CKFinderContext context = cmdContext.getCfCtx();
     cmdContext.checkType();
 
     cmdContext.checkAllPermission(AccessControl.FILE_VIEW);
 
-    if (param.getFileName() == null || param.getFileName().isEmpty()
-            || !FileUtils.isFileNameValid(param.getFileName())
-            || context.isFileHidden(param.getFileName())) {
+    if (fileName == null || fileName.isEmpty()
+            || !FileUtils.isFileNameValid(fileName)
+            || context.isFileHidden(fileName)) {
       cmdContext.throwException(ErrorCode.INVALID_REQUEST);
     }
 
-    if (!FileUtils.isFileExtensionAllowed(param.getFileName(), cmdContext.getType())) {
+    if (!FileUtils.isFileExtensionAllowed(fileName, cmdContext.getType())) {
       cmdContext.throwException(ErrorCode.INVALID_REQUEST);
     }
 
     Path imageFile = getPath(cmdContext.getType().getPath(),
             cmdContext.getCurrentFolder(),
-            param.getFileName());
+            fileName);
 
     try {
       if (!Files.isRegularFile(imageFile)) {
@@ -63,23 +62,18 @@ public class ImageResizeInfoCommand extends BaseXmlCommand<ImageResizeInfoParame
       try (InputStream is = Files.newInputStream(imageFile)) {
         image = ImageIO.read(is);
       }
-      param.setImageWidth(image.getWidth());
-      param.setImageHeight(image.getHeight());
+      rootElement.result(ImageInfo.builder()
+              .width(image.getWidth())
+              .height(image.getHeight()).build());
     } catch (IOException e) {
       log.error("", e);
       cmdContext.throwException(ErrorCode.ACCESS_DENIED);
     }
-    rootElement.result(ImageInfo.builder()
-            .width(param.getImageWidth())
-            .height(param.getImageHeight()).build());
   }
 
   @Override
-  protected ImageResizeInfoParameter popupParams(HttpServletRequest request, CKFinderContext context)
-          throws ConnectorException {
-    ImageResizeInfoParameter param = new ImageResizeInfoParameter();
-    param.setFileName(request.getParameter("fileName"));
-    return param;
+  protected String popupParams(HttpServletRequest request, CKFinderContext context) {
+    return request.getParameter("fileName");
   }
 
 }

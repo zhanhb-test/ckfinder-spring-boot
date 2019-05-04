@@ -214,7 +214,7 @@ public class CopyFilesCommand extends ErrorListXmlCommand<CopyMoveParameter> imp
   }
 
   @Override
-  protected CopyMoveParameter popupParams(HttpServletRequest request, CKFinderContext context) throws ConnectorException {
+  protected CopyMoveParameter popupParams(HttpServletRequest request, CKFinderContext context) {
     CopyMoveParameter param = new CopyMoveParameter();
     param.setAll(request.getParameter("copied") != null ? Integer.parseInt(request.getParameter("copied")) : 0);
 

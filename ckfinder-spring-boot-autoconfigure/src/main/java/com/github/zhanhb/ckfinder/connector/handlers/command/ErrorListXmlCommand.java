@@ -46,7 +46,6 @@ public abstract class ErrorListXmlCommand<T extends ErrorListXmlParameter> exten
    *
    * @param rootElement XML root node
    * @param param the parameter
-   * @param context ckfinder context
    */
   protected abstract void addResultNode(Connector.Builder rootElement, T param);
 
@@ -54,7 +53,7 @@ public abstract class ErrorListXmlCommand<T extends ErrorListXmlParameter> exten
    * gets all necessary data to create XML response.
    *
    * @param param the parameter
-   * @param context ckfinder context
+   * @param cmdContext command context
    * @return the warning code or null if it's correct.
    * {@link com.github.zhanhb.ckfinder.connector.api.ErrorCode} if no error
    * occurred.

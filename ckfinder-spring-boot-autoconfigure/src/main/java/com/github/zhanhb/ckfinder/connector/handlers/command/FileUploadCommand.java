@@ -156,7 +156,7 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
    *
    * @param request request
    * @param param the parameter
-   * @param context ckfinder context
+   * @param cmdContext command context
    * @throws ConnectorException when error occurs
    */
   private void uploadFile(HttpServletRequest request, FileUploadParameter param,
@@ -169,7 +169,7 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
    *
    * @param request http request
    * @param param the parameter
-   * @param context ckfinder context
+   * @param cmdContext command context
    * @throws ConnectorException when error occurs
    */
   private void fileUpload(HttpServletRequest request, FileUploadParameter param,
@@ -212,7 +212,7 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
    * @param path path to save file
    * @param item file upload item
    * @param param the parameter
-   * @param context ckfinder context
+   * @param cmdContext command context
    * @throws IOException when IO Exception occurs.
    * @throws ConnectorException when error occurs
    */
@@ -279,7 +279,7 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
    * @param item uploaded item.
    * @param path file path
    * @param param the parameter
-   * @param context ckfinder context
+   * @param cmdContext command context
    * @throws ConnectorException when error occurs
    */
   private void validateUploadItem(MultipartFile item, Path path,

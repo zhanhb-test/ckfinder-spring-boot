@@ -63,8 +63,7 @@ public class GetFoldersCommand extends BaseXmlCommand<Void> {
    * creates folder data node in XML document.
    *
    * @param rootElement root element in XML document
-   * @param param the parameter
-   * @param context ckfinder context
+   * @param cmdContext command context
    * @param directories list of children folder
    */
   private void createFoldersData(Connector.Builder rootElement, CommandContext cmdContext, List<Path> directories) {
@@ -95,7 +94,7 @@ public class GetFoldersCommand extends BaseXmlCommand<Void> {
   }
 
   @Override
-  protected Void popupParams(HttpServletRequest request, CKFinderContext context) throws ConnectorException {
+  protected Void popupParams(HttpServletRequest request, CKFinderContext context) {
     return null;
   }
 

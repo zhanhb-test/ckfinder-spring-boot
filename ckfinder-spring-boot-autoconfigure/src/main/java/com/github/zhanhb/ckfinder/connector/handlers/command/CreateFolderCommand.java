@@ -15,7 +15,6 @@ import com.github.zhanhb.ckfinder.connector.api.AccessControl;
 import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
-import com.github.zhanhb.ckfinder.connector.handlers.parameter.CreateFolderParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.NewFolder;
 import com.github.zhanhb.ckfinder.connector.support.CommandContext;
@@ -30,39 +29,40 @@ import lombok.extern.slf4j.Slf4j;
  * Class to handle <code>CreateFolder</code> command. Create subfolder.
  */
 @Slf4j
-public class CreateFolderCommand extends BaseXmlCommand<CreateFolderParameter> implements IPostCommand {
+public class CreateFolderCommand extends BaseXmlCommand<String> implements IPostCommand {
 
   /**
    * creates current folder XML node.
    *
    * @param rootElement XML root element.
-   * @param context ckfinder context
+   * @param cmdContext command context
    * @throws ConnectorException when error occurs
    */
   @Override
-  protected void createXml(Connector.Builder rootElement, CreateFolderParameter param, CommandContext cmdContext) throws ConnectorException {
-    checkRequestPath(param.getNewFolderName());
+  @SuppressWarnings("AssignmentToMethodParameter")
+  protected void createXml(Connector.Builder rootElement, String newFolderName, CommandContext cmdContext) throws ConnectorException {
+    checkRequestPath(newFolderName);
 
     CKFinderContext context = cmdContext.getCfCtx();
     cmdContext.checkType();
     cmdContext.checkAllPermission(AccessControl.FOLDER_CREATE);
 
     if (context.isForceAscii()) {
-      param.setNewFolderName(FileUtils.convertToAscii(param.getNewFolderName()));
+      newFolderName = FileUtils.convertToAscii(newFolderName);
     }
 
-    if (FileUtils.isFolderNameInvalid(param.getNewFolderName(), context)) {
+    if (FileUtils.isFolderNameInvalid(newFolderName, context)) {
       cmdContext.throwException(ErrorCode.INVALID_NAME);
     }
     if (context.isDirectoryHidden(cmdContext.getCurrentFolder())) {
       cmdContext.throwException(ErrorCode.INVALID_REQUEST);
     }
-    if (context.isDirectoryHidden(param.getNewFolderName())) {
+    if (context.isDirectoryHidden(newFolderName)) {
       cmdContext.throwException(ErrorCode.INVALID_NAME);
     }
 
     Path dir = getPath(cmdContext.getType().getPath(),
-            cmdContext.getCurrentFolder(), param.getNewFolderName());
+            cmdContext.getCurrentFolder(), newFolderName);
     if (Files.exists(dir)) {
       cmdContext.throwException(ErrorCode.ALREADY_EXIST);
     }
@@ -72,17 +72,12 @@ public class CreateFolderCommand extends BaseXmlCommand<CreateFolderParameter> i
       cmdContext.throwException(ErrorCode.UNAUTHORIZED);
     }
 
-    rootElement.result(NewFolder.builder()
-            .name(param.getNewFolderName())
-            .build());
+    rootElement.result(NewFolder.builder().name(newFolderName).build());
   }
 
   @Override
-  protected CreateFolderParameter popupParams(HttpServletRequest request, CKFinderContext context)
-          throws ConnectorException {
-    CreateFolderParameter param = new CreateFolderParameter();
-    param.setNewFolderName(request.getParameter("NewFolderName"));
-    return param;
+  protected String popupParams(HttpServletRequest request, CKFinderContext context) {
+    return request.getParameter("NewFolderName");
   }
 
 }

@@ -55,9 +55,8 @@ public abstract class XmlCommand<T> extends BaseCommand<T> {
   /**
    * creates <code>CurrentFolder</code> element.
    *
-   * @param param the parameter
+   * @param cmdContext command context
    * @param rootElement XML root node.
-   * @param accessControl
    */
   final void createCurrentFolderNode(CommandContext cmdContext, Connector.Builder rootElement) {
     if (cmdContext.getType() != null && cmdContext.getCurrentFolder() != null) {

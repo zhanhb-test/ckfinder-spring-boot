@@ -47,7 +47,7 @@ public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> 
    * gets data for XML and checks all validation.
    *
    * @param param the parameter
-   * @param context ckfinder context
+   * @param cmdContext command context
    * @return error code or null if it's correct.
    * @throws ConnectorException when error occurs
    */
@@ -133,8 +133,7 @@ public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> 
   }
 
   @Override
-  protected RenameFileParameter popupParams(HttpServletRequest request, CKFinderContext context)
-          throws ConnectorException {
+  protected RenameFileParameter popupParams(HttpServletRequest request, CKFinderContext context) {
     RenameFileParameter param = new RenameFileParameter();
     param.setFileName(request.getParameter("fileName"));
     param.setNewFileName(request.getParameter("newFileName"));

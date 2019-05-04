@@ -15,7 +15,6 @@ import com.github.zhanhb.ckfinder.connector.api.AccessControl;
 import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
-import com.github.zhanhb.ckfinder.connector.handlers.parameter.DownloadFileParameter;
 import com.github.zhanhb.ckfinder.connector.support.CommandContext;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import com.github.zhanhb.ckfinder.download.ContentDisposition;
@@ -30,25 +29,25 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * Class to handle <code>DownloadFile</code> command.
  */
-public class DownloadFileCommand extends BaseCommand<DownloadFileParameter> {
+public class DownloadFileCommand extends BaseCommand<String> {
 
   /**
    * executes the download file command. Writes file to response.
    *
-   * @param param the parameter
+   * @param fileName the fileName
    * @param request request
    * @throws ConnectorException when something went wrong during reading file.
    * @throws IOException when IO Exception occurs.
    */
   @Override
-  void execute(DownloadFileParameter param, HttpServletRequest request, HttpServletResponse response, CKFinderContext context)
+  void execute(String fileName, HttpServletRequest request, HttpServletResponse response, CKFinderContext context)
           throws ConnectorException, IOException {
     CommandContext cmdContext = populateCommandContext(request, context);
     cmdContext.checkType();
     cmdContext.checkAllPermission(AccessControl.FILE_VIEW);
 
-    if (!FileUtils.isFileNameValid(param.getFileName())
-            || !FileUtils.isFileExtensionAllowed(param.getFileName(),
+    if (!FileUtils.isFileNameValid(fileName)
+            || !FileUtils.isFileExtensionAllowed(fileName,
                     cmdContext.getType())) {
       cmdContext.throwException(ErrorCode.INVALID_REQUEST);
     }
@@ -57,11 +56,11 @@ public class DownloadFileCommand extends BaseCommand<DownloadFileParameter> {
       cmdContext.throwException(ErrorCode.INVALID_REQUEST);
     }
 
-    if (context.isFileHidden(param.getFileName())) {
+    if (context.isFileHidden(fileName)) {
       cmdContext.throwException(ErrorCode.FILE_NOT_FOUND);
     }
 
-    Path file = getPath(cmdContext.getType().getPath(), cmdContext.getCurrentFolder(), param.getFileName());
+    Path file = getPath(cmdContext.getType().getPath(), cmdContext.getCurrentFolder(), fileName);
 
     response.setHeader("Cache-Control", "cache, must-revalidate");
     response.setHeader("Pragma", "public");
@@ -82,15 +81,11 @@ public class DownloadFileCommand extends BaseCommand<DownloadFileParameter> {
    * @param request request
    * @param context ckfinder context
    * @return the parameter
-   * @throws ConnectorException when error occurs.
    */
   @Override
-  protected DownloadFileParameter popupParams(HttpServletRequest request, CKFinderContext context)
-          throws ConnectorException {
-    DownloadFileParameter param = new DownloadFileParameter();
+  protected String popupParams(HttpServletRequest request, CKFinderContext context) {
     // problem with showing filename when dialog window appear
-    param.setFileName(request.getParameter("FileName"));
-    return param;
+    return request.getParameter("FileName");
   }
 
   @SuppressWarnings("UtilityClassWithoutPrivateConstructor")

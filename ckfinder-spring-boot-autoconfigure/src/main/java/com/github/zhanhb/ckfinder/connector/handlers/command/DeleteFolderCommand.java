@@ -62,7 +62,7 @@ public class DeleteFolderCommand extends BaseXmlCommand<ErrorListXmlParameter> i
   }
 
   @Override
-  protected ErrorListXmlParameter popupParams(HttpServletRequest request, CKFinderContext context) throws ConnectorException {
+  protected ErrorListXmlParameter popupParams(HttpServletRequest request, CKFinderContext context) {
     return new ErrorListXmlParameter();
   }
 

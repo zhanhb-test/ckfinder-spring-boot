@@ -42,7 +42,7 @@ public abstract class BaseCommand<T> implements Command {
    * @throws ConnectorException if validation error occurs.
    */
   @SuppressWarnings("FinalMethod")
-  static final String checkRequestPath(String path) throws ConnectorException {
+  static String checkRequestPath(String path) throws ConnectorException {
     if (StringUtils.hasLength(path) && Pattern.compile(Constants.INVALID_PATH_REGEX).matcher(path).find()) {
       throw new ConnectorException(ErrorCode.INVALID_NAME);
     }
@@ -57,7 +57,7 @@ public abstract class BaseCommand<T> implements Command {
     execute(popupParams(request, context), request, response, context);
   }
 
-  protected abstract T popupParams(HttpServletRequest request, CKFinderContext context) throws ConnectorException;
+  protected abstract T popupParams(HttpServletRequest request, CKFinderContext context);
 
   @SuppressWarnings("FinalMethod")
   protected final CommandContext populateCommandContext(HttpServletRequest request,

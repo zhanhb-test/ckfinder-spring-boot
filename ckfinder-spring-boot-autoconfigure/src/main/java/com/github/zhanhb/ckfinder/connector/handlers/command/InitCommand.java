@@ -13,12 +13,10 @@ package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.api.AccessControl;
 import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
-import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.InitCommandEvent;
 import com.github.zhanhb.ckfinder.connector.api.License;
 import com.github.zhanhb.ckfinder.connector.api.ResourceType;
 import com.github.zhanhb.ckfinder.connector.api.ThumbnailProperties;
-import com.github.zhanhb.ckfinder.connector.handlers.parameter.InitParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.ConnectorInfo;
 import com.github.zhanhb.ckfinder.connector.handlers.response.PluginsInfos;
@@ -39,7 +37,7 @@ import lombok.extern.slf4j.Slf4j;
  * Class to handle <code>Init</code> command.
  */
 @Slf4j
-public class InitCommand extends XmlCommand<InitParameter> {
+public class InitCommand extends XmlCommand<String> {
 
   /**
    * chars taken to license key.
@@ -50,12 +48,12 @@ public class InitCommand extends XmlCommand<InitParameter> {
   private static final char[] hexChars = "0123456789abcdef".toCharArray();
 
   @Override
-  Connector buildConnector(InitParameter param, CommandContext cmdContext) {
+  Connector buildConnector(String host, CommandContext cmdContext) {
     Connector.Builder rootElement = Connector.builder();
     CKFinderContext context = cmdContext.getCfCtx();
     cmdContext.setResourceType(rootElement);
     createErrorNode(rootElement, 0);
-    createConnectorData(rootElement, param.getHost(), context);
+    createConnectorData(rootElement, host, context);
     createResouceTypesData(rootElement, cmdContext, context);
     createPluginsData(rootElement, context);
     return rootElement.build();
@@ -65,7 +63,7 @@ public class InitCommand extends XmlCommand<InitParameter> {
    * Creates connector node in XML.
    *
    * @param rootElement root element in XML
-   * @param param the parameter
+   * @param host request head host
    * @param context connector context
    */
   private void createConnectorData(Connector.Builder rootElement, String host, CKFinderContext context) {
@@ -154,7 +152,6 @@ public class InitCommand extends XmlCommand<InitParameter> {
    * Creates plugins node in XML.
    *
    * @param rootElement root element in XML
-   * @param param the parameter
    * @param context ckfinder context
    */
   private void createResouceTypesData(Connector.Builder rootElement, CommandContext cmdContext, CKFinderContext context) {
@@ -206,11 +203,8 @@ public class InitCommand extends XmlCommand<InitParameter> {
   }
 
   @Override
-  protected InitParameter popupParams(HttpServletRequest request, CKFinderContext context)
-          throws ConnectorException {
-    InitParameter param = new InitParameter();
-    param.setHost(request.getServerName());
-    return param;
+  protected String popupParams(HttpServletRequest request, CKFinderContext context) {
+    return request.getServerName();
   }
 
   @Deprecated

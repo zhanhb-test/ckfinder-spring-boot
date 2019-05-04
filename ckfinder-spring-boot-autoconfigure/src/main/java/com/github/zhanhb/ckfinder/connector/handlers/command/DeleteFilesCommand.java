@@ -45,7 +45,7 @@ public class DeleteFilesCommand extends ErrorListXmlCommand<DeleteFilesParameter
    * Prepares data for XML response.
    *
    * @param param the parameter
-   * @param context ckfinder context
+   * @param cmdContext command context
    * @return error code or null if action ended with success.
    * @throws ConnectorException when error occurs
    */
@@ -127,11 +127,9 @@ public class DeleteFilesCommand extends ErrorListXmlCommand<DeleteFilesParameter
    * @param request current response object
    * @param context ckfinder context object
    * @return the parameter
-   * @throws ConnectorException when initialization parameters can't be loaded
-   * for command handler.
    */
   @Override
-  protected DeleteFilesParameter popupParams(HttpServletRequest request, CKFinderContext context) throws ConnectorException {
+  protected DeleteFilesParameter popupParams(HttpServletRequest request, CKFinderContext context) {
     DeleteFilesParameter param = new DeleteFilesParameter();
     RequestFileHelper.addFilesListFromRequest(request, param.getFiles(), context);
     return param;
