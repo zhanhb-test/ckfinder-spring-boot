@@ -15,6 +15,7 @@ import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.Parameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
+import com.github.zhanhb.ckfinder.connector.support.CommandContext;
 
 /**
  * Base class to handle XML commands.
@@ -28,9 +29,8 @@ public abstract class BaseXmlCommand<T extends Parameter> extends XmlCommand<T> 
   final Connector buildConnector(T param, CKFinderContext context)
           throws ConnectorException {
     Connector.Builder connector = Connector.builder();
-    if (param.getType() != null) {
-      connector.resourceType(param.getType().getName());
-    }
+    CommandContext cmdContext = param.getContext();
+    cmdContext.setResourceType(connector);
     createCurrentFolderNode(param, connector, context.getAccessControl());
     createErrorNode(connector, 0);
     createXml(connector, param, context);

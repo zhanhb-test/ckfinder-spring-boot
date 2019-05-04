@@ -18,6 +18,7 @@ import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.RenameFolderParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.RenamedFolder;
+import com.github.zhanhb.ckfinder.connector.support.CommandContext;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import com.github.zhanhb.ckfinder.connector.utils.PathUtils;
 import java.io.IOException;
@@ -41,17 +42,15 @@ public class RenameFolderCommand extends BaseXmlCommand<RenameFolderParameter> i
    */
   @Override
   protected void createXml(Connector.Builder rootElement, RenameFolderParameter param, CKFinderContext context) throws ConnectorException {
-    checkRequestPathValid(param.getNewFolderName());
+    checkRequestPath(param.getNewFolderName());
+    CommandContext cmdContext = param.getContext();
+    cmdContext.checkType();
 
-    if (param.getType() == null) {
-      throw new ConnectorException(ErrorCode.INVALID_TYPE);
-    }
-
-    if (!context.getAccessControl().hasPermission(param.getType().getName(),
-            param.getCurrentFolder(),
-            param.getUserRole(),
+    if (!context.getAccessControl().hasPermission(cmdContext.getType().getName(),
+            cmdContext.getCurrentFolder(),
+            cmdContext.getUserRole(),
             AccessControl.FOLDER_RENAME)) {
-      param.throwException(ErrorCode.UNAUTHORIZED);
+      cmdContext.throwException(ErrorCode.UNAUTHORIZED);
     }
 
     if (context.isForceAscii()) {
@@ -60,34 +59,34 @@ public class RenameFolderCommand extends BaseXmlCommand<RenameFolderParameter> i
 
     if (context.isDirectoryHidden(param.getNewFolderName())
             || FileUtils.isFolderNameInvalid(param.getNewFolderName(), context)) {
-      param.throwException(ErrorCode.INVALID_NAME);
+      cmdContext.throwException(ErrorCode.INVALID_NAME);
     }
 
-    if (param.getCurrentFolder().equals("/")) {
-      param.throwException(ErrorCode.INVALID_REQUEST);
+    if (cmdContext.getCurrentFolder().equals("/")) {
+      cmdContext.throwException(ErrorCode.INVALID_REQUEST);
     }
 
-    Path dir = getPath(param.getType().getPath(),
-            param.getCurrentFolder());
+    Path dir = getPath(cmdContext.getType().getPath(),
+            cmdContext.getCurrentFolder());
     if (!Files.isDirectory(dir)) {
-      param.throwException(ErrorCode.INVALID_REQUEST);
+      cmdContext.throwException(ErrorCode.INVALID_REQUEST);
     }
     setNewFolder(param);
-    Path newDir = getPath(param.getType().getPath(),
+    Path newDir = getPath(cmdContext.getType().getPath(),
             param.getNewFolderPath());
     if (Files.exists(newDir)) {
-      param.throwException(ErrorCode.ALREADY_EXIST);
+      cmdContext.throwException(ErrorCode.ALREADY_EXIST);
     }
     try {
       Files.move(dir, newDir);
       renameThumb(param);
     } catch (IOException ex) {
-      param.throwException(ErrorCode.ACCESS_DENIED);
+      cmdContext.throwException(ErrorCode.ACCESS_DENIED);
     }
     rootElement.result(RenamedFolder.builder()
             .newName(param.getNewFolderName())
             .newPath(param.getNewFolderPath())
-            .newUrl(param.getType().getUrl() + param.getNewFolderPath())
+            .newUrl(cmdContext.getType().getUrl() + param.getNewFolderPath())
             .build());
   }
 
@@ -97,10 +96,11 @@ public class RenameFolderCommand extends BaseXmlCommand<RenameFolderParameter> i
    * @param param the parameter
    */
   private void renameThumb(RenameFolderParameter param) {
-    Path thumbnailPath = param.getType().getThumbnailPath();
+    CommandContext cmdContext = param.getContext();
+    Path thumbnailPath = cmdContext.getType().getThumbnailPath();
     if (thumbnailPath != null) {
-      Path thumbDir = getPath(thumbnailPath, param.getCurrentFolder());
-      Path newThumbDir = getPath(param.getType().getThumbnailPath(), param.getNewFolderPath());
+      Path thumbDir = getPath(thumbnailPath, cmdContext.getCurrentFolder());
+      Path newThumbDir = getPath(cmdContext.getType().getThumbnailPath(), param.getNewFolderPath());
       try {
         Files.move(thumbDir, newThumbDir);
       } catch (IOException ignored) {
@@ -114,7 +114,8 @@ public class RenameFolderCommand extends BaseXmlCommand<RenameFolderParameter> i
    * @param param the parameter
    */
   private void setNewFolder(RenameFolderParameter param) {
-    String str = param.getCurrentFolder();
+    CommandContext cmdContext = param.getContext();
+    String str = cmdContext.getCurrentFolder();
     int index = str.lastIndexOf('/', str.lastIndexOf('/') - 1);
     String path = PathUtils.addSlashToEnd(str.substring(0, index + 1).concat(param.getNewFolderName()));
     param.setNewFolderPath(path);

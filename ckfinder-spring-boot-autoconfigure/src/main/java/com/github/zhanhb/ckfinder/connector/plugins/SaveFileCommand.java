@@ -19,6 +19,7 @@ import com.github.zhanhb.ckfinder.connector.handlers.command.BaseXmlCommand;
 import com.github.zhanhb.ckfinder.connector.handlers.command.IPostCommand;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.SaveFileParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
+import com.github.zhanhb.ckfinder.connector.support.CommandContext;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -32,44 +33,43 @@ public class SaveFileCommand extends BaseXmlCommand<SaveFileParameter> implement
 
   @Override
   protected void createXml(Connector.Builder rootElement, SaveFileParameter param, CKFinderContext context) throws ConnectorException {
-    if (param.getType() == null) {
-      throw new ConnectorException(ErrorCode.INVALID_TYPE);
-    }
+    CommandContext cmdContext = param.getContext();
+    cmdContext.checkType();
 
-    if (!context.getAccessControl().hasPermission(param.getType().getName(),
-            param.getCurrentFolder(), param.getUserRole(),
+    if (!context.getAccessControl().hasPermission(cmdContext.getType().getName(),
+            cmdContext.getCurrentFolder(), cmdContext.getUserRole(),
             AccessControl.FILE_DELETE)) {
-      param.throwException(ErrorCode.UNAUTHORIZED);
+      cmdContext.throwException(ErrorCode.UNAUTHORIZED);
     }
 
     if (param.getFileName() == null || param.getFileName().isEmpty()) {
-      param.throwException(ErrorCode.INVALID_NAME);
+      cmdContext.throwException(ErrorCode.INVALID_NAME);
     }
 
     if (param.getFileContent() == null || param.getFileContent().isEmpty()) {
-      param.throwException(ErrorCode.INVALID_REQUEST);
+      cmdContext.throwException(ErrorCode.INVALID_REQUEST);
     }
 
-    if (!FileUtils.isFileExtensionAllowed(param.getFileName(), param.getType())) {
-      param.throwException(ErrorCode.INVALID_EXTENSION);
+    if (!FileUtils.isFileExtensionAllowed(param.getFileName(), cmdContext.getType())) {
+      cmdContext.throwException(ErrorCode.INVALID_EXTENSION);
     }
 
     if (!FileUtils.isFileNameValid(param.getFileName())) {
-      param.throwException(ErrorCode.INVALID_REQUEST);
+      cmdContext.throwException(ErrorCode.INVALID_REQUEST);
     }
 
-    Path sourceFile = getPath(param.getType().getPath(),
-            param.getCurrentFolder(), param.getFileName());
+    Path sourceFile = getPath(cmdContext.getType().getPath(),
+            cmdContext.getCurrentFolder(), param.getFileName());
 
     if (!Files.isRegularFile(sourceFile)) {
-      param.throwException(ErrorCode.FILE_NOT_FOUND);
+      cmdContext.throwException(ErrorCode.FILE_NOT_FOUND);
     }
 
     try {
       Files.write(sourceFile, param.getFileContent().getBytes(StandardCharsets.UTF_8));
     } catch (IOException e) {
       log.error("", e);
-      param.throwException(ErrorCode.ACCESS_DENIED);
+      cmdContext.throwException(ErrorCode.ACCESS_DENIED);
     }
   }
 

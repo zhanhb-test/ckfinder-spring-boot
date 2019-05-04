@@ -18,6 +18,7 @@ import com.github.zhanhb.ckfinder.connector.api.Constants;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.api.ResourceType;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.Parameter;
+import com.github.zhanhb.ckfinder.connector.support.CommandContext;
 import com.github.zhanhb.ckfinder.connector.utils.PathUtils;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -35,6 +36,20 @@ import org.springframework.util.StringUtils;
  */
 public abstract class BaseCommand<T extends Parameter> implements Command {
 
+  /**
+   * check request for security issue.
+   *
+   * @param path request path
+   * @throws ConnectorException if validation error occurs.
+   */
+  @SuppressWarnings("FinalMethod")
+  static final String checkRequestPath(String path) throws ConnectorException {
+    if (StringUtils.hasLength(path) && Pattern.compile(Constants.INVALID_PATH_REGEX).matcher(path).find()) {
+      throw new ConnectorException(ErrorCode.INVALID_NAME);
+    }
+    return path;
+  }
+
   @SuppressWarnings("FinalMethod")
   @Override
   public final void runCommand(HttpServletRequest request,
@@ -44,6 +59,28 @@ public abstract class BaseCommand<T extends Parameter> implements Command {
   }
 
   protected abstract T popupParams(HttpServletRequest request, CKFinderContext context) throws ConnectorException;
+
+  private CommandContext populateCommandContext(HttpServletRequest request,
+          CKFinderContext context) throws ConnectorException {
+    checkConnectorEnabled(context);
+    String userRole = getUserRole(request, context);
+    String currentFolder = checkRequestPath(getCurrentFolder(request));
+
+    if (context.isDirectoryHidden(currentFolder)) {
+      throw new ConnectorException(ErrorCode.INVALID_REQUEST);
+    }
+
+    String typeName = request.getParameter("type");
+    ResourceType type = context.getTypes().get(typeName);
+    if (currentFolder != null && typeName != null && type != null) {
+      Path currDir = getPath(type.getPath(), currentFolder);
+      if (!Files.isDirectory(currDir)) {
+        throw new ConnectorException(ErrorCode.FOLDER_NOT_FOUND);
+      }
+    }
+    return CommandContext.builder().cfCtx(context).userRole(userRole)
+            .currentFolder(currentFolder).type(type).build();
+  }
 
   /**
    * initialize params for command handler.
@@ -58,26 +95,7 @@ public abstract class BaseCommand<T extends Parameter> implements Command {
   @SuppressWarnings("FinalMethod")
   protected final <P extends Parameter> P doInitParam(P param, HttpServletRequest request,
           CKFinderContext context) throws ConnectorException {
-    checkConnectorEnabled(context);
-    setUserRole(param, request, context);
-    String currentFolder = getCurrentFolder(request);
-    param.setCurrentFolder(currentFolder);
-
-    checkRequestPathValid(currentFolder);
-
-    if (context.isDirectoryHidden(currentFolder)) {
-      throw new ConnectorException(ErrorCode.INVALID_REQUEST);
-    }
-
-    String typeName = request.getParameter("type");
-    ResourceType type = context.getTypes().get(typeName);
-    if (currentFolder != null && typeName != null && type != null) {
-      Path currDir = getPath(type.getPath(), currentFolder);
-      if (!Files.isDirectory(currDir)) {
-        throw new ConnectorException(ErrorCode.FOLDER_NOT_FOUND);
-      }
-    }
-    param.setType(type);
+    param.setContext(populateCommandContext(request, context));
     return param;
   }
 
@@ -107,23 +125,12 @@ public abstract class BaseCommand<T extends Parameter> implements Command {
           HttpServletResponse response, CKFinderContext context)
           throws ConnectorException, IOException;
 
-  /**
-   * check request for security issue.
-   *
-   * @param reqParam request param
-   * @throws ConnectorException if validation error occurs.
-   */
-  @SuppressWarnings("FinalMethod")
-  final void checkRequestPathValid(String reqParam) throws ConnectorException {
-    if (StringUtils.hasLength(reqParam) && Pattern.compile(Constants.INVALID_PATH_REGEX).matcher(reqParam).find()) {
-      throw new ConnectorException(ErrorCode.INVALID_NAME);
-    }
-  }
-
-  private void setUserRole(Parameter param, HttpServletRequest request, CKFinderContext context) {
+  private String getUserRole(HttpServletRequest request, CKFinderContext context) {
     HttpSession session = request.getSession(false);
-    String userRole = session == null ? null : (String) session.getAttribute(context.getUserRoleName());
-    param.setUserRole(userRole);
+    if (session == null) {
+      return null;
+    }
+    return (String) session.getAttribute(context.getUserRoleName());
   }
 
   /**

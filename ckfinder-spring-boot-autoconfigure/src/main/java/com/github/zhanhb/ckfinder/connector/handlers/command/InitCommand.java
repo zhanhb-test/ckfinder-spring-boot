@@ -23,6 +23,7 @@ import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.ConnectorInfo;
 import com.github.zhanhb.ckfinder.connector.handlers.response.PluginsInfos;
 import com.github.zhanhb.ckfinder.connector.handlers.response.ResourceTypes;
+import com.github.zhanhb.ckfinder.connector.support.CommandContext;
 import com.github.zhanhb.ckfinder.connector.support.KeyGenerator;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import com.github.zhanhb.ckfinder.connector.utils.PathUtils;
@@ -30,10 +31,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
@@ -54,9 +52,8 @@ public class InitCommand extends XmlCommand<InitParameter> {
   @Override
   Connector buildConnector(InitParameter param, CKFinderContext context) {
     Connector.Builder rootElement = Connector.builder();
-    if (param.getType() != null) {
-      rootElement.resourceType(param.getType().getName());
-    }
+    CommandContext cmdContext = param.getContext();
+    cmdContext.setResourceType(rootElement);
     createErrorNode(rootElement, 0);
     createConnectorData(rootElement, param, context);
     createResouceTypesData(rootElement, param, context);
@@ -163,19 +160,15 @@ public class InitCommand extends XmlCommand<InitParameter> {
   private void createResouceTypesData(Connector.Builder rootElement, InitParameter param, CKFinderContext context) {
     //resurcetypes
     ResourceTypes.Builder resourceTypes = ResourceTypes.builder();
-    Collection<ResourceType> types;
-    if (param.getType() != null) {
-      types = Collections.singleton(param.getType());
-    } else {
-      types = getTypes(context);
-    }
+    CommandContext cmdContext = param.getContext();
+    Collection<ResourceType> types = cmdContext.typeToCollection();
 
     for (ResourceType resourceType : types) {
       String name = resourceType.getName();
-      int acl = context.getAccessControl().getAcl(name, "/", param.getUserRole());
+      int acl = context.getAccessControl().getAcl(name, "/", cmdContext.getUserRole());
       if ((acl & AccessControl.FOLDER_VIEW) != 0) {
         long maxSize = resourceType.getMaxSize();
-        boolean hasChildren = FileUtils.hasChildren(context.getAccessControl(), "/", getPath(resourceType.getPath()), context, resourceType.getName(), param.getUserRole());
+        boolean hasChildren = FileUtils.hasChildren(context.getAccessControl(), "/", getPath(resourceType.getPath()), context, resourceType.getName(), cmdContext.getUserRole());
         resourceTypes.resourceType(com.github.zhanhb.ckfinder.connector.handlers.response.ResourceType.builder()
                 .name(name)
                 .acl(acl)
@@ -188,28 +181,6 @@ public class InitCommand extends XmlCommand<InitParameter> {
       }
     }
     rootElement.result(resourceTypes.build());
-  }
-
-  /**
-   * gets list of types names.
-   *
-   * @param context ckfinder context
-   * @return list of types names.
-   */
-  private Collection<ResourceType> getTypes(CKFinderContext context) {
-    if (context.getDefaultResourceTypes().size() > 0) {
-      Set<String> defaultResourceTypes = context.getDefaultResourceTypes();
-      ArrayList<ResourceType> arrayList = new ArrayList<>(defaultResourceTypes.size());
-      for (String key : defaultResourceTypes) {
-        ResourceType resourceType = context.getTypes().get(key);
-        if (resourceType != null) {
-          arrayList.add(resourceType);
-        }
-      }
-      return arrayList;
-    } else {
-      return context.getTypes().values();
-    }
   }
 
   /**

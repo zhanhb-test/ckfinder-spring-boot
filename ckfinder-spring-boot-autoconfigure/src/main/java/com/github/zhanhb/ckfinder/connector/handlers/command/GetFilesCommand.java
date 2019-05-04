@@ -19,6 +19,7 @@ import com.github.zhanhb.ckfinder.connector.api.ThumbnailProperties;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.GetFilesParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.File;
+import com.github.zhanhb.ckfinder.connector.support.CommandContext;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import com.github.zhanhb.ckfinder.connector.utils.ImageUtils;
 import java.io.IOException;
@@ -61,20 +62,19 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
 
   @Override
   protected void createXml(Connector.Builder rootElement, GetFilesParameter param, CKFinderContext context) throws ConnectorException {
-    if (param.getType() == null) {
-      throw new ConnectorException(ErrorCode.INVALID_TYPE);
-    }
+    CommandContext cmdContext = param.getContext();
+    cmdContext.checkType();
 
-    if (!context.getAccessControl().hasPermission(param.getType().getName(),
-            param.getCurrentFolder(), param.getUserRole(),
+    if (!context.getAccessControl().hasPermission(cmdContext.getType().getName(),
+            cmdContext.getCurrentFolder(), cmdContext.getUserRole(),
             AccessControl.FILE_VIEW)) {
-      param.throwException(ErrorCode.UNAUTHORIZED);
+      cmdContext.throwException(ErrorCode.UNAUTHORIZED);
     }
 
-    Path dir = getPath(param.getType().getPath(), param.getCurrentFolder());
+    Path dir = getPath(cmdContext.getType().getPath(), cmdContext.getCurrentFolder());
 
     if (!Files.isDirectory(dir)) {
-      param.throwException(ErrorCode.FOLDER_NOT_FOUND);
+      cmdContext.throwException(ErrorCode.FOLDER_NOT_FOUND);
     }
 
     try {
@@ -82,7 +82,7 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
       createFilesData(files, rootElement, param, context);
     } catch (IOException e) {
       log.error("", e);
-      param.throwException(ErrorCode.ACCESS_DENIED);
+      cmdContext.throwException(ErrorCode.ACCESS_DENIED);
     }
   }
 
@@ -96,9 +96,10 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
    */
   private void createFilesData(List<Path> list, Connector.Builder rootElement, GetFilesParameter param, CKFinderContext context) {
     com.github.zhanhb.ckfinder.connector.handlers.response.Files.Builder files = com.github.zhanhb.ckfinder.connector.handlers.response.Files.builder();
+    CommandContext cmdContext = param.getContext();
     for (Path file : list) {
       String fileName = file.getFileName().toString();
-      if (!FileUtils.isFileExtensionAllowed(fileName, param.getType())) {
+      if (!FileUtils.isFileExtensionAllowed(fileName, cmdContext.getType())) {
         continue;
       }
       if (context.isFileHidden(fileName)) {
@@ -129,8 +130,9 @@ public class GetFilesCommand extends BaseXmlCommand<GetFilesParameter> {
    * @return thumb attribute values
    */
   private String createThumbAttr(Path file, GetFilesParameter param, CKFinderContext context) {
+    CommandContext cmdContext = param.getContext();
     if (ImageUtils.isImageExtension(file) && isAddThumbsAttr(param, context.getThumbnail())) {
-      Path thumbFile = getPath(param.getType().getThumbnailPath(), param.getCurrentFolder(),
+      Path thumbFile = getPath(cmdContext.getType().getThumbnailPath(), cmdContext.getCurrentFolder(),
               file.getFileName().toString());
       if (Files.exists(thumbFile)) {
         return file.getFileName().toString();

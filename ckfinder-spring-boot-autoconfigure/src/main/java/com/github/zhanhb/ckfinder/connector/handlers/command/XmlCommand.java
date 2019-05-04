@@ -7,6 +7,7 @@ import com.github.zhanhb.ckfinder.connector.handlers.parameter.Parameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.CurrentFolder;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Error;
+import com.github.zhanhb.ckfinder.connector.support.CommandContext;
 import com.github.zhanhb.ckfinder.connector.support.XmlCreator;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -60,12 +61,14 @@ public abstract class XmlCommand<T extends Parameter> extends BaseCommand<T> {
    * @param accessControl
    */
   final void createCurrentFolderNode(T param, Connector.Builder rootElement, AccessControl accessControl) {
-    if (param.getType() != null && param.getCurrentFolder() != null) {
+    CommandContext cmdContext = param.getContext();
+    if (cmdContext.getType() != null && cmdContext.getCurrentFolder() != null) {
       rootElement.currentFolder(CurrentFolder.builder()
-              .path(param.getCurrentFolder())
-              .url(param.getType().getUrl()
-                      + param.getCurrentFolder())
-              .acl(accessControl.getAcl(param.getType().getName(), param.getCurrentFolder(), param.getUserRole()))
+              .path(cmdContext.getCurrentFolder())
+              .url(cmdContext.getType().getUrl()
+                      + cmdContext.getCurrentFolder())
+              .acl(accessControl.getAcl(cmdContext.getType().getName(),
+                      cmdContext.getCurrentFolder(), cmdContext.getUserRole()))
               .build());
     }
   }

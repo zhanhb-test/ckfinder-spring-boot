@@ -16,6 +16,7 @@ import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.ThumbnailParameter;
+import com.github.zhanhb.ckfinder.connector.support.CommandContext;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import com.github.zhanhb.ckfinder.connector.utils.ImageUtils;
 import com.github.zhanhb.ckfinder.download.ContentDisposition;
@@ -39,29 +40,28 @@ public class ThumbnailCommand extends BaseCommand<ThumbnailParameter> {
   @SuppressWarnings("FinalMethod")
   final void execute(ThumbnailParameter param, HttpServletRequest request, HttpServletResponse response, CKFinderContext context)
           throws ConnectorException {
+    CommandContext cmdContext = param.getContext();
     if (context.getThumbnail() == null) {
-      param.throwException(ErrorCode.THUMBNAILS_DISABLED);
+      cmdContext.throwException(ErrorCode.THUMBNAILS_DISABLED);
     }
 
-    if (param.getType() == null) {
-      throw new ConnectorException(ErrorCode.INVALID_TYPE);
-    }
+    cmdContext.checkType();
 
-    if (!context.getAccessControl().hasPermission(param.getType().getName(),
-            param.getCurrentFolder(), param.getUserRole(),
+    if (!context.getAccessControl().hasPermission(cmdContext.getType().getName(),
+            cmdContext.getCurrentFolder(), cmdContext.getUserRole(),
             AccessControl.FILE_VIEW)) {
-      param.throwException(ErrorCode.UNAUTHORIZED);
+      cmdContext.throwException(ErrorCode.UNAUTHORIZED);
     }
 
     if (!FileUtils.isFileNameValid(param.getFileName())) {
-      param.throwException(ErrorCode.INVALID_REQUEST);
+      cmdContext.throwException(ErrorCode.INVALID_REQUEST);
     }
 
     if (context.isFileHidden(param.getFileName())) {
-      param.throwException(ErrorCode.FILE_NOT_FOUND);
+      cmdContext.throwException(ErrorCode.FILE_NOT_FOUND);
     }
 
-    Path fullCurrentPath = getPath(param.getType().getThumbnailPath(), param.getCurrentFolder());
+    Path fullCurrentPath = getPath(cmdContext.getType().getThumbnailPath(), cmdContext.getCurrentFolder());
     log.debug("typeThumbDir: {}", fullCurrentPath);
 
     try {
@@ -74,16 +74,16 @@ public class ThumbnailCommand extends BaseCommand<ThumbnailParameter> {
     log.debug("thumbFile: {}", thumbFile);
 
     if (!Files.exists(thumbFile)) {
-      Path originFile = getPath(param.getType().getPath(),
-              param.getCurrentFolder(), param.getFileName());
+      Path originFile = getPath(cmdContext.getType().getPath(),
+              cmdContext.getCurrentFolder(), param.getFileName());
       log.debug("orginFile: {}", originFile);
       if (!Files.exists(originFile)) {
-        param.throwException(ErrorCode.FILE_NOT_FOUND);
+        cmdContext.throwException(ErrorCode.FILE_NOT_FOUND);
       }
       try {
         boolean success = ImageUtils.createThumb(originFile, thumbFile, context.getThumbnail());
         if (!success) {
-          param.throwException(ErrorCode.FILE_NOT_FOUND);
+          cmdContext.throwException(ErrorCode.FILE_NOT_FOUND);
         }
       } catch (IOException | ConnectorException e) {
         try {

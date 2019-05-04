@@ -20,6 +20,7 @@ import com.github.zhanhb.ckfinder.connector.handlers.command.BaseXmlCommand;
 import com.github.zhanhb.ckfinder.connector.handlers.command.IPostCommand;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.ImageResizeParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
+import com.github.zhanhb.ckfinder.connector.support.CommandContext;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import com.github.zhanhb.ckfinder.connector.utils.ImageUtils;
 import java.io.IOException;
@@ -40,65 +41,64 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> imp
 
   @Override
   protected void createXml(Connector.Builder rootElement, ImageResizeParameter param, CKFinderContext context) throws ConnectorException {
-    if (param.getType() == null) {
-      throw new ConnectorException(ErrorCode.INVALID_TYPE);
-    }
+    CommandContext cmdContext = param.getContext();
+    cmdContext.checkType();
 
-    if (!context.getAccessControl().hasPermission(param.getType().getName(),
-            param.getCurrentFolder(), param.getUserRole(),
+    if (!context.getAccessControl().hasPermission(cmdContext.getType().getName(),
+            cmdContext.getCurrentFolder(), cmdContext.getUserRole(),
             AccessControl.FILE_DELETE
             | AccessControl.FILE_UPLOAD)) {
-      param.throwException(ErrorCode.UNAUTHORIZED);
+      cmdContext.throwException(ErrorCode.UNAUTHORIZED);
     }
 
     String fileName = param.getFileName();
     String newFileName = param.getNewFileName();
 
     if (fileName == null || fileName.isEmpty()) {
-      param.throwException(ErrorCode.INVALID_NAME);
+      cmdContext.throwException(ErrorCode.INVALID_NAME);
     }
 
     if (!FileUtils.isFileNameValid(fileName) || context.isFileHidden(fileName)) {
-      param.throwException(ErrorCode.INVALID_REQUEST);
+      cmdContext.throwException(ErrorCode.INVALID_REQUEST);
     }
 
-    if (!FileUtils.isFileExtensionAllowed(fileName, param.getType())) {
-      param.throwException(ErrorCode.INVALID_REQUEST);
+    if (!FileUtils.isFileExtensionAllowed(fileName, cmdContext.getType())) {
+      cmdContext.throwException(ErrorCode.INVALID_REQUEST);
     }
 
-    Path file = getPath(param.getType().getPath(), param.getCurrentFolder(), fileName);
+    Path file = getPath(cmdContext.getType().getPath(), cmdContext.getCurrentFolder(), fileName);
     if (!Files.isRegularFile(file)) {
-      param.throwException(ErrorCode.FILE_NOT_FOUND);
+      cmdContext.throwException(ErrorCode.FILE_NOT_FOUND);
     }
 
     if (param.isWrongReqSizesParams()) {
-      param.throwException(ErrorCode.INVALID_REQUEST);
+      cmdContext.throwException(ErrorCode.INVALID_REQUEST);
     }
 
     ImageProperties image = context.getImage();
     if (param.getWidth() != null && param.getHeight() != null) {
 
       if (!FileUtils.isFileNameValid(newFileName) && context.isFileHidden(newFileName)) {
-        param.throwException(ErrorCode.INVALID_NAME);
+        cmdContext.throwException(ErrorCode.INVALID_NAME);
       }
 
-      if (!FileUtils.isFileExtensionAllowed(newFileName, param.getType())) {
-        param.throwException(ErrorCode.INVALID_EXTENSION);
+      if (!FileUtils.isFileExtensionAllowed(newFileName, cmdContext.getType())) {
+        cmdContext.throwException(ErrorCode.INVALID_EXTENSION);
       }
 
-      Path thumbFile = getPath(param.getType().getPath(), param.getCurrentFolder(), newFileName);
+      Path thumbFile = getPath(cmdContext.getType().getPath(), cmdContext.getCurrentFolder(), newFileName);
 
       if (Files.exists(thumbFile) && !Files.isWritable(thumbFile)) {
-        param.throwException(ErrorCode.ACCESS_DENIED);
+        cmdContext.throwException(ErrorCode.ACCESS_DENIED);
       }
       if (!"1".equals(param.getOverwrite()) && Files.exists(thumbFile)) {
-        param.throwException(ErrorCode.ALREADY_EXIST);
+        cmdContext.throwException(ErrorCode.ALREADY_EXIST);
       }
       int maxImageHeight = image.getMaxHeight();
       int maxImageWidth = image.getMaxWidth();
       if ((maxImageWidth > 0 && param.getWidth() > maxImageWidth)
               || (maxImageHeight > 0 && param.getHeight() > maxImageHeight)) {
-        param.throwException(ErrorCode.INVALID_REQUEST);
+        cmdContext.throwException(ErrorCode.INVALID_REQUEST);
       }
 
       try {
@@ -107,7 +107,7 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> imp
 
       } catch (IOException e) {
         log.error("", e);
-        param.throwException(ErrorCode.ACCESS_DENIED);
+        cmdContext.throwException(ErrorCode.ACCESS_DENIED);
       }
     }
 
@@ -116,7 +116,7 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> imp
     for (ImageResizeParam key : ImageResizeParam.values()) {
       if ("1".equals(param.getSizesFromReq().get(key))) {
         String thumbName = fileNameWithoutExt + "_" + key.getParameter() + "." + fileExt;
-        Path thumbFile = getPath(param.getType().getPath(), param.getCurrentFolder(), thumbName);
+        Path thumbFile = getPath(cmdContext.getType().getPath(), cmdContext.getCurrentFolder(), thumbName);
         ImageResizeSize size = pluginParams.get(key);
         if (size != null) {
           try {
@@ -124,7 +124,7 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> imp
                     size.getHeight(), image.getQuality());
           } catch (IOException e) {
             log.error("", e);
-            param.throwException(ErrorCode.ACCESS_DENIED);
+            cmdContext.throwException(ErrorCode.ACCESS_DENIED);
           }
         }
       }

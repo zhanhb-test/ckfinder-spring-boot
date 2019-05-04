@@ -16,6 +16,7 @@ import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.DownloadFileParameter;
+import com.github.zhanhb.ckfinder.connector.support.CommandContext;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import com.github.zhanhb.ckfinder.download.ContentDisposition;
 import com.github.zhanhb.ckfinder.download.ContentTypeResolver;
@@ -42,31 +43,30 @@ public class DownloadFileCommand extends BaseCommand<DownloadFileParameter> {
   @Override
   void execute(DownloadFileParameter param, HttpServletRequest request, HttpServletResponse response, CKFinderContext context)
           throws ConnectorException, IOException {
-    if (param.getType() == null) {
-      throw new ConnectorException(ErrorCode.INVALID_TYPE);
-    }
+    CommandContext cmdContext = param.getContext();
+    cmdContext.checkType();
 
-    if (!context.getAccessControl().hasPermission(param.getType().getName(),
-            param.getCurrentFolder(), param.getUserRole(),
+    if (!context.getAccessControl().hasPermission(cmdContext.getType().getName(),
+            cmdContext.getCurrentFolder(), cmdContext.getUserRole(),
             AccessControl.FILE_VIEW)) {
-      param.throwException(ErrorCode.UNAUTHORIZED);
+      cmdContext.throwException(ErrorCode.UNAUTHORIZED);
     }
 
     if (!FileUtils.isFileNameValid(param.getFileName())
             || !FileUtils.isFileExtensionAllowed(param.getFileName(),
-                    param.getType())) {
-      param.throwException(ErrorCode.INVALID_REQUEST);
+                    cmdContext.getType())) {
+      cmdContext.throwException(ErrorCode.INVALID_REQUEST);
     }
 
-    if (context.isDirectoryHidden(param.getCurrentFolder())) {
-      param.throwException(ErrorCode.INVALID_REQUEST);
+    if (context.isDirectoryHidden(cmdContext.getCurrentFolder())) {
+      cmdContext.throwException(ErrorCode.INVALID_REQUEST);
     }
 
     if (context.isFileHidden(param.getFileName())) {
-      param.throwException(ErrorCode.FILE_NOT_FOUND);
+      cmdContext.throwException(ErrorCode.FILE_NOT_FOUND);
     }
 
-    Path file = getPath(param.getType().getPath(), param.getCurrentFolder(), param.getFileName());
+    Path file = getPath(cmdContext.getType().getPath(), cmdContext.getCurrentFolder(), param.getFileName());
 
     response.setHeader("Cache-Control", "cache, must-revalidate");
     response.setHeader("Pragma", "public");

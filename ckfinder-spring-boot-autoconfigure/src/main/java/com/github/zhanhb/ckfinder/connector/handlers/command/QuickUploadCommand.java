@@ -15,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.FileUploadParameter;
+import com.github.zhanhb.ckfinder.connector.support.CommandContext;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import java.io.IOException;
 import java.io.Writer;
@@ -30,6 +31,7 @@ public class QuickUploadCommand extends FileUploadCommand {
 
   @Override
   protected void handleOnUploadCompleteResponse(Writer writer, String errorMsg, FileUploadParameter param) throws IOException {
+    CommandContext cmdContext = param.getContext();
     if ("json".equalsIgnoreCase(param.getResponseType())) {
       handleJSONResponse(writer, errorMsg, null, param);
     } else {
@@ -37,8 +39,8 @@ public class QuickUploadCommand extends FileUploadCommand {
       int errorNum = errorCode != null ? errorCode.getCode() : 0;
       writer.write("<script type=\"text/javascript\">window.parent.OnUploadCompleted(" + errorNum + ", '");
       if (param.isUploaded()) {
-        writer.write(param.getType().getUrl()
-                + param.getCurrentFolder()
+        writer.write(cmdContext.getType().getUrl()
+                + cmdContext.getCurrentFolder()
                 + FileUtils.escapeJavaScript(FileUtils.encodeURIComponent(param.getNewFileName()))
                 + "', '" + FileUtils.escapeJavaScript(param.getNewFileName()));
       } else {
@@ -87,6 +89,7 @@ public class QuickUploadCommand extends FileUploadCommand {
    * @throws IOException when IO Exception occurs.
    */
   private void handleJSONResponse(Writer writer, String errorMsg, String path, FileUploadParameter param) throws IOException {
+    CommandContext cmdContext = param.getContext();
     Map<String, Object> jsonObj = new HashMap<>(6);
 
     jsonObj.put("fileName", param.getNewFileName());
@@ -97,8 +100,8 @@ public class QuickUploadCommand extends FileUploadCommand {
         jsonObj.put("url", path + FileUtils.escapeJavaScript(FileUtils.encodeURIComponent(param.getNewFileName())));
       } else {
         jsonObj.put("url",
-                param.getType().getUrl()
-                + param.getCurrentFolder()
+                cmdContext.getType().getUrl()
+                + cmdContext.getCurrentFolder()
                 + FileUtils.escapeJavaScript(FileUtils
                         .encodeURIComponent(param.getNewFileName())));
       }

@@ -53,7 +53,6 @@ public class FileUploadParameter extends Parameter {
     this.newFileName = "";
   }
 
-  @Override
   public void throwException(ErrorCode code) throws ConnectorException {
     String msg = MessageUtil.INSTANCE.getMessage(getLangCode(), code.getCode());
     throw new ConnectorException(code, msg);

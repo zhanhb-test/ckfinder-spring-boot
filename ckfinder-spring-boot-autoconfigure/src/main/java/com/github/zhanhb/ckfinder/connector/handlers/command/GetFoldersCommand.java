@@ -19,6 +19,7 @@ import com.github.zhanhb.ckfinder.connector.handlers.parameter.Parameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Folder;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Folders;
+import com.github.zhanhb.ckfinder.connector.support.CommandContext;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -36,23 +37,22 @@ public class GetFoldersCommand extends BaseXmlCommand<Parameter> {
 
   @Override
   protected void createXml(Connector.Builder rootElement, Parameter param, CKFinderContext context) throws ConnectorException {
-    if (param.getType() == null) {
-      throw new ConnectorException(ErrorCode.INVALID_TYPE);
-    }
+    CommandContext cmdContext = param.getContext();
+    cmdContext.checkType();
 
-    if (!context.getAccessControl().hasPermission(param.getType().getName(),
-            param.getCurrentFolder(), param.getUserRole(),
+    if (!context.getAccessControl().hasPermission(cmdContext.getType().getName(),
+            cmdContext.getCurrentFolder(), cmdContext.getUserRole(),
             AccessControl.FOLDER_VIEW)) {
-      param.throwException(ErrorCode.UNAUTHORIZED);
+      cmdContext.throwException(ErrorCode.UNAUTHORIZED);
     }
-    if (context.isDirectoryHidden(param.getCurrentFolder())) {
-      param.throwException(ErrorCode.INVALID_REQUEST);
+    if (context.isDirectoryHidden(cmdContext.getCurrentFolder())) {
+      cmdContext.throwException(ErrorCode.INVALID_REQUEST);
     }
 
-    Path dir = getPath(param.getType().getPath(), param.getCurrentFolder());
+    Path dir = getPath(cmdContext.getType().getPath(), cmdContext.getCurrentFolder());
 
     if (!Files.isDirectory(dir)) {
-      param.throwException(ErrorCode.FOLDER_NOT_FOUND);
+      cmdContext.throwException(ErrorCode.FOLDER_NOT_FOUND);
     }
 
     try {
@@ -60,7 +60,7 @@ public class GetFoldersCommand extends BaseXmlCommand<Parameter> {
       createFoldersData(rootElement, param, context, directories);
     } catch (IOException e) {
       log.error("", e);
-      param.throwException(ErrorCode.ACCESS_DENIED);
+      cmdContext.throwException(ErrorCode.ACCESS_DENIED);
     }
   }
 
@@ -73,10 +73,11 @@ public class GetFoldersCommand extends BaseXmlCommand<Parameter> {
    * @param directories list of children folder
    */
   private void createFoldersData(Connector.Builder rootElement, Parameter param, CKFinderContext context, List<Path> directories) {
+    CommandContext cmdContext = param.getContext();
     Folders.Builder folders = Folders.builder();
     for (Path dir : directories) {
       String dirName = dir.getFileName().toString();
-      if (!context.getAccessControl().hasPermission(param.getType().getName(), param.getCurrentFolder() + dirName, param.getUserRole(),
+      if (!context.getAccessControl().hasPermission(cmdContext.getType().getName(), cmdContext.getCurrentFolder() + dirName, cmdContext.getUserRole(),
               AccessControl.FOLDER_VIEW)) {
         continue;
       }
@@ -84,16 +85,16 @@ public class GetFoldersCommand extends BaseXmlCommand<Parameter> {
         continue;
       }
       boolean hasChildren = FileUtils.hasChildren(context.getAccessControl(),
-              param.getCurrentFolder() + dirName + "/", dir,
-              context, param.getType().getName(), param.getUserRole());
+              cmdContext.getCurrentFolder() + dirName + "/", dir,
+              context, cmdContext.getType().getName(), cmdContext.getUserRole());
 
       folders.folder(Folder.builder()
               .name(dirName)
               .hasChildren(hasChildren)
               .acl(context.getAccessControl()
-                      .getAcl(param.getType().getName(),
-                              param.getCurrentFolder()
-                              + dirName, param.getUserRole())).build());
+                      .getAcl(cmdContext.getType().getName(),
+                              cmdContext.getCurrentFolder()
+                              + dirName, cmdContext.getUserRole())).build());
     }
     rootElement.result(folders.build());
   }

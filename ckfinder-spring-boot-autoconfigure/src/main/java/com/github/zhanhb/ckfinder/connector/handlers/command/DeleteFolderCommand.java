@@ -17,6 +17,7 @@ import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.ErrorListXmlParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
+import com.github.zhanhb.ckfinder.connector.support.CommandContext;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -31,38 +32,37 @@ public class DeleteFolderCommand extends BaseXmlCommand<ErrorListXmlParameter> i
 
   @Override
   protected void createXml(Connector.Builder rootElement, ErrorListXmlParameter param, CKFinderContext context) throws ConnectorException {
-    if (param.getType() == null) {
-      throw new ConnectorException(ErrorCode.INVALID_TYPE);
-    }
+    CommandContext cmdContext = param.getContext();
+    cmdContext.checkType();
 
-    if (!context.getAccessControl().hasPermission(param.getType().getName(),
-            param.getCurrentFolder(),
-            param.getUserRole(),
+    if (!context.getAccessControl().hasPermission(cmdContext.getType().getName(),
+            cmdContext.getCurrentFolder(),
+            cmdContext.getUserRole(),
             AccessControl.FOLDER_DELETE)) {
-      param.throwException(ErrorCode.UNAUTHORIZED);
+      cmdContext.throwException(ErrorCode.UNAUTHORIZED);
     }
-    if (param.getCurrentFolder().equals("/")) {
-      param.throwException(ErrorCode.INVALID_REQUEST);
-    }
-
-    if (context.isDirectoryHidden(param.getCurrentFolder())) {
-      param.throwException(ErrorCode.INVALID_REQUEST);
+    if (cmdContext.getCurrentFolder().equals("/")) {
+      cmdContext.throwException(ErrorCode.INVALID_REQUEST);
     }
 
-    Path dir = getPath(param.getType().getPath(), param.getCurrentFolder());
+    if (context.isDirectoryHidden(cmdContext.getCurrentFolder())) {
+      cmdContext.throwException(ErrorCode.INVALID_REQUEST);
+    }
+
+    Path dir = getPath(cmdContext.getType().getPath(), cmdContext.getCurrentFolder());
 
     if (!Files.isDirectory(dir)) {
-      param.throwException(ErrorCode.FOLDER_NOT_FOUND);
+      cmdContext.throwException(ErrorCode.FOLDER_NOT_FOUND);
     }
 
     if (FileUtils.delete(dir)) {
-      Path thumbnailPath = param.getType().getThumbnailPath();
+      Path thumbnailPath = cmdContext.getType().getThumbnailPath();
       if (thumbnailPath != null) {
-        Path thumbDir = getPath(thumbnailPath, param.getCurrentFolder());
+        Path thumbDir = getPath(thumbnailPath, cmdContext.getCurrentFolder());
         FileUtils.delete(thumbDir);
       }
     } else {
-      param.throwException(ErrorCode.ACCESS_DENIED);
+      cmdContext.throwException(ErrorCode.ACCESS_DENIED);
     }
   }
 

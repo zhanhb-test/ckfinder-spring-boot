@@ -19,6 +19,7 @@ import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.DeleteFilesParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.DeleteFiles;
+import com.github.zhanhb.ckfinder.connector.support.CommandContext;
 import com.github.zhanhb.ckfinder.connector.support.FilePostParam;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import java.nio.file.Files;
@@ -51,41 +52,40 @@ public class DeleteFilesCommand extends ErrorListXmlCommand<DeleteFilesParameter
   @Override
   protected ErrorCode getDataForXml(DeleteFilesParameter param, CKFinderContext context)
           throws ConnectorException {
-    if (param.getType() == null) {
-      throw new ConnectorException(ErrorCode.INVALID_TYPE);
-    }
+    CommandContext cmdContext = param.getContext();
+    cmdContext.checkType();
 
     for (FilePostParam fileItem : param.getFiles()) {
       if (!FileUtils.isFileNameValid(fileItem.getName())) {
-        param.throwException(ErrorCode.INVALID_REQUEST);
+        cmdContext.throwException(ErrorCode.INVALID_REQUEST);
       }
 
       if (fileItem.getType() == null) {
-        param.throwException(ErrorCode.INVALID_REQUEST);
+        cmdContext.throwException(ErrorCode.INVALID_REQUEST);
       }
 
       if (fileItem.getFolder() == null || fileItem.getFolder().isEmpty()
               || Pattern.compile(Constants.INVALID_PATH_REGEX).matcher(
                       fileItem.getFolder()).find()) {
-        param.throwException(ErrorCode.INVALID_REQUEST);
+        cmdContext.throwException(ErrorCode.INVALID_REQUEST);
       }
 
       if (context.isDirectoryHidden(fileItem.getFolder())) {
-        param.throwException(ErrorCode.INVALID_REQUEST);
+        cmdContext.throwException(ErrorCode.INVALID_REQUEST);
       }
 
       if (context.isFileHidden(fileItem.getName())) {
-        param.throwException(ErrorCode.INVALID_REQUEST);
+        cmdContext.throwException(ErrorCode.INVALID_REQUEST);
       }
 
       if (!FileUtils.isFileExtensionAllowed(fileItem.getName(), fileItem.getType())) {
-        param.throwException(ErrorCode.INVALID_REQUEST);
+        cmdContext.throwException(ErrorCode.INVALID_REQUEST);
 
       }
 
-      if (!context.getAccessControl().hasPermission(fileItem.getType().getName(), fileItem.getFolder(), param.getUserRole(),
+      if (!context.getAccessControl().hasPermission(fileItem.getType().getName(), fileItem.getFolder(), cmdContext.getUserRole(),
               AccessControl.FILE_DELETE)) {
-        param.throwException(ErrorCode.UNAUTHORIZED);
+        cmdContext.throwException(ErrorCode.UNAUTHORIZED);
       }
     }
 
@@ -103,7 +103,7 @@ public class DeleteFilesCommand extends ErrorListXmlCommand<DeleteFilesParameter
         param.filesDeletedPlus();
         Path thumbnailPath = fileItem.getType().getThumbnailPath();
         if (thumbnailPath != null) {
-          Path thumbFile = getPath(thumbnailPath, param.getCurrentFolder(), fileItem.getName());
+          Path thumbFile = getPath(thumbnailPath, cmdContext.getCurrentFolder(), fileItem.getName());
 
           try {
             log.debug("prepare delete thumb file '{}'", thumbFile);

@@ -18,6 +18,7 @@ import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.api.FileUploadEvent;
 import com.github.zhanhb.ckfinder.connector.api.ResourceType;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.FileUploadParameter;
+import com.github.zhanhb.ckfinder.connector.support.CommandContext;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import com.github.zhanhb.ckfinder.connector.utils.ImageUtils;
 import java.io.IOException;
@@ -77,11 +78,13 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
     errorMsg = errorMsg.replace("%1", param.getNewFileName());
     String path = "";
 
+    CommandContext cmdContext = param.getContext();
     if (!param.isUploaded()) {
+      cmdContext = cmdContext.toBuilder().currentFolder("").build();
       param.setNewFileName("");
-      param.setCurrentFolder("");
+      param.setContext(cmdContext);
     } else {
-      path = param.getType().getUrl() + param.getCurrentFolder();
+      path = cmdContext.getType().getUrl() + cmdContext.getCurrentFolder();
     }
     setContentType(param, response);
     PrintWriter writer = response.getWriter();
@@ -156,8 +159,11 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
     param.setCkEditorFuncNum(request.getParameter("CKEditorFuncNum"));
     param.setResponseType(request.getParameter("response_type") != null ? request.getParameter("response_type") : request.getParameter("responseType"));
     param.setLangCode(request.getParameter("langCode"));
-    if (param.getType() == null) {
-      param.setErrorCode(ErrorCode.INVALID_TYPE);
+    CommandContext cmdContext = param.getContext();
+    try {
+      cmdContext.checkType();
+    } catch (ConnectorException ex) {
+      param.setErrorCode(ex.getErrorCode());
     }
     return param;
   }
@@ -172,8 +178,9 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
    */
   private void uploadFile(HttpServletRequest request, FileUploadParameter param,
           CKFinderContext context) throws ConnectorException {
-    if (!context.getAccessControl().hasPermission(param.getType().getName(),
-            param.getCurrentFolder(), param.getUserRole(),
+    CommandContext cmdContext = param.getContext();
+    if (!context.getAccessControl().hasPermission(cmdContext.getType().getName(),
+            cmdContext.getCurrentFolder(), cmdContext.getUserRole(),
             AccessControl.FILE_UPLOAD)) {
       param.throwException(ErrorCode.UNAUTHORIZED);
     }
@@ -189,6 +196,7 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
    */
   private void fileUpload(HttpServletRequest request, FileUploadParameter param,
           CKFinderContext context) throws ConnectorException {
+    CommandContext cmdContext = param.getContext();
     MultipartResolver multipartResolver = StandardHolder.RESOLVER;
     try {
       boolean multipart = multipartResolver.isMultipart(request);
@@ -200,8 +208,8 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
           Collection<MultipartFile> parts = resolveMultipart.getFileMap().values();
           //noinspection LoopStatementThatDoesntLoop
           for (MultipartFile part : parts) {
-            Path path = getPath(param.getType().getPath(),
-                    param.getCurrentFolder());
+            Path path = getPath(cmdContext.getType().getPath(),
+                    cmdContext.getCurrentFolder());
             param.setFileName(getFileItemName(part));
             validateUploadItem(part, path, param, context);
             saveTemporaryFile(path, part, param, context);
@@ -233,6 +241,7 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
    */
   private void saveTemporaryFile(Path path, MultipartFile item, FileUploadParameter param, CKFinderContext context)
           throws IOException, ConnectorException {
+    CommandContext cmdContext = param.getContext();
     Path file = getPath(path, param.getNewFileName());
 
     if (ImageUtils.isImageExtension(file)) {
@@ -242,7 +251,7 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
       }
       ImageUtils.createTmpThumb(item, file, context);
       if (context.isCheckSizeAfterScaling()
-              && FileUtils.isFileSizeOutOfRange(param.getType(), Files.size(file))) {
+              && FileUtils.isFileSizeOutOfRange(cmdContext.getType(), Files.size(file))) {
         Files.deleteIfExists(file);
         param.throwException(ErrorCode.UPLOADED_TOO_BIG);
       }
@@ -251,7 +260,7 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
         Files.copy(in, file);
       }
     }
-    context.fireOnFileUpload(new FileUploadEvent(param.getCurrentFolder(), file));
+    context.fireOnFileUpload(new FileUploadEvent(cmdContext.getCurrentFolder(), file));
   }
 
   /**
@@ -297,6 +306,7 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
    */
   private void validateUploadItem(MultipartFile item, Path path,
           FileUploadParameter param, CKFinderContext context) throws ConnectorException {
+    CommandContext cmdContext = param.getContext();
     if (item.getOriginalFilename() == null || item.getOriginalFilename().length() <= 0) {
       param.throwException(ErrorCode.UPLOADED_INVALID);
     }
@@ -315,14 +325,14 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
       param.setErrorCode(ErrorCode.UPLOADED_INVALID_NAME_RENAMED);
     }
 
-    if (context.isDirectoryHidden(param.getCurrentFolder())) {
+    if (context.isDirectoryHidden(cmdContext.getCurrentFolder())) {
       param.throwException(ErrorCode.INVALID_REQUEST);
     }
     if (!FileUtils.isFileNameValid(param.getNewFileName())
             || context.isFileHidden(param.getNewFileName())) {
       param.throwException(ErrorCode.INVALID_NAME);
     }
-    final ResourceType resourceType = param.getType();
+    final ResourceType resourceType = cmdContext.getType();
     if (!FileUtils.isFileExtensionAllowed(param.getNewFileName(), resourceType)) {
       param.throwException(ErrorCode.INVALID_EXTENSION);
     }

@@ -18,6 +18,7 @@ import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.CreateFolderParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.NewFolder;
+import com.github.zhanhb.ckfinder.connector.support.CommandContext;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -40,16 +41,15 @@ public class CreateFolderCommand extends BaseXmlCommand<CreateFolderParameter> i
    */
   @Override
   protected void createXml(Connector.Builder rootElement, CreateFolderParameter param, CKFinderContext context) throws ConnectorException {
-    checkRequestPathValid(param.getNewFolderName());
+    checkRequestPath(param.getNewFolderName());
 
-    if (param.getType() == null) {
-      throw new ConnectorException(ErrorCode.INVALID_TYPE);
-    }
+    CommandContext cmdContext = param.getContext();
+    cmdContext.checkType();
 
-    if (!context.getAccessControl().hasPermission(param.getType().getName(),
-            param.getCurrentFolder(), param.getUserRole(),
+    if (!context.getAccessControl().hasPermission(cmdContext.getType().getName(),
+            cmdContext.getCurrentFolder(), cmdContext.getUserRole(),
             AccessControl.FOLDER_CREATE)) {
-      param.throwException(ErrorCode.UNAUTHORIZED);
+      cmdContext.throwException(ErrorCode.UNAUTHORIZED);
     }
 
     if (context.isForceAscii()) {
@@ -57,24 +57,24 @@ public class CreateFolderCommand extends BaseXmlCommand<CreateFolderParameter> i
     }
 
     if (FileUtils.isFolderNameInvalid(param.getNewFolderName(), context)) {
-      param.throwException(ErrorCode.INVALID_NAME);
+      cmdContext.throwException(ErrorCode.INVALID_NAME);
     }
-    if (context.isDirectoryHidden(param.getCurrentFolder())) {
-      param.throwException(ErrorCode.INVALID_REQUEST);
+    if (context.isDirectoryHidden(cmdContext.getCurrentFolder())) {
+      cmdContext.throwException(ErrorCode.INVALID_REQUEST);
     }
     if (context.isDirectoryHidden(param.getNewFolderName())) {
-      param.throwException(ErrorCode.INVALID_NAME);
+      cmdContext.throwException(ErrorCode.INVALID_NAME);
     }
 
-    Path dir = getPath(param.getType().getPath(),
-            param.getCurrentFolder(), param.getNewFolderName());
+    Path dir = getPath(cmdContext.getType().getPath(),
+            cmdContext.getCurrentFolder(), param.getNewFolderName());
     if (Files.exists(dir)) {
-      param.throwException(ErrorCode.ALREADY_EXIST);
+      cmdContext.throwException(ErrorCode.ALREADY_EXIST);
     }
     try {
       Files.createDirectories(dir);
     } catch (IOException ex) {
-      param.throwException(ErrorCode.UNAUTHORIZED);
+      cmdContext.throwException(ErrorCode.UNAUTHORIZED);
     }
 
     rootElement.result(NewFolder.builder()

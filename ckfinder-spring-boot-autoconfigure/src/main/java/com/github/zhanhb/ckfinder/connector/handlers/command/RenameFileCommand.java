@@ -18,6 +18,7 @@ import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.RenameFileParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.RenamedFile;
+import com.github.zhanhb.ckfinder.connector.support.CommandContext;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
@@ -54,14 +55,13 @@ public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> 
   protected ErrorCode getDataForXml(RenameFileParameter param, CKFinderContext context)
           throws ConnectorException {
     log.trace("getDataForXml");
-    if (param.getType() == null) {
-      throw new ConnectorException(ErrorCode.INVALID_TYPE);
-    }
+    CommandContext cmdContext = param.getContext();
+    cmdContext.checkType();
 
-    if (!context.getAccessControl().hasPermission(param.getType().getName(),
-            param.getCurrentFolder(), param.getUserRole(),
+    if (!context.getAccessControl().hasPermission(cmdContext.getType().getName(),
+            cmdContext.getCurrentFolder(), cmdContext.getUserRole(),
             AccessControl.FILE_RENAME)) {
-      param.throwException(ErrorCode.UNAUTHORIZED);
+      cmdContext.throwException(ErrorCode.UNAUTHORIZED);
     }
 
     if (context.isForceAscii()) {
@@ -73,11 +73,11 @@ public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> 
       param.setAddResultNode(true);
     }
 
-    if (!FileUtils.isFileExtensionAllowed(param.getNewFileName(), param.getType())) {
+    if (!FileUtils.isFileExtensionAllowed(param.getNewFileName(), cmdContext.getType())) {
       return ErrorCode.INVALID_EXTENSION;
     }
     if (context.isCheckDoubleFileExtensions()) {
-      param.setNewFileName(FileUtils.renameFileWithBadExt(param.getType(),
+      param.setNewFileName(FileUtils.renameFileWithBadExt(cmdContext.getType(),
               param.getNewFileName()));
     }
 
@@ -92,13 +92,13 @@ public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> 
     }
 
     if (!FileUtils.isFileExtensionAllowed(param.getFileName(),
-            param.getType())) {
+            cmdContext.getType())) {
       return ErrorCode.INVALID_REQUEST;
     }
 
-    Path dirPath = param.getType().getPath();
-    Path file = getPath(dirPath, param.getCurrentFolder(), param.getFileName());
-    Path newFile = getPath(dirPath, param.getCurrentFolder(), param.getNewFileName());
+    Path dirPath = cmdContext.getType().getPath();
+    Path file = getPath(dirPath, cmdContext.getCurrentFolder(), param.getFileName());
+    Path newFile = getPath(dirPath, cmdContext.getCurrentFolder(), param.getNewFileName());
 
     try {
       Files.move(file, newFile);
@@ -123,11 +123,12 @@ public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> 
    * @param param the parameter
    */
   private void renameThumb(RenameFileParameter param) {
-    Path thumbnailPath = param.getType().getThumbnailPath();
+    CommandContext cmdContext = param.getContext();
+    Path thumbnailPath = cmdContext.getType().getThumbnailPath();
     if (thumbnailPath != null) {
-      Path thumbFile = getPath(thumbnailPath, param.getCurrentFolder(),
+      Path thumbFile = getPath(thumbnailPath, cmdContext.getCurrentFolder(),
               param.getFileName());
-      Path newThumbFile = getPath(param.getType().getThumbnailPath(), param.getCurrentFolder(),
+      Path newThumbFile = getPath(cmdContext.getType().getThumbnailPath(), cmdContext.getCurrentFolder(),
               param.getNewFileName());
 
       try {
