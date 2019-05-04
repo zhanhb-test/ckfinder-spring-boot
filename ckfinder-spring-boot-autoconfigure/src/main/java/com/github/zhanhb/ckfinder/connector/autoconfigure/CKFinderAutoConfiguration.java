@@ -26,7 +26,6 @@ import com.github.zhanhb.ckfinder.connector.support.KeyGenerator;
 import com.github.zhanhb.ckfinder.connector.support.Plugin;
 import com.github.zhanhb.ckfinder.connector.utils.PathUtils;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -145,7 +144,7 @@ public class CKFinderAutoConfiguration {
     public CKFinderContext ckfinderConfiguration(CKFinderProperties properties,
             BasePathBuilder basePathBuilder,
             AccessControl defaultAccessControl,
-            ObjectProvider<Collection<Plugin>> pluginsProvider) throws IOException {
+            ObjectProvider<Collection<Plugin>> pluginsProvider) {
       Collection<Plugin> plugins = pluginsProvider.getIfAvailable();
       DefaultCKFinderContext.Builder builder = DefaultCKFinderContext.builder()
               .enabled(properties.getConnector().isEnabled())
@@ -185,7 +184,7 @@ public class CKFinderAutoConfiguration {
     @SuppressWarnings("deprecation")
     private void setTypes(DefaultCKFinderContext.Builder builder,
             BasePathBuilder basePathBuilder, Map<String, CKFinderProperties.Type> types,
-            ThumbnailProperties thumbnail) throws IOException {
+            ThumbnailProperties thumbnail) {
       Path basePath = basePathBuilder.getBasePath();
       String baseUrl = basePathBuilder.getBaseUrl();
       for (Map.Entry<String, CKFinderProperties.Type> entry : types.entrySet()) {
@@ -208,7 +207,7 @@ public class CKFinderAutoConfiguration {
 
         Optional<Path> thumbnailPath = Optional.ofNullable(thumbnail).map(ThumbnailProperties::getPath).map(p -> PathUtils.resolve(p, path));
         builder.type(typeName, resourceType.maxSize(type.getMaxSize().toBytes())
-                .path(Files.createDirectories(PathUtils.resolve(basePath, path)))
+                .path(PathUtils.resolve(basePath, path))
                 .url(PathUtils.normalizeUrl(baseUrl + url))
                 .thumbnailPath(thumbnailPath).build());
       }

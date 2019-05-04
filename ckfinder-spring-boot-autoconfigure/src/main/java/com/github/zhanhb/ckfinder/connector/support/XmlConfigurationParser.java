@@ -18,7 +18,6 @@ import com.github.zhanhb.ckfinder.connector.plugins.WatermarkSettings;
 import com.github.zhanhb.ckfinder.connector.utils.PathUtils;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -389,10 +388,9 @@ public enum XmlConfigurationParser {
    * @param basePathBuilder base url and path builder
    * @param basePath base path
    * @throws ConnectorException when error occurs
-   * @throws IOException when IO Exception occurs.
    */
   @SuppressWarnings("deprecation")
-  private ThumbnailProperties createThumbs(NodeList childNodes, Path basePath, BasePathBuilder basePathBuilder) throws ConnectorException, IOException {
+  private ThumbnailProperties createThumbs(NodeList childNodes, Path basePath, BasePathBuilder basePathBuilder) throws ConnectorException {
     boolean enabled = true;
     ThumbnailProperties.Builder thumbnail = ThumbnailProperties.builder();
     for (int i = 0, j = childNodes.getLength(); i < j; i++) {
@@ -411,7 +409,7 @@ public enum XmlConfigurationParser {
             throw new ConnectorException(ErrorCode.FOLDER_NOT_FOUND,
                     "Thumbs directory could not be created using specified path.");
           }
-          thumbnail.path(Files.createDirectories(file));
+          thumbnail.path(file);
           break;
         case "directAccess":
           thumbnail.directAccess(Boolean.parseBoolean(nullNodeToString(childNode)));
@@ -450,12 +448,11 @@ public enum XmlConfigurationParser {
    * @param builder context builder
    * @param doc XML document.
    * @param basePathBuilder base url and path builder
-   * @throws IOException when IO Exception occurs.
    * @throws ConnectorException when error occurs
    */
   private void setTypes(DefaultCKFinderContext.Builder builder, Document doc, BasePathBuilder basePathBuilder,
           ThumbnailProperties thumbnail)
-          throws IOException, ConnectorException {
+          throws ConnectorException {
     NodeList list = doc.getElementsByTagName("type");
 
     for (int i = 0, j = list.getLength(); i < j; i++) {
@@ -476,13 +473,12 @@ public enum XmlConfigurationParser {
    * @param childNodes type XML child nodes.
    * @param basePathBuilder base url and path builder
    * @return parsed resource type
-   * @throws IOException when IO Exception occurs.
    * @throws ConnectorException when error occurs
    */
   @SuppressWarnings("deprecation")
   private ResourceType createTypeFromXml(String typeName,
           NodeList childNodes, BasePathBuilder basePathBuilder, ThumbnailProperties thumbnail)
-          throws IOException, ConnectorException {
+          throws ConnectorException {
     ResourceType.Builder builder = ResourceType.builder().name(typeName);
     String path = typeName.toLowerCase();
     String url = typeName.toLowerCase();
@@ -523,7 +519,7 @@ public enum XmlConfigurationParser {
     Optional<Path> thumbnailPath = Optional.ofNullable(thumbnail).map(ThumbnailProperties::getPath).map(f -> PathUtils.resolve(f, tpath));
     return builder
             .url(url)
-            .path(Files.createDirectories(p))
+            .path(p)
             .thumbnailPath(thumbnailPath).build();
   }
 
