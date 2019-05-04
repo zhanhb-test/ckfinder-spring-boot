@@ -65,7 +65,7 @@ public class RenameFolderCommand extends BaseXmlCommand<String> implements IPost
       cmdContext.throwException(ErrorCode.INVALID_REQUEST);
     }
     String newFolderPath = toNewFolder(newFolderName, cmdContext);
-    Path newDir = PathUtils.resolve(cmdContext.getType().getPath(),
+    Path newDir = FileUtils.resolve(cmdContext.getType().getPath(),
             newFolderPath);
     if (Files.exists(newDir)) {
       cmdContext.throwException(ErrorCode.ALREADY_EXIST);

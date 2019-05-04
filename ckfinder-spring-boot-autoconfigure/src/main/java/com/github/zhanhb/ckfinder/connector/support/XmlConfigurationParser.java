@@ -15,6 +15,7 @@ import com.github.zhanhb.ckfinder.connector.plugins.ImageResizePlugin;
 import com.github.zhanhb.ckfinder.connector.plugins.ImageResizeSize;
 import com.github.zhanhb.ckfinder.connector.plugins.WatermarkPlugin;
 import com.github.zhanhb.ckfinder.connector.plugins.WatermarkSettings;
+import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import com.github.zhanhb.ckfinder.connector.utils.PathUtils;
 import java.io.IOException;
 import java.io.InputStream;
@@ -516,7 +517,7 @@ public enum XmlConfigurationParser {
       throw new ConnectorException(ErrorCode.FOLDER_NOT_FOUND,
               "Resource directory could not be created using specified path.");
     }
-    Optional<Path> thumbnailPath = Optional.ofNullable(thumbnail).map(ThumbnailProperties::getPath).map(f -> PathUtils.resolve(f, tpath));
+    Optional<Path> thumbnailPath = Optional.ofNullable(thumbnail).map(ThumbnailProperties::getPath).map(f -> FileUtils.resolve(f, tpath));
     return builder
             .url(url)
             .path(p)

@@ -23,7 +23,6 @@ import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.support.CommandContext;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import com.github.zhanhb.ckfinder.connector.utils.ImageUtils;
-import com.github.zhanhb.ckfinder.connector.utils.PathUtils;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -61,7 +60,7 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> imp
       cmdContext.throwException(ErrorCode.INVALID_REQUEST);
     }
 
-    Path file = PathUtils.resolve(cmdContext.getType().getPath(), cmdContext.getCurrentFolder(), fileName);
+    Path file = cmdContext.resolve(fileName);
     if (!Files.isRegularFile(file)) {
       cmdContext.throwException(ErrorCode.FILE_NOT_FOUND);
     }

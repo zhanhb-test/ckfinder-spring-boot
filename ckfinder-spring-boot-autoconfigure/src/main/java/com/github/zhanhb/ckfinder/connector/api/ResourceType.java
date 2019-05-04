@@ -11,7 +11,7 @@
  */
 package com.github.zhanhb.ckfinder.connector.api;
 
-import com.github.zhanhb.ckfinder.connector.utils.PathUtils;
+import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import java.nio.file.Path;
 import java.util.Optional;
 import javax.annotation.Nullable;
@@ -65,11 +65,11 @@ public class ResourceType {
   private String deniedExtensions;
 
   public Path resolve(String... names) {
-    return PathUtils.resolve(path, names);
+    return FileUtils.resolve(path, names);
   }
 
   public Optional<Path> resolveThumbnail(String... names) {
-    return thumbnailPath.map(p -> PathUtils.resolve(p, names));
+    return thumbnailPath.map(p -> FileUtils.resolve(p, names));
   }
 
   @SuppressWarnings("PublicInnerClass")

@@ -24,8 +24,8 @@ import com.github.zhanhb.ckfinder.connector.support.HostLicenseFactory;
 import com.github.zhanhb.ckfinder.connector.support.InMemoryAccessController;
 import com.github.zhanhb.ckfinder.connector.support.KeyGenerator;
 import com.github.zhanhb.ckfinder.connector.support.Plugin;
+import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import com.github.zhanhb.ckfinder.connector.utils.PathUtils;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -205,9 +205,9 @@ public class CKFinderAutoConfiguration {
         String url = (StringUtils.hasLength(type.getUrl()) ? type.getUrl() : typeName.toLowerCase())
                 .replace(Constants.BASE_URL_PLACEHOLDER, "");
 
-        Optional<Path> thumbnailPath = Optional.ofNullable(thumbnail).map(ThumbnailProperties::getPath).map(p -> PathUtils.resolve(p, path));
+        Optional<Path> thumbnailPath = Optional.ofNullable(thumbnail).map(ThumbnailProperties::getPath).map(p -> FileUtils.resolve(p, path));
         builder.type(typeName, resourceType.maxSize(type.getMaxSize().toBytes())
-                .path(PathUtils.resolve(basePath, path))
+                .path(FileUtils.resolve(basePath, path))
                 .url(PathUtils.normalizeUrl(baseUrl + url))
                 .thumbnailPath(thumbnailPath).build());
       }
@@ -252,7 +252,7 @@ public class CKFinderAutoConfiguration {
     }
 
     private Path getPath(Path first, String... more) {
-      return first == null ? null : PathUtils.resolve(first, more);
+      return first == null ? null : FileUtils.resolve(first, more);
     }
 
   }

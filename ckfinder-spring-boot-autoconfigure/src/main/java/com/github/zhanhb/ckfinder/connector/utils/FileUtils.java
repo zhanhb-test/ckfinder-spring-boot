@@ -40,6 +40,10 @@ import javax.annotation.Nullable;
 @SuppressWarnings({"UtilityClassWithoutPrivateConstructor", "NestedAssignment"})
 public class FileUtils {
 
+  public static Path resolve(Path first, String... more) {
+    return first.getFileSystem().getPath(first.toString(), more);
+  }
+
   /**
    * Gets list of children folder or files for dir, according to searchDirectory
    * param.

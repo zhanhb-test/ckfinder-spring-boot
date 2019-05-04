@@ -18,7 +18,6 @@ import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.support.CommandContext;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import com.github.zhanhb.ckfinder.connector.utils.ImageUtils;
-import com.github.zhanhb.ckfinder.connector.utils.PathUtils;
 import com.github.zhanhb.ckfinder.download.ContentDisposition;
 import com.github.zhanhb.ckfinder.download.PathPartial;
 import java.io.IOException;
@@ -65,12 +64,11 @@ public class ThumbnailCommand extends BaseCommand<String> {
     } catch (IOException e) {
       throw new ConnectorException(ErrorCode.ACCESS_DENIED, e);
     }
-    Path thumbFile = PathUtils.resolve(fullCurrentPath, fileName);
+    Path thumbFile = FileUtils.resolve(fullCurrentPath, fileName);
     log.debug("thumbFile: {}", thumbFile);
 
     if (!Files.exists(thumbFile)) {
-      Path originFile = PathUtils.resolve(cmdContext.getType().getPath(),
-              cmdContext.getCurrentFolder(), fileName);
+      Path originFile = cmdContext.resolve(fileName);
       log.debug("orginFile: {}", originFile);
       if (!Files.exists(originFile)) {
         cmdContext.throwException(ErrorCode.FILE_NOT_FOUND);

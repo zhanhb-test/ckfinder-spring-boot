@@ -12,7 +12,6 @@
 package com.github.zhanhb.ckfinder.connector.utils;
 
 import com.github.zhanhb.ckfinder.connector.api.Constants;
-import java.nio.file.Path;
 import java.util.regex.Pattern;
 import org.springframework.util.StringUtils;
 
@@ -21,10 +20,6 @@ import org.springframework.util.StringUtils;
  */
 @SuppressWarnings("UtilityClassWithoutPrivateConstructor")
 public class PathUtils {
-
-  public static Path resolve(Path first, String... more) {
-    return first.getFileSystem().getPath(first.toString(), more);
-  }
 
   public static String normalize(String string) {
     return string != null ? string.replaceAll("[\\\\/]+", "/") : null;
