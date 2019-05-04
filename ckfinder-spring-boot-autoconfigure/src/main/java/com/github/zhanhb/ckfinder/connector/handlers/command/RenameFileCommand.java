@@ -91,9 +91,8 @@ public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> 
       return ErrorCode.INVALID_REQUEST;
     }
 
-    Path dirPath = cmdContext.getType().getPath();
-    Path file = getPath(dirPath, cmdContext.getCurrentFolder(), param.getFileName());
-    Path newFile = getPath(dirPath, cmdContext.getCurrentFolder(), param.getNewFileName());
+    Path file = cmdContext.resolve(param.getFileName());
+    Path newFile = cmdContext.resolve(param.getNewFileName());
 
     try {
       Files.move(file, newFile);
@@ -118,18 +117,13 @@ public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> 
    * @param param the parameter
    */
   private void renameThumb(RenameFileParameter param, CommandContext cmdContext) {
-    Path thumbnailPath = cmdContext.getType().getThumbnailPath();
-    if (thumbnailPath != null) {
-      Path thumbFile = getPath(thumbnailPath, cmdContext.getCurrentFolder(),
-              param.getFileName());
-      Path newThumbFile = getPath(cmdContext.getType().getThumbnailPath(), cmdContext.getCurrentFolder(),
-              param.getNewFileName());
-
+    cmdContext.resolveThumbnail(param.getFileName()).ifPresent(thumbFile -> {
+      Path newThumbFile = cmdContext.resolveThumbnail(param.getNewFileName()).get();
       try {
         Files.move(thumbFile, newThumbFile);
       } catch (IOException ignored) {
       }
-    }
+    });
   }
 
   @Override

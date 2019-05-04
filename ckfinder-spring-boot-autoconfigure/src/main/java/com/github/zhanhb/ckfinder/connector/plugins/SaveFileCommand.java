@@ -53,8 +53,7 @@ public class SaveFileCommand extends BaseXmlCommand<SaveFileParameter> implement
       cmdContext.throwException(ErrorCode.INVALID_REQUEST);
     }
 
-    Path sourceFile = getPath(cmdContext.getType().getPath(),
-            cmdContext.getCurrentFolder(), param.getFileName());
+    Path sourceFile = cmdContext.resolve(param.getFileName());
 
     if (!Files.isRegularFile(sourceFile)) {
       cmdContext.throwException(ErrorCode.FILE_NOT_FOUND);

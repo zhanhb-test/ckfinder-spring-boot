@@ -20,8 +20,6 @@ import com.github.zhanhb.ckfinder.connector.api.ResourceType;
 import com.github.zhanhb.ckfinder.connector.support.CommandContext;
 import com.github.zhanhb.ckfinder.connector.utils.PathUtils;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -31,7 +29,7 @@ import org.springframework.util.StringUtils;
 /**
  * Base class for all command handlers.
  *
- * @param <T> parameter type
+ * @param <T> parameter resource
  */
 public abstract class BaseCommand<T> implements Command {
 
@@ -66,20 +64,8 @@ public abstract class BaseCommand<T> implements Command {
     String userRole = getUserRole(request, context);
     String currentFolder = checkRequestPath(getCurrentFolder(request));
 
-    if (context.isDirectoryHidden(currentFolder)) {
-      throw new ConnectorException(ErrorCode.INVALID_REQUEST);
-    }
-
-    String typeName = request.getParameter("type");
-    ResourceType type = context.getResource(typeName);
-    if (currentFolder != null && typeName != null && type != null) {
-      Path currDir = getPath(type.getPath(), currentFolder);
-      if (!Files.isDirectory(currDir)) {
-        throw new ConnectorException(ErrorCode.FOLDER_NOT_FOUND);
-      }
-    }
-    return CommandContext.builder().cfCtx(context).userRole(userRole)
-            .currentFolder(currentFolder).type(type).build();
+    ResourceType resource = context.getResource(request.getParameter("type"));
+    return new CommandContext(context, userRole, currentFolder, resource);
   }
 
   /**
@@ -130,11 +116,6 @@ public abstract class BaseCommand<T> implements Command {
     } else {
       return "/";
     }
-  }
-
-  @SuppressWarnings("FinalMethod")
-  protected final Path getPath(Path first, String... more) {
-    return first.getFileSystem().getPath(first.toString(), more);
   }
 
   @Override

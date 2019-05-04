@@ -45,18 +45,18 @@ public class DeleteFolderCommand extends BaseXmlCommand<ErrorListXmlParameter> i
       cmdContext.throwException(ErrorCode.INVALID_REQUEST);
     }
 
-    Path dir = getPath(cmdContext.getType().getPath(), cmdContext.getCurrentFolder());
+    Path dir = cmdContext.toPath();
 
     if (!Files.isDirectory(dir)) {
       cmdContext.throwException(ErrorCode.FOLDER_NOT_FOUND);
     }
 
     if (FileUtils.delete(dir)) {
-      Path thumbnailPath = cmdContext.getType().getThumbnailPath();
-      if (thumbnailPath != null) {
-        Path thumbDir = getPath(thumbnailPath, cmdContext.getCurrentFolder());
-        FileUtils.delete(thumbDir);
-      }
+      log.debug("delete directory '{}'", dir);
+      cmdContext.toThumbnail().ifPresent(tdir -> {
+        log.debug("prepare delete thumbnail directory '{}'", tdir);
+        FileUtils.delete(tdir);
+      });
     } else {
       cmdContext.throwException(ErrorCode.ACCESS_DENIED);
     }

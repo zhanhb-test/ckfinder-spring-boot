@@ -18,6 +18,7 @@ import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.support.CommandContext;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import com.github.zhanhb.ckfinder.connector.utils.ImageUtils;
+import com.github.zhanhb.ckfinder.connector.utils.PathUtils;
 import com.github.zhanhb.ckfinder.download.ContentDisposition;
 import com.github.zhanhb.ckfinder.download.PathPartial;
 import java.io.IOException;
@@ -55,7 +56,7 @@ public class ThumbnailCommand extends BaseCommand<String> {
       cmdContext.throwException(ErrorCode.FILE_NOT_FOUND);
     }
 
-    Path fullCurrentPath = getPath(cmdContext.getType().getThumbnailPath(), cmdContext.getCurrentFolder());
+    Path fullCurrentPath = cmdContext.toThumbnail().get();
     log.debug("typeThumbDir: {}", fullCurrentPath);
 
     try {
@@ -64,11 +65,11 @@ public class ThumbnailCommand extends BaseCommand<String> {
     } catch (IOException e) {
       throw new ConnectorException(ErrorCode.ACCESS_DENIED, e);
     }
-    Path thumbFile = getPath(fullCurrentPath, fileName);
+    Path thumbFile = PathUtils.resolve(fullCurrentPath, fileName);
     log.debug("thumbFile: {}", thumbFile);
 
     if (!Files.exists(thumbFile)) {
-      Path originFile = getPath(cmdContext.getType().getPath(),
+      Path originFile = PathUtils.resolve(cmdContext.getType().getPath(),
               cmdContext.getCurrentFolder(), fileName);
       log.debug("orginFile: {}", originFile);
       if (!Files.exists(originFile)) {

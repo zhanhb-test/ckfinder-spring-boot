@@ -11,8 +11,12 @@
  */
 package com.github.zhanhb.ckfinder.connector.api;
 
+import com.github.zhanhb.ckfinder.connector.utils.PathUtils;
 import java.nio.file.Path;
+import java.util.Optional;
+import javax.annotation.Nullable;
 import lombok.Builder;
+import lombok.NonNull;
 import lombok.Value;
 
 /**
@@ -36,6 +40,7 @@ public class ResourceType {
   /**
    * resource directory.
    */
+  @NonNull
   private Path path;
 
   /**
@@ -46,7 +51,8 @@ public class ResourceType {
   /**
    * resource directory.
    */
-  private Path thumbnailPath;
+  @Nullable
+  private Optional<Path> thumbnailPath;
 
   /**
    * list of allowed extensions in resource (separated with comma).
@@ -57,6 +63,14 @@ public class ResourceType {
    * list of denied extensions in resource (separated with comma).
    */
   private String deniedExtensions;
+
+  public Path resolve(String... names) {
+    return PathUtils.resolve(path, names);
+  }
+
+  public Optional<Path> resolveThumbnail(String... names) {
+    return thumbnailPath.map(p -> PathUtils.resolve(p, names));
+  }
 
   @SuppressWarnings("PublicInnerClass")
   public static class Builder {

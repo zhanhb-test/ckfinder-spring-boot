@@ -34,6 +34,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.Optional;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.ServletContext;
 import org.springframework.beans.factory.ObjectProvider;
@@ -200,15 +201,16 @@ public class CKFinderAutoConfiguration {
         if (type.getDeniedExtensions() != null) {
           resourceType.deniedExtensions(toString(type.getDeniedExtensions()));
         }
-        String path = StringUtils.hasLength(type.getDirectory()) ? type.getDirectory() : typeName.toLowerCase();
-        String url = StringUtils.hasLength(type.getUrl()) ? type.getUrl() : typeName.toLowerCase();
-        path = path.replace(Constants.BASE_DIR_PLACEHOLDER, "");
-        url = url.replace(Constants.BASE_URL_PLACEHOLDER, "");
+        String path = (StringUtils.hasLength(type.getDirectory()) ? type.getDirectory() : typeName.toLowerCase())
+                .replace(Constants.BASE_DIR_PLACEHOLDER, "");
+        String url = (StringUtils.hasLength(type.getUrl()) ? type.getUrl() : typeName.toLowerCase())
+                .replace(Constants.BASE_URL_PLACEHOLDER, "");
 
+        Optional<Path> thumbnailPath = Optional.ofNullable(thumbnail).map(ThumbnailProperties::getPath).map(p -> PathUtils.resolve(p, path));
         builder.type(typeName, resourceType.maxSize(type.getMaxSize().toBytes())
-                .path(Files.createDirectories(getPath(basePath, path)))
+                .path(Files.createDirectories(PathUtils.resolve(basePath, path)))
                 .url(PathUtils.normalizeUrl(baseUrl + url))
-                .thumbnailPath(getPath(thumbnail != null ? thumbnail.getPath() : null, path)).build());
+                .thumbnailPath(thumbnailPath).build());
       }
     }
 
@@ -251,7 +253,7 @@ public class CKFinderAutoConfiguration {
     }
 
     private Path getPath(Path first, String... more) {
-      return first == null ? null : first.getFileSystem().getPath(first.toString(), more);
+      return first == null ? null : PathUtils.resolve(first, more);
     }
 
   }

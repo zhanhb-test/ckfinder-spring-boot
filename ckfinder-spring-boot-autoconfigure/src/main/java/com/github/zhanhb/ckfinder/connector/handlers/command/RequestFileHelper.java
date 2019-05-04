@@ -1,10 +1,8 @@
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
-import com.github.zhanhb.ckfinder.connector.api.ResourceType;
 import com.github.zhanhb.ckfinder.connector.support.FilePostParam;
 import java.util.List;
-import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 /**

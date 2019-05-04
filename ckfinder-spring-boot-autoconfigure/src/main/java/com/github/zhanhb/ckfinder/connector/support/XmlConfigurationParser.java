@@ -23,6 +23,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.StringTokenizer;
 import java.util.stream.Collectors;
 import javax.xml.parsers.DocumentBuilder;
@@ -512,14 +513,18 @@ public enum XmlConfigurationParser {
     }
     url = basePathBuilder.getBaseUrl() + url.replace(Constants.BASE_URL_PLACEHOLDER, "");
     url = PathUtils.normalizeUrl(url);
-    path = path.replace(Constants.BASE_DIR_PLACEHOLDER, "");
+    String tpath = path.replace(Constants.BASE_DIR_PLACEHOLDER, "");
 
     Path p = getPath(basePathBuilder.getBasePath(), path);
     if (!p.isAbsolute()) {
       throw new ConnectorException(ErrorCode.FOLDER_NOT_FOUND,
               "Resource directory could not be created using specified path.");
     }
-    return builder.url(url).path(Files.createDirectories(p)).thumbnailPath(getPath(thumbnail != null ? thumbnail.getPath() : null, path)).build();
+    Optional<Path> thumbnailPath = Optional.ofNullable(thumbnail).map(ThumbnailProperties::getPath).map(f -> PathUtils.resolve(f, tpath));
+    return builder
+            .url(url)
+            .path(Files.createDirectories(p))
+            .thumbnailPath(thumbnailPath).build();
   }
 
   /**

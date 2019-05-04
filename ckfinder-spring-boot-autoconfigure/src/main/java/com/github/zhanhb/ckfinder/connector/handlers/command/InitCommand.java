@@ -163,7 +163,7 @@ public class InitCommand extends XmlCommand<String> {
       int acl = cmdContext.getAcl(resourceType, "/");
       if ((acl & AccessControl.FOLDER_VIEW) != 0) {
         long maxSize = resourceType.getMaxSize();
-        boolean hasChildren = FileUtils.hasChildren(context.getAccessControl(), "/", getPath(resourceType.getPath()), context, resourceType.getName(), cmdContext.getUserRole());
+        boolean hasChildren = FileUtils.hasChildren(context.getAccessControl(), "/", resourceType.getPath(), context, resourceType.getName(), cmdContext.getUserRole());
         resourceTypes.resourceType(com.github.zhanhb.ckfinder.connector.handlers.response.ResourceType.builder()
                 .name(resourceType.getName())
                 .acl(acl)

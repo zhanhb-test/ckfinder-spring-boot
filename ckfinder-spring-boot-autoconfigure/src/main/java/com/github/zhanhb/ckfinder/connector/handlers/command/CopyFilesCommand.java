@@ -94,10 +94,8 @@ public class CopyFilesCommand extends ErrorListXmlCommand<CopyMoveParameter> imp
         continue;
       }
 
-      Path sourceFile = getPath(file.getType().getPath(),
-              file.getFolder(), file.getName());
-      Path destFile = getPath(cmdContext.getType().getPath(),
-              cmdContext.getCurrentFolder(), file.getName());
+      Path sourceFile = file.toPath();
+      Path destFile = cmdContext.resolve(file.getName());
 
       BasicFileAttributes attrs;
       try {
@@ -199,18 +197,20 @@ public class CopyFilesCommand extends ErrorListXmlCommand<CopyMoveParameter> imp
    * @param relation
    */
   private void copyThumb(FilePostParam file, Path relation) {
-    Path thumbnailPath = file.getType().getThumbnailPath();
-    if (thumbnailPath != null) {
-      Path sourceThumbFile = getPath(thumbnailPath, file.getFolder(), file.getName());
+    file.toThumbnailPath().ifPresent(sourceThumbFile -> {
       Path destThumbFile = sourceThumbFile.resolve(relation).normalize();
 
       log.debug("copy thumb from '{}' to '{}'", sourceThumbFile, destThumbFile);
       try {
+        Path dir = destThumbFile.getParent();
+        if (dir != null) {
+          Files.createDirectories(dir);
+        }
         Files.copy(sourceThumbFile, destThumbFile, StandardCopyOption.REPLACE_EXISTING);
       } catch (IOException ex) {
-        log.error("{}", ex.getMessage());
+        log.info("copy thumbnail failed", ex);
       }
-    }
+    });
   }
 
   @Override

@@ -5,21 +5,42 @@ import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.api.ResourceType;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.Set;
-import lombok.Builder;
 import lombok.Getter;
 
-@Builder(toBuilder = true)
 @Getter
 public class CommandContext {
 
   private final CKFinderContext cfCtx;
   private final String userRole;
-  private final ResourceType type;
   private final String currentFolder;
+  private final ResourceType type;
+
+  public CommandContext(CKFinderContext context, String userRole,
+          String currentFolder, ResourceType type) throws ConnectorException {
+    if (context.isDirectoryHidden(currentFolder)) {
+      throw new ConnectorException(ErrorCode.INVALID_REQUEST);
+    }
+
+    if (currentFolder != null && type != null) {
+      if (!"/".equals(currentFolder)) {
+        Path currDir = type.resolve(currentFolder);
+        if (!Files.isDirectory(currDir)) {
+          throw new ConnectorException(ErrorCode.FOLDER_NOT_FOUND);
+        }
+      }
+    }
+    this.cfCtx = context;
+    this.userRole = userRole;
+    this.currentFolder = currentFolder;
+    this.type = type;
+  }
 
   public void setResourceType(Connector.Builder builder) {
     if (type != null) {
@@ -78,6 +99,22 @@ public class CommandContext {
 
   public void checkAllPermission(int acl) throws ConnectorException {
     checkAllPermission(type, currentFolder, acl);
+  }
+
+  public Path resolve(String fileName) {
+    return type.resolve(currentFolder, fileName);
+  }
+
+  public Path toPath() {
+    return type.resolve(currentFolder);
+  }
+
+  public Optional<Path> toThumbnail() {
+    return type.resolveThumbnail(currentFolder);
+  }
+
+  public Optional<Path> resolveThumbnail(String name) {
+    return type.resolveThumbnail(currentFolder, name);
   }
 
 }

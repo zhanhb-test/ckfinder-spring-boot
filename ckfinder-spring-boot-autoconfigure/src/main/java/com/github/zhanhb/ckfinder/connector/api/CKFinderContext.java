@@ -12,7 +12,6 @@
 package com.github.zhanhb.ckfinder.connector.api;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.Set;
 import javax.annotation.Nullable;
 
@@ -34,6 +33,7 @@ public interface CKFinderContext extends CommandFactory, EventHandler, LicenseFa
    * @param typeName the type name of the resource
    * @return resource configuration
    */
+  @Nullable
   ResourceType getResource(String typeName);
 
   /**

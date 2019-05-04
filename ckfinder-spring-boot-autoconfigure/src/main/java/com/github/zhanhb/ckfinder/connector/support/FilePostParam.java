@@ -12,6 +12,8 @@
 package com.github.zhanhb.ckfinder.connector.support;
 
 import com.github.zhanhb.ckfinder.connector.api.ResourceType;
+import java.nio.file.Path;
+import java.util.Optional;
 import lombok.Builder;
 import lombok.Value;
 
@@ -27,5 +29,13 @@ public class FilePostParam {
   private String name;
   private String options;
   private ResourceType type;
+
+  public Path toPath() {
+    return type.resolve(folder, name);
+  }
+
+  public Optional<Path> toThumbnailPath() {
+    return type.resolveThumbnail(folder, name);
+  }
 
 }

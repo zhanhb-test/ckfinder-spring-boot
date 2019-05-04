@@ -11,6 +11,7 @@
  */
 package com.github.zhanhb.ckfinder.connector.support;
 
+import com.github.zhanhb.ckfinder.connector.api.AccessControl;
 import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ExceptionHandler;
@@ -42,18 +43,17 @@ public enum XmlExceptionHandler implements ExceptionHandler {
     Connector.Builder connector = Connector.builder();
     String currentFolder = connectorException.getCurrentFolder();
     ResourceType type = connectorException.getType();
-    CommandContext cmdContext = CommandContext.builder().cfCtx(context).type(type)
-            .currentFolder(currentFolder).userRole(userRole).build();
 
     int errorNum = connectorException.getErrorCode().getCode();
 
     if (type != null) {
-      cmdContext.setResourceType(connector);
+      connector.resourceType(type.getName());
       if (StringUtils.hasLength(currentFolder)) {
+        AccessControl ac = context.getAccessControl();
         connector.currentFolder(CurrentFolder.builder()
                 .path(currentFolder)
                 .url(type.getUrl() + currentFolder)
-                .acl(cmdContext.getAcl())
+                .acl(ac.getAcl(type.getName(), currentFolder, userRole))
                 .build());
       }
     }

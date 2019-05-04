@@ -185,11 +185,10 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
           Collection<MultipartFile> parts = resolveMultipart.getFileMap().values();
           //noinspection LoopStatementThatDoesntLoop
           for (MultipartFile part : parts) {
-            Path path = getPath(cmdContext.getType().getPath(),
-                    cmdContext.getCurrentFolder());
+            Path path = cmdContext.toPath();
             param.setFileName(getFileItemName(part));
-            validateUploadItem(part, path, param, cmdContext);
-            saveTemporaryFile(path, part, param, cmdContext);
+            validateUploadItem(part, param, cmdContext);
+            saveTemporaryFile(part, param, cmdContext);
             return;
           }
         } finally {
@@ -209,18 +208,17 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
   /**
    * saves temporary file in the correct file path.
    *
-   * @param path path to save file
-   * @param item file upload item
+=   * @param item file upload item
    * @param param the parameter
    * @param cmdContext command context
    * @throws IOException when IO Exception occurs.
    * @throws ConnectorException when error occurs
    */
-  private void saveTemporaryFile(Path path, MultipartFile item,
+  private void saveTemporaryFile(MultipartFile item,
           FileUploadParameter param, CommandContext cmdContext)
           throws IOException, ConnectorException {
     CKFinderContext context = cmdContext.getCfCtx();
-    Path file = getPath(path, param.getNewFileName());
+    Path file = cmdContext.resolve(param.getNewFileName());
 
     if (ImageUtils.isImageExtension(file)) {
       if (!context.isCheckSizeAfterScaling()
@@ -244,13 +242,13 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
   /**
    * if file exists this method adds (number) to file.
    *
-   * @param path folder
+   * @param cmdContext command context
    * @param param the parameter
    * @return new file name.
    */
-  private String getFinalFileName(Path path, FileUploadParameter param) {
+  private String getFinalFileName(CommandContext cmdContext, FileUploadParameter param) {
     String name = param.getNewFileName();
-    Path file = getPath(path, name);
+    Path file = cmdContext.resolve(name);
 
     String nameWithoutExtension = FileUtils.getNameWithoutLongExtension(name);
 
@@ -265,7 +263,7 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
         sb.append(number).append(suffix);
         name = sb.toString();
         sb.setLength(len);
-        file = getPath(path, name);
+        file = cmdContext.resolve(name);
       } while (Files.exists(file));
       param.setErrorCode(ErrorCode.UPLOADED_FILE_RENAMED);
       param.setNewFileName(name);
@@ -277,12 +275,11 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
    * validates uploaded file.
    *
    * @param item uploaded item.
-   * @param path file path
    * @param param the parameter
    * @param cmdContext command context
    * @throws ConnectorException when error occurs
    */
-  private void validateUploadItem(MultipartFile item, Path path,
+  private void validateUploadItem(MultipartFile item,
           FileUploadParameter param, CommandContext cmdContext) throws ConnectorException {
     CKFinderContext context = cmdContext.getCfCtx();
     if (item.getOriginalFilename() == null || item.getOriginalFilename().length() <= 0) {
@@ -318,7 +315,7 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
       param.setNewFileName(FileUtils.renameFileWithBadExt(resourceType, param.getNewFileName()));
     }
 
-    Path file = getPath(path, getFinalFileName(path, param));
+    Path file = cmdContext.resolve(getFinalFileName(cmdContext, param));
     if ((!ImageUtils.isImageExtension(file) || !context.isCheckSizeAfterScaling())
             && FileUtils.isFileSizeOutOfRange(resourceType, item.getSize())) {
       param.throwException(ErrorCode.UPLOADED_TOO_BIG);

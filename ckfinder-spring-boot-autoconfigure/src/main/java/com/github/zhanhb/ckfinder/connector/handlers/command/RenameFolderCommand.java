@@ -60,13 +60,12 @@ public class RenameFolderCommand extends BaseXmlCommand<String> implements IPost
       cmdContext.throwException(ErrorCode.INVALID_REQUEST);
     }
 
-    Path dir = getPath(cmdContext.getType().getPath(),
-            cmdContext.getCurrentFolder());
+    Path dir = cmdContext.toPath();
     if (!Files.isDirectory(dir)) {
       cmdContext.throwException(ErrorCode.INVALID_REQUEST);
     }
     String newFolderPath = toNewFolder(newFolderName, cmdContext);
-    Path newDir = getPath(cmdContext.getType().getPath(),
+    Path newDir = PathUtils.resolve(cmdContext.getType().getPath(),
             newFolderPath);
     if (Files.exists(newDir)) {
       cmdContext.throwException(ErrorCode.ALREADY_EXIST);
@@ -90,15 +89,13 @@ public class RenameFolderCommand extends BaseXmlCommand<String> implements IPost
    * @param newFolderPath
    */
   private void renameThumb(String newFolderPath, CommandContext cmdContext) {
-    Path thumbnailPath = cmdContext.getType().getThumbnailPath();
-    if (thumbnailPath != null) {
-      Path thumbDir = getPath(thumbnailPath, cmdContext.getCurrentFolder());
-      Path newThumbDir = getPath(cmdContext.getType().getThumbnailPath(), newFolderPath);
+    cmdContext.toThumbnail().ifPresent(thumbDir -> {
+      Path newThumbDir = cmdContext.resolveThumbnail(newFolderPath).get();
       try {
         Files.move(thumbDir, newThumbDir);
       } catch (IOException ignored) {
       }
-    }
+    });
   }
 
   /**

@@ -60,7 +60,7 @@ public class GetFilesCommand extends BaseXmlCommand<String> {
     cmdContext.checkType();
     cmdContext.checkAllPermission(AccessControl.FILE_VIEW);
 
-    Path dir = getPath(cmdContext.getType().getPath(), cmdContext.getCurrentFolder());
+    Path dir = cmdContext.toPath();
 
     if (!Files.isDirectory(dir)) {
       cmdContext.throwException(ErrorCode.FOLDER_NOT_FOUND);
@@ -83,7 +83,8 @@ public class GetFilesCommand extends BaseXmlCommand<String> {
    * @param showThumbs the request parameter showThumbs
    * @param cmdContext command context
    */
-  private void createFilesData(List<Path> list, Connector.Builder rootElement, String showThumbs, CommandContext cmdContext) {
+  private void createFilesData(List<Path> list, Connector.Builder rootElement,
+          String showThumbs, CommandContext cmdContext) {
     CKFinderContext context = cmdContext.getCfCtx();
     com.github.zhanhb.ckfinder.connector.handlers.response.Files.Builder files = com.github.zhanhb.ckfinder.connector.handlers.response.Files.builder();
     for (Path file : list) {
@@ -120,13 +121,14 @@ public class GetFilesCommand extends BaseXmlCommand<String> {
    */
   private String createThumbAttr(Path file, String showThumbs, CommandContext cmdContext) {
     if (ImageUtils.isImageExtension(file) && isAddThumbsAttr(showThumbs, cmdContext.getCfCtx().getThumbnail())) {
-      Path thumbFile = getPath(cmdContext.getType().getThumbnailPath(), cmdContext.getCurrentFolder(),
-              file.getFileName().toString());
-      if (Files.exists(thumbFile)) {
-        return file.getFileName().toString();
-      } else if (requestShowThumbs(showThumbs)) {
-        return "?".concat(file.getFileName().toString());
-      }
+      return cmdContext.resolveThumbnail(file.getFileName().toString()).map(thumbFile -> {
+        if (Files.exists(thumbFile)) {
+          return file.getFileName().toString();
+        } else if (requestShowThumbs(showThumbs)) {
+          return "?".concat(file.getFileName().toString());
+        }
+        return null;
+      }).orElse(null);
     }
     return null;
   }

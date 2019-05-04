@@ -23,6 +23,7 @@ import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.support.CommandContext;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import com.github.zhanhb.ckfinder.connector.utils.ImageUtils;
+import com.github.zhanhb.ckfinder.connector.utils.PathUtils;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -60,7 +61,7 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> imp
       cmdContext.throwException(ErrorCode.INVALID_REQUEST);
     }
 
-    Path file = getPath(cmdContext.getType().getPath(), cmdContext.getCurrentFolder(), fileName);
+    Path file = PathUtils.resolve(cmdContext.getType().getPath(), cmdContext.getCurrentFolder(), fileName);
     if (!Files.isRegularFile(file)) {
       cmdContext.throwException(ErrorCode.FILE_NOT_FOUND);
     }
@@ -80,7 +81,7 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> imp
         cmdContext.throwException(ErrorCode.INVALID_EXTENSION);
       }
 
-      Path thumbFile = getPath(cmdContext.getType().getPath(), cmdContext.getCurrentFolder(), newFileName);
+      Path thumbFile = cmdContext.resolve(newFileName);
 
       if (Files.exists(thumbFile) && !Files.isWritable(thumbFile)) {
         cmdContext.throwException(ErrorCode.ACCESS_DENIED);
@@ -110,7 +111,7 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> imp
     for (ImageResizeParam key : ImageResizeParam.values()) {
       if ("1".equals(param.getSizesFromReq().get(key))) {
         String thumbName = fileNameWithoutExt + "_" + key.getParameter() + "." + fileExt;
-        Path thumbFile = getPath(cmdContext.getType().getPath(), cmdContext.getCurrentFolder(), thumbName);
+        Path thumbFile = cmdContext.resolve(thumbName);
         ImageResizeSize size = pluginParams.get(key);
         if (size != null) {
           try {

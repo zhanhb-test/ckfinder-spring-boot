@@ -61,8 +61,7 @@ public class CreateFolderCommand extends BaseXmlCommand<String> implements IPost
       cmdContext.throwException(ErrorCode.INVALID_NAME);
     }
 
-    Path dir = getPath(cmdContext.getType().getPath(),
-            cmdContext.getCurrentFolder(), newFolderName);
+    Path dir = cmdContext.resolve(newFolderName);
     if (Files.exists(dir)) {
       cmdContext.throwException(ErrorCode.ALREADY_EXIST);
     }

@@ -60,7 +60,7 @@ public class DownloadFileCommand extends BaseCommand<String> {
       cmdContext.throwException(ErrorCode.FILE_NOT_FOUND);
     }
 
-    Path file = getPath(cmdContext.getType().getPath(), cmdContext.getCurrentFolder(), fileName);
+    Path file = cmdContext.resolve(fileName);
 
     response.setHeader("Cache-Control", "cache, must-revalidate");
     response.setHeader("Pragma", "public");

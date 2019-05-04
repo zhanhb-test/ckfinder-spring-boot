@@ -44,7 +44,7 @@ public class GetFoldersCommand extends BaseXmlCommand<Void> {
       cmdContext.throwException(ErrorCode.INVALID_REQUEST);
     }
 
-    Path dir = getPath(cmdContext.getType().getPath(), cmdContext.getCurrentFolder());
+    Path dir = cmdContext.toPath();
 
     if (!Files.isDirectory(dir)) {
       cmdContext.throwException(ErrorCode.FOLDER_NOT_FOUND);

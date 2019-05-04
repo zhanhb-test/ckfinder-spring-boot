@@ -49,9 +49,7 @@ public class ImageResizeInfoCommand extends BaseXmlCommand<String> {
       cmdContext.throwException(ErrorCode.INVALID_REQUEST);
     }
 
-    Path imageFile = getPath(cmdContext.getType().getPath(),
-            cmdContext.getCurrentFolder(),
-            fileName);
+    Path imageFile = cmdContext.resolve(fileName);
 
     try {
       if (!Files.isRegularFile(imageFile)) {
