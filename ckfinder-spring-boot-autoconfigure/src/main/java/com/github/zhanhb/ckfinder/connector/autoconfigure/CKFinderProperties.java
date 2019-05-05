@@ -32,6 +32,7 @@ public class CKFinderProperties {
   private Thumbs thumbs = new Thumbs();
   private boolean disallowUnsafeCharacters = false;
   private boolean allowDoubleExtension = false;
+  private boolean csrf = true;
   private boolean checkSizeAfterScaling = true;
   private boolean secureImageUploads = true;
   private boolean forceAscii = false;

@@ -160,6 +160,9 @@ public enum XmlConfigurationParser {
           case "checkSizeAfterScaling":
             builder.checkSizeAfterScaling(Boolean.parseBoolean(nullNodeToString(childNode)));
             break;
+          case "enableCsrfProtection":
+            builder.csrf(Boolean.parseBoolean(nullNodeToString(childNode)));
+            break;
           case "secureImageUploads":
             builder.secureImageUploads(Boolean.parseBoolean(nullNodeToString(childNode)));
             break;

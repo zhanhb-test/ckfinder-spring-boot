@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import lombok.Getter;
 import org.springframework.util.StringUtils;
 
@@ -167,6 +169,40 @@ public class CommandContext {
       checkAllPermission(resource, folder,
               requireAccess);
     }
+  }
+
+  private String nullToEmpty(String s) {
+    return s != null ? s : "";
+  }
+
+  /**
+   * Checks if the request contains a valid CSRF token that matches the value
+   * sent in the cookie.<br>
+   *
+   * @see
+   * <a href="https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)_Prevention_Cheat_Sheet#Double_Submit_Cookies">Cross-Site_Request_Forgery_(CSRF)_Prevention</a>
+   *
+   * @param request current request object parameter
+   */
+  public void checkCsrfToken(final HttpServletRequest request) throws ConnectorException {
+    final String tokenParamName = "ckCsrfToken";
+    final String tokenCookieName = "ckCsrfToken";
+    final int minTokenLength = 32;
+    final String paramToken = nullToEmpty(request.getParameter(tokenParamName)).trim();
+
+    Cookie[] cookies = request.getCookies();
+    String cookieToken = "";
+    for (Cookie cookie : cookies) {
+      if (cookie.getName().equals(tokenCookieName)) {
+        cookieToken = nullToEmpty(cookie.getValue()).trim();
+        break;
+      }
+    }
+    if (paramToken.length() >= minTokenLength && cookieToken.length() >= minTokenLength
+            && paramToken.equals(cookieToken)) {
+      return;
+    }
+    throw new ConnectorException(ErrorCode.INVALID_REQUEST, "CSRF Attempt");
   }
 
   private interface InvalidPathHolder {

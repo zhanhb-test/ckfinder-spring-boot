@@ -65,6 +65,7 @@ public class DefaultCKFinderContext implements CKFinderContext {
   @Singular
   private Set<String> defaultResourceTypes;
   private boolean disallowUnsafeCharacters;
+  private boolean csrf;
   @Delegate
   @NonNull
   private EventHandler events;
@@ -134,6 +135,8 @@ public class DefaultCKFinderContext implements CKFinderContext {
   public static class Builder {
 
     Builder() {
+      csrf = true;
+      checkSizeAfterScaling = true;
       userRoleName = "";
     }
 

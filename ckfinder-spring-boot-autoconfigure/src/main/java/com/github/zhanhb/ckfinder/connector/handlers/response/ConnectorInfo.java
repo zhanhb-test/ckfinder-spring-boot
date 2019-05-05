@@ -39,6 +39,8 @@ public class ConnectorInfo extends Result implements ConnectorElement {
   private int imgWidth;
   @XmlAttribute(name = "imgHeight")
   private int imgHeight;
+  @XmlAttribute(name = "csrfProtection")
+  private boolean csrfProtection;
   @XmlAttribute(name = "uploadCheckImages")
   private boolean uploadCheckImages;
   @XmlAttribute(name = "plugins")

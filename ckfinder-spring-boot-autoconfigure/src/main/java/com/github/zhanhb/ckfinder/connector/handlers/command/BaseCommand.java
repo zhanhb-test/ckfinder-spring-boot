@@ -65,7 +65,11 @@ public abstract class BaseCommand<T> implements Command {
     String currentFolder = checkRequestPath(getCurrentFolder(request));
 
     ResourceType resource = context.getResource(request.getParameter("type"));
-    return new CommandContext(context, userRole, currentFolder, resource);
+    CommandContext cmdContext = new CommandContext(context, userRole, currentFolder, resource);
+    if (this instanceof IPostCommand) {
+      cmdContext.checkCsrfToken(request);
+    }
+    return cmdContext;
   }
 
   /**
