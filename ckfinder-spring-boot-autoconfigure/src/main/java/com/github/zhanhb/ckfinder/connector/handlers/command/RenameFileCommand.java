@@ -27,6 +27,7 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.StringUtils;
 
 /**
  * Class to handle <code>RenameFile</code> command.
@@ -63,8 +64,8 @@ public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> 
       param.setNewFileName(FileUtils.convertToAscii(param.getNewFileName()));
     }
 
-    if (param.getFileName() != null && !param.getFileName().isEmpty()
-            && param.getNewFileName() != null && !param.getNewFileName().isEmpty()) {
+    if (!StringUtils.isEmpty(param.getFileName())
+            && !StringUtils.isEmpty(param.getNewFileName())) {
       param.setAddResultNode(true);
     }
 
@@ -120,6 +121,7 @@ public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> 
     cmdContext.resolveThumbnail(param.getFileName()).ifPresent(thumbFile -> {
       Path newThumbFile = cmdContext.resolveThumbnail(param.getNewFileName()).get();
       try {
+        log.debug("remove thumb '{}'->'{}'", thumbFile, newThumbFile);
         Files.move(thumbFile, newThumbFile);
       } catch (IOException ignored) {
       }

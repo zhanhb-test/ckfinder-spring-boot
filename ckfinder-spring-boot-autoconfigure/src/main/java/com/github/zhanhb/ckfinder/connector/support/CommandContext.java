@@ -2,18 +2,23 @@ package com.github.zhanhb.ckfinder.connector.support;
 
 import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
+import com.github.zhanhb.ckfinder.connector.api.Constants;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.api.ResourceType;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
+import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Pattern;
 import lombok.Getter;
+import org.springframework.util.StringUtils;
 
 @Getter
 public class CommandContext {
@@ -65,7 +70,7 @@ public class CommandContext {
     } else {
       if (!cfCtx.getDefaultResourceTypes().isEmpty()) {
         Set<String> defaultResourceTypes = cfCtx.getDefaultResourceTypes();
-        ArrayList<ResourceType> list = new ArrayList<>(defaultResourceTypes.size());
+        List<ResourceType> list = new ArrayList<>(defaultResourceTypes.size());
         for (String key : defaultResourceTypes) {
           ResourceType resourceType = cfCtx.getResource(key);
           if (resourceType != null) {
@@ -83,7 +88,7 @@ public class CommandContext {
     return cfCtx.getAccessControl().getAcl(resourceType.getName(), path, userRole);
   }
 
-  public boolean hasAllPermission(ResourceType resourceType, String path, int acl) {
+  private boolean hasAllPermission(ResourceType resourceType, String path, int acl) {
     return (getAcl(resourceType, path) & acl) == acl;
   }
 
@@ -132,6 +137,42 @@ public class CommandContext {
       }
     }
     return dir;
+  }
+
+  public void checkFilePostParam(Collection<FilePostParam> files, int requireAccess)
+          throws ConnectorException {
+    CKFinderContext context = cfCtx;
+    for (FilePostParam file : files) {
+      ResourceType resource = file.getType();
+      String folder = file.getFolder();
+      String name = file.getName();
+      if (!FileUtils.isFileNameValid(name)) {
+        throwException(ErrorCode.INVALID_REQUEST);
+      }
+      if (InvalidPathHolder.INVALID_PATH.matcher(folder).find()) {
+        throwException(ErrorCode.INVALID_REQUEST);
+      }
+      if (resource == null) {
+        throwException(ErrorCode.INVALID_REQUEST);
+      }
+      if (StringUtils.isEmpty(folder)) {
+        throwException(ErrorCode.INVALID_REQUEST);
+      }
+      if (context.isDirectoryHidden(folder)) {
+        throwException(ErrorCode.INVALID_REQUEST);
+      }
+      if (context.isFileHidden(name)) {
+        throwException(ErrorCode.INVALID_REQUEST);
+      }
+      checkAllPermission(resource, folder,
+              requireAccess);
+    }
+  }
+
+  private interface InvalidPathHolder {
+
+    Pattern INVALID_PATH = Pattern.compile(Constants.INVALID_PATH_REGEX);
+
   }
 
 }

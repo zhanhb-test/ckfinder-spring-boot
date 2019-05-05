@@ -421,7 +421,7 @@ public enum XmlConfigurationParser {
           try {
             thumbnail.maxHeight(Integer.valueOf(width));
           } catch (NumberFormatException e) {
-            thumbnail.maxHeight(Constants.DEFAULT_THUMB_MAX_WIDTH);
+            thumbnail.maxHeight(Constants.DEFAULT_THUMB_MAX_HEIGHT);
           }
           break;
         case "maxWidth":
@@ -430,7 +430,7 @@ public enum XmlConfigurationParser {
           try {
             thumbnail.maxWidth(Integer.valueOf(width));
           } catch (NumberFormatException e) {
-            thumbnail.maxWidth(Constants.DEFAULT_THUMB_MAX_HEIGHT);
+            thumbnail.maxWidth(Constants.DEFAULT_THUMB_MAX_WIDTH);
           }
           break;
         case "quality":

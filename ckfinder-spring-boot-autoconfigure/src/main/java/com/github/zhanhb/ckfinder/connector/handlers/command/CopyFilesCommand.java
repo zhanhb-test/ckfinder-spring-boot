@@ -14,7 +14,6 @@ package com.github.zhanhb.ckfinder.connector.handlers.command;
 import com.github.zhanhb.ckfinder.connector.api.AccessControl;
 import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
-import com.github.zhanhb.ckfinder.connector.api.Constants;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.CopyMoveParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
@@ -28,7 +27,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
@@ -49,37 +47,11 @@ public class CopyFilesCommand extends ErrorListXmlCommand<CopyMoveParameter> imp
   @Override
   protected ErrorCode getDataForXml(CopyMoveParameter param, CommandContext cmdContext)
           throws ConnectorException {
-    CKFinderContext context = cmdContext.getCfCtx();
     cmdContext.checkType();
     cmdContext.checkAllPermission(AccessControl.FILE_RENAME
             | AccessControl.FILE_DELETE
             | AccessControl.FILE_UPLOAD);
-
-    for (FilePostParam file : param.getFiles()) {
-      if (!FileUtils.isFileNameValid(file.getName())) {
-        cmdContext.throwException(ErrorCode.INVALID_REQUEST);
-      }
-      if (Pattern.compile(Constants.INVALID_PATH_REGEX).matcher(
-              file.getFolder()).find()) {
-        cmdContext.throwException(ErrorCode.INVALID_REQUEST);
-      }
-      if (file.getType() == null) {
-        cmdContext.throwException(ErrorCode.INVALID_REQUEST);
-      }
-      if (file.getFolder() == null || file.getFolder().isEmpty()) {
-        cmdContext.throwException(ErrorCode.INVALID_REQUEST);
-      }
-
-      if (context.isDirectoryHidden(file.getFolder())) {
-        cmdContext.throwException(ErrorCode.INVALID_REQUEST);
-      }
-
-      if (context.isFileHidden(file.getName())) {
-        cmdContext.throwException(ErrorCode.INVALID_REQUEST);
-      }
-
-      cmdContext.checkAllPermission(file.getType(), file.getFolder(), AccessControl.FILE_VIEW);
-    }
+    cmdContext.checkFilePostParam(param.getFiles(), AccessControl.FILE_VIEW);
 
     for (FilePostParam file : param.getFiles()) {
       if (!FileUtils.isFileExtensionAllowed(file.getName(), cmdContext.getType())) {
@@ -131,7 +103,7 @@ public class CopyFilesCommand extends ErrorListXmlCommand<CopyMoveParameter> imp
           try {
             Files.copy(sourceFile, destFile, StandardCopyOption.REPLACE_EXISTING);
           } catch (IOException ex) {
-            log.error("copy file fail", ex);
+            log.error("copy file failed", ex);
             param.appendError(file, ErrorCode.ACCESS_DENIED);
             continue;
           }

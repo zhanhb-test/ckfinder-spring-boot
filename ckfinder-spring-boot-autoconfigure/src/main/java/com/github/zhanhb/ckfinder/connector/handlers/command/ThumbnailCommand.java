@@ -37,7 +37,8 @@ public class ThumbnailCommand extends BaseCommand<String> {
 
   @Override
   @SuppressWarnings("FinalMethod")
-  final void execute(String fileName, HttpServletRequest request, HttpServletResponse response, CKFinderContext context)
+  final void execute(String fileName, HttpServletRequest request,
+          HttpServletResponse response, CKFinderContext context)
           throws ConnectorException {
     CommandContext cmdContext = populateCommandContext(request, context);
     if (context.getThumbnail() == null) {
