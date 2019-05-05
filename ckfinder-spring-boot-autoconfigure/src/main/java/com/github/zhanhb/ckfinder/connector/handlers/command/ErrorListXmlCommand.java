@@ -29,9 +29,9 @@ public abstract class ErrorListXmlCommand<T extends ErrorListXmlParameter> exten
   final Connector buildConnector(T param, CommandContext cmdContext)
           throws ConnectorException {
     Connector.Builder connector = Connector.builder();
+    cmdContext.setResourceType(connector);
     ErrorCode error = getDataForXml(param, cmdContext);
     int errorCode = error != null ? error.getCode() : 0;
-    cmdContext.setResourceType(connector);
     createCurrentFolderNode(cmdContext, connector);
     createErrorNode(connector, errorCode);
     param.addErrorsTo(connector);

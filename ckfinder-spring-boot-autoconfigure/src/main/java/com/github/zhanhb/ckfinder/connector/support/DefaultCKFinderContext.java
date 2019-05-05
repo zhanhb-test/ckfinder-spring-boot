@@ -127,7 +127,7 @@ public class DefaultCKFinderContext implements CKFinderContext {
    */
   private String buildHiddenFileOrFolderRegex(List<String> hiddenList) {
     return hiddenList.stream()
-            .map(item->item.replace(".", "\\.").replace("*", ".+").replace("?", "."))
+            .map(item -> item.replace(".", "\\.").replace("*", ".+").replace('?', '.'))
             .collect(Collectors.joining("|", "(", ")"));
   }
 

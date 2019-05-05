@@ -165,10 +165,10 @@ public class FileUtils {
   }
 
   /**
-   * check if new folder name contains disallowed chars.
+   * test if new folder name contains disallowed chars.
    *
    * @param fileName file name
-   * @return true if it does contain disallowed characters.
+   * @return true if it contains disallowed characters.
    */
   private static boolean hasInvalidCharacter(@Nonnull String fileName) {
     return InvalidFileNamePatternHolder.INVALID_FILENAME_PATTERN.matcher(fileName).find();

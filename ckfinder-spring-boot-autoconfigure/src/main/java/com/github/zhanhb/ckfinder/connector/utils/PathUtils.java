@@ -18,8 +18,7 @@ import org.springframework.util.StringUtils;
 /**
  * Utility class used to change paths in connector.
  */
-@SuppressWarnings("UtilityClassWithoutPrivateConstructor")
-public class PathUtils {
+public interface PathUtils {
 
   public static String normalize(String string) {
     return string != null ? string.replaceAll("[\\\\/]+", "/") : null;

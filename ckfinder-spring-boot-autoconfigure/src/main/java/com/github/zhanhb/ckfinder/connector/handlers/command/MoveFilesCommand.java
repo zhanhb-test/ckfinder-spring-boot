@@ -151,10 +151,10 @@ public class MoveFilesCommand extends ErrorListXmlCommand<CopyMoveParameter> imp
               + fileExtension;
       Path newDestFile = destFile.resolveSibling(newFileName);
       try {
-        log.debug("prepare move file '{}' to '{}'", sourceFile, newDestFile);
+        log.debug("move file, '{}'->'{}'", sourceFile, newDestFile);
         Files.move(sourceFile, newDestFile);
-        // can't be in one if=, because when error in
-        // move file occurs then it will be infinity loop
+        // can't be in one if, because when error in
+        // move file occurs then it will be an infinity loop
         return newDestFile;
       } catch (FileAlreadyExistsException ignored) {
       } catch (IOException ex) {
@@ -172,7 +172,7 @@ public class MoveFilesCommand extends ErrorListXmlCommand<CopyMoveParameter> imp
   private void moveThumb(FilePostParam file, Path relation) {
     file.toThumbnailPath().ifPresent(sourceThumbFile -> {
       Path destThumbFile = sourceThumbFile.resolve(relation).normalize();
-      log.debug("move thumb from '{}' to '{}'", sourceThumbFile, destThumbFile);
+      log.debug("move thumb, '{}'->'{}'", sourceThumbFile, destThumbFile);
       try {
         Path dir = destThumbFile.getParent();
         if (dir != null) {

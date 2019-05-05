@@ -35,13 +35,21 @@ import org.springframework.util.StringUtils;
 @Slf4j
 public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> implements IPostCommand {
 
-  @Override
-  protected void addResultNode(Connector.Builder rootElement, RenameFileParameter param) {
-    RenamedFile.Builder element = RenamedFile.builder().name(param.getFileName());
-    if (param.isRenamed()) {
-      element.newName(param.getNewFileName());
-    }
-    rootElement.result(element.build());
+  /**
+   * rename thumb file.
+   *
+   * @param param the parameter
+   */
+  private void renameThumb(RenameFileParameter param, CommandContext cmdContext) {
+    cmdContext.resolveThumbnail(param.getFileName()).ifPresent(thumbFile -> {
+      cmdContext.resolveThumbnail(param.getNewFileName()).ifPresent(newThumbFile -> {
+        try {
+          log.debug("remove thumb '{}'->'{}'", thumbFile, newThumbFile);
+          Files.move(thumbFile, newThumbFile);
+        } catch (IOException ignored) {
+        }
+      });
+    });
   }
 
   /**
@@ -60,40 +68,40 @@ public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> 
     cmdContext.checkType();
     cmdContext.checkAllPermission(AccessControl.FILE_RENAME);
 
+    String fileName = param.getFileName();
+    String newFileName = param.getNewFileName();
+
     if (context.isForceAscii()) {
-      param.setNewFileName(FileUtils.convertToAscii(param.getNewFileName()));
+      newFileName = FileUtils.convertToAscii(newFileName);
+      param.setNewFileName(newFileName);
     }
 
-    if (!StringUtils.isEmpty(param.getFileName())
-            && !StringUtils.isEmpty(param.getNewFileName())) {
+    if (!StringUtils.isEmpty(fileName) && !StringUtils.isEmpty(newFileName)) {
       param.setAddResultNode(true);
     }
 
-    if (!FileUtils.isFileExtensionAllowed(param.getNewFileName(), cmdContext.getType())) {
+    if (!FileUtils.isFileExtensionAllowed(newFileName, cmdContext.getType())) {
       return ErrorCode.INVALID_EXTENSION;
     }
     if (!context.isDoubleFileExtensionsAllowed()) {
-      param.setNewFileName(FileUtils.renameFileWithBadExt(cmdContext.getType(),
-              param.getNewFileName()));
+      newFileName = FileUtils.renameFileWithBadExt(cmdContext.getType(), newFileName);
+      param.setNewFileName(newFileName);
     }
 
-    if (!FileUtils.isFileNameValid(param.getFileName())
-            || context.isFileHidden(param.getFileName())) {
+    if (!FileUtils.isFileNameValid(fileName) || context.isFileHidden(fileName)) {
       return ErrorCode.INVALID_REQUEST;
     }
 
-    if (!FileUtils.isFileNameValid(param.getNewFileName(), context)
-            || context.isFileHidden(param.getNewFileName())) {
+    if (!FileUtils.isFileNameValid(newFileName, context) || context.isFileHidden(newFileName)) {
       return ErrorCode.INVALID_NAME;
     }
 
-    if (!FileUtils.isFileExtensionAllowed(param.getFileName(),
-            cmdContext.getType())) {
+    if (!FileUtils.isFileExtensionAllowed(fileName, cmdContext.getType())) {
       return ErrorCode.INVALID_REQUEST;
     }
 
-    Path file = cmdContext.resolve(param.getFileName());
-    Path newFile = cmdContext.resolve(param.getNewFileName());
+    Path file = cmdContext.resolve(fileName);
+    Path newFile = cmdContext.resolve(newFileName);
 
     try {
       Files.move(file, newFile);
@@ -109,23 +117,15 @@ public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> 
       log.error("IOException", ex);
       return ErrorCode.ACCESS_DENIED;
     }
-
   }
 
-  /**
-   * rename thumb file.
-   *
-   * @param param the parameter
-   */
-  private void renameThumb(RenameFileParameter param, CommandContext cmdContext) {
-    cmdContext.resolveThumbnail(param.getFileName()).ifPresent(thumbFile -> {
-      Path newThumbFile = cmdContext.resolveThumbnail(param.getNewFileName()).get();
-      try {
-        log.debug("remove thumb '{}'->'{}'", thumbFile, newThumbFile);
-        Files.move(thumbFile, newThumbFile);
-      } catch (IOException ignored) {
-      }
-    });
+  @Override
+  protected void addResultNode(Connector.Builder rootElement, RenameFileParameter param) {
+    RenamedFile.Builder element = RenamedFile.builder().name(param.getFileName());
+    if (param.isRenamed()) {
+      element.newName(param.getNewFileName());
+    }
+    rootElement.result(element.build());
   }
 
   @Override

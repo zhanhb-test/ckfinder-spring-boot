@@ -207,7 +207,6 @@ public class InitCommand extends XmlCommand<String> {
     return request.getServerName();
   }
 
-  @Deprecated
   @Override
   String getCurrentFolder(HttpServletRequest request) {
     return null;
