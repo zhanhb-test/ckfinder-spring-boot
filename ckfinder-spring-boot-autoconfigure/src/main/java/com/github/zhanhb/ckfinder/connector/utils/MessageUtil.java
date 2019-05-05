@@ -12,11 +12,15 @@
 package com.github.zhanhb.ckfinder.connector.utils;
 
 import java.util.Locale;
+import java.util.Optional;
 import java.util.ResourceBundle;
+import javax.annotation.Nullable;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Error utils.
  */
+@Slf4j
 public enum MessageUtil {
 
   INSTANCE;
@@ -31,10 +35,12 @@ public enum MessageUtil {
    * @param lang connector language code
    * @return localized error message.
    */
-  public String getMessage(String lang, int errorCode) {
+  public String getMessage(@Nullable String lang, int errorCode) {
+    Locale locale = Optional.ofNullable(lang).map(Locale::forLanguageTag).orElse(Locale.ROOT);
     try {
-      return ResourceBundle.getBundle(BUNDLE_NAME, Locale.forLanguageTag(lang)).getString(Integer.toString(errorCode));
+      return ResourceBundle.getBundle(BUNDLE_NAME, locale).getString(Integer.toString(errorCode));
     } catch (RuntimeException ex) {
+      log.debug("",ex);
       return "";
     }
   }

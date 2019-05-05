@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 
 @Slf4j
 public class MessageUtilTest {
@@ -14,12 +15,15 @@ public class MessageUtilTest {
   @Test
   public void testGetMessage() {
     log.info("getMessage");
-    String lang = "zh-cn";
+    String[] langs = {null, "zh-cn", "null", "***----------"};
     int errorCode = 1;
     MessageUtil instance = MessageUtil.INSTANCE;
-    String expResult = "";
-    String result = instance.getMessage(lang, errorCode);
-    assertNotEquals(expResult, result);
+    for (String lang : langs) {
+      String expResult = "";
+      String result = instance.getMessage(lang, errorCode);
+      assertNotNull(result);
+      assertNotEquals(expResult, result);
+    }
   }
 
 }
