@@ -27,6 +27,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
@@ -187,11 +188,10 @@ public class MoveFilesCommand extends ErrorListXmlCommand<CopyMoveParameter> imp
 
   @Override
   protected CopyMoveParameter popupParams(HttpServletRequest request, CKFinderContext context) {
-    CopyMoveParameter param = new CopyMoveParameter();
     String moved = request.getParameter("moved");
-    param.setAll(moved != null ? Integer.parseInt(moved) : 0);
-    RequestFileHelper.addFilesListFromRequest(request, param.getFiles(), context);
-    return param;
+    int all = moved != null ? Integer.parseInt(moved) : 0;
+    List<FilePostParam> files = RequestFileHelper.getFilesList(request, context);
+    return new CopyMoveParameter(files, all);
   }
 
 }

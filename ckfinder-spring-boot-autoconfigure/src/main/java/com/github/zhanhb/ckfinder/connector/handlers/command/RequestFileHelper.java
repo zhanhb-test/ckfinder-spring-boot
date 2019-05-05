@@ -2,6 +2,7 @@ package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.support.FilePostParam;
+import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
@@ -18,8 +19,9 @@ interface RequestFileHelper {
    * @param files uploaded files
    * @param context ckfinder context
    */
-  static void addFilesListFromRequest(HttpServletRequest request, List<FilePostParam> files,
-          CKFinderContext context) {
+  static List<FilePostParam> getFilesList(HttpServletRequest request, CKFinderContext context) {
+    @SuppressWarnings("CollectionWithoutInitialCapacity")
+    List<FilePostParam> files = new ArrayList<>();
     for (int i = 0;; ++i) {
       String paramName = "files[" + i + "][name]";
       String name = request.getParameter(paramName);
@@ -32,6 +34,7 @@ interface RequestFileHelper {
       files.add(FilePostParam.builder().name(name).folder(folder)
               .options(options).type(context.getResource(type)).build());
     }
+    return files;
   }
 
 }

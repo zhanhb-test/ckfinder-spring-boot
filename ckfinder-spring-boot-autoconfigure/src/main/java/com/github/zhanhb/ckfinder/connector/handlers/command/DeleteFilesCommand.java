@@ -24,6 +24,7 @@ import com.github.zhanhb.ckfinder.connector.support.FilePostParam;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -127,9 +128,8 @@ public class DeleteFilesCommand extends ErrorListXmlCommand<DeleteFilesParameter
    */
   @Override
   protected DeleteFilesParameter popupParams(HttpServletRequest request, CKFinderContext context) {
-    DeleteFilesParameter param = new DeleteFilesParameter();
-    RequestFileHelper.addFilesListFromRequest(request, param.getFiles(), context);
-    return param;
+    List<FilePostParam> files = RequestFileHelper.getFilesList(request, context);
+    return new DeleteFilesParameter(files);
   }
 
 }
