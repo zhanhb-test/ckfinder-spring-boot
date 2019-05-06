@@ -11,75 +11,48 @@
  */
 package com.github.zhanhb.ckfinder.connector.api;
 
-import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import java.nio.file.Path;
 import java.util.Optional;
-import javax.annotation.Nullable;
-import lombok.Builder;
-import lombok.NonNull;
-import lombok.Value;
+import javax.annotation.Nonnull;
 
 /**
  * Resource type entity.
  */
-@Builder(builderClassName = "Builder")
-@SuppressWarnings("FinalClass")
-@Value
-public class ResourceType {
+public interface ResourceType {
 
   /**
    * resource name.
    */
-  private String name;
+  String getName();
 
   /**
    * resource url.
    */
-  private String url;
+  String getUrl();
 
   /**
    * resource directory.
    */
-  @NonNull
-  private Path path;
-
-  /**
-   * max file size in resource.
-   */
-  private long maxSize;
-
-  /**
-   * resource directory.
-   */
-  @Nullable
-  private Path thumbnailPath;
+  @Nonnull
+  Path getPath();
 
   /**
    * list of allowed extensions in resource (separated with comma).
    */
-  private String allowedExtensions;
+  String getAllowedExtensions();
 
   /**
    * list of denied extensions in resource (separated with comma).
    */
-  private String deniedExtensions;
+  String getDeniedExtensions();
 
-  public Path resolve(String... names) {
-    return FileUtils.resolve(path, names);
-  }
+  /**
+   * max file size in resource.
+   */
+  long getMaxSize();
 
-  public Optional<Path> resolveThumbnail(String... names) {
-    return Optional.ofNullable(thumbnailPath).map(p -> FileUtils.resolve(p, names));
-  }
+  Path resolve(String... names);
 
-  @SuppressWarnings("PublicInnerClass")
-  public static class Builder {
-
-    Builder() {
-      allowedExtensions = "";
-      deniedExtensions = "";
-    }
-
-  }
+  Optional<Path> resolveThumbnail(String... names);
 
 }

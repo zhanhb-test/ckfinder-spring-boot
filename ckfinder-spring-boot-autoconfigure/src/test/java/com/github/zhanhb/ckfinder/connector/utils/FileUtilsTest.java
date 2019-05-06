@@ -1,6 +1,7 @@
 package com.github.zhanhb.ckfinder.connector.utils;
 
 import com.github.zhanhb.ckfinder.connector.api.ResourceType;
+import com.github.zhanhb.ckfinder.connector.support.DefaultResourceType;
 import java.nio.file.Paths;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
@@ -20,7 +21,7 @@ public class FileUtilsTest {
   @Test
   public void testRenameFileWithBadExt() {
     log.debug("renameFileWithBadExt");
-    ResourceType type = ResourceType.builder()
+    ResourceType type = DefaultResourceType.builder()
             .name("test")
             .allowedExtensions("html,htm")
             .path(Paths.get("."))

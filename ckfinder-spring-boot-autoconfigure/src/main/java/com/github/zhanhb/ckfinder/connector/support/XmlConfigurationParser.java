@@ -481,7 +481,7 @@ public enum XmlConfigurationParser {
   private ResourceType createTypeFromXml(String typeName,
           NodeList childNodes, BasePathBuilder basePathBuilder, ThumbnailProperties thumbnail)
           throws ConnectorException {
-    ResourceType.Builder builder = ResourceType.builder().name(typeName);
+    DefaultResourceType.Builder builder = DefaultResourceType.builder().name(typeName);
     String path = typeName.toLowerCase();
     String url = typeName.toLowerCase();
 

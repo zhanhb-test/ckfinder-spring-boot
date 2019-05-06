@@ -7,7 +7,6 @@ import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ImageProperties;
 import com.github.zhanhb.ckfinder.connector.api.License;
 import com.github.zhanhb.ckfinder.connector.api.LicenseFactory;
-import com.github.zhanhb.ckfinder.connector.api.ResourceType;
 import com.github.zhanhb.ckfinder.connector.api.ThumbnailProperties;
 import com.github.zhanhb.ckfinder.connector.plugins.FileEditorPlugin;
 import com.github.zhanhb.ckfinder.connector.plugins.ImageResizeParam;
@@ -18,6 +17,7 @@ import com.github.zhanhb.ckfinder.connector.plugins.WatermarkSettings;
 import com.github.zhanhb.ckfinder.connector.support.AccessControlLevel;
 import com.github.zhanhb.ckfinder.connector.support.DefaultCKFinderContext;
 import com.github.zhanhb.ckfinder.connector.support.DefaultPathBuilder;
+import com.github.zhanhb.ckfinder.connector.support.DefaultResourceType;
 import com.github.zhanhb.ckfinder.connector.support.FixLicenseFactory;
 import com.github.zhanhb.ckfinder.connector.support.HostLicenseFactory;
 import com.github.zhanhb.ckfinder.connector.support.InMemoryAccessController;
@@ -190,7 +190,7 @@ public class CKFinderAutoConfiguration {
         final String typeName = entry.getKey();
         CKFinderProperties.Type type = entry.getValue();
         Assert.hasText(typeName, "Resource type name should not be empty");
-        ResourceType.Builder resourceType = ResourceType.builder()
+        DefaultResourceType.Builder resourceType = DefaultResourceType.builder()
                 .name(typeName);
 
         if (type.getAllowedExtensions() != null) {
