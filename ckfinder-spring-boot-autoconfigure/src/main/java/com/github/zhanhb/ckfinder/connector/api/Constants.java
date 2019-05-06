@@ -40,16 +40,4 @@ public interface Constants {
    */
   String URL_REGEX = "^(https?)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]$";
 
-  /**
-   * Regular expression to find base directory property placeholder.
-   */
-  @Deprecated
-  String BASE_DIR_PLACEHOLDER = "%BASE_DIR%";
-
-  /**
-   * Regular expression to find baseUrl property placeholder.
-   */
-  @Deprecated
-  String BASE_URL_PLACEHOLDER = "%BASE_URL%";
-
 }

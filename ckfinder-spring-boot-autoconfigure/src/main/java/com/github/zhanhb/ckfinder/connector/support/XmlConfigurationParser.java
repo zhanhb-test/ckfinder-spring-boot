@@ -393,7 +393,6 @@ public enum XmlConfigurationParser {
    * @param basePath base path
    * @throws ConnectorException when error occurs
    */
-  @SuppressWarnings("deprecation")
   private ThumbnailProperties createThumbs(NodeList childNodes, Path basePath, BasePathBuilder basePathBuilder) throws ConnectorException {
     boolean enabled = true;
     ThumbnailProperties.Builder thumbnail = ThumbnailProperties.builder();
@@ -404,10 +403,10 @@ public enum XmlConfigurationParser {
           enabled = Boolean.parseBoolean(nullNodeToString(childNode));
           break;
         case "url":
-          thumbnail.url(PathUtils.normalizeUrl(basePathBuilder.getBaseUrl() + nullNodeToString(childNode).replace(Constants.BASE_URL_PLACEHOLDER, "")));
+          thumbnail.url(PathUtils.normalizeUrl(basePathBuilder.getBaseUrl() + nullNodeToString(childNode)));
           break;
         case "directory":
-          String thumbsDir = nullNodeToString(childNode).replace(Constants.BASE_DIR_PLACEHOLDER, "");
+          String thumbsDir = nullNodeToString(childNode);
           Path file = getPath(basePath, thumbsDir);
           if (file == null) {
             throw new ConnectorException(ErrorCode.FOLDER_NOT_FOUND,
@@ -479,7 +478,6 @@ public enum XmlConfigurationParser {
    * @return parsed resource type
    * @throws ConnectorException when error occurs
    */
-  @SuppressWarnings("deprecation")
   private ResourceType createTypeFromXml(String typeName,
           NodeList childNodes, BasePathBuilder basePathBuilder, ThumbnailProperties thumbnail)
           throws ConnectorException {
@@ -511,9 +509,8 @@ public enum XmlConfigurationParser {
           builder.deniedExtensions(nullNodeToString(childNode));
       }
     }
-    url = basePathBuilder.getBaseUrl() + url.replace(Constants.BASE_URL_PLACEHOLDER, "");
+    url = basePathBuilder.getBaseUrl() + url;
     url = PathUtils.normalizeUrl(url);
-    String tpath = path.replace(Constants.BASE_DIR_PLACEHOLDER, "");
 
     Path p = getPath(basePathBuilder.getBasePath(), path);
     if (!p.isAbsolute()) {
@@ -521,10 +518,8 @@ public enum XmlConfigurationParser {
               "Resource directory could not be created using specified path.");
     }
     Optional<Path> thumbnailPath = Optional.ofNullable(thumbnail).map(ThumbnailProperties::getPath).map(f -> FileUtils.resolve(f, typeName));
-    return builder
-            .url(url)
-            .path(p)
-            .thumbnailPath(thumbnailPath).build();
+    return builder.url(url).path(p)
+            .thumbnailPath(thumbnailPath.orElse(null)).build();
   }
 
   /**

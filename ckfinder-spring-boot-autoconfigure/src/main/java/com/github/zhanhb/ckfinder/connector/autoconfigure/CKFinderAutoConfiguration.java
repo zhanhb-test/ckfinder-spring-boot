@@ -4,7 +4,6 @@ import com.github.zhanhb.ckfinder.connector.ConnectorServlet;
 import com.github.zhanhb.ckfinder.connector.api.AccessControl;
 import com.github.zhanhb.ckfinder.connector.api.BasePathBuilder;
 import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
-import com.github.zhanhb.ckfinder.connector.api.Constants;
 import com.github.zhanhb.ckfinder.connector.api.ImageProperties;
 import com.github.zhanhb.ckfinder.connector.api.License;
 import com.github.zhanhb.ckfinder.connector.api.LicenseFactory;
@@ -33,7 +32,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import javax.annotation.Nullable;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.ServletContext;
 import org.springframework.beans.factory.ObjectProvider;
@@ -168,7 +169,7 @@ public class CKFinderAutoConfiguration {
               .checkSizeAfterScaling(properties.isCheckSizeAfterScaling())
               .secureImageUploads(properties.isSecureImageUploads());
       if (properties.getTypes() != null) {
-        setTypes(builder, basePathBuilder, properties.getTypes(), thumbnail);
+        setTypes(builder, basePathBuilder, properties.getTypes(), Optional.ofNullable(thumbnail).map(ThumbnailProperties::getPath).orElse(null));
       }
       builder.forceAscii(properties.isForceAscii());
       if (properties.getHiddenFolders() != null) {
@@ -181,10 +182,9 @@ public class CKFinderAutoConfiguration {
       return builder.build();
     }
 
-    @SuppressWarnings("deprecation")
     private void setTypes(DefaultCKFinderContext.Builder builder,
             BasePathBuilder basePathBuilder, Map<String, CKFinderProperties.Type> types,
-            ThumbnailProperties thumbnail) {
+            @Nullable Path rootThumbnail) {
       Path basePath = basePathBuilder.getBasePath();
       String baseUrl = basePathBuilder.getBaseUrl();
       for (Map.Entry<String, CKFinderProperties.Type> entry : types.entrySet()) {
@@ -200,12 +200,10 @@ public class CKFinderAutoConfiguration {
         if (type.getDeniedExtensions() != null) {
           resourceType.deniedExtensions(toString(type.getDeniedExtensions()));
         }
-        String path = (StringUtils.hasLength(type.getDirectory()) ? type.getDirectory() : typeName.toLowerCase())
-                .replace(Constants.BASE_DIR_PLACEHOLDER, "");
-        String url = (StringUtils.hasLength(type.getUrl()) ? type.getUrl() : typeName.toLowerCase())
-                .replace(Constants.BASE_URL_PLACEHOLDER, "");
-
-        Optional<Path> thumbnailPath = Optional.ofNullable(thumbnail).map(ThumbnailProperties::getPath).map(p -> FileUtils.resolve(p, typeName));
+        String path = StringUtils.hasLength(type.getDirectory()) ? type.getDirectory() : typeName.toLowerCase();
+        String url = StringUtils.hasLength(type.getUrl()) ? type.getUrl() : typeName.toLowerCase();
+        Path thumbnailPath = Optional.ofNullable(rootThumbnail)
+                .map(p -> FileUtils.resolve(p, typeName)).orElse(null);
         builder.type(typeName, resourceType.maxSize(type.getMaxSize().toBytes())
                 .path(FileUtils.resolve(basePath, path))
                 .url(PathUtils.normalizeUrl(baseUrl + url))
@@ -213,14 +211,14 @@ public class CKFinderAutoConfiguration {
       }
     }
 
-    @SuppressWarnings("deprecation")
+    @Nullable
     private ThumbnailProperties createThumbs(CKFinderProperties.Thumbs thumbs, BasePathBuilder basePathBuilder) {
       if (thumbs != null && thumbs.isEnabled()) {
-        Path basePath = basePathBuilder.getBasePath();
-        String baseUrl = basePathBuilder.getBaseUrl();
-        String url = PathUtils.normalizeUrl(baseUrl + thumbs.getUrl().replace(Constants.BASE_URL_PLACEHOLDER, ""));
+        Path basePath = Objects.requireNonNull(basePathBuilder.getBasePath(), "ckfinder base path");
+        String baseUrl = Objects.requireNonNull(basePathBuilder.getBaseUrl(), "ckfinder base url");
+        String url = PathUtils.normalizeUrl(baseUrl + thumbs.getUrl());
         return ThumbnailProperties.builder()
-                .path(getPath(basePath, thumbs.getDirectory().replace(Constants.BASE_DIR_PLACEHOLDER, "")))
+                .path(FileUtils.resolve(basePath, thumbs.getDirectory()))
                 .directAccess(thumbs.isDirectAccess())
                 .url(url)
                 .maxHeight(thumbs.getMaxHeight())
@@ -249,10 +247,6 @@ public class CKFinderAutoConfiguration {
         }
       }
       return new FixLicenseFactory(licenseBuilder.build());
-    }
-
-    private Path getPath(Path first, String... more) {
-      return first == null ? null : FileUtils.resolve(first, more);
     }
 
   }

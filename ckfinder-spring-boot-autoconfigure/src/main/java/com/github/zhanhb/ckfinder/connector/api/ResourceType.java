@@ -52,7 +52,7 @@ public class ResourceType {
    * resource directory.
    */
   @Nullable
-  private Optional<Path> thumbnailPath;
+  private Path thumbnailPath;
 
   /**
    * list of allowed extensions in resource (separated with comma).
@@ -69,7 +69,7 @@ public class ResourceType {
   }
 
   public Optional<Path> resolveThumbnail(String... names) {
-    return thumbnailPath.map(p -> FileUtils.resolve(p, names));
+    return Optional.ofNullable(thumbnailPath).map(p -> FileUtils.resolve(p, names));
   }
 
   @SuppressWarnings("PublicInnerClass")
