@@ -63,10 +63,6 @@ public class WatermarkProcessor implements FileUploadListener {
   /**
    * Extracts image location from settings or uses default image if none is
    * provided.
-   *
-   * @param settings
-   * @return the parameter
-   * @throws IOException when IO Exception occurs.
    */
   private BufferedImage getWatermarkImage(WatermarkSettings settings) throws IOException {
     final InputStreamSource source = settings.getSource();

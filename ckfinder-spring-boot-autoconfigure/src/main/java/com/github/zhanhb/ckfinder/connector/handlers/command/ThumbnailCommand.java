@@ -56,6 +56,7 @@ public class ThumbnailCommand extends BaseCommand<String> {
       cmdContext.throwException(ErrorCode.FILE_NOT_FOUND);
     }
 
+    //noinspection OptionalGetWithoutIsPresent
     Path fullCurrentPath = cmdContext.toThumbnail().get();
     log.debug("typeThumbDir: {}", fullCurrentPath);
 
@@ -70,7 +71,7 @@ public class ThumbnailCommand extends BaseCommand<String> {
 
     if (!Files.exists(thumbFile)) {
       Path originFile = cmdContext.resolve(fileName);
-      log.debug("orginFile: {}", originFile);
+      log.debug("original file: {}", originFile);
       if (!Files.exists(originFile)) {
         cmdContext.throwException(ErrorCode.FILE_NOT_FOUND);
       }

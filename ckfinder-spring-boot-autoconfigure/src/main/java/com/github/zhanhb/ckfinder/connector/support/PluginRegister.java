@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 /**
  *
@@ -58,7 +57,7 @@ public class PluginRegister {
   }
 
   String getNames() {
-    return names.isEmpty() ? null : names.stream().collect(Collectors.joining(","));
+    return names.isEmpty() ? null : String.join(",", names);
   }
 
   CommandFactory buildCommandFactory() {

@@ -70,8 +70,8 @@ public class CommandContext {
     if (type != null) {
       return Collections.singleton(type);
     } else {
-      if (!cfCtx.getDefaultResourceTypes().isEmpty()) {
-        Set<String> defaultResourceTypes = cfCtx.getDefaultResourceTypes();
+      Set<String> defaultResourceTypes = cfCtx.getDefaultResourceTypes();
+      if (!defaultResourceTypes.isEmpty()) {
         List<ResourceType> list = new ArrayList<>(defaultResourceTypes.size());
         for (String key : defaultResourceTypes) {
           ResourceType resourceType = cfCtx.getResource(key);

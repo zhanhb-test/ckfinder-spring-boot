@@ -23,7 +23,6 @@ import com.github.zhanhb.ckfinder.connector.support.FallbackExceptionHandler;
 import com.github.zhanhb.ckfinder.connector.support.XmlExceptionHandler;
 import java.io.IOException;
 import java.util.Objects;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -49,11 +48,10 @@ public class ConnectorServlet extends HttpServlet {
    * @param request request
    * @param response response
    * @throws IOException when IO Exception occurs.
-   * @throws ServletException when error occurs.
    */
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
-          throws ServletException, IOException {
+          throws IOException {
     log.trace("query string={}", request.getQueryString());
     processRequest(request, response, false);
   }
@@ -64,11 +62,10 @@ public class ConnectorServlet extends HttpServlet {
    * @param request request
    * @param response response
    * @throws IOException when IO Exception occurs.
-   * @throws ServletException when error occurs.
    */
   @Override
   protected void doPost(HttpServletRequest request, HttpServletResponse response)
-          throws ServletException, IOException {
+          throws IOException {
     processRequest(request, response, true);
   }
 
@@ -78,12 +75,11 @@ public class ConnectorServlet extends HttpServlet {
    * @param request request
    * @param response response
    * @param post if it's post command.
-   * @throws ServletException when error occurs.
    * @throws IOException when IO Exception occurs.
    */
   private void processRequest(HttpServletRequest request,
           HttpServletResponse response, boolean post)
-          throws ServletException, IOException {
+          throws IOException {
     request.setCharacterEncoding("UTF-8");
     String commandName = request.getParameter("command");
     ExceptionHandler handler = XmlExceptionHandler.INSTANCE;

@@ -28,6 +28,7 @@ import java.nio.file.Path;
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.StringUtils;
 
 @Slf4j
 public class ImageResizeInfoCommand extends BaseXmlCommand<String> {
@@ -39,7 +40,7 @@ public class ImageResizeInfoCommand extends BaseXmlCommand<String> {
 
     cmdContext.checkAllPermission(AccessControl.FILE_VIEW);
 
-    if (fileName == null || fileName.isEmpty()
+    if (StringUtils.isEmpty(fileName)
             || !FileUtils.isFileNameValid(fileName)
             || context.isFileHidden(fileName)) {
       cmdContext.throwException(ErrorCode.INVALID_REQUEST);

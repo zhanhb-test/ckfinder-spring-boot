@@ -84,16 +84,15 @@ public class RenameFolderCommand extends BaseXmlCommand<String> implements IPost
 
   /**
    * renames thumb folder.
-   *
-   * @param newFolderPath
    */
   private void renameThumb(String newFolderPath, CommandContext cmdContext) {
     cmdContext.toThumbnail().ifPresent(thumbDir -> {
-      Path newThumbDir = cmdContext.resolveThumbnail(newFolderPath).get();
-      try {
-        Files.move(thumbDir, newThumbDir);
-      } catch (IOException ignored) {
-      }
+      cmdContext.resolveThumbnail(newFolderPath).ifPresent(newThumbDir -> {
+        try {
+          Files.move(thumbDir, newThumbDir);
+        } catch (IOException ignored) {
+        }
+      });
     });
   }
 

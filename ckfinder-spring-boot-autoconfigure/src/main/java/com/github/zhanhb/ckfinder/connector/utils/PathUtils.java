@@ -20,7 +20,7 @@ import org.springframework.util.StringUtils;
  */
 public interface PathUtils {
 
-  public static String normalize(String string) {
+  static String normalize(String string) {
     return string != null ? string.replaceAll("[\\\\/]+", "/") : null;
   }
 
@@ -32,7 +32,7 @@ public interface PathUtils {
    * @param string string to escapeUrl
    * @return Escaped string, {@code null} or empty string.
    */
-  public static String normalizeUrl(String string) {
+  static String normalizeUrl(String string) {
     if (StringUtils.isEmpty(string)) {
       return string;
     }
@@ -65,7 +65,7 @@ public interface PathUtils {
    * @return String with slash character at the end, {@code null} or empty
    * string.
    */
-  public static String addSlashToEnd(String string) {
+  static String addSlashToEnd(String string) {
     if (string == null || string.endsWith("/")) {
       return string;
     }
@@ -80,7 +80,7 @@ public interface PathUtils {
    * @return String with slash character at the beginning, {@code null} or full
    * URL.
    */
-  public static String addSlashToBegin(String string) {
+  static String addSlashToBegin(String string) {
     if (string == null || string.startsWith("/")
             || Pattern.matches(Constants.URL_REGEX, string)) {
       return string;

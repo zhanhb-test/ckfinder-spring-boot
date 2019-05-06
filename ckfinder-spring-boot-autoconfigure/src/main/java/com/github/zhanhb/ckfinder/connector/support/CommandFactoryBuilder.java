@@ -26,11 +26,11 @@ import java.util.TreeMap;
  *
  * @author zhanhb
  */
-public class CommandFactoryBuilder {
+class CommandFactoryBuilder {
 
   private final SortedMap<String, Command> commands = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
-  public CommandFactoryBuilder enableDefaultCommands() {
+  CommandFactoryBuilder enableDefaultCommands() {
     return registCommands(new InitCommand(),
             new GetFoldersCommand(),
             new GetFilesCommand(),
@@ -47,7 +47,7 @@ public class CommandFactoryBuilder {
             new QuickUploadCommand());
   }
 
-  public CommandFactoryBuilder registCommands(Command... commands) {
+  CommandFactoryBuilder registCommands(Command... commands) {
     Map<String, Command> map = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
     for (Command command : commands) {
       String className = command.getClass().getSimpleName();
@@ -63,7 +63,7 @@ public class CommandFactoryBuilder {
     return registCommands(map);
   }
 
-  public CommandFactoryBuilder registCommand(String name, Command command) {
+  CommandFactoryBuilder registCommand(String name, Command command) {
     return registCommands(Collections.singletonMap(name, command));
   }
 
