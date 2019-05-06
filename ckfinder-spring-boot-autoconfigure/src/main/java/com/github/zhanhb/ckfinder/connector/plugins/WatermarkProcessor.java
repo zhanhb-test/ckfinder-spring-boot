@@ -54,7 +54,7 @@ public class WatermarkProcessor implements FileUploadListener {
                   .toOutputStream(out);
         }
       }
-    } catch (Exception ex) {
+    } catch (IOException ex) {
       // only log error if watermark is not created
       log.error("", ex);
     }

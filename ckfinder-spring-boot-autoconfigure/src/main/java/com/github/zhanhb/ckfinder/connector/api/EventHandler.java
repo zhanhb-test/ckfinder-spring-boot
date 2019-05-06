@@ -8,6 +8,6 @@ public interface EventHandler {
 
   void fireOnFileUpload(FileUploadEvent args);
 
-  void fireOnInitCommand(InitCommandEvent event);
+  void fireOnInitCommand(InitPluginInfo data);
 
 }

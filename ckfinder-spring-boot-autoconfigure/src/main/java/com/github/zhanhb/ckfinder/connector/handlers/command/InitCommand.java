@@ -13,7 +13,7 @@ package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.api.AccessControl;
 import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
-import com.github.zhanhb.ckfinder.connector.api.InitCommandEvent;
+import com.github.zhanhb.ckfinder.connector.api.InitPluginInfo;
 import com.github.zhanhb.ckfinder.connector.api.License;
 import com.github.zhanhb.ckfinder.connector.api.ResourceType;
 import com.github.zhanhb.ckfinder.connector.api.ThumbnailProperties;
@@ -141,9 +141,9 @@ public class InitCommand extends XmlCommand<String> {
    * @param context ckfinder context
    */
   private void createPluginsData(Connector.Builder rootElement, CKFinderContext context) {
-    InitCommandEvent event = new InitCommandEvent();
-    context.fireOnInitCommand(event);
-    PluginsInfos pluginsInfos = event.build();
+    InitPluginInfo data = new InitPluginInfo();
+    context.fireOnInitCommand(data);
+    PluginsInfos pluginsInfos = data.build();
     if (pluginsInfos != null) {
       rootElement.result(pluginsInfos);
     }

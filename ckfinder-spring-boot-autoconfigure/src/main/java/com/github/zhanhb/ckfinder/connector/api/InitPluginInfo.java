@@ -11,25 +11,28 @@
  */
 package com.github.zhanhb.ckfinder.connector.api;
 
+import com.github.zhanhb.ckfinder.connector.handlers.response.PluginInfo;
 import com.github.zhanhb.ckfinder.connector.handlers.response.PluginsInfos;
-import com.github.zhanhb.ckfinder.connector.support.PluginRegister;
 
 /**
- * Event data for {@link PluginRegister#addPluginInfoRegister} event.
+ * Event data for {@link PluginRegistry#addPluginInfoRegister} event.
  */
-public class InitCommandEvent {
+public class InitPluginInfo {
 
   private PluginsInfos.Builder builder;
 
-  public PluginsInfos.Builder getBuilder() {
-    if (builder == null) {
-      builder = PluginsInfos.builder();
+  public void add(PluginInfo pluginInfo) {
+    PluginsInfos.Builder b = builder;
+    if (b == null) {
+      b = PluginsInfos.builder();
+      builder = b;
     }
-    return builder;
+    b.pluginsInfo(pluginInfo);
   }
 
   public PluginsInfos build() {
-    return builder != null ? builder.build() : null;
+    PluginsInfos.Builder b = builder;
+    return b != null ? b.build() : null;
   }
 
 }

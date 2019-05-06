@@ -16,6 +16,7 @@ import lombok.Value;
 @Value
 public class ThumbnailProperties {
 
+  @NonNull
   private String url;
   @NonNull
   private Path path;
@@ -27,7 +28,6 @@ public class ThumbnailProperties {
   public static class Builder {
 
     Builder() {
-      url = "";
       maxHeight = Constants.DEFAULT_THUMB_MAX_HEIGHT;
       maxWidth = Constants.DEFAULT_THUMB_MAX_WIDTH;
       quality = Constants.DEFAULT_IMG_QUALITY;

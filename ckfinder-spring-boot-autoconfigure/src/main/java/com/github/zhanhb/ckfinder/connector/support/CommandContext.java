@@ -141,10 +141,10 @@ public class CommandContext {
     return dir;
   }
 
-  public void checkFilePostParam(Collection<FilePostParam> files, int requireAccess)
+  public void checkFilePostParam(Collection<FileItem> files, int requireAccess)
           throws ConnectorException {
     CKFinderContext context = cfCtx;
-    for (FilePostParam file : files) {
+    for (FileItem file : files) {
       ResourceType resource = file.getType();
       String folder = file.getFolder();
       String name = file.getName();

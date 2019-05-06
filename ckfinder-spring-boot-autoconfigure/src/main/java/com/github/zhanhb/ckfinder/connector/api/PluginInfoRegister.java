@@ -6,6 +6,6 @@ package com.github.zhanhb.ckfinder.connector.api;
  */
 public interface PluginInfoRegister {
 
-  void onInitEvent(InitCommandEvent event);
+  void addPluginDataTo(InitPluginInfo event);
 
 }

@@ -247,7 +247,7 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
         Files.copy(in, file);
       }
     }
-    context.fireOnFileUpload(new FileUploadEvent(cmdContext.getCurrentFolder(), file));
+    context.fireOnFileUpload(new FileUploadEvent(this, cmdContext.getCurrentFolder(), file));
   }
 
   /**

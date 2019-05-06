@@ -31,7 +31,7 @@ class CommandFactoryBuilder {
   private final SortedMap<String, Command> commands = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
   CommandFactoryBuilder enableDefaultCommands() {
-    return registCommands(new InitCommand(),
+    return registerCommands(new InitCommand(),
             new GetFoldersCommand(),
             new GetFilesCommand(),
             new ThumbnailCommand(),
@@ -47,7 +47,7 @@ class CommandFactoryBuilder {
             new QuickUploadCommand());
   }
 
-  CommandFactoryBuilder registCommands(Command... commands) {
+  CommandFactoryBuilder registerCommands(Command... commands) {
     Map<String, Command> map = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
     for (Command command : commands) {
       String className = command.getClass().getSimpleName();
@@ -60,14 +60,14 @@ class CommandFactoryBuilder {
         throw new IllegalArgumentException("duplicate command '" + name + "'");
       }
     }
-    return registCommands(map);
+    return registerCommands(map);
   }
 
-  CommandFactoryBuilder registCommand(String name, Command command) {
-    return registCommands(Collections.singletonMap(name, command));
+  CommandFactoryBuilder registerCommand(String name, Command command) {
+    return registerCommands(Collections.singletonMap(name, command));
   }
 
-  private CommandFactoryBuilder registCommands(Map<String, ? extends Command> commands) {
+  private CommandFactoryBuilder registerCommands(Map<String, ? extends Command> commands) {
     for (Map.Entry<String, ? extends Command> entry : commands.entrySet()) {
       String name = Objects.requireNonNull(entry.getKey());
       Objects.requireNonNull(entry.getValue());

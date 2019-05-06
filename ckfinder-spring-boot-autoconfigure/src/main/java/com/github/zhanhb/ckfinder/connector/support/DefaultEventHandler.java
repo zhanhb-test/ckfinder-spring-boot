@@ -14,7 +14,7 @@ package com.github.zhanhb.ckfinder.connector.support;
 import com.github.zhanhb.ckfinder.connector.api.EventHandler;
 import com.github.zhanhb.ckfinder.connector.api.FileUploadEvent;
 import com.github.zhanhb.ckfinder.connector.api.FileUploadListener;
-import com.github.zhanhb.ckfinder.connector.api.InitCommandEvent;
+import com.github.zhanhb.ckfinder.connector.api.InitPluginInfo;
 import com.github.zhanhb.ckfinder.connector.api.PluginInfoRegister;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -42,10 +42,10 @@ public class DefaultEventHandler implements EventHandler {
   }
 
   @Override
-  public void fireOnInitCommand(InitCommandEvent event) {
+  public void fireOnInitCommand(InitPluginInfo info) {
     log.trace("{}", pluginInfoRegisters);
     for (PluginInfoRegister pluginInfoRegister : pluginInfoRegisters) {
-      pluginInfoRegister.onInitEvent(event);
+      pluginInfoRegister.addPluginDataTo(info);
     }
   }
 

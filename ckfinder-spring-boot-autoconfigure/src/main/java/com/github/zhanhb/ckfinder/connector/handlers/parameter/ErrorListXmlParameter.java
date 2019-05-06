@@ -4,7 +4,7 @@ import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.DetailError;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Errors;
-import com.github.zhanhb.ckfinder.connector.support.FilePostParam;
+import com.github.zhanhb.ckfinder.connector.support.FileItem;
 
 /**
  *
@@ -23,14 +23,14 @@ public class ErrorListXmlParameter {
   /**
    * save errors node to list.
    *
-   * @param filePostParam the file who leads the error
+   * @param fileItem the file who leads the error
    * @param errorCode error code
    */
-  public void appendError(FilePostParam filePostParam, ErrorCode errorCode) {
+  public void appendError(FileItem fileItem, ErrorCode errorCode) {
     int code = errorCode.getCode();
-    String name = filePostParam.getName();
-    String folder = filePostParam.getFolder();
-    String type = filePostParam.getType().getName();
+    String name = fileItem.getName();
+    String folder = fileItem.getFolder();
+    String type = fileItem.getType().getName();
     if (errorsBuilder == null) {
       errorsBuilder = Errors.builder();
     }

@@ -140,16 +140,6 @@ public class DefaultCKFinderContext implements CKFinderContext {
       userRoleName = "";
     }
 
-    public Builder eventsFromPlugins(Collection<? extends Plugin> plugins) {
-      PluginRegister register = new PluginRegister();
-      for (Plugin plugin : plugins) {
-        plugin.regist(register);
-      }
-      events(register.buildEventHandler());
-      commandFactory(register.buildCommandFactory());
-      publicPluginNames(register.getNames());
-      return this;
-    }
   }
 
 }

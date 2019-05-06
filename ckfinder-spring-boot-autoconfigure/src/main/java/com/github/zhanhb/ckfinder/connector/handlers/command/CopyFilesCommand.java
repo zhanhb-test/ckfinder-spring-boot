@@ -19,7 +19,7 @@ import com.github.zhanhb.ckfinder.connector.handlers.parameter.CopyMoveParameter
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.CopyFiles;
 import com.github.zhanhb.ckfinder.connector.support.CommandContext;
-import com.github.zhanhb.ckfinder.connector.support.FilePostParam;
+import com.github.zhanhb.ckfinder.connector.support.FileItem;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
@@ -54,7 +54,7 @@ public class CopyFilesCommand extends ErrorListXmlCommand<CopyMoveParameter> imp
             | AccessControl.FILE_UPLOAD);
     cmdContext.checkFilePostParam(param.getFiles(), AccessControl.FILE_VIEW);
 
-    for (FilePostParam file : param.getFiles()) {
+    for (FileItem file : param.getFiles()) {
       if (!FileUtils.isFileExtensionAllowed(file.getName(), cmdContext.getType())) {
         param.appendError(file, ErrorCode.INVALID_EXTENSION);
         continue;
@@ -169,7 +169,7 @@ public class CopyFilesCommand extends ErrorListXmlCommand<CopyMoveParameter> imp
    * @param file file to copy.
    * @param relation
    */
-  private void copyThumb(FilePostParam file, Path relation) {
+  private void copyThumb(FileItem file, Path relation) {
     file.toThumbnailPath().ifPresent(sourceThumbFile -> {
       Path destThumbFile = sourceThumbFile.resolve(relation).normalize();
 
@@ -190,7 +190,7 @@ public class CopyFilesCommand extends ErrorListXmlCommand<CopyMoveParameter> imp
   protected CopyMoveParameter popupParams(HttpServletRequest request, CKFinderContext context) {
     String copied = request.getParameter("copied");
     int all = copied != null ? Integer.parseInt(copied) : 0;
-    List<FilePostParam> files = RequestFileHelper.getFilesList(request, context);
+    List<FileItem> files = RequestFileHelper.getFilesList(request, context);
     return new CopyMoveParameter(files, all);
   }
 

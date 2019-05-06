@@ -7,22 +7,23 @@ import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ImageProperties;
 import com.github.zhanhb.ckfinder.connector.api.License;
 import com.github.zhanhb.ckfinder.connector.api.LicenseFactory;
+import com.github.zhanhb.ckfinder.connector.api.Plugin;
 import com.github.zhanhb.ckfinder.connector.api.ThumbnailProperties;
-import com.github.zhanhb.ckfinder.connector.plugins.FileEditorPlugin;
+import com.github.zhanhb.ckfinder.connector.plugins.FileEditor;
+import com.github.zhanhb.ckfinder.connector.plugins.ImageResize;
 import com.github.zhanhb.ckfinder.connector.plugins.ImageResizeParam;
-import com.github.zhanhb.ckfinder.connector.plugins.ImageResizePlugin;
 import com.github.zhanhb.ckfinder.connector.plugins.ImageResizeSize;
-import com.github.zhanhb.ckfinder.connector.plugins.WatermarkPlugin;
+import com.github.zhanhb.ckfinder.connector.plugins.Watermark;
 import com.github.zhanhb.ckfinder.connector.plugins.WatermarkSettings;
 import com.github.zhanhb.ckfinder.connector.support.AccessControlLevel;
 import com.github.zhanhb.ckfinder.connector.support.DefaultCKFinderContext;
 import com.github.zhanhb.ckfinder.connector.support.DefaultPathBuilder;
+import com.github.zhanhb.ckfinder.connector.support.DefaultPluginRegistry;
 import com.github.zhanhb.ckfinder.connector.support.DefaultResourceType;
 import com.github.zhanhb.ckfinder.connector.support.FixLicenseFactory;
 import com.github.zhanhb.ckfinder.connector.support.HostLicenseFactory;
 import com.github.zhanhb.ckfinder.connector.support.InMemoryAccessController;
 import com.github.zhanhb.ckfinder.connector.support.KeyGenerator;
-import com.github.zhanhb.ckfinder.connector.support.Plugin;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import com.github.zhanhb.ckfinder.connector.utils.PathUtils;
 import java.nio.file.Path;
@@ -177,8 +178,14 @@ public class CKFinderAutoConfiguration {
       if (properties.getHiddenFiles() != null) {
         builder.hiddenFiles(Arrays.asList(properties.getHiddenFiles()));
       }
-      builder.eventsFromPlugins(plugins != null ? plugins : Collections.emptyList());
-      return builder.build();
+      DefaultPluginRegistry registry = DefaultPluginRegistry.newInstance();
+      if (plugins != null) {
+        plugins.forEach(plugin -> plugin.register(registry));
+      }
+      return builder.events(registry.buildEventHandler()).
+              commandFactory(registry.buildCommandFactory())
+              .publicPluginNames(registry.getPluginNames())
+              .build();
     }
 
     private void setTypes(DefaultCKFinderContext.Builder builder,
@@ -251,49 +258,49 @@ public class CKFinderAutoConfiguration {
   }
 
   @Configuration
-  @ConditionalOnMissingBean(FileEditorPlugin.class)
+  @ConditionalOnMissingBean(FileEditor.class)
   @ConditionalOnProperty(prefix = CKFinderProperties.CKFINDER_PREFIX + ".file-editor", name = "enabled", havingValue = "true", matchIfMissing = true)
   public static class DefaultFileEditorConfigurer {
 
     @Bean
-    public FileEditorPlugin fileEditorPlugin() {
-      return new FileEditorPlugin();
+    public FileEditor fileEditorPlugin() {
+      return new FileEditor();
     }
 
   }
 
   @Configuration
-  @ConditionalOnMissingBean(ImageResizePlugin.class)
+  @ConditionalOnMissingBean(ImageResize.class)
   @ConditionalOnProperty(prefix = DefaultImageResizeConfigurer.PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
   public static class DefaultImageResizeConfigurer {
 
     static final String PREFIX = CKFinderProperties.CKFINDER_PREFIX + ".image-resize";
 
     @Bean
-    public ImageResizePlugin imageResizePlugin(CKFinderProperties properties) {
+    public ImageResize imageResizePlugin(CKFinderProperties properties) {
       CKFinderProperties.ImageResize imageResize = properties.getImageResize();
       Map<ImageResizeParam, ImageResizeSize> params = imageResize.getParams();
       Map<ImageResizeParam, ImageResizeSize> map = new EnumMap<>(ImageResizeParam.class);
       map.putAll(params != null && !params.isEmpty() ? params
               : ImageResizeParam.createDefaultParams());
-      return new ImageResizePlugin(Collections.unmodifiableMap(map));
+      return new ImageResize(Collections.unmodifiableMap(map));
     }
 
   }
 
   @Configuration
-  @ConditionalOnMissingBean(WatermarkPlugin.class)
+  @ConditionalOnMissingBean(Watermark.class)
   @ConditionalOnProperty(prefix = CKFinderProperties.CKFINDER_PREFIX + ".watermark", name = "enabled", havingValue = "true")
   public static class DefaultWatermarkConfigurer {
 
     @Bean
-    public WatermarkPlugin watermarkPlugin(CKFinderProperties properties) {
+    public Watermark watermarkPlugin(CKFinderProperties properties) {
       CKFinderProperties.Watermark watermark = properties.getWatermark();
       WatermarkSettings.Builder builder = WatermarkSettings.builder();
       Resource resource = watermark.getSource();
       Assert.notNull(resource, "watermark source should not be null");
       Assert.isTrue(resource.exists(), "watermark resource not exists");
-      return new WatermarkPlugin(builder.marginBottom(watermark.getMarginBottom())
+      return new Watermark(builder.marginBottom(watermark.getMarginBottom())
               .marginRight(watermark.getMarginRight())
               .quality(watermark.getQuality())
               .source(resource)

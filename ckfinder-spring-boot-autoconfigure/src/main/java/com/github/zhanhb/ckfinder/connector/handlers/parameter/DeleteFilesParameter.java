@@ -1,6 +1,6 @@
 package com.github.zhanhb.ckfinder.connector.handlers.parameter;
 
-import com.github.zhanhb.ckfinder.connector.support.FilePostParam;
+import com.github.zhanhb.ckfinder.connector.support.FileItem;
 import java.util.List;
 import lombok.Getter;
 
@@ -11,10 +11,10 @@ import lombok.Getter;
 @Getter
 public class DeleteFilesParameter extends ErrorListXmlParameter {
 
-  private final List<FilePostParam> files;
+  private final List<FileItem> files;
   private int filesDeleted;
 
-  public DeleteFilesParameter(List<FilePostParam> files) {
+  public DeleteFilesParameter(List<FileItem> files) {
     this.files = files;
   }
 

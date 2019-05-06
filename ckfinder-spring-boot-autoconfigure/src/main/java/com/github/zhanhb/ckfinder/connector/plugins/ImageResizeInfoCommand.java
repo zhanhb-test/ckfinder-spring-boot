@@ -52,11 +52,11 @@ public class ImageResizeInfoCommand extends BaseXmlCommand<String> {
 
     Path imageFile = cmdContext.resolve(fileName);
 
-    try {
-      if (!Files.isRegularFile(imageFile)) {
-        cmdContext.throwException(ErrorCode.FILE_NOT_FOUND);
-      }
+    if (!Files.isRegularFile(imageFile)) {
+      cmdContext.throwException(ErrorCode.FILE_NOT_FOUND);
+    }
 
+    try {
       BufferedImage image;
       try (InputStream is = Files.newInputStream(imageFile)) {
         image = ImageIO.read(is);
@@ -65,7 +65,7 @@ public class ImageResizeInfoCommand extends BaseXmlCommand<String> {
               .width(image.getWidth())
               .height(image.getHeight()).build());
     } catch (IOException e) {
-      log.error("", e);
+      log.error("failed to access file '{}'", imageFile, e);
       cmdContext.throwException(ErrorCode.ACCESS_DENIED);
     }
   }

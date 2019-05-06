@@ -9,17 +9,13 @@
  * modifying or distribute this file or part of its contents. The contents of
  * this file is part of the Source Code of CKFinder.
  */
-package com.github.zhanhb.ckfinder.connector.plugins;
+package com.github.zhanhb.ckfinder.connector.api;
 
-import com.github.zhanhb.ckfinder.connector.support.Plugin;
-import com.github.zhanhb.ckfinder.connector.support.PluginRegister;
+/**
+ * Base class for plugins.
+ */
+public interface Plugin {
 
-public class FileEditorPlugin implements Plugin {
-
-  @Override
-  public void regist(PluginRegister register) {
-    register.addName("fileeditor")
-            .registCommands(new SaveFileCommand());
-  }
+  void register(PluginRegistry registry);
 
 }

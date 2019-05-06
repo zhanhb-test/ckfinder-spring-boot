@@ -23,7 +23,7 @@ import lombok.Value;
 @Builder(builderClassName = "Builder")
 @SuppressWarnings("FinalClass")
 @Value
-public class FilePostParam {
+public class FileItem {
 
   private String folder;
   private String name;

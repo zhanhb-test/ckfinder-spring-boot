@@ -11,29 +11,33 @@
  */
 package com.github.zhanhb.ckfinder.connector.plugins;
 
-import com.github.zhanhb.ckfinder.connector.api.InitCommandEvent;
+import com.github.zhanhb.ckfinder.connector.api.InitPluginInfo;
 import com.github.zhanhb.ckfinder.connector.api.PluginInfoRegister;
 import com.github.zhanhb.ckfinder.connector.handlers.response.ImageResizeInfo;
 import java.util.Map;
-import lombok.RequiredArgsConstructor;
+import javax.xml.namespace.QName;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@RequiredArgsConstructor
 public class ImageResizeRegister implements PluginInfoRegister {
 
-  private final Map<ImageResizeParam, ImageResizeSize> params;
+  private final ImageResizeInfo imageResizeInfo;
 
-  @Override
-  public void onInitEvent(InitCommandEvent event) {
-    log.debug("runEventHandler: {}", event);
+  @SuppressWarnings("WeakerAccess")
+  public ImageResizeRegister(Map<ImageResizeParam, ImageResizeSize> params){
     ImageResizeInfo.Builder builder = ImageResizeInfo.builder();
     for (Map.Entry<ImageResizeParam, ImageResizeSize> entry : params.entrySet()) {
-      String key = entry.getKey().getXmlKey();
+      QName key = QName.valueOf(entry.getKey().getXmlKey());
       String value = entry.getValue().toString();
-      builder.attr(key, value);
+      builder.attribute(key, value);
     }
-    event.getBuilder().pluginsInfo(builder.build());
+    imageResizeInfo = builder.build();
+  }
+
+  @Override
+  public void addPluginDataTo(InitPluginInfo info) {
+    log.debug("addPluginDataTo: {}", info);
+    info.add(imageResizeInfo);
   }
 
 }

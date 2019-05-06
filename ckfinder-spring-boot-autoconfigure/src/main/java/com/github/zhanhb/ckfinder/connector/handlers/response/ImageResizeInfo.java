@@ -14,7 +14,7 @@ import lombok.Singular;
 
 /**
  *
- * @see com.github.zhanhb.ckfinder.connector.plugins.ImageResizePlugin
+ * @see com.github.zhanhb.ckfinder.connector.plugins.ImageResize
  * @author zhanhb
  */
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
@@ -27,14 +27,5 @@ public class ImageResizeInfo extends PluginInfo {
   @Singular
   @XmlAnyAttribute
   private Map<QName, String> attributes;
-
-  @SuppressWarnings("PublicInnerClass")
-  public static class Builder {
-
-    public Builder attr(String key, String value) {
-      return attribute(QName.valueOf(key), value);
-    }
-
-  }
 
 }

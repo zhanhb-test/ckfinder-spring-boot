@@ -7,13 +7,14 @@ import com.github.zhanhb.ckfinder.connector.api.Constants;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.api.ImageProperties;
 import com.github.zhanhb.ckfinder.connector.api.License;
+import com.github.zhanhb.ckfinder.connector.api.Plugin;
 import com.github.zhanhb.ckfinder.connector.api.ResourceType;
 import com.github.zhanhb.ckfinder.connector.api.ThumbnailProperties;
-import com.github.zhanhb.ckfinder.connector.plugins.FileEditorPlugin;
+import com.github.zhanhb.ckfinder.connector.plugins.FileEditor;
 import com.github.zhanhb.ckfinder.connector.plugins.ImageResizeParam;
-import com.github.zhanhb.ckfinder.connector.plugins.ImageResizePlugin;
+import com.github.zhanhb.ckfinder.connector.plugins.ImageResize;
 import com.github.zhanhb.ckfinder.connector.plugins.ImageResizeSize;
-import com.github.zhanhb.ckfinder.connector.plugins.WatermarkPlugin;
+import com.github.zhanhb.ckfinder.connector.plugins.Watermark;
 import com.github.zhanhb.ckfinder.connector.plugins.WatermarkSettings;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import com.github.zhanhb.ckfinder.connector.utils.PathUtils;
@@ -571,20 +572,20 @@ public enum XmlConfigurationParser {
           switch (name) {
             case "imageresize":
               try {
-                plugin = new ImageResizePlugin(pluginInfo.getParams().entrySet().stream()
+                plugin = new ImageResize(pluginInfo.getParams().entrySet().stream()
                         .collect(Collectors.toMap(entry
                                 -> ImageResizeParam.valueOf(entry.getKey()),
                                 entry -> new ImageResizeSize(entry.getValue()))));
               } catch (IllegalArgumentException ex) {
-                plugin = new ImageResizePlugin(ImageResizeParam.createDefaultParams());
+                plugin = new ImageResize(ImageResizeParam.createDefaultParams());
               }
               break;
             case "watermark":
               WatermarkSettings watermarkSettings = parseWatermarkSettings(pluginInfo, resourceLoader);
-              plugin = new WatermarkPlugin(watermarkSettings);
+              plugin = new Watermark(watermarkSettings);
               break;
             case "fileeditor":
-              plugin = new FileEditorPlugin();
+              plugin = new FileEditor();
               break;
             default:
               continue;
@@ -593,7 +594,11 @@ public enum XmlConfigurationParser {
         }
       }
     }
-    builder.eventsFromPlugins(plugins);
+    DefaultPluginRegistry registry = DefaultPluginRegistry.newInstance();
+    plugins.forEach(plugin -> plugin.register(registry));
+    builder.events(registry.buildEventHandler()).
+            commandFactory(registry.buildCommandFactory())
+            .publicPluginNames(registry.getPluginNames());
   }
 
   private WatermarkSettings parseWatermarkSettings(PluginInfo pluginInfo, ResourceLoader resourceLoader) {

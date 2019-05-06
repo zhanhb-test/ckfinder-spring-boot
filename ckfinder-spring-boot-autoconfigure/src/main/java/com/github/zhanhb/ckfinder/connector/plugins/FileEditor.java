@@ -11,18 +11,15 @@
  */
 package com.github.zhanhb.ckfinder.connector.plugins;
 
-import com.github.zhanhb.ckfinder.connector.support.Plugin;
-import com.github.zhanhb.ckfinder.connector.support.PluginRegister;
-import lombok.RequiredArgsConstructor;
+import com.github.zhanhb.ckfinder.connector.api.Plugin;
+import com.github.zhanhb.ckfinder.connector.api.PluginRegistry;
 
-@RequiredArgsConstructor
-public class WatermarkPlugin implements Plugin {
-
-  private final WatermarkSettings watermarkSettings;
+public class FileEditor implements Plugin {
 
   @Override
-  public void regist(PluginRegister register) {
-    register.addFileUploadListener(new WatermarkProcessor(watermarkSettings));
+  public void register(PluginRegistry registry) {
+    registry.addName("fileeditor")
+            .registerCommands(new SaveFileCommand());
   }
 
 }

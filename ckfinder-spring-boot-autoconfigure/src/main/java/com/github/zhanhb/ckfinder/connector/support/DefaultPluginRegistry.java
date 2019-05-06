@@ -5,6 +5,7 @@ import com.github.zhanhb.ckfinder.connector.api.CommandFactory;
 import com.github.zhanhb.ckfinder.connector.api.EventHandler;
 import com.github.zhanhb.ckfinder.connector.api.FileUploadListener;
 import com.github.zhanhb.ckfinder.connector.api.PluginInfoRegister;
+import com.github.zhanhb.ckfinder.connector.api.PluginRegistry;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -15,26 +16,36 @@ import java.util.TreeSet;
  *
  * @author zhanhb
  */
-public class PluginRegister {
+public class DefaultPluginRegistry implements PluginRegistry {
+
+  public static DefaultPluginRegistry newInstance() {
+    return new DefaultPluginRegistry();
+  }
 
   private final List<FileUploadListener> fileUploadListeners = new ArrayList<>(4);
   private final List<PluginInfoRegister> pluginInfoRegisters = new ArrayList<>(4);
   private final Set<String> names = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
   private final CommandFactoryBuilder commandFactory = new CommandFactoryBuilder().enableDefaultCommands();
 
-  public PluginRegister addFileUploadListener(FileUploadListener fileUploadListener) {
+  private DefaultPluginRegistry() {
+  }
+
+  @Override
+  public DefaultPluginRegistry addFileUploadListener(FileUploadListener fileUploadListener) {
     Objects.requireNonNull(fileUploadListener);
     fileUploadListeners.add(fileUploadListener);
     return this;
   }
 
-  public PluginRegister addPluginInfoRegister(PluginInfoRegister pluginInfoRegister) {
+  @Override
+  public DefaultPluginRegistry addPluginInfoRegister(PluginInfoRegister pluginInfoRegister) {
     Objects.requireNonNull(pluginInfoRegister);
     pluginInfoRegisters.add(pluginInfoRegister);
     return this;
   }
 
-  public PluginRegister addName(String name) {
+  @Override
+  public DefaultPluginRegistry addName(String name) {
     if (name.matches("\\s*")) {
       throw new IllegalArgumentException("name should not be empty");
     }
@@ -42,25 +53,27 @@ public class PluginRegister {
     return this;
   }
 
-  public PluginRegister registCommands(Command... commands) {
-    commandFactory.registCommands(commands);
+  @Override
+  public DefaultPluginRegistry registerCommands(Command... commands) {
+    commandFactory.registerCommands(commands);
     return this;
   }
 
-  public PluginRegister registCommand(String name, Command command) {
-    commandFactory.registCommand(name, command);
+  @Override
+  public DefaultPluginRegistry registerCommand(String name, Command command) {
+    commandFactory.registerCommand(name, command);
     return this;
   }
 
-  EventHandler buildEventHandler() {
+  public EventHandler buildEventHandler() {
     return new DefaultEventHandler(new ArrayList<>(fileUploadListeners), new ArrayList<>(pluginInfoRegisters));
   }
 
-  String getNames() {
+  public String getPluginNames() {
     return names.isEmpty() ? null : String.join(",", names);
   }
 
-  CommandFactory buildCommandFactory() {
+  public CommandFactory buildCommandFactory() {
     return commandFactory.build();
   }
 

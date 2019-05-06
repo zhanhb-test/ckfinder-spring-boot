@@ -10,6 +10,13 @@ import org.springframework.util.Assert;
  */
 public class ImageResizeSize {
 
+  private static int requirePositive(int value, String name) {
+    if (value <= 0) {
+      throw new IllegalArgumentException(name + " must be greater than 0");
+    }
+    return value;
+  }
+
   private int width, height;
   private String strVal;
 
@@ -18,8 +25,8 @@ public class ImageResizeSize {
     Matcher matcher = Pattern.compile("(\\d+)x(\\d+)").matcher(value);
     if (matcher.matches()) {
       try {
-        width = Integer.parseInt(matcher.group(1));
-        height = Integer.parseInt(matcher.group(2));
+        width = requirePositive(Integer.parseInt(matcher.group(1)), "width");
+        height = requirePositive(Integer.parseInt(matcher.group(2)), "height");
         this.strVal = width + "x" + height;
         return;
       } catch (NumberFormatException ignored) {

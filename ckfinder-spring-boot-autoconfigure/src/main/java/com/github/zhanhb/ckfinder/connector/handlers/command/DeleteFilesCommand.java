@@ -20,7 +20,7 @@ import com.github.zhanhb.ckfinder.connector.handlers.parameter.DeleteFilesParame
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.DeleteFiles;
 import com.github.zhanhb.ckfinder.connector.support.CommandContext;
-import com.github.zhanhb.ckfinder.connector.support.FilePostParam;
+import com.github.zhanhb.ckfinder.connector.support.FileItem;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -56,7 +56,7 @@ public class DeleteFilesCommand extends ErrorListXmlCommand<DeleteFilesParameter
     CKFinderContext context = cmdContext.getCfCtx();
     cmdContext.checkType();
 
-    for (FilePostParam fileItem : param.getFiles()) {
+    for (FileItem fileItem : param.getFiles()) {
       if (!FileUtils.isFileNameValid(fileItem.getName())) {
         cmdContext.throwException(ErrorCode.INVALID_REQUEST);
       }
@@ -87,7 +87,7 @@ public class DeleteFilesCommand extends ErrorListXmlCommand<DeleteFilesParameter
       cmdContext.checkAllPermission(fileItem.getType(), fileItem.getFolder(), AccessControl.FILE_DELETE);
     }
 
-    for (FilePostParam fileItem : param.getFiles()) {
+    for (FileItem fileItem : param.getFiles()) {
       Path file = fileItem.toPath();
 
       param.setAddResultNode(true);
@@ -128,7 +128,7 @@ public class DeleteFilesCommand extends ErrorListXmlCommand<DeleteFilesParameter
    */
   @Override
   protected DeleteFilesParameter popupParams(HttpServletRequest request, CKFinderContext context) {
-    List<FilePostParam> files = RequestFileHelper.getFilesList(request, context);
+    List<FileItem> files = RequestFileHelper.getFilesList(request, context);
     return new DeleteFilesParameter(files);
   }
 
