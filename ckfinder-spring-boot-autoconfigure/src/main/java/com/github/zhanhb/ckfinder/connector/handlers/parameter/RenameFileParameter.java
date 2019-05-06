@@ -9,7 +9,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class RenameFileParameter extends ErrorListXmlParameter {
+public class RenameFileParameter {
 
   private String fileName;
   private String newFileName;

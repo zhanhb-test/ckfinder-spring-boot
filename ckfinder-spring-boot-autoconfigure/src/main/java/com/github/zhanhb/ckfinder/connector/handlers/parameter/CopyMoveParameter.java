@@ -9,7 +9,7 @@ import lombok.Getter;
  * @author zhanhb
  */
 @Getter
-public class CopyMoveParameter extends ErrorListXmlParameter {
+public class CopyMoveParameter {
 
   private final List<FileItem> files;
   private final int all;

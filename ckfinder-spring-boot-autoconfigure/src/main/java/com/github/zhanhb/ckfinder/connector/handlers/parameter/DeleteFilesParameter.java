@@ -9,7 +9,7 @@ import lombok.Getter;
  * @author zhanhb
  */
 @Getter
-public class DeleteFilesParameter extends ErrorListXmlParameter {
+public class DeleteFilesParameter {
 
   private final List<FileItem> files;
   private int filesDeleted;

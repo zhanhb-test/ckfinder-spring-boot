@@ -15,7 +15,6 @@ import com.github.zhanhb.ckfinder.connector.api.AccessControl;
 import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
-import com.github.zhanhb.ckfinder.connector.handlers.parameter.ErrorListXmlParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.support.CommandContext;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
@@ -28,10 +27,10 @@ import lombok.extern.slf4j.Slf4j;
  * Class to handle <code>DeleteFolder</code> command.
  */
 @Slf4j
-public class DeleteFolderCommand extends BaseXmlCommand<ErrorListXmlParameter> implements IPostCommand {
+public class DeleteFolderCommand extends BaseXmlCommand<Void> implements IPostCommand {
 
   @Override
-  protected void createXml(Connector.Builder rootElement, ErrorListXmlParameter param,
+  protected void createXml(Connector.Builder rootElement, Void param,
           CommandContext cmdContext) throws ConnectorException {
     CKFinderContext context = cmdContext.getCfCtx();
     cmdContext.checkType();
@@ -63,8 +62,8 @@ public class DeleteFolderCommand extends BaseXmlCommand<ErrorListXmlParameter> i
   }
 
   @Override
-  protected ErrorListXmlParameter popupParams(HttpServletRequest request, CKFinderContext context) {
-    return new ErrorListXmlParameter();
+  protected Void popupParams(HttpServletRequest request, CKFinderContext context) {
+    return null;
   }
 
 }

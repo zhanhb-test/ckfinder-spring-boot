@@ -150,8 +150,9 @@ public class ImageResizeCommand extends BaseXmlCommand<ImageResizeParameter> imp
       param.setHeight(null);
       param.setWrongReqSizesParams(true);
     }
+    Map<ImageResizeParam, String> requestSizes = param.getSizesFromReq();
     for (ImageResizeParam size : ImageResizeParam.values()) {
-      param.getSizesFromReq().put(size, request.getParameter(size.getParameter()));
+      requestSizes.put(size, request.getParameter(size.getParameter()));
     }
     return param;
   }

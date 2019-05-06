@@ -20,6 +20,7 @@ import com.github.zhanhb.ckfinder.connector.handlers.parameter.DeleteFilesParame
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.DeleteFiles;
 import com.github.zhanhb.ckfinder.connector.support.CommandContext;
+import com.github.zhanhb.ckfinder.connector.support.ErrorListResult;
 import com.github.zhanhb.ckfinder.connector.support.FileItem;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import java.nio.file.Files;
@@ -51,7 +52,7 @@ public class DeleteFilesCommand extends ErrorListXmlCommand<DeleteFilesParameter
    * @throws ConnectorException when error occurs
    */
   @Override
-  protected ErrorCode getDataForXml(DeleteFilesParameter param, CommandContext cmdContext)
+  protected ErrorListResult applyData(DeleteFilesParameter param, CommandContext cmdContext)
           throws ConnectorException {
     CKFinderContext context = cmdContext.getCfCtx();
     cmdContext.checkType();
@@ -87,12 +88,14 @@ public class DeleteFilesCommand extends ErrorListXmlCommand<DeleteFilesParameter
       cmdContext.checkAllPermission(fileItem.getType(), fileItem.getFolder(), AccessControl.FILE_DELETE);
     }
 
+    ErrorListResult.Builder builder = ErrorListResult.builder();
+
     for (FileItem fileItem : param.getFiles()) {
       Path file = fileItem.toPath();
 
-      param.setAddResultNode(true);
+      builder.addResultNode(true);
       if (!Files.exists(file)) {
-        param.appendError(fileItem, ErrorCode.FILE_NOT_FOUND);
+        builder.appendError(fileItem, ErrorCode.FILE_NOT_FOUND);
         continue;
       }
 
@@ -109,14 +112,10 @@ public class DeleteFilesCommand extends ErrorListXmlCommand<DeleteFilesParameter
           }
         });
       } else { //If access is denied, report error and try to delete rest of files.
-        param.appendError(fileItem, ErrorCode.ACCESS_DENIED);
+        builder.appendError(fileItem, ErrorCode.ACCESS_DENIED);
       }
     }
-    if (param.hasError()) {
-      return ErrorCode.DELETE_FAILED;
-    } else {
-      return null;
-    }
+    return builder.ifError(ErrorCode.DELETE_FAILED);
   }
 
   /**

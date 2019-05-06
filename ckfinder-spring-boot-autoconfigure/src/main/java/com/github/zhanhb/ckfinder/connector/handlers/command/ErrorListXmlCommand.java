@@ -13,16 +13,16 @@ package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
-import com.github.zhanhb.ckfinder.connector.handlers.parameter.ErrorListXmlParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.support.CommandContext;
+import com.github.zhanhb.ckfinder.connector.support.ErrorListResult;
 
 /**
  * Base class to handle XML commands with error list.
  *
  * @param <T> parameter type
  */
-public abstract class ErrorListXmlCommand<T extends ErrorListXmlParameter> extends XmlCommand<T> {
+public abstract class ErrorListXmlCommand<T> extends XmlCommand<T> {
 
   @Override
   @SuppressWarnings("FinalMethod")
@@ -30,12 +30,13 @@ public abstract class ErrorListXmlCommand<T extends ErrorListXmlParameter> exten
           throws ConnectorException {
     Connector.Builder connector = Connector.builder();
     cmdContext.setResourceType(connector);
-    ErrorCode error = getDataForXml(param, cmdContext);
+    ErrorListResult result = applyData(param, cmdContext);
+    ErrorCode error = result.getErrorCode();
     int errorCode = error != null ? error.getCode() : 0;
     createCurrentFolderNode(cmdContext, connector);
     createErrorNode(connector, errorCode);
-    param.addErrorsTo(connector);
-    if (param.isAddResultNode()) {
+    result.addErrorsTo(connector);
+    if (result.isAddResultNode()) {
       addResultNode(connector, param);
     }
     return connector.build();
@@ -59,6 +60,6 @@ public abstract class ErrorListXmlCommand<T extends ErrorListXmlParameter> exten
    * occurred.
    * @throws ConnectorException when error occurs
    */
-  protected abstract ErrorCode getDataForXml(T param, CommandContext cmdContext) throws ConnectorException;
+  protected abstract ErrorListResult applyData(T param, CommandContext cmdContext) throws ConnectorException;
 
 }

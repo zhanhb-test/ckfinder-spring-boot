@@ -19,6 +19,7 @@ import com.github.zhanhb.ckfinder.connector.handlers.parameter.RenameFileParamet
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.RenamedFile;
 import com.github.zhanhb.ckfinder.connector.support.CommandContext;
+import com.github.zhanhb.ckfinder.connector.support.ErrorListResult;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
@@ -61,7 +62,7 @@ public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> 
    * @throws ConnectorException when error occurs
    */
   @Override
-  protected ErrorCode getDataForXml(RenameFileParameter param, CommandContext cmdContext)
+  protected ErrorListResult applyData(RenameFileParameter param, CommandContext cmdContext)
           throws ConnectorException {
     log.trace("getDataForXml");
     CKFinderContext context = cmdContext.getCfCtx();
@@ -76,12 +77,14 @@ public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> 
       param.setNewFileName(newFileName);
     }
 
+    ErrorListResult.Builder builder = ErrorListResult.builder();
+
     if (!StringUtils.isEmpty(fileName) && !StringUtils.isEmpty(newFileName)) {
-      param.setAddResultNode(true);
+      builder.addResultNode(true);
     }
 
     if (!FileUtils.isFileExtensionAllowed(newFileName, cmdContext.getType())) {
-      return ErrorCode.INVALID_EXTENSION;
+      return builder.errorCode(ErrorCode.INVALID_EXTENSION).build();
     }
     if (!context.isDoubleFileExtensionsAllowed()) {
       newFileName = FileUtils.renameFileWithBadExt(cmdContext.getType(), newFileName);
@@ -89,15 +92,15 @@ public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> 
     }
 
     if (!FileUtils.isFileNameValid(fileName) || context.isFileHidden(fileName)) {
-      return ErrorCode.INVALID_REQUEST;
+      return builder.errorCode(ErrorCode.INVALID_REQUEST).build();
     }
 
     if (!FileUtils.isFileNameValid(newFileName, context) || context.isFileHidden(newFileName)) {
-      return ErrorCode.INVALID_NAME;
+      return builder.errorCode(ErrorCode.INVALID_NAME).build();
     }
 
     if (!FileUtils.isFileExtensionAllowed(fileName, cmdContext.getType())) {
-      return ErrorCode.INVALID_REQUEST;
+      return builder.errorCode(ErrorCode.INVALID_REQUEST).build();
     }
 
     Path file = cmdContext.resolve(fileName);
@@ -109,13 +112,13 @@ public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> 
       renameThumb(param, cmdContext);
       return null;
     } catch (NoSuchFileException ex) {
-      return ErrorCode.FILE_NOT_FOUND;
+      return builder.errorCode(ErrorCode.FILE_NOT_FOUND).build();
     } catch (FileAlreadyExistsException ex) {
-      return ErrorCode.ALREADY_EXIST;
+      return builder.errorCode(ErrorCode.ALREADY_EXIST).build();
     } catch (IOException ex) {
       param.setRenamed(false);
       log.error("IOException", ex);
-      return ErrorCode.ACCESS_DENIED;
+      return builder.errorCode(ErrorCode.ACCESS_DENIED).build();
     }
   }
 

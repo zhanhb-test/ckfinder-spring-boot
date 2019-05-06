@@ -19,6 +19,7 @@ import com.github.zhanhb.ckfinder.connector.handlers.parameter.CopyMoveParameter
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.CopyFiles;
 import com.github.zhanhb.ckfinder.connector.support.CommandContext;
+import com.github.zhanhb.ckfinder.connector.support.ErrorListResult;
 import com.github.zhanhb.ckfinder.connector.support.FileItem;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import java.io.IOException;
@@ -46,7 +47,7 @@ public class CopyFilesCommand extends ErrorListXmlCommand<CopyMoveParameter> imp
   }
 
   @Override
-  protected ErrorCode getDataForXml(CopyMoveParameter param, CommandContext cmdContext)
+  protected ErrorListResult applyData(CopyMoveParameter param, CommandContext cmdContext)
           throws ConnectorException {
     cmdContext.checkType();
     cmdContext.checkAllPermission(AccessControl.FILE_RENAME
@@ -54,16 +55,18 @@ public class CopyFilesCommand extends ErrorListXmlCommand<CopyMoveParameter> imp
             | AccessControl.FILE_UPLOAD);
     cmdContext.checkFilePostParam(param.getFiles(), AccessControl.FILE_VIEW);
 
+    ErrorListResult.Builder builder = ErrorListResult.builder();
+
     for (FileItem file : param.getFiles()) {
       if (!FileUtils.isFileExtensionAllowed(file.getName(), cmdContext.getType())) {
-        param.appendError(file, ErrorCode.INVALID_EXTENSION);
+        builder.appendError(file, ErrorCode.INVALID_EXTENSION);
         continue;
       }
       // check #4 (extension) - when copy to another resource type,
       //double check extension
       if (cmdContext.getType() != file.getType()
               && !FileUtils.isFileExtensionAllowed(file.getName(), file.getType())) {
-        param.appendError(file, ErrorCode.INVALID_EXTENSION);
+        builder.appendError(file, ErrorCode.INVALID_EXTENSION);
         continue;
       }
 
@@ -74,23 +77,23 @@ public class CopyFilesCommand extends ErrorListXmlCommand<CopyMoveParameter> imp
       try {
         attrs = Files.readAttributes(sourceFile, BasicFileAttributes.class);
       } catch (IOException ex) {
-        param.appendError(file, ErrorCode.FILE_NOT_FOUND);
+        builder.appendError(file, ErrorCode.FILE_NOT_FOUND);
         continue;
       }
       if (!attrs.isRegularFile()) {
-        param.appendError(file, ErrorCode.FILE_NOT_FOUND);
+        builder.appendError(file, ErrorCode.FILE_NOT_FOUND);
       }
       if (cmdContext.getType() != file.getType()) {
         long maxSize = cmdContext.getType().getMaxSize();
         if (maxSize != 0 && maxSize < attrs.size()) {
-          param.appendError(file, ErrorCode.UPLOADED_TOO_BIG);
+          builder.appendError(file, ErrorCode.UPLOADED_TOO_BIG);
           continue;
         }
         // fail through
       }
       try {
         if (Files.isSameFile(sourceFile, destFile)) {
-          param.appendError(file, ErrorCode.SOURCE_AND_TARGET_PATH_EQUAL);
+          builder.appendError(file, ErrorCode.SOURCE_AND_TARGET_PATH_EQUAL);
           continue;
         }
       } catch (IOException ex) {
@@ -105,33 +108,28 @@ public class CopyFilesCommand extends ErrorListXmlCommand<CopyMoveParameter> imp
             Files.copy(sourceFile, destFile, StandardCopyOption.REPLACE_EXISTING);
           } catch (IOException ex) {
             log.error("copy file failed", ex);
-            param.appendError(file, ErrorCode.ACCESS_DENIED);
+            builder.appendError(file, ErrorCode.ACCESS_DENIED);
             continue;
           }
         } else if (options != null && options.contains("autorename")) {
           destFile = handleAutoRename(sourceFile, destFile);
           if (destFile == null) {
-            param.appendError(file, ErrorCode.ACCESS_DENIED);
+            builder.appendError(file, ErrorCode.ACCESS_DENIED);
             continue;
           }
         } else {
-          param.appendError(file, ErrorCode.ALREADY_EXIST);
+          builder.appendError(file, ErrorCode.ALREADY_EXIST);
           continue;
         }
       } catch (IOException e) {
         log.error("", e);
-        param.appendError(file, ErrorCode.ACCESS_DENIED);
+        builder.appendError(file, ErrorCode.ACCESS_DENIED);
         continue;
       }
       param.increase();
       copyThumb(file, sourceFile.relativize(destFile));
     }
-    param.setAddResultNode(true);
-    if (param.hasError()) {
-      return ErrorCode.COPY_FAILED;
-    } else {
-      return null;
-    }
+    return builder.addResultNode(true).ifError(ErrorCode.COPY_FAILED);
   }
 
   /**
