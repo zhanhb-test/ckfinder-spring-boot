@@ -74,7 +74,7 @@ public class PathPartial {
   }
 
   public void service(HttpServletRequest request, HttpServletResponse response,
-          Path path) throws IOException, ServletException {
+          @Nullable Path path) throws IOException, ServletException {
     serveResource(request, response, !"HEAD".equals(request.getMethod()), path);
   }
 
@@ -88,7 +88,7 @@ public class PathPartial {
    * @throws ServletException if servlet exception occurs
    */
   public void doHead(HttpServletRequest request, HttpServletResponse response,
-          Path path) throws IOException, ServletException {
+          @Nullable Path path) throws IOException, ServletException {
     // Serve the requested resource, without the data content
     serveResource(request, response, false, path);
   }
@@ -103,7 +103,7 @@ public class PathPartial {
    * @throws ServletException if servlet exception occurs
    */
   public void doGet(HttpServletRequest request, HttpServletResponse response,
-          Path path) throws IOException, ServletException {
+          @Nullable Path path) throws IOException, ServletException {
     serveResource(request, response, true, path);
   }
 
