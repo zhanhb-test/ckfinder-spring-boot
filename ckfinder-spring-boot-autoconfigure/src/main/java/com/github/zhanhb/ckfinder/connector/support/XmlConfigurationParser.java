@@ -520,7 +520,7 @@ public enum XmlConfigurationParser {
       throw new ConnectorException(ErrorCode.FOLDER_NOT_FOUND,
               "Resource directory could not be created using specified path.");
     }
-    Optional<Path> thumbnailPath = Optional.ofNullable(thumbnail).map(ThumbnailProperties::getPath).map(f -> FileUtils.resolve(f, tpath));
+    Optional<Path> thumbnailPath = Optional.ofNullable(thumbnail).map(ThumbnailProperties::getPath).map(f -> FileUtils.resolve(f, typeName));
     return builder
             .url(url)
             .path(p)

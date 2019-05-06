@@ -205,7 +205,7 @@ public class CKFinderAutoConfiguration {
         String url = (StringUtils.hasLength(type.getUrl()) ? type.getUrl() : typeName.toLowerCase())
                 .replace(Constants.BASE_URL_PLACEHOLDER, "");
 
-        Optional<Path> thumbnailPath = Optional.ofNullable(thumbnail).map(ThumbnailProperties::getPath).map(p -> FileUtils.resolve(p, path));
+        Optional<Path> thumbnailPath = Optional.ofNullable(thumbnail).map(ThumbnailProperties::getPath).map(p -> FileUtils.resolve(p, typeName));
         builder.type(typeName, resourceType.maxSize(type.getMaxSize().toBytes())
                 .path(FileUtils.resolve(basePath, path))
                 .url(PathUtils.normalizeUrl(baseUrl + url))
