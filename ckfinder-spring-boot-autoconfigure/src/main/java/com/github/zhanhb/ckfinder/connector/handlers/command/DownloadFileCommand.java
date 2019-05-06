@@ -71,7 +71,7 @@ public class DownloadFileCommand extends BaseCommand<String> {
     } catch (UncheckedConnectorException ex) {
       throw ex.getCause();
     } catch (ServletException ex) {
-      throw new AssertionError(ex);
+      throw new ConnectorException(ErrorCode.UNKNOWN, ex);
     }
   }
 
