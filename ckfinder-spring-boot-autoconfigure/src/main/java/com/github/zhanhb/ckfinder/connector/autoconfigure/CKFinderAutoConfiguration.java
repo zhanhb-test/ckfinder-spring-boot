@@ -47,7 +47,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -161,7 +160,7 @@ public class CKFinderAutoConfiguration {
       if (properties.getUserRoleSessionVar() != null) {
         builder.userRoleName(properties.getUserRoleSessionVar());
       }
-      builder.accessControl(defaultAccessControl);
+      builder.csrf(properties.isCsrf()).accessControl(defaultAccessControl);
       ThumbnailProperties thumbnail = createThumbs(properties.getThumbs(), basePathBuilder);
       builder.thumbnail(thumbnail)
               .disallowUnsafeCharacters(properties.isDisallowUnsafeCharacters())
@@ -288,12 +287,11 @@ public class CKFinderAutoConfiguration {
   public static class DefaultWatermarkConfigurer {
 
     @Bean
-    public WatermarkPlugin watermarkPlugin(CKFinderProperties properties, ResourceLoader resourceLoader) {
+    public WatermarkPlugin watermarkPlugin(CKFinderProperties properties) {
       CKFinderProperties.Watermark watermark = properties.getWatermark();
       WatermarkSettings.Builder builder = WatermarkSettings.builder();
-      String source = watermark.getSource();
-      Assert.notNull(source, "watermark source should not be null");
-      Resource resource = resourceLoader.getResource(source);
+      Resource resource = watermark.getSource();
+      Assert.notNull(resource, "watermark source should not be null");
       Assert.isTrue(resource.exists(), "watermark resource not exists");
       return new WatermarkPlugin(builder.marginBottom(watermark.getMarginBottom())
               .marginRight(watermark.getMarginRight())
@@ -309,7 +307,8 @@ public class CKFinderAutoConfiguration {
   public static class DefaultConnectorServletConfigurer {
 
     @Bean
-    public ServletRegistrationBean<ConnectorServlet> connectorServlet(CKFinderProperties properties,
+    public ServletRegistrationBean<ConnectorServlet> connectorServlet(
+            CKFinderProperties properties,
             MultipartConfigElement multipartConfigElement,
             CKFinderContext context) {
       ConnectorServlet servlet = new ConnectorServlet(context);

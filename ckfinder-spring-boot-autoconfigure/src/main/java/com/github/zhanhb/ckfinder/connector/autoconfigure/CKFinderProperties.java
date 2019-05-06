@@ -6,6 +6,7 @@ import com.github.zhanhb.ckfinder.connector.plugins.ImageResizeSize;
 import java.util.Map;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.convert.DataSizeUnit;
+import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 import org.springframework.util.unit.DataSize;
 import org.springframework.util.unit.DataUnit;
@@ -94,6 +95,10 @@ public class CKFinderProperties {
     return allowDoubleExtension;
   }
 
+  public boolean isCsrf() {
+    return csrf;
+  }
+
   public boolean isCheckSizeAfterScaling() {
     return this.checkSizeAfterScaling;
   }
@@ -176,6 +181,10 @@ public class CKFinderProperties {
 
   public void setAllowDoubleExtension(boolean allowDoubleExtension) {
     this.allowDoubleExtension = allowDoubleExtension;
+  }
+
+  public void setCsrf(boolean csrf) {
+    this.csrf = csrf;
   }
 
   public void setCheckSizeAfterScaling(final boolean checkSizeAfterScaling) {
@@ -530,7 +539,7 @@ public class CKFinderProperties {
   public static class Watermark {
 
     private boolean enabled = false;
-    private String source;
+    private Resource source;
     private float transparency = 0.8F;
     private float quality = 1;
     private int marginBottom = 5;
@@ -540,7 +549,7 @@ public class CKFinderProperties {
       return this.enabled;
     }
 
-    public String getSource() {
+    public Resource getSource() {
       return this.source;
     }
 
@@ -564,7 +573,7 @@ public class CKFinderProperties {
       this.enabled = enabled;
     }
 
-    public void setSource(final String source) {
+    public void setSource(final Resource source) {
       this.source = source;
     }
 
