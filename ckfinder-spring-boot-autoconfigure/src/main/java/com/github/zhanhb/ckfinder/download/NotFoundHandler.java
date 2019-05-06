@@ -30,8 +30,8 @@ public interface NotFoundHandler {
 
   static NotFoundHandler defaultHandler() {
     return context -> {
-      HttpServletRequest request = context.get(HttpServletRequest.class);
-      HttpServletResponse response = context.get(HttpServletResponse.class);
+      HttpServletRequest request = context.getRequest();
+      HttpServletResponse response = context.getResponse();
       // Check if we're included so we can return the appropriate
       // missing resource name in the error
       String requestUri = (String) request.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI);

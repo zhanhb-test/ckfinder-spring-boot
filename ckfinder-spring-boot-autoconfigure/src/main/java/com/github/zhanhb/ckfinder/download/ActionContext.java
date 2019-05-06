@@ -15,40 +15,34 @@
  */
 package com.github.zhanhb.ckfinder.download;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  *
  * @author zhanhb
  */
+@Getter
+@Setter(AccessLevel.PACKAGE)
 public class ActionContext {
 
-  private final Map<Class<?>, Object> map = new HashMap<>(8);
+  private HttpServletRequest request;
+  private HttpServletResponse response;
+  private ServletContext servletContext;
+  private Path path;
+  private BasicFileAttributes attributes;
 
-  // package private
-  ActionContext() {
-  }
-
-  /**
-   * Available types
-   *
-   * @see javax.servlet.http.HttpServletRequest request
-   * @see javax.servlet.http.HttpServletResponse response
-   * @see javax.servlet.ServletContext servlet context
-   * @see java.nio.file.Path
-   * @see java.nio.file.attribute.BasicFileAttributes
-   */
-  public <T> T get(Class<T> clazz) {
-    @SuppressWarnings("unchecked")
-    T result = (T) map.get(clazz);
-    return result;
-  }
-
-  // package private
-  <T> ActionContext put(Class<T> clazz, T object) {
-    map.put(clazz, object);
-    return this;
+  public ActionContext(HttpServletRequest request, HttpServletResponse response, ServletContext servletContext, Path path) {
+    this.request = request;
+    this.response = response;
+    this.servletContext = servletContext;
+    this.path = path;
   }
 
 }

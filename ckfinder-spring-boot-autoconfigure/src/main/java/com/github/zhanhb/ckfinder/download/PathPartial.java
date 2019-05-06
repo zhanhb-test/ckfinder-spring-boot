@@ -29,7 +29,6 @@ import java.util.StringTokenizer;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -144,11 +143,10 @@ public class PathPartial {
    */
   private void serveResource(HttpServletRequest request, HttpServletResponse response,
           boolean content, Path path) throws IOException, ServletException {
-    ActionContext context = new ActionContext()
-            .put(HttpServletRequest.class, request)
-            .put(HttpServletResponse.class, response)
-            .put(ServletContext.class, request.getServletContext())
-            .put(Path.class, path);
+
+    ActionContext context = new ActionContext(request, response,
+            request.getServletContext(), path);
+
     if (path == null) {
       notFound.handle(context);
       return;
@@ -160,7 +158,7 @@ public class PathPartial {
       notFound.handle(context);
       return;
     }
-    context.put(BasicFileAttributes.class, attr);
+    context.setAttributes(attr);
     if (attr.isDirectory()) {
       notFound.handle(context);
       return;

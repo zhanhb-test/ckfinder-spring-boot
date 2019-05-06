@@ -27,7 +27,7 @@ public class ETag {
 
   public static final Function<ActionContext, String> DEFAULT_ETAG_MAPPER
           = context -> {
-            BasicFileAttributes attributes = context.get(BasicFileAttributes.class);
+            BasicFileAttributes attributes = context.getAttributes();
             return attributes.size() + "-" + attributes.lastModifiedTime().toMillis();
           };
 

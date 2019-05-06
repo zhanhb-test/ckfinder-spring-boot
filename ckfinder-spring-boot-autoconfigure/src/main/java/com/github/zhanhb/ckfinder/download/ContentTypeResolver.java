@@ -15,9 +15,6 @@
  */
 package com.github.zhanhb.ckfinder.download;
 
-import java.nio.file.Path;
-import javax.servlet.ServletContext;
-
 /**
  *
  * @author zhanhb
@@ -25,7 +22,7 @@ import javax.servlet.ServletContext;
 public interface ContentTypeResolver {
 
   static ContentTypeResolver getDefault() {
-    return context -> context.get(ServletContext.class).getMimeType(context.get(Path.class).getFileName().toString());
+    return context -> context.getServletContext().getMimeType(context.getPath().getFileName().toString());
   }
 
   String getValue(ActionContext context);

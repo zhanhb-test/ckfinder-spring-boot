@@ -30,7 +30,7 @@ interface ContentDispositionEncoder {
   static ContentDisposition wrapper(String type, Function<Path, String> nameMapper) {
     Objects.requireNonNull(nameMapper, "nameMapper");
     return context -> org.springframework.http.ContentDisposition.builder(type)
-            .filename(nameMapper.apply(context.get(Path.class)), StandardCharsets.UTF_8)
+            .filename(nameMapper.apply(context.getPath()), StandardCharsets.UTF_8)
             .build().toString();
   }
 
