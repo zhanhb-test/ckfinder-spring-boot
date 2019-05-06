@@ -5,6 +5,7 @@
 .idea/
 .project
 .settings/
+/ckfinder-webjars/.ckfinder/
 nbproject/
 pom.xml.bak
 pom.xml.releaseBackup
