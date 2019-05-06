@@ -8,7 +8,7 @@ import lombok.Value;
 @Builder(builderClassName = "Builder")
 @SuppressWarnings("FinalClass")
 @Value
-class PluginInfo {
+class PluginParam {
 
   private String name;
   @Singular

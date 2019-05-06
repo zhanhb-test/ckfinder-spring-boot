@@ -565,14 +565,14 @@ public enum XmlConfigurationParser {
     for (int i = 0; i < length; i++) {
       Node childChildNode = nodeList.item(i);
       if ("plugin".equals(childChildNode.getNodeName())) {
-        PluginInfo pluginInfo = createPluginFromNode(childChildNode);
-        String name = pluginInfo.getName();
+        PluginParam pluginParam = createPluginFromNode(childChildNode);
+        String name = pluginParam.getName();
         if (name != null) {
           Plugin plugin;
           switch (name) {
             case "imageresize":
               try {
-                plugin = new ImageResize(pluginInfo.getParams().entrySet().stream()
+                plugin = new ImageResize(pluginParam.getParams().entrySet().stream()
                         .collect(Collectors.toMap(entry
                                 -> ImageResizeParam.valueOf(entry.getKey()),
                                 entry -> new ImageResizeSize(entry.getValue()))));
@@ -581,7 +581,7 @@ public enum XmlConfigurationParser {
               }
               break;
             case "watermark":
-              WatermarkSettings watermarkSettings = parseWatermarkSettings(pluginInfo, resourceLoader);
+              WatermarkSettings watermarkSettings = parseWatermarkSettings(pluginParam, resourceLoader);
               plugin = new Watermark(watermarkSettings);
               break;
             case "fileeditor":
@@ -601,9 +601,9 @@ public enum XmlConfigurationParser {
             .publicPluginNames(registry.getPluginNames());
   }
 
-  private WatermarkSettings parseWatermarkSettings(PluginInfo pluginInfo, ResourceLoader resourceLoader) {
+  private WatermarkSettings parseWatermarkSettings(PluginParam pluginParam, ResourceLoader resourceLoader) {
     WatermarkSettings.Builder settings = WatermarkSettings.builder();
-    for (Map.Entry<String, String> entry : pluginInfo.getParams().entrySet()) {
+    for (Map.Entry<String, String> entry : pluginParam.getParams().entrySet()) {
       final String name = entry.getKey();
       final String value = entry.getValue();
       switch (name) {
@@ -634,10 +634,10 @@ public enum XmlConfigurationParser {
    * Creates plugin data from configuration file.
    *
    * @param element XML plugin node.
-   * @return PluginInfo data
+   * @return PluginParam data
    */
-  private PluginInfo createPluginFromNode(Node element) {
-    PluginInfo.Builder builder = PluginInfo.builder();
+  private PluginParam createPluginFromNode(Node element) {
+    PluginParam.Builder builder = PluginParam.builder();
     NodeList list = element.getChildNodes();
     for (int i = 0, l = list.getLength(); i < l; i++) {
       Node childElem = list.item(i);
