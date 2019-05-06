@@ -11,13 +11,16 @@ public enum KeyGenerator {
 
   KeyGenerator() {
     // Character set used in license key
-    final String str = "123456789ABCDEFGHJKLMNPQRSTUVWXYZ";
-    this.chars = str.toCharArray();
+    this("123456789ABCDEFGHJKLMNPQRSTUVWXYZ".toCharArray());
+  }
+
+  KeyGenerator(char[] chars) {
     int[] arr = new int['Z' - '1' + 1];
     Arrays.fill(arr, -1);
-    for (int i = 0, len = str.length(); i < len; ++i) {
-      arr[str.charAt(i) - '1'] = i;
+    for (int i = 0, len = chars.length; i < len; ++i) {
+      arr[chars[i] - '1'] = i;
     }
+    this.chars = chars;
     this.index = arr;
   }
 

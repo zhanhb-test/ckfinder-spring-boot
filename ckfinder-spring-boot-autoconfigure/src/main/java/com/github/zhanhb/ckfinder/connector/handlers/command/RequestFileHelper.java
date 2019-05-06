@@ -16,7 +16,6 @@ interface RequestFileHelper {
    * get file list to copy from request.
    *
    * @param request request
-   * @param files uploaded files
    * @param context ckfinder context
    */
   static List<FilePostParam> getFilesList(HttpServletRequest request, CKFinderContext context) {

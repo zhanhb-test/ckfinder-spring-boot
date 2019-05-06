@@ -163,7 +163,6 @@ public class InitCommand extends XmlCommand<String> {
     for (ResourceType resourceType : types) {
       int acl = cmdContext.getAcl(resourceType, "/");
       if ((acl & AccessControl.FOLDER_VIEW) != 0) {
-        long maxSize = resourceType.getMaxSize();
         boolean hasChildren = FileUtils.hasChildren(context.getAccessControl(), "/", resourceType.getPath(), context, resourceType.getName(), cmdContext.getUserRole());
         resourceTypes.resourceType(com.github.zhanhb.ckfinder.connector.handlers.response.ResourceType.builder()
                 .name(resourceType.getName())
@@ -172,7 +171,7 @@ public class InitCommand extends XmlCommand<String> {
                 .allowedExtensions(resourceType.getAllowedExtensions())
                 .deniedExtensions(resourceType.getDeniedExtensions())
                 .url(PathUtils.addSlashToEnd(resourceType.getUrl()))
-                .maxSize(maxSize > 0 ? maxSize : 0)
+                .maxSize(Math.max(resourceType.getMaxSize(), 0))
                 .hasChildren(hasChildren).build());
       }
     }
