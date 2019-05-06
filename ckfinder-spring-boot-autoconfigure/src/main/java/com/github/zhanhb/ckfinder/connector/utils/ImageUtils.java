@@ -120,9 +120,9 @@ public class ImageUtils {
     BufferedImage image;
     try (InputStream stream = part.getInputStream()) {
       image = ImageIO.read(stream);
-      if (image == null) {
-        throw new IOException("Wrong file");
-      }
+    }
+    if (image == null) {
+      throw new IOException("Wrong file");
     }
     ImageProperties imageProperties = context.getImage();
     Dimension dimension = createThumbDimension(image, imageProperties.getMaxWidth(),

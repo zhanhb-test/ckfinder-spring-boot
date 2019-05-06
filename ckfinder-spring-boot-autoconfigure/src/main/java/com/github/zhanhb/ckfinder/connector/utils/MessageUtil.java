@@ -12,6 +12,7 @@
 package com.github.zhanhb.ckfinder.connector.utils;
 
 import java.util.Locale;
+import java.util.MissingResourceException;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import javax.annotation.Nullable;
@@ -39,8 +40,8 @@ public enum MessageUtil {
     Locale locale = Optional.ofNullable(lang).map(Locale::forLanguageTag).orElse(Locale.ROOT);
     try {
       return ResourceBundle.getBundle(BUNDLE_NAME, locale).getString(Integer.toString(errorCode));
-    } catch (RuntimeException ex) {
-      log.debug("",ex);
+    } catch (MissingResourceException ex) {
+      log.debug("error code '{}' with locale '{}' not exists", errorCode, lang, ex);
       return "";
     }
   }
