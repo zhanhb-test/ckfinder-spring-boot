@@ -126,13 +126,8 @@ public class PathPartial {
       checkIfNoneMatch(request, etag);
       checkIfModifiedSince(request, attr);
       return true;
-    } catch (UncheckException ex) {
-      if (ex.isError()) {
-        response.sendError(ex.getCode());
-      } else {
-        response.setStatus(ex.getCode());
-        response.setHeader(HttpHeaders.ETAG, etag);
-      }
+    } catch (UncheckedException ex) {
+      ex.serve(response, etag);
       return false;
     }
   }
@@ -175,7 +170,7 @@ public class PathPartial {
     // Check if the conditions specified in the optional If headers are
     // satisfied.
     // Checking If headers
-    boolean included = (request.getAttribute(RequestDispatcher.INCLUDE_CONTEXT_PATH) != null);
+    boolean included = request.getAttribute(RequestDispatcher.INCLUDE_CONTEXT_PATH) != null;
     String etag = this.eTag.getValue(context);
     if (!included && !isError && !checkIfHeaders(request, response, attr, etag)) {
       return;
@@ -284,10 +279,11 @@ public class PathPartial {
         // is returned.
         return FULL;
       }
+      // fail through
     }
     long fileLength = attr.size();
     if (fileLength == 0) {
-      return FULL;
+      return null;
     }
     // Retrieving the range header (if any is specified
     String rangeHeader = request.getHeader(HttpHeaders.RANGE);
@@ -296,49 +292,51 @@ public class PathPartial {
     }
     // bytes is the only range unit supported (and I don't see the point
     // of adding new ones).
-    if (!rangeHeader.startsWith("bytes=")) {
-      return FULL;
-    }
-    // List which will contain all the ranges which are successfully
-    // parsed.
-    List<Range> result = new ArrayList<>(4);
-    // Parsing the range list
-    // "bytes=".length() = 6
-    for (int index, last = 6;; last = index + 1) {
-      index = rangeHeader.indexOf(',', last);
-      boolean isLast = index == -1;
-      final String rangeDefinition = (isLast ? rangeHeader.substring(last) : rangeHeader.substring(last, index)).trim();
-      final int dashPos = rangeDefinition.indexOf('-');
-      if (dashPos == -1) {
-        break;
-      }
-      final Range currentRange = new Range(fileLength);
-      try {
-        if (dashPos == 0) {
-          final long offset = Long.parseLong(rangeDefinition);
-          if (offset == 0) { // -0, --0
-            break;
-          }
-          currentRange.start = Math.max(fileLength + offset, 0);
-        } else {
-          currentRange.start = Long.parseLong(rangeDefinition.substring(0, dashPos));
-          if (dashPos < rangeDefinition.length() - 1) {
-            currentRange.end = Long.parseLong(rangeDefinition.substring(dashPos + 1, rangeDefinition.length()));
-          }
-        }
-      } catch (NumberFormatException e) {
-        break;
-      }
-      if (!currentRange.validate()) {
-        break;
-      }
-      result.add(currentRange);
-      if (isLast) {
-        int size = result.size();
-        if (size == 0) {
+    if (rangeHeader.startsWith("bytes=")) {
+      // List which will contain all the ranges which are successfully
+      // parsed.
+      List<Range> result = new ArrayList<>(4);
+      // Parsing the range list
+      // "bytes=".length() = 6
+      for (int index, last = 6;; last = index + 1) {
+        index = rangeHeader.indexOf(',', last);
+        String rangeDefinition = (index == -1 ? rangeHeader.substring(last) : rangeHeader.substring(last, index)).trim();
+        final int dashPos = rangeDefinition.indexOf('-');
+        if (dashPos == -1) {
           break;
         }
-        return result.toArray(new Range[size]);
+        final Range currentRange;
+        try {
+          if (dashPos == 0) {
+            final long offset = Long.parseLong(rangeDefinition);
+            if (offset == 0) { // -0, --0
+              break;
+            }
+            long start = Math.max(fileLength + offset, 0);
+            currentRange = new Range(fileLength, start);
+          } else {
+            long start = Long.parseLong(rangeDefinition.substring(0, dashPos));
+            if (dashPos < rangeDefinition.length() - 1) {
+              long end = Long.parseLong(rangeDefinition.substring(dashPos + 1));
+              currentRange = new Range(fileLength, start, end);
+            } else {
+              currentRange = new Range(fileLength, start);
+            }
+          }
+        } catch (NumberFormatException e) {
+          break;
+        }
+        if (!currentRange.validate()) {
+          break;
+        }
+        result.add(currentRange);
+        if (index == -1) {
+          int size = result.size();
+          if (size == 0) {
+            break;
+          }
+          return result.toArray(new Range[size]);
+        }
       }
     }
     response.addHeader(HttpHeaders.CONTENT_RANGE, "bytes */" + fileLength);
@@ -356,9 +354,9 @@ public class PathPartial {
     String headerValue = request.getHeader(HttpHeaders.IF_MATCH);
     if (headerValue != null && headerValue.indexOf('*') == -1
             && !anyMatches(headerValue, etag)) {
-      // If none of the given ETags match, 412 Precodition failed is
+      // If none of the given ETags match, 412 Precondition failed is
       // sent back
-      throw new UncheckException(HttpServletResponse.SC_PRECONDITION_FAILED);
+      throw new UncheckedException(HttpServletResponse.SC_PRECONDITION_FAILED);
     }
   }
 
@@ -379,9 +377,9 @@ public class PathPartial {
               && attr.lastModifiedTime().toMillis() < headerValue + 1000) {
         // The entity has not been modified since the date
         // specified by the client. This is not an error case.
-        throw new UncheckException(HttpServletResponse.SC_NOT_MODIFIED);
+        throw new UncheckedException(HttpServletResponse.SC_NOT_MODIFIED);
       }
-    } catch (IllegalArgumentException ex) {
+    } catch (IllegalArgumentException ignored) {
     }
   }
 
@@ -400,9 +398,9 @@ public class PathPartial {
       // back.
       String method = request.getMethod();
       if ("GET".equals(method) || "HEAD".equals(method)) {
-        throw new UncheckException(HttpServletResponse.SC_NOT_MODIFIED);
+        throw new UncheckedException(HttpServletResponse.SC_NOT_MODIFIED);
       } else {
-        throw new UncheckException(HttpServletResponse.SC_PRECONDITION_FAILED);
+        throw new UncheckedException(HttpServletResponse.SC_PRECONDITION_FAILED);
       }
     }
   }
@@ -421,10 +419,10 @@ public class PathPartial {
         if (headerValue != -1 && lastModified >= headerValue + 1000) {
           // The entity has not been modified since the date
           // specified by the client. This is not an error case.
-          throw new UncheckException(HttpServletResponse.SC_PRECONDITION_FAILED);
+          throw new UncheckedException(HttpServletResponse.SC_PRECONDITION_FAILED);
         }
       } catch (IllegalArgumentException ex) {
-        throw new UncheckException(HttpServletResponse.SC_PRECONDITION_FAILED);
+        throw new UncheckedException(HttpServletResponse.SC_PRECONDITION_FAILED);
       }
     }
   }
@@ -457,7 +455,11 @@ public class PathPartial {
         // Printing content
         copyRange(stream, ostream, currentRange, buffer);
       } catch (IOException ex) {
-        exception = ex;
+        if (exception == null) {
+          exception = ex;
+        } else {
+          exception.addSuppressed(ex);
+        }
       }
     }
     ostream.println();
@@ -496,37 +498,39 @@ public class PathPartial {
 
   private static class Range {
 
-    public long start;
-    public long end;
-    public long total;
+    final long start, end, total;
 
-    Range(long length) {
-      this.end = length - 1;
+    Range(long length, long start) {
+      this(length, start, length - 1);
+    }
+
+    Range(long length, long start, long end) {
       this.total = length;
+      this.start = start;
+      this.end = end;
     }
 
     /**
      * Validate range.
      */
-    public boolean validate() {
-      end = Math.min(end, total - 1);
-      return start <= end;
+    boolean validate() {
+      return start <= Math.min(end, total - 1);
     }
 
     @Override
     public String toString() {
-      return "bytes " + start + "-" + end + "/" + total;
+      return "bytes " + start + '-' + end + '/' + total;
     }
 
   }
 
-  private static class UncheckException extends RuntimeException {
+  private static class UncheckedException extends RuntimeException {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 0L;
 
     private final int code;
 
-    UncheckException(int code) {
+    UncheckedException(int code) {
       this.code = code;
     }
 
@@ -534,15 +538,19 @@ public class PathPartial {
       return code;
     }
 
-    public boolean isError() {
-      return code >= HttpServletResponse.SC_BAD_REQUEST;
-    }
-
     @Override
     public Throwable fillInStackTrace() {
       return this;
     }
 
+    void serve(HttpServletResponse response, String etag) throws IOException {
+      if (code >= HttpServletResponse.SC_BAD_REQUEST) {
+        response.sendError(code);
+      } else {
+        response.setStatus(code);
+        response.setHeader(HttpHeaders.ETAG, etag);
+      }
+    }
   }
 
 }

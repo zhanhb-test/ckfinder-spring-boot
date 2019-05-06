@@ -30,6 +30,15 @@ public class ActionContext {
   ActionContext() {
   }
 
+  /**
+   * Available types
+   *
+   * @see javax.servlet.http.HttpServletRequest request
+   * @see javax.servlet.http.HttpServletResponse response
+   * @see javax.servlet.ServletContext servlet context
+   * @see java.nio.file.Path
+   * @see java.nio.file.attribute.BasicFileAttributes
+   */
   public <T> T get(Class<T> clazz) {
     @SuppressWarnings("unchecked")
     T result = (T) map.get(clazz);
