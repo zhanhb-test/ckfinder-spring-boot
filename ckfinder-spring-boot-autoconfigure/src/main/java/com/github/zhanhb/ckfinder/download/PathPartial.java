@@ -194,10 +194,7 @@ public class PathPartial {
       // Last-Modified header
       response.setDateHeader(HttpHeaders.LAST_MODIFIED, attr.lastModifiedTime().toMillis());
     }
-    ServletOutputStream ostream = null;
-    if (serveContent) {
-      ostream = response.getOutputStream();
-    }
+    final ServletOutputStream ostream = serveContent ? response.getOutputStream() : null;
 
     contentDisposition.apply(context).ifPresent(disposition -> {
       response.setHeader(HttpHeaders.CONTENT_DISPOSITION, disposition);
@@ -240,7 +237,7 @@ public class PathPartial {
       } else {
         response.setContentType("multipart/byteranges; boundary=" + MIME_SEPARATION);
         if (serveContent) {
-          copy(path, ostream, ranges, contentTypeOptional, new byte[Math.min((int) contentLength, 8192)]);
+          copy(path, ostream, ranges, contentTypeOptional.orElse(null), new byte[Math.min((int) contentLength, 8192)]);
         }
       }
     }
@@ -438,7 +435,7 @@ public class PathPartial {
    * @exception IOException if an input/output error occurs
    */
   private void copy(Path path, ServletOutputStream ostream, Range[] ranges,
-          Optional<String> contentTypeOptional, byte[] buffer)
+          String contentType, byte[] buffer)
           throws IOException {
     IOException exception = null;
     for (Range currentRange : ranges) {
@@ -446,8 +443,8 @@ public class PathPartial {
         // Writing MIME header.
         ostream.println();
         ostream.println("--" + MIME_SEPARATION);
-        if (contentTypeOptional.isPresent()) {
-          ostream.println(HttpHeaders.CONTENT_TYPE + ": " + contentTypeOptional.get());
+        if (contentType != null) {
+          ostream.println(HttpHeaders.CONTENT_TYPE + ": " + contentType);
         }
         ostream.println(HttpHeaders.CONTENT_RANGE + ": " + currentRange);
         ostream.println();
