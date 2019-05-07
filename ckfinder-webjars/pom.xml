@@ -20,14 +20,6 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
-  <dependencies>
-    <dependency>
-      <groupId>org.unbescape</groupId>
-      <artifactId>unbescape</artifactId>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
-
   <build>
     <plugins>
       <plugin>
@@ -62,10 +54,10 @@
 
                 <unzip dest="${project.build.directory}" src="${ckfinder.cache.path}" />
                 <unzip dest="${project.build.directory}" src="${ckfinder.cache.path.php}" />
-                <copy todir="${ckfinder.build.directory}" preservelastmodified="true">
+                <copy preservelastmodified="true" todir="${ckfinder.build.directory}">
                   <fileset dir="${project.build.directory}/ckfinder/_source/CKFinder for Java/WebApp/src/main/webapp/ckfinder" excludes="_samples/**" includes="**" />
                 </copy>
-                <copy todir="${ckfinder.build.directory}/plugins/zip" preservelastmodified="true">
+                <copy preservelastmodified="true" todir="${ckfinder.build.directory}/plugins/zip">
                   <fileset dir="${project.build.directory}/ckfinder/plugins/zip" excludes="*.php,**/*.php" includes="**" />
                 </copy>
               </target>
@@ -81,24 +73,75 @@
         </dependencies>
       </plugin>
       <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
+        <groupId>org.codehaus.gmavenplus</groupId>
+        <artifactId>gmavenplus-plugin</artifactId>
         <executions>
           <execution>
-            <id>unescape-js</id>
-            <phase>test</phase>
+            <id>unescape-javascript</id>
+            <phase>process-resources</phase>
             <goals>
-              <goal>java</goal>
+              <goal>execute</goal>
             </goals>
             <configuration>
-              <classpathScope>test</classpathScope>
-              <mainClass>JSEscaper</mainClass>
-              <arguments>
-                <argument>${project.build.directory}</argument>
-              </arguments>
+              <scripts>
+                <script><![CDATA[import java.io.*
+import java.nio.*
+import java.nio.charset.*
+import java.nio.file.*
+import java.nio.file.attribute.*
+
+try {
+  def stringify = { org.unbescape.javascript.JavaScriptEscape.escapeJavaScript(it) }
+  def esc = { index, radix ->
+    { all -> stringify(new String(Character.toChars(Integer.parseInt(all.substring(index), radix)))) }
+  }
+
+  def dir = Paths.get('''${project.build.directory}''')
+
+  Files.walk(dir).filter{ Files.isRegularFile(it)
+  }.filter { it.fileName.toString().endsWith('.js')
+  }.forEach { path ->
+    def charset = StandardCharsets.UTF_8
+    def str = charset.newDecoder().decode(ByteBuffer.wrap(Files.readAllBytes(path))).toString()
+    def old = str
+    if (str[0] == "\ufeff") {
+      str = str.substring(1);
+    }
+    str = str.replaceAll(/\\x[0-9A-Fa-f]{2}/, esc(2, 16))
+    str = str.replaceAll(/\\u[0-9A-Fa-f]{4}/, esc(2, 16))
+    str = str.replaceAll(/(?-i)\\[0-7]{3}/, esc(1, 8))
+    str = str.replaceAll(/[^\000-\x7E\u2028\u2029]++/) { stringify(it) }
+    if (str != old) {
+      def bfa = Files.readAttributes(path, BasicFileAttributes)
+      Files.write(path, str.getBytes(charset))
+      Files.setLastModifiedTime(path, bfa.lastModifiedTime())
+    }
+  }
+} catch (Throwable t) {
+  log.error(t); throw t
+}
+]]></script>
+              </scripts>
+              <properties>
+                <ant>null</ant>
+              </properties>
             </configuration>
           </execution>
         </executions>
+        <dependencies>
+          <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy</artifactId>
+            <version>${groovy.version}</version>
+            <scope>runtime</scope>
+          </dependency>
+          <dependency>
+            <groupId>org.unbescape</groupId>
+            <artifactId>unbescape</artifactId>
+            <version>${unbescape.version}</version>
+            <scope>runtime</scope>
+          </dependency>
+        </dependencies>
       </plugin>
     </plugins>
   </build>
