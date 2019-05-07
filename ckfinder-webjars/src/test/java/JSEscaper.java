@@ -21,8 +21,15 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Objects;
 import java.util.function.Function;
-import org.unbescape.javascript.JavaScriptEscape;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static java.lang.Character.toChars;
+import static java.lang.Integer.parseInt;
+import static java.util.regex.Matcher.quoteReplacement;
+import static org.unbescape.javascript.JavaScriptEscape.escapeJavaScript;
 
 /**
  *
@@ -50,22 +57,38 @@ public class JSEscaper {
     if (str.startsWith("\ufeff")) {
       str = str.substring(1);
     }
-    str = MatcherWrapper.matcher("\\\\x[0-9A-Fa-f]{2}", str).replaceAll(esc(2, 16));
-    str = MatcherWrapper.matcher("\\\\u[0-9A-Fa-f]{4}", str).replaceAll(esc(2, 16));
-    str = MatcherWrapper.matcher("(?-i)\\\\[0-7]{3}", str).replaceAll(esc(1, 8));
-    str = MatcherWrapper.matcher("[^\000-\\x7E\u2028\u2029]++", str).replaceAll(matcher -> esc(matcher.group()));
+    str = replaceAll("\\\\x[0-9A-Fa-f]{2}", str, esc(2, 16));
+    str = replaceAll("\\\\u[0-9A-Fa-f]{4}", str, esc(2, 16));
+    str = replaceAll("(?-i)\\\\[0-7]{3}", str, esc(1, 8));
+    str = replaceAll("[^\000-\\x7E\u2028\u2029]++", str, matcher -> esc(matcher.group()));
     if (!str.equals(old)) {
       Files.write(path, str.getBytes(charset));
     }
   }
 
-  private static Function<MatcherWrapper, String> esc(int index, int radix) {
-    return m -> esc(
-            String.valueOf((char) Integer.parseInt(m.group().substring(index), radix)));
+  private static Function<Matcher, String> esc(int index, int radix) {
+    return m -> esc(new String(toChars(parseInt(m.group().substring(index), radix))));
   }
 
   private static String esc(String str) {
-    return JavaScriptEscape.escapeJavaScript(str);
+    return escapeJavaScript(str);
+  }
+
+  private static String replaceAll(String pat, String text, Function<Matcher, String> replaceFunction) {
+    Objects.requireNonNull(replaceFunction);
+    Matcher matcher = Pattern.compile(pat).matcher(text);
+
+    boolean result = matcher.find();
+    if (result) {
+      @SuppressWarnings("StringBufferWithoutInitialCapacity")
+      StringBuffer sb = new StringBuffer();
+      do {
+        String replacement = Objects.requireNonNull(replaceFunction.apply(matcher));
+        result = matcher.appendReplacement(sb, quoteReplacement(replacement)).find();
+      } while (result);
+      return matcher.appendTail(sb).toString();
+    }
+    return text;
   }
 
 }
