@@ -92,11 +92,11 @@ public class CKFinderProperties {
   }
 
   public boolean isAllowDoubleExtension() {
-    return allowDoubleExtension;
+    return this.allowDoubleExtension;
   }
 
   public boolean isCsrf() {
-    return csrf;
+    return this.csrf;
   }
 
   public boolean isCheckSizeAfterScaling() {
@@ -131,51 +131,51 @@ public class CKFinderProperties {
     return this.servlet;
   }
 
-  public void setEnabled(final boolean enabled) {
+  public void setEnabled(boolean enabled) {
     this.enabled = enabled;
   }
 
-  public void setConnector(final Connector connector) {
+  public void setConnector(Connector connector) {
     this.connector = connector;
   }
 
-  public void setBasePath(final String basePath) {
+  public void setBasePath(String basePath) {
     this.basePath = basePath;
   }
 
-  public void setBaseUrl(final String baseUrl) {
+  public void setBaseUrl(String baseUrl) {
     this.baseUrl = baseUrl;
   }
 
-  public void setLicense(final License license) {
+  public void setLicense(License license) {
     this.license = license;
   }
 
-  public void setImage(final Image image) {
+  public void setImage(Image image) {
     this.image = image;
   }
 
-  public void setDefaultResourceTypes(final String[] defaultResourceTypes) {
+  public void setDefaultResourceTypes(String[] defaultResourceTypes) {
     this.defaultResourceTypes = defaultResourceTypes;
   }
 
-  public void setTypes(final Map<String, Type> types) {
+  public void setTypes(Map<String, Type> types) {
     this.types = types;
   }
 
-  public void setUserRoleSessionVar(final String userRoleSessionVar) {
+  public void setUserRoleSessionVar(String userRoleSessionVar) {
     this.userRoleSessionVar = userRoleSessionVar;
   }
 
-  public void setAccessControls(final AccessControl[] accessControls) {
+  public void setAccessControls(AccessControl[] accessControls) {
     this.accessControls = accessControls;
   }
 
-  public void setThumbs(final Thumbs thumbs) {
+  public void setThumbs(Thumbs thumbs) {
     this.thumbs = thumbs;
   }
 
-  public void setDisallowUnsafeCharacters(final boolean disallowUnsafeCharacters) {
+  public void setDisallowUnsafeCharacters(boolean disallowUnsafeCharacters) {
     this.disallowUnsafeCharacters = disallowUnsafeCharacters;
   }
 
@@ -187,31 +187,31 @@ public class CKFinderProperties {
     this.csrf = csrf;
   }
 
-  public void setCheckSizeAfterScaling(final boolean checkSizeAfterScaling) {
+  public void setCheckSizeAfterScaling(boolean checkSizeAfterScaling) {
     this.checkSizeAfterScaling = checkSizeAfterScaling;
   }
 
-  public void setSecureImageUploads(final boolean secureImageUploads) {
+  public void setSecureImageUploads(boolean secureImageUploads) {
     this.secureImageUploads = secureImageUploads;
   }
 
-  public void setForceAscii(final boolean forceAscii) {
+  public void setForceAscii(boolean forceAscii) {
     this.forceAscii = forceAscii;
   }
 
-  public void setHiddenFolders(final String[] hiddenFolders) {
+  public void setHiddenFolders(String[] hiddenFolders) {
     this.hiddenFolders = hiddenFolders;
   }
 
-  public void setHiddenFiles(final String[] hiddenFiles) {
+  public void setHiddenFiles(String[] hiddenFiles) {
     this.hiddenFiles = hiddenFiles;
   }
 
-  public void setWatermark(final Watermark watermark) {
+  public void setWatermark(Watermark watermark) {
     this.watermark = watermark;
   }
 
-  public void setImageResize(final ImageResize imageResize) {
+  public void setImageResize(ImageResize imageResize) {
     this.imageResize = imageResize;
   }
 

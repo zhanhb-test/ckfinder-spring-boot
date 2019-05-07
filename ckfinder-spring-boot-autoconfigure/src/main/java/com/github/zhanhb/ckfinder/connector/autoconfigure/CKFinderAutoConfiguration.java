@@ -72,14 +72,10 @@ public class CKFinderAutoConfiguration {
     public DefaultPathBuilder defaultPathBuilder(ApplicationContext applicationContext, CKFinderProperties properties) {
       ServletContext servletContext = applicationContext.getBean(ServletContext.class);
       String baseUrl = properties.getBaseUrl();
-      if (StringUtils.isEmpty(baseUrl)) {
-        baseUrl = DEFAULT_BASE_URL;
-      }
-      baseUrl = PathUtils.addSlashToBegin(PathUtils.addSlashToEnd(baseUrl));
+      baseUrl = PathUtils.addSlashToBegin(PathUtils.addSlashToEnd(
+              StringUtils.isEmpty(baseUrl) ? DEFAULT_BASE_URL : baseUrl));
       String basePath = properties.getBasePath();
-      if (StringUtils.isEmpty(basePath)) {
-        basePath = baseUrl.replaceAll("^/+", "");
-      }
+      basePath = StringUtils.isEmpty(basePath) ? baseUrl.replaceAll("^/+", "") : basePath;
       Path path = Paths.get(basePath).normalize();
       try {
         if (!path.isAbsolute()) {

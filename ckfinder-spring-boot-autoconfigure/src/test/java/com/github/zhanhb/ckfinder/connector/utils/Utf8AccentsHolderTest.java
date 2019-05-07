@@ -19,8 +19,8 @@ public class Utf8AccentsHolderTest {
   public void testConvert() {
     log.info("convert");
     Random random = ThreadLocalRandom.current();
-    for (int k = 0; k < 100; ++k) {
-      int len = 100;
+    for (int k = 0; k < 10000; ++k) {
+      int len = 4;
 
       StringBuilder sb = new StringBuilder(len);
       for (int i = 0; i < len; ++i) {
