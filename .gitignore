@@ -2,6 +2,7 @@
 *.original~
 .classpath
 .flattened-pom.xml
+.flattened-pom.xml.bak
 .idea/
 .project
 .settings/
