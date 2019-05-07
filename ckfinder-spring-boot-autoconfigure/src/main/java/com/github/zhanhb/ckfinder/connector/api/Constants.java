@@ -12,7 +12,7 @@
 package com.github.zhanhb.ckfinder.connector.api;
 
 /**
- * Class holding constants used by the CKFinder connector.
+ * Default values used by the CKFinder connector.
  */
 public interface Constants {
 
@@ -24,20 +24,5 @@ public interface Constants {
   String DEFAULT_THUMBS_URL = "_thumbs";
   String DEFAULT_THUMBS_DIR = "_thumbs";
   String DEFAULT_BASE_URL = "/userfiles";
-
-  /**
-   * Regular expression to identify invalid characters in file name.
-   */
-  String INVALID_FILE_NAME_REGEX = "\\p{Cntrl}|[/\\\\\\:\\*\\?\"\\<\\>\\|]";
-
-  /**
-   * Regular expression to identify invalid characters in path.
-   */
-  String INVALID_PATH_REGEX = "(/\\.|\\p{Cntrl}|//|\\\\|[:*?<>\"\\|])";
-
-  /**
-   * Regular expression to identify full URL.
-   */
-  String URL_REGEX = "^(https?)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]$";
 
 }

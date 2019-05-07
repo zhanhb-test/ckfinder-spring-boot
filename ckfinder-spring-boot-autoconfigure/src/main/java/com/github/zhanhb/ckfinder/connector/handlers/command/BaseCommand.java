@@ -14,13 +14,12 @@ package com.github.zhanhb.ckfinder.connector.handlers.command;
 import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.Command;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
-import com.github.zhanhb.ckfinder.connector.api.Constants;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.api.ResourceType;
 import com.github.zhanhb.ckfinder.connector.support.CommandContext;
+import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import com.github.zhanhb.ckfinder.connector.utils.PathUtils;
 import java.io.IOException;
-import java.util.regex.Pattern;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -42,7 +41,7 @@ public abstract class BaseCommand<T> implements Command {
    */
   @SuppressWarnings("FinalMethod")
   static String checkRequestPath(String path) throws ConnectorException {
-    if (StringUtils.hasLength(path) && Pattern.compile(Constants.INVALID_PATH_REGEX).matcher(path).find()) {
+    if (StringUtils.hasLength(path) && FileUtils.isPathNameInvalid(path)) {
       throw new ConnectorException(ErrorCode.INVALID_NAME);
     }
     return path;

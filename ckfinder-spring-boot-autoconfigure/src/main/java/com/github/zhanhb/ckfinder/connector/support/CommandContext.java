@@ -2,7 +2,6 @@ package com.github.zhanhb.ckfinder.connector.support;
 
 import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
-import com.github.zhanhb.ckfinder.connector.api.Constants;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.api.ResourceType;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
@@ -16,9 +15,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.regex.Pattern;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
 import lombok.Getter;
 import org.springframework.util.StringUtils;
 
@@ -151,7 +147,7 @@ public class CommandContext {
       if (!FileUtils.isFileNameValid(name)) {
         throwException(ErrorCode.INVALID_REQUEST);
       }
-      if (InvalidPathHolder.INVALID_PATH.matcher(folder).find()) {
+      if (FileUtils.isPathNameInvalid(folder)) {
         throwException(ErrorCode.INVALID_REQUEST);
       }
       if (resource == null) {
@@ -169,12 +165,6 @@ public class CommandContext {
       checkAllPermission(resource, folder,
               requireAccess);
     }
-  }
-
-  private interface InvalidPathHolder {
-
-    Pattern INVALID_PATH = Pattern.compile(Constants.INVALID_PATH_REGEX);
-
   }
 
 }

@@ -13,7 +13,6 @@ package com.github.zhanhb.ckfinder.connector.utils;
 
 import com.github.zhanhb.ckfinder.connector.api.AccessControl;
 import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
-import com.github.zhanhb.ckfinder.connector.api.Constants;
 import com.github.zhanhb.ckfinder.connector.api.ResourceType;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
@@ -330,6 +329,10 @@ public class FileUtils {
     return UriComponentHolder.URI_COMPONENT.encode(str);
   }
 
+  public static boolean isPathNameInvalid(String path) {
+    return InvalidPathHolder.INVALID_PATH.matcher(path).find();
+  }
+
   public static boolean isFolderNameInvalid(String folderName, CKFinderContext context) {
     return (context.isDisallowUnsafeCharacters()
             && (folderName.contains(".") || folderName.contains(";")))
@@ -345,9 +348,15 @@ public class FileUtils {
     return JavaScriptEscape.escapeJavaScriptMinimal(fileName);
   }
 
+  private interface InvalidPathHolder {
+
+    Pattern INVALID_PATH = Pattern.compile("(/\\.|\\p{Cntrl}|//|\\\\|[:*?<>\"\\|])");
+
+  }
+
   private interface InvalidFileNamePatternHolder {
 
-    Pattern INVALID_FILENAME_PATTERN = Pattern.compile(Constants.INVALID_FILE_NAME_REGEX);
+    Pattern INVALID_FILENAME_PATTERN = Pattern.compile("\\p{Cntrl}|[/\\\\\\:\\*\\?\"\\<\\>\\|]");
 
   }
 

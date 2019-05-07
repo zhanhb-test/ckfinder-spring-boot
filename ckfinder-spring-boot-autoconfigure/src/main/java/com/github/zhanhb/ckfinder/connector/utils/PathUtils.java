@@ -11,16 +11,18 @@
  */
 package com.github.zhanhb.ckfinder.connector.utils;
 
-import com.github.zhanhb.ckfinder.connector.api.Constants;
 import java.util.regex.Pattern;
+import lombok.experimental.UtilityClass;
 import org.springframework.util.StringUtils;
 
 /**
- * Utility class used to change paths in connector.
+ * Utility class calculate path in connector.
  */
-public interface PathUtils {
+@UtilityClass
+@SuppressWarnings("FinalClass")
+public class PathUtils {
 
-  static String normalize(String string) {
+  public String normalize(String string) {
     return string != null ? string.replaceAll("[\\\\/]+", "/") : null;
   }
 
@@ -32,7 +34,7 @@ public interface PathUtils {
    * @param string string to escapeUrl
    * @return Escaped string, {@code null} or empty string.
    */
-  static String normalizeUrl(String string) {
+  public String normalizeUrl(String string) {
     if (StringUtils.isEmpty(string)) {
       return string;
     }
@@ -65,7 +67,7 @@ public interface PathUtils {
    * @return String with slash character at the end, {@code null} or empty
    * string.
    */
-  static String addSlashToEnd(String string) {
+  public String addSlashToEnd(String string) {
     if (string == null || string.endsWith("/")) {
       return string;
     }
@@ -80,12 +82,18 @@ public interface PathUtils {
    * @return String with slash character at the beginning, {@code null} or full
    * URL.
    */
-  static String addSlashToBegin(String string) {
+  public String addSlashToBegin(String string) {
     if (string == null || string.startsWith("/")
-            || Pattern.matches(Constants.URL_REGEX, string)) {
+            || UrlPatternHolder.URL_PATTERN.matcher(string).matches()) {
       return string;
     }
     return "/".concat(string);
+  }
+
+  private interface UrlPatternHolder {
+
+    Pattern URL_PATTERN = Pattern.compile("^(https?)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]$");
+
   }
 
 }

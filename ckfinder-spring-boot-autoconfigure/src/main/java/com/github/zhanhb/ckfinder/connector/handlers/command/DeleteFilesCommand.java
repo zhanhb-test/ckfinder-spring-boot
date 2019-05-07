@@ -14,7 +14,6 @@ package com.github.zhanhb.ckfinder.connector.handlers.command;
 import com.github.zhanhb.ckfinder.connector.api.AccessControl;
 import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
-import com.github.zhanhb.ckfinder.connector.api.Constants;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.DeleteFilesParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
@@ -26,7 +25,6 @@ import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
@@ -67,8 +65,7 @@ public class DeleteFilesCommand extends FailAtEndXmlCommand<DeleteFilesParameter
       }
 
       if (fileItem.getFolder() == null || fileItem.getFolder().isEmpty()
-              || Pattern.compile(Constants.INVALID_PATH_REGEX).matcher(
-                      fileItem.getFolder()).find()) {
+              || FileUtils.isPathNameInvalid(fileItem.getFolder())) {
         cmdContext.throwException(ErrorCode.INVALID_REQUEST);
       }
 
