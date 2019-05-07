@@ -15,19 +15,18 @@
  */
 package com.github.zhanhb.ckfinder.download;
 
-import java.nio.file.Path;
 import java.util.Optional;
-import java.util.function.Function;
 
 import static com.github.zhanhb.ckfinder.download.ContentDispositionEncoder.wrapper;
 
 /**
  *
+ * @see <a href="https://tools.ietf.org/html/rfc6266">rfc6266</a>
  * @author zhanhb
  */
 public interface ContentDispositionStrategy extends Strategy<Optional<String>> {
 
-  Function<Path, String> DEFAULT_NAME_MAPPER = path -> path.getFileName().toString();
+  NameMapper DEFAULT_NAME_MAPPER = path -> path.getFileName().toString();
 
   static ContentDispositionStrategy attachment() {
     return attachment(DEFAULT_NAME_MAPPER);
@@ -37,11 +36,11 @@ public interface ContentDispositionStrategy extends Strategy<Optional<String>> {
     return inline(DEFAULT_NAME_MAPPER);
   }
 
-  static ContentDispositionStrategy attachment(Function<Path, String> nameMapper) {
+  static ContentDispositionStrategy attachment(NameMapper nameMapper) {
     return wrapper("attachment", nameMapper);
   }
 
-  static ContentDispositionStrategy inline(Function<Path, String> nameMapper) {
+  static ContentDispositionStrategy inline(NameMapper nameMapper) {
     return wrapper("inline", nameMapper);
   }
 
@@ -49,7 +48,6 @@ public interface ContentDispositionStrategy extends Strategy<Optional<String>> {
     return __ -> Optional.empty();
   }
 
-  // https://tools.ietf.org/html/rfc6266
   @Override
   Optional<String> apply(PartialContext context);
 

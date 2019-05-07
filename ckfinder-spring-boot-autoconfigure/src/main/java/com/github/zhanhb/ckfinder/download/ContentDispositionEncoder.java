@@ -16,23 +16,22 @@
 package com.github.zhanhb.ckfinder.download;
 
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
 import org.springframework.http.ContentDisposition;
 
 /**
- *
+ * @see <a href="https://tools.ietf.org/html/rfc6266#section-4.1">
+ * RFC6266#section-4.1</a>
  * @author zhanhb
- * @see <a href="https://tools.ietf.org/html/rfc6266#section-4.1">RFC6266#section-4.1</a>
  */
 interface ContentDispositionEncoder {
 
-  static ContentDispositionStrategy wrapper(String type, Function<Path, String> nameMapper) {
+  static ContentDispositionStrategy wrapper(String type, NameMapper nameMapper) {
     Objects.requireNonNull(nameMapper, "nameMapper");
-    return context -> Optional.of(ContentDisposition.builder(type)
-            .filename(nameMapper.apply(context.getPath()), StandardCharsets.UTF_8)
+    return context -> Optional.ofNullable(nameMapper.apply(context.getPath()))
+            .map(filename -> ContentDisposition.builder(type)
+            .filename(filename, StandardCharsets.UTF_8)
             .build().toString());
   }
 
