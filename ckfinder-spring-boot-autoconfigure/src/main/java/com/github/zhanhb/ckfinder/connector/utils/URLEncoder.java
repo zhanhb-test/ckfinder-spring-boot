@@ -29,9 +29,8 @@ class URLEncoder {
 
   private static final char[] HEX_CHARS = "0123456789ABCDEF".toCharArray();
 
-  private static StringBuilder append(StringBuilder out, byte[] bytes) {
+  private static StringBuilder append(StringBuilder out, char[] buf, byte[] bytes) {
     char[] hexChars = HEX_CHARS;
-    char[] buf = new char[]{'%', 0, 0};
     for (byte b : bytes) {
       buf[1] = hexChars[b >> 4 & 15];
       buf[2] = hexChars[b & 15];
@@ -62,21 +61,22 @@ class URLEncoder {
    * @throws NullPointerException s or charset is null
    */
   @SuppressWarnings({"AssignmentToForLoopParameter", "ValueOfIncrementOrDecrementUsed"})
-  public String encode(String s, Charset charset) {
+  private String encode(String s, Charset charset) {
     final int length = s.length();
     Objects.requireNonNull(charset, "charset");
     BitSet bs = dontNeedEncoding;
 
     for (int i = 0; i < length; ++i) {
       if (!bs.get(s.charAt(i))) {
+        char[] buf = new char[]{'%', 0, 0};
         StringBuilder out = new StringBuilder(s.substring(0, i));
         for (int k = i;;) {
           do {
             if (++k == length) {
-              return append(out, s.substring(i).getBytes(charset)).toString();
+              return append(out, buf, s.substring(i).getBytes(charset)).toString();
             }
           } while (!bs.get(s.charAt(k)));
-          append(out, s.substring(i, k).getBytes(charset));
+          append(out, buf, s.substring(i, k).getBytes(charset));
           i = k;
           do {
             if (++k == length) {
@@ -98,7 +98,7 @@ class URLEncoder {
    * @return the translated {@code String}.
    * @throws NullPointerException s is null
    */
-  public String encode(String s) {
+  String encode(String s) {
     return encode(s, StandardCharsets.UTF_8);
   }
 
