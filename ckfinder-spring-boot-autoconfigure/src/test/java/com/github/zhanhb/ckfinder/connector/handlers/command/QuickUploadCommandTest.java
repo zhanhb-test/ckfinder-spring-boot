@@ -1,6 +1,5 @@
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
-import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import java.io.StringWriter;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;

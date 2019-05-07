@@ -50,8 +50,7 @@ public class QuickUploadCommand extends FileUploadCommand {
     } else {
       response.setContentType("text/html;charset=UTF-8");
       try (PrintWriter writer = response.getWriter()) {
-        if ("txt".equalsIgnoreCase(responseType)) {
-        } else if (ckEditorFuncNum != null) {
+        if (ckEditorFuncNum != null) {
           writer.write("<script>//<![CDATA[\nwindow.parent.CKEDITOR.tools.callFunction("
                   + ckEditorFuncNum.replaceAll("\\D", "") + ", '"
                   + FileUtils.escapeJavaScript(path + FileUtils.encodeURIComponent(name))

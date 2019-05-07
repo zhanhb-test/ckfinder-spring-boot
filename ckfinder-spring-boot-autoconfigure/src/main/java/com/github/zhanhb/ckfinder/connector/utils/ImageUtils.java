@@ -81,15 +81,15 @@ public class ImageUtils {
    * @return true if success
    * @throws IOException when IO Exception occurs.
    */
-  public static boolean createThumb(Path originFile, Path file, ThumbnailProperties thumbnail)
-          throws IOException {
+  public static boolean createThumb(Path originFile, Path file,
+          ThumbnailProperties thumbnail) throws IOException {
     log.debug("createThumb");
     BufferedImage image;
     try (InputStream is = Files.newInputStream(originFile)) {
       image = ImageIO.read(is);
     }
     if (image == null) {
-      log.error("Wrong image file");
+      log.error("createThumb: Wrong image file: {}", originFile);
       return false;
     }
     Dimension dimension = createThumbDimension(image,
@@ -210,26 +210,26 @@ public class ImageUtils {
   /**
    * check if image size isn't bigger then biggest allowed.
    *
-   * @param part servlet part
-   * @param context ckfinder context.
+   * @param source upload file
+   * @param imageProperties ckfinder image configuration.
    * @return true if image size isn't bigger then biggest allowed.
    * @throws IOException when IO Exception occurs during reading image.
    */
-  public static boolean checkImageSize(InputStreamSource part, CKFinderContext context)
-          throws IOException {
-    ImageProperties image = context.getImage();
-    final int maxWidth = image.getMaxWidth();
-    final int maxHeight = image.getMaxHeight();
+  public static boolean isImageSizeInRange(InputStreamSource source,
+          ImageProperties imageProperties) throws IOException {
+    final int maxWidth = imageProperties.getMaxWidth();
+    final int maxHeight = imageProperties.getMaxHeight();
     if (maxHeight == 0 && maxWidth == 0) {
       return true;
     }
     BufferedImage bi;
-    try (InputStream stream = part.getInputStream()) {
+    try (InputStream stream = source.getInputStream()) {
       bi = ImageIO.read(stream);
     }
     if (bi != null) {
       log.debug("image size: {} {}", bi.getWidth(), bi.getHeight());
-      return (maxHeight == 0 || bi.getHeight() <= maxHeight) && (maxWidth == 0 || bi.getWidth() <= maxWidth);
+      return (maxHeight == 0 || bi.getHeight() <= maxHeight)
+              && (maxWidth == 0 || bi.getWidth() <= maxWidth);
     }
     return false;
   }

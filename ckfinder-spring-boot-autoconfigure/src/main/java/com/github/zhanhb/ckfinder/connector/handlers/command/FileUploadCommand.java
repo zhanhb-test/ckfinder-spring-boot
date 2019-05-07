@@ -176,14 +176,14 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
     CKFinderContext context = cmdContext.getCfCtx();
     Path file = cmdContext.resolve(param.getNewFileName());
 
+    boolean csas = context.isCheckSizeAfterScaling();
+
     if (ImageUtils.isImageExtension(file)) {
-      if (!context.isCheckSizeAfterScaling()
-              && !ImageUtils.checkImageSize(item, context)) {
+      if (!csas && !ImageUtils.isImageSizeInRange(item, context.getImage())) {
         param.throwException(ErrorCode.UPLOADED_TOO_BIG);
       }
       ImageUtils.createTmpThumb(item, file, context);
-      if (context.isCheckSizeAfterScaling()
-              && FileUtils.isFileSizeOutOfRange(cmdContext.getType(), Files.size(file))) {
+      if (csas && FileUtils.isFileSizeOutOfRange(cmdContext.getType(), Files.size(file))) {
         Files.deleteIfExists(file);
         param.throwException(ErrorCode.UPLOADED_TOO_BIG);
       }

@@ -97,7 +97,7 @@ public class ThumbnailCommand extends BaseCommand<String> {
     } catch (UncheckedConnectorException ex) {
       throw ex.getCause();
     } catch (ServletException ex) {
-      throw new AssertionError(ex);
+      throw new ConnectorException(ErrorCode.UNKNOWN, ex);
     } catch (IOException ex) {
       throw new ConnectorException(ErrorCode.ACCESS_DENIED, ex);
     }
