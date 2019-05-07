@@ -92,9 +92,7 @@ import java.nio.file.attribute.*
 
 try {
   def stringify = { org.unbescape.javascript.JavaScriptEscape.escapeJavaScript(it) }
-  def esc = { index, radix ->
-    { all -> stringify(new String(Character.toChars(Integer.parseInt(all.substring(index), radix)))) }
-  }
+  def parse = { org.unbescape.javascript.JavaScriptEscape.unescapeJavaScript(it) }
 
   def dir = Paths.get('''${project.build.directory}''')
 
@@ -107,9 +105,7 @@ try {
     if (str[0] == "\ufeff") {
       str = str.substring(1);
     }
-    str = str.replaceAll(/\\x[0-9A-Fa-f]{2}/, esc(2, 16))
-    str = str.replaceAll(/\\u[0-9A-Fa-f]{4}/, esc(2, 16))
-    str = str.replaceAll(/(?-i)\\[0-7]{3}/, esc(1, 8))
+    str = str.replaceAll(/(?:\\x[0-9A-Fa-f]{2}|\\u[0-9A-Fa-f]{4}|\\[0-7]{3})+/) { stringify(parse(it)) }
     str = str.replaceAll(/[^\000-\x7E\u2028\u2029]++/) { stringify(it) }
     if (str != old) {
       def bfa = Files.readAttributes(path, BasicFileAttributes)
