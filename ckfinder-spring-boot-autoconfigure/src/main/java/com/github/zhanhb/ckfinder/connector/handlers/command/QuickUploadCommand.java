@@ -29,7 +29,7 @@ import org.unbescape.json.JsonEscape;
 public class QuickUploadCommand extends FileUploadCommand {
 
   @Override
-  protected void finish(HttpServletResponse response, @Nonnull String path,
+  protected void finish(HttpServletResponse response, @Nonnull String uri,
           FileUploadParameter param, String errorMsg) throws IOException {
     final String name = param.getNewFileName();
     final String responseType = param.getResponseType();
@@ -40,7 +40,7 @@ public class QuickUploadCommand extends FileUploadCommand {
     if ("json".equalsIgnoreCase(responseType)) {
       response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
       try (PrintWriter writer = response.getWriter()) {
-        writeJSON(writer, errorMsg, path, name, errorNum);
+        writeJSON(writer, errorMsg, uri, name, errorNum);
       }
     } else if ("txt".equalsIgnoreCase(responseType)) {
       response.setContentType("text/plain;charset=UTF-8");
@@ -53,13 +53,12 @@ public class QuickUploadCommand extends FileUploadCommand {
         if (ckEditorFuncNum != null) {
           writer.write("<script>//<![CDATA[\nwindow.parent.CKEDITOR.tools.callFunction("
                   + ckEditorFuncNum.replaceAll("\\D", "") + ", '"
-                  + FileUtils.escapeJavaScript(path + FileUtils.encodeURIComponent(name))
+                  + FileUtils.escapeJavaScript(uri)
                   + "', '" + errorMsg + "')//]]></script>");
         } else {
-          boolean success = !StringUtils.isEmpty(path);
+          boolean success = !StringUtils.isEmpty(uri);
           writer.write("<script>//<![CDATA[\nwindow.parent.OnUploadCompleted(" + errorNum + ", '");
           if (success) {
-            String uri = path + FileUtils.encodeURIComponent(name);
             writer.write(FileUtils.escapeJavaScript(uri) + "', '"
                     + FileUtils.escapeJavaScript(name));
           } else {
@@ -72,9 +71,9 @@ public class QuickUploadCommand extends FileUploadCommand {
   }
 
   // for test
-  void writeJSON(Writer writer, String errorMsg, String path,
+  void writeJSON(Writer writer, String errorMsg, String uri,
           String fileName, int errorNum) throws IOException {
-    boolean success = !StringUtils.isEmpty(path);
+    boolean success = !StringUtils.isEmpty(uri);
 
     writer.write("{\"fileName\":");
     if (fileName != null) {
@@ -96,7 +95,7 @@ public class QuickUploadCommand extends FileUploadCommand {
     if (success) {
       assert fileName != null;
       writer.write(",\"url\":\"");
-      JsonEscape.escapeJsonMinimal(path + FileUtils.encodeURIComponent(fileName), writer);
+      JsonEscape.escapeJsonMinimal(uri, writer);
       writer.write('"');
     }
     writer.write('}');

@@ -53,41 +53,6 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
   private static final Pattern UNSAFE_FILE_NAME_PATTERN = Pattern.compile("[:*?|/]");
 
   /**
-   * Executes file upload command.
-   *
-   * @param param the parameter
-   * @param request request
-   * @param response response
-   * @param context ckfinder context
-   * @throws IOException when IO Exception occurs.
-   */
-  @Override
-  @SuppressWarnings("FinalMethod")
-  final void execute(FileUploadParameter param, HttpServletRequest request,
-          HttpServletResponse response, CKFinderContext context) throws IOException {
-    String errorMsg = "";
-    String path = "";
-
-    boolean uploaded = false;
-    try {
-      CommandContext cmdContext = populateCommandContext(request, context);
-      cmdContext.checkType();
-      uploadFile(request, param, cmdContext);
-      path = cmdContext.getType().getUrl() + cmdContext.getCurrentFolder();
-      uploaded = true;
-      checkParam(param);
-    } catch (ConnectorException ex) {
-      log.info("got ConnectorException", ex);
-      param.setErrorCode(ex.getErrorCode());
-      errorMsg = ex.getMessage();
-      if (!uploaded) {
-        param.setNewFileName("");
-      }
-    }
-    finish(response, path, param, errorMsg.replace("%1", param.getNewFileName()));
-  }
-
-  /**
    * initializing parameters for command handler.
    *
    * @param request request
@@ -106,6 +71,42 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
     param.setResponseType(responseType);
     param.setLangCode(request.getParameter("langCode"));
     return param;
+  }
+
+  /**
+   * Executes file upload command.
+   *
+   * @param param the parameter
+   * @param request request
+   * @param response response
+   * @param context ckfinder context
+   * @throws IOException when IO Exception occurs.
+   */
+  @Override
+  @SuppressWarnings("FinalMethod")
+  final void execute(FileUploadParameter param, HttpServletRequest request,
+          HttpServletResponse response, CKFinderContext context) throws IOException {
+    String errorMsg = "";
+    String uri = "";
+
+    boolean uploaded = false;
+    try {
+      CommandContext cmdContext = populateCommandContext(request, context);
+      cmdContext.checkType();
+      uploadFile(request, param, cmdContext);
+      uploaded = true;
+      uri = cmdContext.getType().getUrl() + cmdContext.getCurrentFolder() 
+              + FileUtils.encodeURIComponent(param.getNewFileName());
+      checkParam(param);
+    } catch (ConnectorException ex) {
+      log.info("got ConnectorException", ex);
+      param.setErrorCode(ex.getErrorCode());
+      errorMsg = ex.getMessage();
+      if (!uploaded) {
+        param.setNewFileName("");
+      }
+    }
+    finish(response, uri, param, errorMsg.replace("%1", param.getNewFileName()));
   }
 
   /**
@@ -310,7 +311,7 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
     }
   }
 
-  protected void finish(HttpServletResponse response, @Nonnull String path,
+  protected void finish(HttpServletResponse response, @Nonnull String uri,
           FileUploadParameter param, String errorMsg) throws IOException {
 
     String name = param.getNewFileName();
@@ -326,7 +327,6 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
     } else {
       contentType = "text/html;charset=UTF-8";
       if (ckFinderFuncNum != null) {
-        String uri = path + FileUtils.encodeURIComponent(name);
         result = "<script>//<![CDATA[\nwindow.parent.CKFinder.tools.callFunction("
                 + ckFinderFuncNum.replaceAll("[^\\d]", "") + ", '"
                 + FileUtils.escapeJavaScript(uri)
