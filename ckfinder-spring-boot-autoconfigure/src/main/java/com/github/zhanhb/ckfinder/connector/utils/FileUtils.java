@@ -29,8 +29,8 @@ import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import lombok.NonNull;
 import org.unbescape.javascript.JavaScriptEscape;
 
 /**
@@ -69,7 +69,7 @@ public class FileUtils {
    * @return file extension
    */
   @Nullable
-  public static String getLongExtension(String fileName) {
+  public static String getLongExtension(@Nullable String fileName) {
     int indexOf;
     if (fileName == null || (indexOf = fileName.indexOf('.')) == -1
             || indexOf == fileName.length() - 1) {
@@ -85,7 +85,7 @@ public class FileUtils {
    * @return file extension
    */
   @Nullable
-  public static String getExtension(String fileName) {
+  public static String getExtension(@Nullable String fileName) {
     int lastIndexOf;
     if (fileName == null || (lastIndexOf = fileName.lastIndexOf('.')) == -1
             || lastIndexOf == fileName.length() - 1) {
@@ -101,7 +101,7 @@ public class FileUtils {
    * @return file extension
    */
   @Nullable
-  public static String getNameWithoutLongExtension(String fileName) {
+  public static String getNameWithoutLongExtension(@Nullable String fileName) {
     int indexOf;
     if (fileName == null || (indexOf = fileName.indexOf('.')) == -1) {
       return null;
@@ -116,7 +116,7 @@ public class FileUtils {
    * @return file extension
    */
   @Nullable
-  public static String getNameWithoutExtension(String fileName) {
+  public static String getNameWithoutExtension(@Nullable String fileName) {
     int lastIndexOf;
     if (fileName == null || (lastIndexOf = fileName.lastIndexOf('.')) == -1) {
       return null;
@@ -157,7 +157,7 @@ public class FileUtils {
    * @param fileName file name
    * @return true if file name is correct
    */
-  public static boolean isFileNameValid(String fileName) {
+  public static boolean isFileNameValid(@Nullable String fileName) {
     return !(fileName == null || fileName.isEmpty()
             || fileName.charAt(fileName.length() - 1) == '.'
             || fileName.contains("..")
@@ -170,7 +170,7 @@ public class FileUtils {
    * @param fileName file name
    * @return true if it contains disallowed characters.
    */
-  private static boolean hasInvalidCharacter(@Nonnull String fileName) {
+  private static boolean hasInvalidCharacter(@NonNull String fileName) {
     return InvalidFileNamePatternHolder.INVALID_FILENAME_PATTERN.matcher(fileName).find();
   }
 
@@ -181,7 +181,7 @@ public class FileUtils {
    * @param type resource type
    * @return true if extension is allowed
    */
-  public static boolean isFileExtensionAllowed(String fileName, ResourceType type) {
+  public static boolean isFileExtensionAllowed(@Nullable String fileName, @Nullable ResourceType type) {
     if (type == null || fileName == null) {
       return false;
     }
@@ -326,8 +326,8 @@ public class FileUtils {
     return currToken;
   }
 
-  public static String encodeURIComponent(String fileName) {
-    return UriComponentHolder.URI_COMPONENT.encode(fileName);
+  public static String encodeURIComponent(@NonNull String str) {
+    return UriComponentHolder.URI_COMPONENT.encode(str);
   }
 
   public static boolean isFolderNameInvalid(String folderName, CKFinderContext context) {
