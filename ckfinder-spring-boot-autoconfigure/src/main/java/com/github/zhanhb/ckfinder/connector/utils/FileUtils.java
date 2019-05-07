@@ -15,7 +15,6 @@ import com.github.zhanhb.ckfinder.connector.api.AccessControl;
 import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.Constants;
 import com.github.zhanhb.ckfinder.connector.api.ResourceType;
-import com.github.zhanhb.ckfinder.download.URLEncoder;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
