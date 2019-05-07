@@ -95,7 +95,7 @@ public abstract class BaseCommand<T> implements Command {
   @SuppressWarnings("FinalMethod")
   protected final CommandContext populateCommandContext(HttpServletRequest request,
           CKFinderContext context) throws ConnectorException {
-    if (this instanceof IPostCommand) {
+    if (context.isCsrf() && this instanceof IPostCommand) {
       checkCsrfToken(request);
     }
     checkConnectorEnabled(context);
