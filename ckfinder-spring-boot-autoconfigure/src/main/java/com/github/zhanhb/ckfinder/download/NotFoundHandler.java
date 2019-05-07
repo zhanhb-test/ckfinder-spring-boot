@@ -28,7 +28,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 public interface NotFoundHandler {
 
-  static NotFoundHandler defaultHandler() {
+  static NotFoundHandler getDefault() {
     return context -> {
       HttpServletRequest request = context.getRequest();
       HttpServletResponse response = context.getResponse();

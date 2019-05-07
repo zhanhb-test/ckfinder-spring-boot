@@ -46,7 +46,7 @@ public class PathPartialBuilder {
   /**
    * not found handler
    */
-  private NotFoundHandler notFound = NotFoundHandler.defaultHandler();
+  private NotFoundHandler notFound = NotFoundHandler.getDefault();
 
   // package private
   PathPartialBuilder() {
