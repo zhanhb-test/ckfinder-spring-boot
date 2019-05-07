@@ -11,18 +11,15 @@
  */
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.FileUploadParameter;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Objects;
 import javax.servlet.http.HttpServletResponse;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.util.StringUtils;
+import org.unbescape.json.JsonEscape;
 
 /**
  * Class to handle <code>QuickUpload</code> command.
@@ -90,32 +87,38 @@ public class QuickUploadCommand extends FileUploadCommand {
    */
   private void handleJSONResponse(Writer writer, String errorMsg, String path,
           FileUploadParameter param) throws IOException {
-    Map<String, Object> jsonObj = new HashMap<>(4);
-
-    boolean success = !StringUtils.isEmpty(path);
-    String fileName = param.getNewFileName();
-    jsonObj.put("fileName", fileName);
-    jsonObj.put("uploaded", success ? 1 : 0);
-
-    if (success) {
-      jsonObj.put("url", path + FileUtils.encodeURIComponent(fileName));
-    }
-
-    if (!StringUtils.isEmpty(errorMsg)) {
-      Map<String, Object> jsonErrObj = new HashMap<>(3);
-      ErrorCode error = param.getErrorCode();
-      jsonErrObj.put("number", error != null ? error.getCode() : 0);
-      jsonErrObj.put("message", errorMsg);
-      jsonObj.put("error", jsonErrObj);
-    }
-
-    ObjectMapperHolder.MAPPER.writeValue(writer, jsonObj);
+    writeJSON(writer, errorMsg, path, param.getNewFileName(), param.getErrorCode());
   }
 
-  private interface ObjectMapperHolder {
+  // for test
+  void writeJSON(Writer writer, String errorMsg, String path,
+          String fileName, ErrorCode error) throws IOException {
+    boolean success = !StringUtils.isEmpty(path);
 
-    ObjectMapper MAPPER = new Jackson2ObjectMapperBuilder().serializationInclusion(JsonInclude.Include.ALWAYS).build();
-
+    writer.write("{\"fileName\":");
+    if (fileName != null) {
+      writer.write('"');
+      JsonEscape.escapeJsonMinimal(fileName, writer);
+      writer.write('"');
+    } else {
+      writer.write("null");
+    }
+    writer.write(",\"uploaded\":");
+    writer.write(success ? '1' : '0');
+    if (!StringUtils.isEmpty(errorMsg)) {
+      writer.write(",\"error\":{\"number\":");
+      writer.write(Integer.toString(error != null ? error.getCode() : 0));
+      writer.write(",\"message\":\"");
+      JsonEscape.escapeJsonMinimal(errorMsg, writer);
+      writer.write("\"}");
+    }
+    if (success) {
+      assert fileName != null;
+      writer.write(",\"url\":\"");
+      JsonEscape.escapeJsonMinimal(path + FileUtils.encodeURIComponent(fileName), writer);
+      writer.write('"');
+    }
+    writer.write('}');
   }
 
 }

@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import org.unbescape.javascript.JavaScriptEscape;
 
 /**
  * Utils for files.
@@ -341,7 +342,7 @@ public class FileUtils {
   }
 
   public static String escapeJavaScript(String fileName) {
-    return fileName.replace("'", "\\'");
+    return JavaScriptEscape.escapeJavaScriptMinimal(fileName);
   }
 
   private interface InvalidFileNamePatternHolder {
