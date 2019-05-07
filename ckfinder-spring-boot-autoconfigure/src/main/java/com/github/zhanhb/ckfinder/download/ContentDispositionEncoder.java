@@ -19,6 +19,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.function.Function;
+import org.springframework.http.ContentDisposition;
 
 /**
  *
@@ -27,9 +28,9 @@ import java.util.function.Function;
  */
 interface ContentDispositionEncoder {
 
-  static ContentDisposition wrapper(String type, Function<Path, String> nameMapper) {
+  static ContentDispositionStrategy wrapper(String type, Function<Path, String> nameMapper) {
     Objects.requireNonNull(nameMapper, "nameMapper");
-    return context -> org.springframework.http.ContentDisposition.builder(type)
+    return context -> ContentDisposition.builder(type)
             .filename(nameMapper.apply(context.getPath()), StandardCharsets.UTF_8)
             .build().toString();
   }

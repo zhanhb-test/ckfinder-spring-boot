@@ -18,7 +18,7 @@ import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.support.CommandContext;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import com.github.zhanhb.ckfinder.connector.utils.ImageUtils;
-import com.github.zhanhb.ckfinder.download.ContentDisposition;
+import com.github.zhanhb.ckfinder.download.ContentDispositionStrategy;
 import com.github.zhanhb.ckfinder.download.PathPartial;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -118,7 +118,7 @@ public class ThumbnailCommand extends BaseCommand<String> {
               .notFound(context -> {
                 throw new UncheckedConnectorException(ErrorCode.FILE_NOT_FOUND);
               })
-              .contentDisposition(ContentDisposition.inline())
+              .contentDisposition(ContentDispositionStrategy.inline())
               .build();
     }
 

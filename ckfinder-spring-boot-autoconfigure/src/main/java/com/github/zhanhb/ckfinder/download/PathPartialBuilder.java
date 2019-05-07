@@ -31,7 +31,7 @@ public class PathPartialBuilder {
    * Should the Content-Disposition: attachment; filename=... header be sent
    * with static resources?
    */
-  private ContentDisposition contentDisposition = ContentDisposition.none();
+  private ContentDispositionStrategy contentDisposition = ContentDispositionStrategy.none();
 
   /**
    * content type resolver
@@ -41,7 +41,7 @@ public class PathPartialBuilder {
   /**
    * ETag generator
    */
-  private ETag eTag = ETag.weak();
+  private ETagStrategy eTag = ETagStrategy.weak();
 
   /**
    * not found handler
@@ -57,12 +57,12 @@ public class PathPartialBuilder {
     return this;
   }
 
-  public PathPartialBuilder contentDisposition(ContentDisposition contentDisposition) {
+  public PathPartialBuilder contentDisposition(ContentDispositionStrategy contentDisposition) {
     this.contentDisposition = contentDisposition;
     return this;
   }
 
-  public PathPartialBuilder eTag(ETag etag) {
+  public PathPartialBuilder eTag(ETagStrategy etag) {
     this.eTag = etag;
     return this;
   }

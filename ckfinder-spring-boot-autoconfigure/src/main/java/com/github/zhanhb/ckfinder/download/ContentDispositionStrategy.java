@@ -25,32 +25,32 @@ import static com.github.zhanhb.ckfinder.download.ContentDispositionEncoder.wrap
  *
  * @author zhanhb
  */
-public interface ContentDisposition {
+public interface ContentDispositionStrategy {
 
   Function<Path, String> DEFAULT_NAME_MAPPER = path -> path.getFileName().toString();
 
-  static ContentDisposition attachment() {
+  static ContentDispositionStrategy attachment() {
     return attachment(DEFAULT_NAME_MAPPER);
   }
 
-  static ContentDisposition inline() {
+  static ContentDispositionStrategy inline() {
     return inline(DEFAULT_NAME_MAPPER);
   }
 
-  static ContentDisposition attachment(Function<Path, String> nameMapper) {
+  static ContentDispositionStrategy attachment(Function<Path, String> nameMapper) {
     return wrapper("attachment", nameMapper);
   }
 
-  static ContentDisposition inline(Function<Path, String> nameMapper) {
+  static ContentDispositionStrategy inline(Function<Path, String> nameMapper) {
     return wrapper("inline", nameMapper);
   }
 
-  static ContentDisposition none() {
+  static ContentDispositionStrategy none() {
     return __ -> null;
   }
 
   // https://tools.ietf.org/html/rfc6266
   @Nullable
-  String getValue(ActionContext context);
+  String getValue(PartialContext context);
 
 }

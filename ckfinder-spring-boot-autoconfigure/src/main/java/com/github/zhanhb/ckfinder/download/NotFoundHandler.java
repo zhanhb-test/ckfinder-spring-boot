@@ -44,6 +44,6 @@ public interface NotFoundHandler {
     };
   }
 
-  void handle(ActionContext context) throws IOException, ServletException;
+  void handle(PartialContext context) throws IOException, ServletException;
 
 }

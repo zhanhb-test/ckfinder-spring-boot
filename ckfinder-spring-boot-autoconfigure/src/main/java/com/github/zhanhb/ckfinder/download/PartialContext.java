@@ -30,7 +30,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter(AccessLevel.PACKAGE)
-public class ActionContext {
+public class PartialContext {
 
   private HttpServletRequest request;
   private HttpServletResponse response;
@@ -38,7 +38,7 @@ public class ActionContext {
   private Path path;
   private BasicFileAttributes attributes;
 
-  public ActionContext(HttpServletRequest request, HttpServletResponse response, ServletContext servletContext, Path path) {
+  public PartialContext(HttpServletRequest request, HttpServletResponse response, ServletContext servletContext, Path path) {
     this.request = request;
     this.response = response;
     this.servletContext = servletContext;

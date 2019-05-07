@@ -57,13 +57,13 @@ public class PathPartial {
   }
 
   private final boolean useAcceptRanges;
-  private final ContentDisposition contentDisposition;
-  private final ETag eTag;
+  private final ContentDispositionStrategy contentDisposition;
+  private final ETagStrategy eTag;
   private final ContentTypeResolver contentTypeResolver;
   private final NotFoundHandler notFound;
 
-  PathPartial(boolean useAcceptRanges, @Nonnull ContentDisposition contentDisposition,
-          @Nonnull ETag eTag, @Nonnull ContentTypeResolver contentType,
+  PathPartial(boolean useAcceptRanges, @Nonnull ContentDispositionStrategy contentDisposition,
+          @Nonnull ETagStrategy eTag, @Nonnull ContentTypeResolver contentType,
           @Nonnull NotFoundHandler notFound) {
     this.useAcceptRanges = useAcceptRanges;
     this.contentDisposition = Objects.requireNonNull(contentDisposition, "contentDisposition");
@@ -144,7 +144,7 @@ public class PathPartial {
   private void serveResource(HttpServletRequest request, HttpServletResponse response,
           boolean content, Path path) throws IOException, ServletException {
 
-    ActionContext context = new ActionContext(request, response,
+    PartialContext context = new PartialContext(request, response,
             request.getServletContext(), path);
 
     if (path == null) {

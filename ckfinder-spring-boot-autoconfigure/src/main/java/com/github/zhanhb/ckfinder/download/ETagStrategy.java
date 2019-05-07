@@ -23,39 +23,39 @@ import java.util.function.Function;
  *
  * @author zhanhb
  */
-public class ETag {
+public class ETagStrategy {
 
-  public static final Function<ActionContext, String> DEFAULT_ETAG_MAPPER
+  public static final Function<PartialContext, String> DEFAULT_ETAG_MAPPER
           = context -> {
             BasicFileAttributes attributes = context.getAttributes();
             return attributes.size() + "-" + attributes.lastModifiedTime().toMillis();
           };
 
-  public static ETag weak() {
+  public static ETagStrategy weak() {
     return weak(DEFAULT_ETAG_MAPPER);
   }
 
-  public static ETag strong() {
+  public static ETagStrategy strong() {
     return strong(DEFAULT_ETAG_MAPPER);
   }
 
-  public static ETag weak(Function<ActionContext, String> eTagMapper) {
-    return new ETag(true, eTagMapper);
+  public static ETagStrategy weak(Function<PartialContext, String> eTagMapper) {
+    return new ETagStrategy(true, eTagMapper);
   }
 
-  public static ETag strong(Function<ActionContext, String> eTagMapper) {
-    return new ETag(false, eTagMapper);
+  public static ETagStrategy strong(Function<PartialContext, String> eTagMapper) {
+    return new ETagStrategy(false, eTagMapper);
   }
 
   private final String prefix;
-  private final Function<ActionContext, String> eTagMapper;
+  private final Function<PartialContext, String> eTagMapper;
 
-  private ETag(boolean weak, Function<ActionContext, String> eTagMapper) {
+  private ETagStrategy(boolean weak, Function<PartialContext, String> eTagMapper) {
     this.prefix = weak ? "W/" : "";
     this.eTagMapper = Objects.requireNonNull(eTagMapper, "eTagMapper");
   }
 
-  public String getValue(ActionContext context) {
+  public String getValue(PartialContext context) {
     String result = Objects.requireNonNull(eTagMapper.apply(context));
     return prefix + "\"" + result + "\"";
   }

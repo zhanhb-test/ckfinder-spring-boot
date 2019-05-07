@@ -25,6 +25,6 @@ public interface ContentTypeResolver {
     return context -> context.getServletContext().getMimeType(context.getPath().getFileName().toString());
   }
 
-  String getValue(ActionContext context);
+  String getValue(PartialContext context);
 
 }
