@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
+ * Base class to handle XML commands.
  *
  * @author zhanhb
  * @param <T> parameter type

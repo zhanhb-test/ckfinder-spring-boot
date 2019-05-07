@@ -243,6 +243,8 @@ public class ImageUtils {
   public static boolean isValid(InputStreamSource item) {
     BufferedImage bi;
     try (InputStream is = item.getInputStream()) {
+      // TODO java.lang.ArrayIndexOutOfBoundsException: 4096
+      // https://stackoverflow.com/questions/22259714/arrayindexoutofboundsexception-4096-while-reading-gif-file
       bi = ImageIO.read(is);
     } catch (IOException e) {
       return false;

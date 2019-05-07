@@ -7,6 +7,7 @@ import lombok.NonNull;
 import lombok.Value;
 
 /**
+ * Configuration of thumbnail properties.
  *
  * @author zhanhb
  */

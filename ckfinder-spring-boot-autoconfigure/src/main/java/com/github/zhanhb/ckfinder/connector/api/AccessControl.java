@@ -57,7 +57,7 @@ public interface AccessControl {
   int FILE_DELETE = 1 << 7;
 
   /**
-   * check ACL for folder.
+   * check acl for given role in specified folder.
    *
    * @param resourceType resource type name
    * @param folder folder name
@@ -70,7 +70,7 @@ public interface AccessControl {
   }
 
   /**
-   * Checks ACL for given role.
+   * calculate acl for given role.
    *
    * @param resourceType resource type
    * @param folder current folder

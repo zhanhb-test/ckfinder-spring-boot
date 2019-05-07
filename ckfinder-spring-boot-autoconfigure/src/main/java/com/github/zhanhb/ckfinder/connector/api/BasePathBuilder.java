@@ -14,7 +14,7 @@ package com.github.zhanhb.ckfinder.connector.api;
 import java.nio.file.Path;
 
 /**
- *
+ * Configuration to get storage path and base url
  */
 public interface BasePathBuilder {
 

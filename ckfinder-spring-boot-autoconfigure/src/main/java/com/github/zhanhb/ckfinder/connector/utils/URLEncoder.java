@@ -22,7 +22,9 @@ import java.util.Objects;
 import javax.annotation.Nonnull;
 
 /**
+ * URL Encoder. An alternative for java.net.URLEncoder
  *
+ * @see java.net.URLEncoder
  * @author zhanhb
  */
 class URLEncoder {

@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * Ascii value of unicode, when force ascii is enabled.
  *
  * @author zhanhb
  */

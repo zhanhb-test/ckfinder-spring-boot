@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Value;
 
 /**
+ * License name and key.
  *
  * @author zhanhb
  */

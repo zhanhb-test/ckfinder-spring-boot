@@ -16,7 +16,7 @@ import java.util.Optional;
 import javax.annotation.Nonnull;
 
 /**
- * Resource type entity.
+ * Resource type interface.
  */
 public interface ResourceType {
 

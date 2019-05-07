@@ -4,11 +4,7 @@ import com.github.zhanhb.ckfinder.connector.api.Command;
 import com.github.zhanhb.ckfinder.connector.api.CommandFactory;
 import java.util.Map;
 
-/**
- *
- * @author zhanhb
- */
-public class DefaultCommandFactory implements CommandFactory {
+class DefaultCommandFactory implements CommandFactory {
 
   private final Map<String, ? extends Command> commands;
 
@@ -17,8 +13,8 @@ public class DefaultCommandFactory implements CommandFactory {
   }
 
   @Override
-  public Command getCommand(String commandName) {
-    return commands.get(commandName);
+  public Command getCommand(String name) {
+    return commands.get(name);
   }
 
 }

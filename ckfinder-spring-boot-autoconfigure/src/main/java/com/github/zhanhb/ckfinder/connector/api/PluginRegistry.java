@@ -1,6 +1,8 @@
 package com.github.zhanhb.ckfinder.connector.api;
 
 /**
+ * Registry of plugins.
+ *
  *
  * @author zhanhb
  */

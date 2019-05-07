@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Value;
 
 /**
+ * Configuration of image properties.
  *
  * @author zhanhb
  */

@@ -5,13 +5,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
+ * Base interface for all command handlers.
  *
  * @author zhanhb
  */
 public interface Command {
 
   /**
-   * Runs command. Initialize, sets response and execute command.
+   * Runs command. execute and write result to response.
    *
    * @param request request
    * @param response response

@@ -24,14 +24,14 @@ import java.nio.file.Path;
  *
  * @author zhanhb
  */
-public interface DeleteHelper {
+interface DeleteHelper {
 
-    static Path delete(Path path) throws IOException {
-        try {
-            return Files.walkFileTree(path, DeleteFileVisitor.INSTANCE);
-        } catch (NoSuchFileException ignore) {
-            return path;
-        }
+  static Path delete(Path path) throws IOException {
+    try {
+      return Files.walkFileTree(path, DeleteFileVisitor.INSTANCE);
+    } catch (NoSuchFileException ignore) {
+      return path;
     }
+  }
 
 }

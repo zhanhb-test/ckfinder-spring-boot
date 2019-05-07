@@ -19,7 +19,7 @@ import javax.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Error utils.
+ * Utility class to get error messages.
  */
 @Slf4j
 public enum MessageUtil {

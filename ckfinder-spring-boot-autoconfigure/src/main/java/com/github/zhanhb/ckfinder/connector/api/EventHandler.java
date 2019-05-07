@@ -6,7 +6,7 @@ package com.github.zhanhb.ckfinder.connector.api;
  */
 public interface EventHandler {
 
-  void fireOnFileUpload(FileUploadEvent args);
+  void fireOnFileUpload(FileUploadEvent event);
 
   void fireOnInitCommand(InitPluginInfo data);
 
