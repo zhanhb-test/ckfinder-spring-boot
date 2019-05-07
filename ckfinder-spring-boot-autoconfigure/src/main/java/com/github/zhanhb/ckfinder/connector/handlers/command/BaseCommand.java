@@ -21,6 +21,7 @@ import com.github.zhanhb.ckfinder.connector.support.CommandContext;
 import com.github.zhanhb.ckfinder.connector.utils.PathUtils;
 import java.io.IOException;
 import java.util.regex.Pattern;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -57,18 +58,52 @@ public abstract class BaseCommand<T> implements Command {
 
   protected abstract T popupParams(HttpServletRequest request, CKFinderContext context);
 
+  private String nullToEmpty(String s) {
+    return s != null ? s : "";
+  }
+
+  /**
+   * Checks if the request contains a valid CSRF token that matches the value
+   * sent in the cookie.<br>
+   *
+   * @see
+   * <a href="https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)_Prevention_Cheat_Sheet#Double_Submit_Cookies">Cross-Site_Request_Forgery_(CSRF)_Prevention</a>
+   *
+   * @param request current request object parameter
+   */
+  private void checkCsrfToken(final HttpServletRequest request) throws ConnectorException {
+    final String tokenParamName = "ckCsrfToken";
+    final String tokenCookieName = "ckCsrfToken";
+    final int minTokenLength = 32;
+    final String paramToken = nullToEmpty(request.getParameter(tokenParamName)).trim();
+
+    Cookie[] cookies = request.getCookies();
+    String cookieToken = "";
+    for (Cookie cookie : cookies) {
+      if (cookie.getName().equals(tokenCookieName)) {
+        cookieToken = nullToEmpty(cookie.getValue()).trim();
+        break;
+      }
+    }
+    if (paramToken.length() >= minTokenLength && cookieToken.length() >= minTokenLength
+            && paramToken.equals(cookieToken)) {
+      return;
+    }
+    throw new ConnectorException(ErrorCode.INVALID_REQUEST, "CSRF Attempt");
+  }
+
   @SuppressWarnings("FinalMethod")
   protected final CommandContext populateCommandContext(HttpServletRequest request,
           CKFinderContext context) throws ConnectorException {
+    if (this instanceof IPostCommand) {
+      checkCsrfToken(request);
+    }
     checkConnectorEnabled(context);
     String userRole = getUserRole(request, context);
     String currentFolder = checkRequestPath(getCurrentFolder(request));
 
     ResourceType resource = context.getResource(request.getParameter("type"));
     CommandContext cmdContext = new CommandContext(context, userRole, currentFolder, resource);
-    if (this instanceof IPostCommand) {
-      cmdContext.checkCsrfToken(request);
-    }
     return cmdContext;
   }
 
