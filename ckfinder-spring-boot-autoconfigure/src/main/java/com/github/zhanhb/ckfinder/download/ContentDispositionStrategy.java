@@ -15,7 +15,7 @@
  */
 package com.github.zhanhb.ckfinder.download;
 
-import java.util.Optional;
+import javax.annotation.Nullable;
 
 import static com.github.zhanhb.ckfinder.download.ContentDispositionEncoder.wrapper;
 
@@ -24,7 +24,7 @@ import static com.github.zhanhb.ckfinder.download.ContentDispositionEncoder.wrap
  * @see <a href="https://tools.ietf.org/html/rfc6266">rfc6266</a>
  * @author zhanhb
  */
-public interface ContentDispositionStrategy extends Strategy<Optional<String>> {
+public interface ContentDispositionStrategy extends Strategy<String> {
 
   NameMapper DEFAULT_NAME_MAPPER = path -> path.getFileName().toString();
 
@@ -45,10 +45,11 @@ public interface ContentDispositionStrategy extends Strategy<Optional<String>> {
   }
 
   static ContentDispositionStrategy none() {
-    return __ -> Optional.empty();
+    return __ -> null;
   }
 
+  @Nullable
   @Override
-  Optional<String> apply(PartialContext context);
+  String apply(PartialContext context);
 
 }

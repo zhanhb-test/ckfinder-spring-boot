@@ -93,9 +93,9 @@ public class DownloadFileCommand extends BaseCommand<String> {
   private static class PartialHolder {
 
     static PathPartial INSTANCE = PathPartial.builder()
-            .contentType(context -> Optional.of(ContentTypeResolver.getDefault().apply(context).map(mt
+            .contentType(context -> Optional.of(ContentTypeResolver.getDefault().apply(context)).map(mt
             -> (mt.startsWith("text/") || mt.endsWith("/javascript") || mt.endsWith("/xml"))
-            ? mt + ";charset=UTF-8" : mt).orElse("application/octet-stream")))
+            ? mt + ";charset=UTF-8" : mt).orElse("application/octet-stream"))
             .notFound(__ -> {
               throw new UncheckedConnectorException(ErrorCode.FILE_NOT_FOUND);
             })

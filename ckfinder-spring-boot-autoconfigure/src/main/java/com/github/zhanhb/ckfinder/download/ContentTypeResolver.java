@@ -15,19 +15,20 @@
  */
 package com.github.zhanhb.ckfinder.download;
 
-import java.util.Optional;
+import javax.annotation.Nullable;
 
 /**
  *
  * @author zhanhb
  */
-public interface ContentTypeResolver extends Strategy<Optional<String>> {
+public interface ContentTypeResolver extends Strategy<String> {
 
   static ContentTypeResolver getDefault() {
-    return context -> Optional.ofNullable(context.getServletContext().getMimeType(context.getPath().getFileName().toString()));
+    return context -> context.getServletContext().getMimeType(context.getPath().getFileName().toString());
   }
 
+  @Nullable
   @Override
-  Optional<String> apply(PartialContext context);
+  String apply(PartialContext context);
 
 }

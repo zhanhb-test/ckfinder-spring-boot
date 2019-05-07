@@ -25,7 +25,6 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.StringTokenizer;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -175,7 +174,7 @@ public class PathPartial {
       return;
     }
     // Find content type.
-    Optional<String> contentTypeOptional = Objects.requireNonNull(contentTypeResolver.apply(context));
+    String contentType = contentTypeResolver.apply(context);
     // Get content length
     long contentLength = attr.size();
     // Special case for zero length files, which would cause a
@@ -196,19 +195,22 @@ public class PathPartial {
     }
     final ServletOutputStream ostream = serveContent ? response.getOutputStream() : null;
 
-    contentDisposition.apply(context).ifPresent(disposition -> {
-      response.setHeader(HttpHeaders.CONTENT_DISPOSITION, disposition);
-    });
+    {
+      String disposition = contentDisposition.apply(context);
+      if (disposition != null) {
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, disposition);
+      }
+    }
 
     // Check to see if a Filter, Valve of wrapper has written some content.
     // If it has, disable range requests and setting of a content length
     // since neither can be done reliably.
     if (isError || ranges == FULL) {
       // Set the appropriate output headers
-      contentTypeOptional.ifPresent(contentType -> {
+      if (contentType != null) {
         log.debug("serveFile: contentType='{}'", contentType);
         response.setContentType(contentType);
-      });
+      }
       if (contentLength >= 0) {
         response.setContentLengthLong(contentLength);
       }
@@ -225,10 +227,10 @@ public class PathPartial {
         response.addHeader(HttpHeaders.CONTENT_RANGE, range.toString());
         long length = range.end - range.start + 1;
         response.setContentLengthLong(length);
-        contentTypeOptional.ifPresent(contentType -> {
+        if (contentType != null) {
           log.debug("serveFile: contentType='{}'", contentType);
           response.setContentType(contentType);
-        });
+        }
         if (serveContent) {
           try (InputStream stream = Files.newInputStream(path)) {
             copyRange(stream, ostream, range, new byte[Math.min((int) length, 8192)]);
@@ -237,7 +239,7 @@ public class PathPartial {
       } else {
         response.setContentType("multipart/byteranges; boundary=" + MIME_SEPARATION);
         if (serveContent) {
-          copy(path, ostream, ranges, contentTypeOptional.orElse(null), new byte[Math.min((int) contentLength, 8192)]);
+          copy(path, ostream, ranges, contentType, new byte[Math.min((int) contentLength, 8192)]);
         }
       }
     }

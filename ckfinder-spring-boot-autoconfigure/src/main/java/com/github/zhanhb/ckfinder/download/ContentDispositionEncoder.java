@@ -32,7 +32,7 @@ interface ContentDispositionEncoder {
     return context -> Optional.ofNullable(nameMapper.apply(context.getPath()))
             .map(filename -> ContentDisposition.builder(type)
             .filename(filename, StandardCharsets.UTF_8)
-            .build().toString());
+            .build().toString()).orElse(null);
   }
 
 }
