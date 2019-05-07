@@ -233,7 +233,7 @@
           <sourcepath>${delombok.directory}</sourcepath>
           <locale>en_US</locale>
           <links>
-            <link>http://docs.spring.io/spring-boot/docs/${spring-boot.version}/api/</link>
+            <link>http://docs.spring.io/spring-boot/docs/2.1.4.RELEASE/api/</link>
             <link>http://docs.spring.io/spring-framework/docs/${spring.version}/javadoc-api/</link>
           </links>
         </configuration>
