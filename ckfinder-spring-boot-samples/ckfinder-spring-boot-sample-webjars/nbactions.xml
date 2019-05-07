@@ -8,5 +8,8 @@
     <goals>
       <goal>spring-boot:run</goal>
     </goals>
+    <properties>
+      <spring-boot.run.jvmArguments>-Dfile.encoding=UTF-8 -Dspring.output.ansi.enabled=always -Dserver.tomcat.basedir=target -noverify -XX:TieredStopAtLevel=1</spring-boot.run.jvmArguments>
+    </properties>
   </action>
 </actions>
