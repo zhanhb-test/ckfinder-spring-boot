@@ -36,7 +36,7 @@ import lombok.extern.slf4j.Slf4j;
  * Class to handle <code>CopyFiles</code> command.
  */
 @Slf4j
-public class CopyFilesCommand extends ErrorListXmlCommand<CopyMoveParameter> implements IPostCommand {
+public class CopyFilesCommand extends FailAtEndXmlCommand<CopyMoveParameter> implements IPostCommand {
 
   @Override
   protected void addResultNode(Connector.Builder rootElement, CopyMoveParameter param) {

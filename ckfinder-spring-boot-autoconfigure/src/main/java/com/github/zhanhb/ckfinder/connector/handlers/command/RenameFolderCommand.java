@@ -30,7 +30,7 @@ import lombok.extern.slf4j.Slf4j;
  * Class to handle <code>RenameFolder</code> command.
  */
 @Slf4j
-public class RenameFolderCommand extends SuccessXmlCommand<String> implements IPostCommand {
+public class RenameFolderCommand extends FinishOnErrorXmlCommand<String> implements IPostCommand {
 
   /**
    * creates XML node for renamed folder.

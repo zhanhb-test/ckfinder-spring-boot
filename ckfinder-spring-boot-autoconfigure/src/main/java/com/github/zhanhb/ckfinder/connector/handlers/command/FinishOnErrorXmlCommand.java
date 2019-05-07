@@ -12,17 +12,15 @@
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
-import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.support.CommandContext;
-import com.github.zhanhb.ckfinder.connector.support.ErrorListResult;
 
 /**
- * Base class to handle XML commands with error list.
+ * Base class to handle XML commands.
  *
  * @param <T> parameter type
  */
-public abstract class ErrorListXmlCommand<T> extends XmlCommand<T> {
+public abstract class FinishOnErrorXmlCommand<T> extends XmlCommand<T> {
 
   @Override
   @SuppressWarnings("FinalMethod")
@@ -30,15 +28,9 @@ public abstract class ErrorListXmlCommand<T> extends XmlCommand<T> {
           throws ConnectorException {
     Connector.Builder connector = Connector.builder();
     cmdContext.setResourceType(connector);
-    ErrorListResult result = applyData(param, cmdContext);
-    ErrorCode error = result.getErrorCode();
-    int errorCode = error != null ? error.getCode() : 0;
     createCurrentFolderNode(cmdContext, connector);
-    createErrorNode(connector, errorCode);
-    result.addErrorsTo(connector);
-    if (result.isAddResultNode()) {
-      addResultNode(connector, param);
-    }
+    createErrorNode(connector, 0);
+    createXml(connector, param, cmdContext);
     return connector.build();
   }
 
@@ -47,19 +39,9 @@ public abstract class ErrorListXmlCommand<T> extends XmlCommand<T> {
    *
    * @param rootElement XML root node
    * @param param the parameter
-   */
-  protected abstract void addResultNode(Connector.Builder rootElement, T param);
-
-  /**
-   * gets all necessary data to create XML response.
-   *
-   * @param param the parameter
    * @param cmdContext command context
-   * @return the warning code or null if it's correct.
-   * {@link com.github.zhanhb.ckfinder.connector.api.ErrorCode} if no error
-   * occurred.
    * @throws ConnectorException when error occurs
    */
-  protected abstract ErrorListResult applyData(T param, CommandContext cmdContext) throws ConnectorException;
+  protected abstract void createXml(Connector.Builder rootElement, T param, CommandContext cmdContext) throws ConnectorException;
 
 }

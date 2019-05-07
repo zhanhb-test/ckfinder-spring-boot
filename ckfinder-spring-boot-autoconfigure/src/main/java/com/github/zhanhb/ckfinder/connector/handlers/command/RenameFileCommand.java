@@ -34,7 +34,7 @@ import org.springframework.util.StringUtils;
  * Class to handle <code>RenameFile</code> command.
  */
 @Slf4j
-public class RenameFileCommand extends ErrorListXmlCommand<RenameFileParameter> implements IPostCommand {
+public class RenameFileCommand extends FailAtEndXmlCommand<RenameFileParameter> implements IPostCommand {
 
   /**
    * rename thumb file.
