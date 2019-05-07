@@ -32,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
  * location command.
  */
 @Slf4j
-public class GetFoldersCommand extends BaseXmlCommand<Void> {
+public class GetFoldersCommand extends SuccessXmlCommand<Void> {
 
   @Override
   protected void createXml(Connector.Builder rootElement, Void param, CommandContext cmdContext) throws ConnectorException {

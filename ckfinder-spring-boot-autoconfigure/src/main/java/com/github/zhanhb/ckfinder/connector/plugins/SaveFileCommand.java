@@ -15,8 +15,8 @@ import com.github.zhanhb.ckfinder.connector.api.AccessControl;
 import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
-import com.github.zhanhb.ckfinder.connector.handlers.command.BaseXmlCommand;
 import com.github.zhanhb.ckfinder.connector.handlers.command.IPostCommand;
+import com.github.zhanhb.ckfinder.connector.handlers.command.SuccessXmlCommand;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.SaveFileParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.support.CommandContext;
@@ -29,7 +29,7 @@ import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class SaveFileCommand extends BaseXmlCommand<SaveFileParameter> implements IPostCommand {
+public class SaveFileCommand extends SuccessXmlCommand<SaveFileParameter> implements IPostCommand {
 
   @Override
   protected void createXml(Connector.Builder rootElement, SaveFileParameter param,

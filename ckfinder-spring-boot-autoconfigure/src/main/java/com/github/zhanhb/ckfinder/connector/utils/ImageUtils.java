@@ -88,22 +88,21 @@ public class ImageUtils {
     try (InputStream is = Files.newInputStream(originFile)) {
       image = ImageIO.read(is);
     }
-    if (image != null) {
-      Dimension dimension = createThumbDimension(image,
-              thumbnail.getMaxWidth(), thumbnail.getMaxHeight());
-      FileUtils.createPath(file);
-      if (image.getHeight() <= dimension.height
-              && image.getWidth() <= dimension.width) {
-        writeUntouchedImage(originFile, file);
-      } else {
-        resizeImage(image, dimension.width, dimension.height,
-                thumbnail.getQuality(), file);
-      }
-      return true;
-    } else {
+    if (image == null) {
       log.error("Wrong image file");
+      return false;
     }
-    return false;
+    Dimension dimension = createThumbDimension(image,
+            thumbnail.getMaxWidth(), thumbnail.getMaxHeight());
+    FileUtils.createPath(file);
+    if (image.getHeight() <= dimension.height
+            && image.getWidth() <= dimension.width) {
+      writeUntouchedImage(originFile, file);
+    } else {
+      resizeImage(image, dimension.width, dimension.height,
+              thumbnail.getQuality(), file);
+    }
+    return true;
   }
 
   /**
@@ -116,7 +115,7 @@ public class ImageUtils {
    * @throws IOException when IO Exception occurs.
    */
   public static void createTmpThumb(InputStreamSource part, Path file,
-                                    CKFinderContext context) throws IOException {
+          CKFinderContext context) throws IOException {
     BufferedImage image;
     try (InputStream stream = part.getInputStream()) {
       image = ImageIO.read(stream);

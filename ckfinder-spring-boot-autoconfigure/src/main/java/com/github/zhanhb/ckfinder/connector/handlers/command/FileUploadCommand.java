@@ -34,6 +34,7 @@ import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -293,7 +294,7 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
   private void validateUploadItem(MultipartFile item,
           FileUploadParameter param, CommandContext cmdContext) throws ConnectorException {
     CKFinderContext context = cmdContext.getCfCtx();
-    if (item.getOriginalFilename() == null || item.getOriginalFilename().length() == 0) {
+    if (StringUtils.isEmpty(item.getOriginalFilename())) {
       param.throwException(ErrorCode.UPLOADED_INVALID);
     }
 

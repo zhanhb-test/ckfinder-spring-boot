@@ -36,7 +36,7 @@ import lombok.extern.slf4j.Slf4j;
  * command.
  */
 @Slf4j
-public class GetFilesCommand extends BaseXmlCommand<String> {
+public class GetFilesCommand extends SuccessXmlCommand<String> {
 
   /**
    * number of bytes in kilobyte.

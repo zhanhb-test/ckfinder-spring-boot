@@ -29,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
  * Class to handle <code>CreateFolder</code> command. Create subfolder.
  */
 @Slf4j
-public class CreateFolderCommand extends BaseXmlCommand<String> implements IPostCommand {
+public class CreateFolderCommand extends SuccessXmlCommand<String> implements IPostCommand {
 
   /**
    * creates current folder XML node.

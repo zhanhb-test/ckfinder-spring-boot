@@ -15,7 +15,7 @@ import com.github.zhanhb.ckfinder.connector.api.AccessControl;
 import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
-import com.github.zhanhb.ckfinder.connector.handlers.command.BaseXmlCommand;
+import com.github.zhanhb.ckfinder.connector.handlers.command.SuccessXmlCommand;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.ImageInfo;
 import com.github.zhanhb.ckfinder.connector.support.CommandContext;
@@ -31,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 
 @Slf4j
-public class ImageResizeInfoCommand extends BaseXmlCommand<String> {
+public class ImageResizeInfoCommand extends SuccessXmlCommand<String> {
 
   @Override
   protected void createXml(Connector.Builder rootElement, String fileName, CommandContext cmdContext) throws ConnectorException {

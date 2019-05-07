@@ -20,7 +20,7 @@ import com.github.zhanhb.ckfinder.connector.support.CommandContext;
  *
  * @param <T> parameter type
  */
-public abstract class BaseXmlCommand<T> extends XmlCommand<T> {
+public abstract class SuccessXmlCommand<T> extends XmlCommand<T> {
 
   @Override
   @SuppressWarnings("FinalMethod")
