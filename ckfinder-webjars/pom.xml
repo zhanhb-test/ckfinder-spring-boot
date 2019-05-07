@@ -62,10 +62,10 @@
 
                 <unzip dest="${project.build.directory}" src="${ckfinder.cache.path}" />
                 <unzip dest="${project.build.directory}" src="${ckfinder.cache.path.php}" />
-                <copy todir="${ckfinder.build.directory}">
+                <copy todir="${ckfinder.build.directory}" preservelastmodified="true">
                   <fileset dir="${project.build.directory}/ckfinder/_source/CKFinder for Java/WebApp/src/main/webapp/ckfinder" excludes="_samples/**" includes="**" />
                 </copy>
-                <copy todir="${ckfinder.build.directory}/plugins/zip">
+                <copy todir="${ckfinder.build.directory}/plugins/zip" preservelastmodified="true">
                   <fileset dir="${project.build.directory}/ckfinder/plugins/zip" excludes="*.php,**/*.php" includes="**" />
                 </copy>
               </target>

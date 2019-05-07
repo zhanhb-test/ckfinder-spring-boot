@@ -21,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -62,7 +63,9 @@ public class JSEscaper {
     str = replaceAll("(?-i)\\\\[0-7]{3}", str, esc(1, 8));
     str = replaceAll("[^\000-\\x7E\u2028\u2029]++", str, matcher -> esc(matcher.group()));
     if (!str.equals(old)) {
+      BasicFileAttributes bfa = Files.readAttributes(path, BasicFileAttributes.class);
       Files.write(path, str.getBytes(charset));
+      Files.setLastModifiedTime(path, bfa.lastModifiedTime());
     }
   }
 
