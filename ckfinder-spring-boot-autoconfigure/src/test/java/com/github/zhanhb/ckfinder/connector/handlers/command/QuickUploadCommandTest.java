@@ -39,18 +39,16 @@ public class QuickUploadCommandTest {
           if (!StringUtils.isEmpty(path) && fileName == null) {
             continue;
           }
-          for (ErrorCode error : new ErrorCode[]{null, ErrorCode.ACCESS_DENIED}) {
-            QuickUploadCommand instance = new QuickUploadCommand();
-            instance.writeJSON(writer, errorMsg, path, fileName, error);
-            String result = writer.toString();
-            writer.getBuffer().setLength(0);
-            log.debug("result={}", result);
-            String rhino = (String) javascript.eval("JSON.stringify(" + result + ")");
-            try {
-              assertEquals(rhino, result);
-            } catch (AssertionError ae) {
-              log.warn(ae.getMessage());
-            }
+          QuickUploadCommand instance = new QuickUploadCommand();
+          instance.writeJSON(writer, errorMsg, path, fileName, 0);
+          String result = writer.toString();
+          writer.getBuffer().setLength(0);
+          log.trace("result={}", result);
+          String rhino = (String) javascript.eval("JSON.stringify(" + result + ")");
+          try {
+            assertEquals(rhino, result);
+          } catch (AssertionError ae) {
+            log.warn(ae.getMessage());
           }
         }
       }

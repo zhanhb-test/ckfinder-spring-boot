@@ -24,7 +24,6 @@ import com.github.zhanhb.ckfinder.connector.utils.ImageUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -85,62 +84,7 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
         param.setNewFileName("");
       }
     }
-    String newFileName = param.getNewFileName();
-    errorMsg = errorMsg.replace("%1", newFileName);
-
-    setContentType(param, response);
-    PrintWriter writer = response.getWriter();
-    if ("txt".equals(param.getResponseType())) {
-      writer.write(newFileName + "|" + errorMsg);
-    } else if (checkFuncNum(param)) {
-      handleOnUploadCompleteCallFuncResponse(writer, errorMsg, path, param);
-    } else {
-      handleOnUploadCompleteResponse(writer, errorMsg, param, path);
-    }
-    writer.flush();
-  }
-
-  /**
-   * check if func num is set in request.
-   *
-   * @param param the parameter
-   * @return true if is.
-   */
-  protected boolean checkFuncNum(FileUploadParameter param) {
-    return param.getCkFinderFuncNum() != null;
-  }
-
-  /**
-   * return response when func num is set.
-   *
-   * @param out response.
-   * @param errorMsg error message
-   * @param path path
-   * @param param the parameter
-   * @throws IOException when IO Exception occurs.
-   */
-  protected void handleOnUploadCompleteCallFuncResponse(Writer out, String errorMsg, String path, FileUploadParameter param) throws IOException {
-    param.setCkFinderFuncNum(param.getCkFinderFuncNum().replaceAll("[^\\d]", ""));
-    String name = param.getNewFileName();
-    String uri = path + FileUtils.encodeURIComponent(name);
-    out.write("<script>//<![CDATA[\nwindow.parent.CKFinder.tools.callFunction("
-            + param.getCkFinderFuncNum() + ", '"
-            + FileUtils.escapeJavaScript(uri)
-            + "', '" + errorMsg + "')//]]></script>");
-  }
-
-  /**
-   *
-   * @param writer out put stream
-   * @param errorMsg error message
-   * @param param the parameter
-   * @throws IOException when IO Exception occurs.
-   */
-  protected void handleOnUploadCompleteResponse(Writer writer, String errorMsg, FileUploadParameter param, String path) throws IOException {
-    writer.write("<script>//<![CDATA[\nwindow.parent.OnUploadCompleted('"
-            + FileUtils.escapeJavaScript(param.getNewFileName()) + "', '"
-            + (param.getErrorCode() != null ? errorMsg : "")
-            + "')//]]></script>");
+    finish(response, path, param, errorMsg.replace("%1", param.getNewFileName()));
   }
 
   /**
@@ -361,14 +305,45 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
             Pattern.CASE_INSENSITIVE).matcher(nameWithoutExtension).matches();
   }
 
-  void setContentType(FileUploadParameter param, HttpServletResponse response) {
-    response.setContentType("text/html;charset=UTF-8");
-  }
-
   private void checkParam(FileUploadParameter param) throws ConnectorException {
     ErrorCode code = param.getErrorCode();
     if (code != null) {
       param.throwException(code);
+    }
+  }
+
+  protected void finish(HttpServletResponse response, @Nonnull String path,
+          FileUploadParameter param, String errorMsg) throws IOException {
+
+    String name = param.getNewFileName();
+    String ckFinderFuncNum = param.getCkFinderFuncNum();
+    String responseType = param.getResponseType();
+    ErrorCode errorCode = param.getErrorCode();
+
+    String contentType, result;
+
+    if ("txt".equalsIgnoreCase(responseType)) {
+      contentType = "text/plain;charset=UTF-8";
+      result = name + "|" + errorMsg;
+    } else {
+      contentType = "text/html;charset=UTF-8";
+      if (ckFinderFuncNum != null) {
+        String uri = path + FileUtils.encodeURIComponent(name);
+        result = "<script>//<![CDATA[\nwindow.parent.CKFinder.tools.callFunction("
+                + ckFinderFuncNum.replaceAll("[^\\d]", "") + ", '"
+                + FileUtils.escapeJavaScript(uri)
+                + "', '" + errorMsg + "')//]]></script>";
+      } else {
+        result = "<script>//<![CDATA[\nwindow.parent.OnUploadCompleted('"
+                + FileUtils.escapeJavaScript(name) + "', '"
+                + (errorCode != null ? errorMsg : "")
+                + "')//]]></script>";
+      }
+    }
+
+    response.setContentType(contentType);
+    try (PrintWriter writer = response.getWriter()) {
+      writer.write(result);
     }
   }
 

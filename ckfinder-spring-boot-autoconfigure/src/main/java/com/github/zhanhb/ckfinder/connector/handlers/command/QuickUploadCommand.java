@@ -15,9 +15,11 @@ import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.FileUploadParameter;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.Writer;
-import java.util.Objects;
+import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletResponse;
+import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
 import org.unbescape.json.JsonEscape;
 
@@ -27,72 +29,52 @@ import org.unbescape.json.JsonEscape;
 public class QuickUploadCommand extends FileUploadCommand {
 
   @Override
-  protected void handleOnUploadCompleteResponse(Writer writer, String errorMsg, FileUploadParameter param, String path) throws IOException {
-    if ("json".equalsIgnoreCase(param.getResponseType())) {
-      handleJSONResponse(writer, errorMsg, path, param);
-    } else {
-      ErrorCode errorCode = param.getErrorCode();
-      int errorNum = errorCode != null ? errorCode.getCode() : 0;
-      boolean success = !StringUtils.isEmpty(path);
-      writer.write("<script>//<![CDATA[\nwindow.parent.OnUploadCompleted(" + errorNum + ", '");
-      if (success) {
-        String name = param.getNewFileName();
-        String uri = path + FileUtils.encodeURIComponent(name);
-        writer.write(FileUtils.escapeJavaScript(uri) + "', '"
-                + FileUtils.escapeJavaScript(name));
-      } else {
-        writer.write("', '");
+  protected void finish(HttpServletResponse response, @Nonnull String path,
+          FileUploadParameter param, String errorMsg) throws IOException {
+    final String name = param.getNewFileName();
+    final String responseType = param.getResponseType();
+    final String ckEditorFuncNum = param.getCkEditorFuncNum();
+    final ErrorCode errorCode = param.getErrorCode();
+    final int errorNum = errorCode != null ? errorCode.getCode() : 0;
+
+    if ("json".equalsIgnoreCase(responseType)) {
+      response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
+      try (PrintWriter writer = response.getWriter()) {
+        writeJSON(writer, errorMsg, path, name, errorNum);
       }
-      writer.write("', '')//]]></script>");
-    }
-  }
-
-  @Override
-  protected void handleOnUploadCompleteCallFuncResponse(Writer writer, String errorMsg, String path, FileUploadParameter param) throws IOException {
-    if ("json".equalsIgnoreCase(param.getResponseType())) {
-      handleJSONResponse(writer, errorMsg, path, param);
-    } else {
-      param.setCkEditorFuncNum(param.getCkEditorFuncNum().replaceAll("\\D", ""));
-      writer.write("<script>//<![CDATA[\nwindow.parent.CKEDITOR.tools.callFunction("
-              + param.getCkEditorFuncNum() + ", '"
-              + FileUtils.escapeJavaScript(path + FileUtils.encodeURIComponent(param.getNewFileName()))
-              + "', '" + errorMsg + "')//]]></script>");
-    }
-  }
-
-  @Override
-  protected boolean checkFuncNum(FileUploadParameter param) {
-    return param.getCkEditorFuncNum() != null;
-  }
-
-  @Override
-  void setContentType(FileUploadParameter param, HttpServletResponse response) {
-    if ("json".equalsIgnoreCase(param.getResponseType())) {
-      response.setContentType("application/json;charset=UTF-8");
+    } else if ("txt".equalsIgnoreCase(responseType)) {
+      response.setContentType("text/plain;charset=UTF-8");
+      try (PrintWriter writer = response.getWriter()) {
+        writer.write(name + "|" + errorMsg);
+      }
     } else {
       response.setContentType("text/html;charset=UTF-8");
+      try (PrintWriter writer = response.getWriter()) {
+        if ("txt".equalsIgnoreCase(responseType)) {
+        } else if (ckEditorFuncNum != null) {
+          writer.write("<script>//<![CDATA[\nwindow.parent.CKEDITOR.tools.callFunction("
+                  + ckEditorFuncNum.replaceAll("\\D", "") + ", '"
+                  + FileUtils.escapeJavaScript(path + FileUtils.encodeURIComponent(name))
+                  + "', '" + errorMsg + "')//]]></script>");
+        } else {
+          boolean success = !StringUtils.isEmpty(path);
+          writer.write("<script>//<![CDATA[\nwindow.parent.OnUploadCompleted(" + errorNum + ", '");
+          if (success) {
+            String uri = path + FileUtils.encodeURIComponent(name);
+            writer.write(FileUtils.escapeJavaScript(uri) + "', '"
+                    + FileUtils.escapeJavaScript(name));
+          } else {
+            writer.write("', '");
+          }
+          writer.write("', '')//]]></script>");
+        }
+      }
     }
-  }
-
-  /**
-   * Writes JSON object into response stream after uploading file which was
-   * dragged and dropped in to CKEditor 4.5 or higher.
-   *
-   * @param writer the response stream
-   * @param errorMsg string representing error message which indicates that
-   * there was an error during upload or uploaded file was renamed
-   * @param path path to uploaded file
-   * @param param the parameter
-   * @throws IOException when IO Exception occurs.
-   */
-  private void handleJSONResponse(Writer writer, String errorMsg, String path,
-          FileUploadParameter param) throws IOException {
-    writeJSON(writer, errorMsg, path, param.getNewFileName(), param.getErrorCode());
   }
 
   // for test
   void writeJSON(Writer writer, String errorMsg, String path,
-          String fileName, ErrorCode error) throws IOException {
+          String fileName, int errorNum) throws IOException {
     boolean success = !StringUtils.isEmpty(path);
 
     writer.write("{\"fileName\":");
@@ -107,7 +89,7 @@ public class QuickUploadCommand extends FileUploadCommand {
     writer.write(success ? '1' : '0');
     if (!StringUtils.isEmpty(errorMsg)) {
       writer.write(",\"error\":{\"number\":");
-      writer.write(Integer.toString(error != null ? error.getCode() : 0));
+      writer.write(Integer.toString(errorNum));
       writer.write(",\"message\":\"");
       JsonEscape.escapeJsonMinimal(errorMsg, writer);
       writer.write("\"}");
