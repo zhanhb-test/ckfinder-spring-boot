@@ -55,7 +55,7 @@ public class ETagStrategy {
     this.eTagMapper = Objects.requireNonNull(eTagMapper, "eTagMapper");
   }
 
-  public String getValue(PartialContext context) {
+  public String apply(PartialContext context) {
     String result = Objects.requireNonNull(eTagMapper.apply(context));
     return prefix + "\"" + result + "\"";
   }

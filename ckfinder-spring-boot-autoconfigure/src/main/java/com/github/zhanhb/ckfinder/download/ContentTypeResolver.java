@@ -15,16 +15,19 @@
  */
 package com.github.zhanhb.ckfinder.download;
 
+import java.util.Optional;
+
 /**
  *
  * @author zhanhb
  */
-public interface ContentTypeResolver {
+public interface ContentTypeResolver extends Strategy<Optional<String>> {
 
   static ContentTypeResolver getDefault() {
-    return context -> context.getServletContext().getMimeType(context.getPath().getFileName().toString());
+    return context -> Optional.ofNullable(context.getServletContext().getMimeType(context.getPath().getFileName().toString()));
   }
 
-  String getValue(PartialContext context);
+  @Override
+  Optional<String> apply(PartialContext context);
 
 }

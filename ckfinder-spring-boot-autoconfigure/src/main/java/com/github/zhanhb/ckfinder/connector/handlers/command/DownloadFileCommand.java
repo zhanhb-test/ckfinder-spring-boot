@@ -22,6 +22,7 @@ import com.github.zhanhb.ckfinder.download.ContentTypeResolver;
 import com.github.zhanhb.ckfinder.download.PathPartial;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Optional;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -91,28 +92,15 @@ public class DownloadFileCommand extends BaseCommand<String> {
   @SuppressWarnings("UtilityClassWithoutPrivateConstructor")
   private static class PartialHolder {
 
-    static PathPartial INSTANCE;
-
-    static {
-      ContentTypeResolver contentTypeResolver = ContentTypeResolver.getDefault();
-      INSTANCE = PathPartial.builder()
-              .contentType(context -> {
-                String mimetype = contentTypeResolver.getValue(context);
-                if (mimetype == null) {
-                  return "application/octet-stream";
-                }
-                if (mimetype.startsWith("text/") || mimetype.endsWith("/javascript") || mimetype.endsWith("/xml")) {
-                  return mimetype + ";charset=UTF-8";
-                }
-                return mimetype;
-              })
-              .notFound(context -> {
-                throw new UncheckedConnectorException(ErrorCode.FILE_NOT_FOUND);
-              })
-              .contentDisposition(ContentDispositionStrategy.attachment())
-              .build();
-    }
-
+    static PathPartial INSTANCE = PathPartial.builder()
+            .contentType(context -> Optional.of(ContentTypeResolver.getDefault().apply(context).map(mt
+            -> (mt.startsWith("text/") || mt.endsWith("/javascript") || mt.endsWith("/xml"))
+            ? mt + ";charset=UTF-8" : mt).orElse("application/octet-stream")))
+            .notFound(__ -> {
+              throw new UncheckedConnectorException(ErrorCode.FILE_NOT_FOUND);
+            })
+            .contentDisposition(ContentDispositionStrategy.attachment())
+            .build();
   }
 
 }

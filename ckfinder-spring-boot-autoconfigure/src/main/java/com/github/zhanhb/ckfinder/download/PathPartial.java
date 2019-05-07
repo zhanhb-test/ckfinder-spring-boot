@@ -25,6 +25,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.StringTokenizer;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -169,12 +170,12 @@ public class PathPartial {
     // satisfied.
     // Checking If headers
     boolean included = request.getAttribute(RequestDispatcher.INCLUDE_CONTEXT_PATH) != null;
-    String etag = this.eTag.getValue(context);
+    String etag = this.eTag.apply(context);
     if (!included && !isError && !checkIfHeaders(request, response, attr, etag)) {
       return;
     }
     // Find content type.
-    String contentType = contentTypeResolver.getValue(context);
+    Optional<String> contentTypeOptional = Objects.requireNonNull(contentTypeResolver.apply(context));
     // Get content length
     long contentLength = attr.size();
     // Special case for zero length files, which would cause a
@@ -198,20 +199,19 @@ public class PathPartial {
       ostream = response.getOutputStream();
     }
 
-    String disposition = contentDisposition.getValue(context);
-    if (disposition != null) {
+    contentDisposition.apply(context).ifPresent(disposition -> {
       response.setHeader(HttpHeaders.CONTENT_DISPOSITION, disposition);
-    }
+    });
 
     // Check to see if a Filter, Valve of wrapper has written some content.
     // If it has, disable range requests and setting of a content length
     // since neither can be done reliably.
     if (isError || ranges == FULL) {
       // Set the appropriate output headers
-      if (contentType != null) {
+      contentTypeOptional.ifPresent(contentType -> {
         log.debug("serveFile: contentType='{}'", contentType);
         response.setContentType(contentType);
-      }
+      });
       if (contentLength >= 0) {
         response.setContentLengthLong(contentLength);
       }
@@ -228,10 +228,10 @@ public class PathPartial {
         response.addHeader(HttpHeaders.CONTENT_RANGE, range.toString());
         long length = range.end - range.start + 1;
         response.setContentLengthLong(length);
-        if (contentType != null) {
+        contentTypeOptional.ifPresent(contentType -> {
           log.debug("serveFile: contentType='{}'", contentType);
           response.setContentType(contentType);
-        }
+        });
         if (serveContent) {
           try (InputStream stream = Files.newInputStream(path)) {
             copyRange(stream, ostream, range, new byte[Math.min((int) length, 8192)]);
@@ -240,7 +240,7 @@ public class PathPartial {
       } else {
         response.setContentType("multipart/byteranges; boundary=" + MIME_SEPARATION);
         if (serveContent) {
-          copy(path, ostream, ranges, contentType, new byte[Math.min((int) contentLength, 8192)]);
+          copy(path, ostream, ranges, contentTypeOptional, new byte[Math.min((int) contentLength, 8192)]);
         }
       }
     }
@@ -437,7 +437,8 @@ public class PathPartial {
    * @param buffer buffer to copy the resource
    * @exception IOException if an input/output error occurs
    */
-  private void copy(Path path, ServletOutputStream ostream, Range[] ranges, String contentType, byte[] buffer)
+  private void copy(Path path, ServletOutputStream ostream, Range[] ranges,
+          Optional<String> contentTypeOptional, byte[] buffer)
           throws IOException {
     IOException exception = null;
     for (Range currentRange : ranges) {
@@ -445,8 +446,8 @@ public class PathPartial {
         // Writing MIME header.
         ostream.println();
         ostream.println("--" + MIME_SEPARATION);
-        if (contentType != null) {
-          ostream.println(HttpHeaders.CONTENT_TYPE + ": " + contentType);
+        if (contentTypeOptional.isPresent()) {
+          ostream.println(HttpHeaders.CONTENT_TYPE + ": " + contentTypeOptional.get());
         }
         ostream.println(HttpHeaders.CONTENT_RANGE + ": " + currentRange);
         ostream.println();

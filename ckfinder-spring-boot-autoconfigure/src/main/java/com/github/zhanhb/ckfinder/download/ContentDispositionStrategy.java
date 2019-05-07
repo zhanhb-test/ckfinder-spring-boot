@@ -16,8 +16,8 @@
 package com.github.zhanhb.ckfinder.download;
 
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.function.Function;
-import javax.annotation.Nullable;
 
 import static com.github.zhanhb.ckfinder.download.ContentDispositionEncoder.wrapper;
 
@@ -25,7 +25,7 @@ import static com.github.zhanhb.ckfinder.download.ContentDispositionEncoder.wrap
  *
  * @author zhanhb
  */
-public interface ContentDispositionStrategy {
+public interface ContentDispositionStrategy extends Strategy<Optional<String>> {
 
   Function<Path, String> DEFAULT_NAME_MAPPER = path -> path.getFileName().toString();
 
@@ -46,11 +46,11 @@ public interface ContentDispositionStrategy {
   }
 
   static ContentDispositionStrategy none() {
-    return __ -> null;
+    return __ -> Optional.empty();
   }
 
   // https://tools.ietf.org/html/rfc6266
-  @Nullable
-  String getValue(PartialContext context);
+  @Override
+  Optional<String> apply(PartialContext context);
 
 }
