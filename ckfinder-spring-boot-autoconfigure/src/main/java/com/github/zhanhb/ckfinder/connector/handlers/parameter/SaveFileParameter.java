@@ -7,7 +7,7 @@ import lombok.Getter;
  *
  * @author zhanhb
  */
-@Builder
+@Builder(builderClassName = "Builder")
 @Getter
 public class SaveFileParameter {
 
