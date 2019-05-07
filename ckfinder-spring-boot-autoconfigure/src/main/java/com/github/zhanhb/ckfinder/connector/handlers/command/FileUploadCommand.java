@@ -250,10 +250,6 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
     if (context.isForceAscii()) {
       newFileName = FileUtils.convertToAscii(newFileName);
     }
-    if (!newFileName.equals(fileName)) {
-      param.setErrorCode(ErrorCode.UPLOADED_INVALID_NAME_RENAMED);
-    }
-
     if (context.isDirectoryHidden(cmdContext.getCurrentFolder())) {
       param.throwException(ErrorCode.INVALID_REQUEST);
     }
@@ -268,7 +264,9 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
     if (!context.isDoubleFileExtensionsAllowed()) {
       newFileName = FileUtils.renameFileWithBadExt(resourceType, newFileName);
     }
-
+    if (!newFileName.equals(fileName)) {
+      param.setErrorCode(ErrorCode.UPLOADED_INVALID_NAME_RENAMED);
+    }
     param.setNewFileName(newFileName);
     Path file = cmdContext.resolve(getFinalFileName(cmdContext, param));
     if ((!ImageUtils.isImageExtension(file) || !context.isCheckSizeAfterScaling())
