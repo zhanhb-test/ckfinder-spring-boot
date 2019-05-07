@@ -11,7 +11,6 @@
  */
 package com.github.zhanhb.ckfinder.connector.utils;
 
-import java.util.regex.Pattern;
 import lombok.experimental.UtilityClass;
 import org.springframework.util.StringUtils;
 
@@ -76,24 +75,17 @@ public class PathUtils {
 
   /**
    * Adds slash character at the start of String provided as parameter. The
-   * slash character will not be added if parameter is ULR or starts with slash.
+   * slash character will not be added if parameter is a URL or starts with slash.
    *
    * @param string string to add slash character to
    * @return String with slash character at the beginning, {@code null} or full
    * URL.
    */
   public String addSlashToBegin(String string) {
-    if (string == null || string.startsWith("/")
-            || UrlPatternHolder.URL_PATTERN.matcher(string).matches()) {
+    if (string == null || string.startsWith("/") || string.contains("://")) {
       return string;
     }
     return "/".concat(string);
-  }
-
-  private interface UrlPatternHolder {
-
-    Pattern URL_PATTERN = Pattern.compile("^(https?)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]$");
-
   }
 
 }
