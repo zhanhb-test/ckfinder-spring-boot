@@ -110,7 +110,7 @@ public class RenameFileCommand extends FailAtEndXmlCommand<RenameFileParameter> 
       Files.move(file, newFile);
       param.setRenamed(true);
       renameThumb(param, cmdContext);
-      return null;
+      return builder.build();
     } catch (NoSuchFileException ex) {
       return builder.errorCode(ErrorCode.FILE_NOT_FOUND).build();
     } catch (FileAlreadyExistsException ex) {
