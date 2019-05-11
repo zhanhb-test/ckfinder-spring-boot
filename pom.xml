@@ -40,6 +40,7 @@
   </developers>
 
   <modules>
+    <module>ckfinder-connector</module>
     <module>ckfinder-spring-boot-autoconfigure</module>
     <module>ckfinder-spring-boot-starter</module>
     <module>ckfinder-webjars</module>

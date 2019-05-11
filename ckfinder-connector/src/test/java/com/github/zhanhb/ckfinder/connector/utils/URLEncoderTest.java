@@ -1,6 +1,5 @@
 package com.github.zhanhb.ckfinder.connector.utils;
 
-import com.google.common.base.Strings;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -23,7 +22,7 @@ public class URLEncoderTest {
     assertEquals(expect + expect, encoder.encode(str + str));
     assertEquals(expect + expect + 1, encoder.encode(str + str + 1));
 
-    str = Strings.repeat(str, 13);
+    str = str + str + str + str + str;
     assertNotEquals(new URLEncoder("").encode(str), encoder.encode(str));
 
     str = "abc,,,123456";
