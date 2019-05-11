@@ -598,7 +598,8 @@ public enum XmlConfigurationParser {
     plugins.forEach(plugin -> plugin.register(registry));
     builder.events(registry.buildEventHandler()).
             commandFactory(registry.buildCommandFactory())
-            .publicPluginNames(registry.getPluginNames());
+            .publicPluginNames(registry.getPluginNames())
+            .pluginInfos(registry.getPluginInfos());
   }
 
   private WatermarkSettings parseWatermarkSettings(PluginParam pluginParam, ResourceLoader resourceLoader) {

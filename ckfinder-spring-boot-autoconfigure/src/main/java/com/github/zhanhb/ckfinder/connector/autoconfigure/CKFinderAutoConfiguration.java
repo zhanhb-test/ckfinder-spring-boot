@@ -181,6 +181,7 @@ public class CKFinderAutoConfiguration {
       return builder.events(registry.buildEventHandler()).
               commandFactory(registry.buildCommandFactory())
               .publicPluginNames(registry.getPluginNames())
+              .pluginInfos(registry.getPluginInfos())
               .build();
     }
 

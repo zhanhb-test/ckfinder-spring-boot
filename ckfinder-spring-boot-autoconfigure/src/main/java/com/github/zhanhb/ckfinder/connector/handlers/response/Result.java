@@ -11,7 +11,7 @@ import javax.xml.bind.annotation.XmlSeeAlso;
   ImageInfo.class,
   MoveFiles.class,
   NewFolder.class,
-  PluginsInfos.class,
+  PluginInfos.class,
   RenamedFile.class,
   RenamedFolder.class,
   ResourceTypes.class

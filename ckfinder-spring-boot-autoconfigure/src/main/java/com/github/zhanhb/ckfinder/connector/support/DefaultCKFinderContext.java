@@ -17,6 +17,7 @@ import com.github.zhanhb.ckfinder.connector.api.CommandFactory;
 import com.github.zhanhb.ckfinder.connector.api.EventHandler;
 import com.github.zhanhb.ckfinder.connector.api.ImageProperties;
 import com.github.zhanhb.ckfinder.connector.api.LicenseFactory;
+import com.github.zhanhb.ckfinder.connector.api.PluginInfo;
 import com.github.zhanhb.ckfinder.connector.api.ResourceType;
 import com.github.zhanhb.ckfinder.connector.api.ThumbnailProperties;
 import com.github.zhanhb.ckfinder.connector.utils.PathUtils;
@@ -69,6 +70,8 @@ public class DefaultCKFinderContext implements CKFinderContext {
   @Delegate
   @NonNull
   private EventHandler events;
+  @Singular
+  private List<PluginInfo> pluginInfos;
   @Delegate
   @NonNull
   private AccessControl accessControl;

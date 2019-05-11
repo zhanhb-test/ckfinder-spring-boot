@@ -14,8 +14,6 @@ package com.github.zhanhb.ckfinder.connector.support;
 import com.github.zhanhb.ckfinder.connector.api.EventHandler;
 import com.github.zhanhb.ckfinder.connector.api.FileUploadEvent;
 import com.github.zhanhb.ckfinder.connector.api.FileUploadListener;
-import com.github.zhanhb.ckfinder.connector.api.InitPluginInfo;
-import com.github.zhanhb.ckfinder.connector.api.PluginInfoRegister;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 
@@ -26,11 +24,9 @@ import lombok.extern.slf4j.Slf4j;
 class DefaultEventHandler implements EventHandler {
 
   private final List<FileUploadListener> fileUploadListeners;
-  private final List<PluginInfoRegister> pluginInfoRegisters;
 
-  DefaultEventHandler(List<FileUploadListener> fileUploadListeners, List<PluginInfoRegister> pluginInfoRegisters) {
+  DefaultEventHandler(List<FileUploadListener> fileUploadListeners) {
     this.fileUploadListeners = fileUploadListeners;
-    this.pluginInfoRegisters = pluginInfoRegisters;
   }
 
   @Override
@@ -38,14 +34,6 @@ class DefaultEventHandler implements EventHandler {
     log.trace("{}", fileUploadListeners);
     for (FileUploadListener listener : fileUploadListeners) {
       listener.onFileUploadComplete(event);
-    }
-  }
-
-  @Override
-  public void fireOnInitCommand(InitPluginInfo info) {
-    log.trace("{}", pluginInfoRegisters);
-    for (PluginInfoRegister pluginInfoRegister : pluginInfoRegisters) {
-      pluginInfoRegister.addPluginDataTo(info);
     }
   }
 

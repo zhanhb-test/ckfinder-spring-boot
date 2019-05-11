@@ -13,7 +13,9 @@ package com.github.zhanhb.ckfinder.connector.plugins;
 
 import com.github.zhanhb.ckfinder.connector.api.Plugin;
 import com.github.zhanhb.ckfinder.connector.api.PluginRegistry;
+import com.github.zhanhb.ckfinder.connector.handlers.response.ImageResizeInfo;
 import java.util.Map;
+import javax.xml.namespace.QName;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -23,8 +25,15 @@ public class ImageResize implements Plugin {
 
   @Override
   public void register(PluginRegistry registry) {
-    registry.addName("imageresize")
-            .addPluginInfoRegister(new ImageResizeRegister(params))
+    String name = "imageresize";
+    ImageResizeInfo.Builder builder = ImageResizeInfo.builder().name(name);
+    for (Map.Entry<ImageResizeParam, ImageResizeSize> entry : params.entrySet()) {
+      QName key = QName.valueOf(entry.getKey().getXmlKey());
+      String value = entry.getValue().toString();
+      builder.attribute(key, value);
+    }
+    registry.addName(name)
+            .addPluginInfo(builder.build())
             .registerCommands(new ImageResizeCommand(params),
                     new ImageResizeInfoCommand());
   }

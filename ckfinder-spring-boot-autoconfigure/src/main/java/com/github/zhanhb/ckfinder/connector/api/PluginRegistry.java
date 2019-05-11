@@ -10,7 +10,7 @@ public interface PluginRegistry {
 
   PluginRegistry addFileUploadListener(FileUploadListener fileUploadListener) ;
 
-  PluginRegistry addPluginInfoRegister(PluginInfoRegister pluginInfoRegister) ;
+  PluginRegistry addPluginInfo(PluginInfo pluginInfo) ;
 
   PluginRegistry addName(String name);
 

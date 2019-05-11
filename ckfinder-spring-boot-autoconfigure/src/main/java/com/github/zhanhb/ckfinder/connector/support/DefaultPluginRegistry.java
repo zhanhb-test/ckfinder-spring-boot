@@ -4,9 +4,10 @@ import com.github.zhanhb.ckfinder.connector.api.Command;
 import com.github.zhanhb.ckfinder.connector.api.CommandFactory;
 import com.github.zhanhb.ckfinder.connector.api.EventHandler;
 import com.github.zhanhb.ckfinder.connector.api.FileUploadListener;
-import com.github.zhanhb.ckfinder.connector.api.PluginInfoRegister;
+import com.github.zhanhb.ckfinder.connector.api.PluginInfo;
 import com.github.zhanhb.ckfinder.connector.api.PluginRegistry;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -23,7 +24,7 @@ public class DefaultPluginRegistry implements PluginRegistry {
   }
 
   private final List<FileUploadListener> fileUploadListeners = new ArrayList<>(4);
-  private final List<PluginInfoRegister> pluginInfoRegisters = new ArrayList<>(4);
+  private final List<PluginInfo> pluginInfos = new ArrayList<>(4);
   private final Set<String> names = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
   private final CommandFactoryBuilder commandFactory = new CommandFactoryBuilder().enableDefaultCommands();
 
@@ -38,9 +39,9 @@ public class DefaultPluginRegistry implements PluginRegistry {
   }
 
   @Override
-  public DefaultPluginRegistry addPluginInfoRegister(PluginInfoRegister pluginInfoRegister) {
-    Objects.requireNonNull(pluginInfoRegister);
-    pluginInfoRegisters.add(pluginInfoRegister);
+  public PluginRegistry addPluginInfo(PluginInfo pluginInfo) {
+    Objects.requireNonNull(pluginInfo);
+    pluginInfos.add(pluginInfo);
     return this;
   }
 
@@ -66,7 +67,19 @@ public class DefaultPluginRegistry implements PluginRegistry {
   }
 
   public EventHandler buildEventHandler() {
-    return new DefaultEventHandler(new ArrayList<>(fileUploadListeners), new ArrayList<>(pluginInfoRegisters));
+    return new DefaultEventHandler(new ArrayList<>(fileUploadListeners));
+  }
+
+  public List<PluginInfo> getPluginInfos() {
+    List<PluginInfo> pi = pluginInfos;
+    switch (pi.size()) {
+      case 0:
+        return Collections.emptyList();
+      case 1:
+        return Collections.singletonList(pi.get(0));
+      default:
+        return Collections.unmodifiableList(new ArrayList<>(pi));
+    }
   }
 
   public String getPluginNames() {

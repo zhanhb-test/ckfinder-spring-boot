@@ -13,13 +13,13 @@ package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.api.AccessControl;
 import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
-import com.github.zhanhb.ckfinder.connector.api.InitPluginInfo;
 import com.github.zhanhb.ckfinder.connector.api.License;
+import com.github.zhanhb.ckfinder.connector.api.PluginInfo;
 import com.github.zhanhb.ckfinder.connector.api.ResourceType;
 import com.github.zhanhb.ckfinder.connector.api.ThumbnailProperties;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.ConnectorInfo;
-import com.github.zhanhb.ckfinder.connector.handlers.response.PluginsInfos;
+import com.github.zhanhb.ckfinder.connector.handlers.response.PluginInfos;
 import com.github.zhanhb.ckfinder.connector.handlers.response.ResourceTypes;
 import com.github.zhanhb.ckfinder.connector.support.CommandContext;
 import com.github.zhanhb.ckfinder.connector.support.KeyGenerator;
@@ -141,11 +141,13 @@ public class InitCommand extends XmlCommand<String> {
    * @param context ckfinder context
    */
   private void createPluginsData(Connector.Builder rootElement, CKFinderContext context) {
-    InitPluginInfo data = new InitPluginInfo();
-    context.fireOnInitCommand(data);
-    PluginsInfos pluginsInfos = data.build();
-    if (pluginsInfos != null) {
-      rootElement.result(pluginsInfos);
+    Collection<PluginInfo> pluginInfos = context.getPluginInfos();
+    if (pluginInfos != null && !pluginInfos.isEmpty()) {
+      PluginInfos.Builder builder = PluginInfos.builder();
+      for (PluginInfo pluginInfo : pluginInfos) {
+        builder.add(pluginInfo.getName(), pluginInfo.getAttributes());
+      }
+      rootElement.result(builder.build());
     }
   }
 

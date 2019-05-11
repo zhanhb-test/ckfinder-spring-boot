@@ -143,4 +143,10 @@ public interface CKFinderContext extends CommandFactory, EventHandler, LicenseFa
    */
   AccessControl getAccessControl();
 
+  /**
+   *
+   * @return the plugin infos
+   */
+  Collection<PluginInfo> getPluginInfos();
+
 }
