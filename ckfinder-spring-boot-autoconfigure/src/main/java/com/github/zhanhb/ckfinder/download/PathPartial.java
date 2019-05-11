@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.OptionalInt;
 import java.util.StringTokenizer;
+import java.util.concurrent.ThreadLocalRandom;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.servlet.RequestDispatcher;
@@ -48,11 +49,6 @@ public class PathPartial {
   private static final Range[] FULL = {};
 
   // ----------------------------------------------------- Static Initializer
-  /**
-   * MIME multipart separation string
-   */
-  private static final String MIME_SEPARATION = "PATH_PARTIAL_MIME_BOUNDARY";
-
   public static PathPartialBuilder builder() {
     return new PathPartialBuilder();
   }
@@ -242,9 +238,10 @@ public class PathPartial {
           }
         }
       } else {
-        response.setContentType("multipart/byteranges; boundary=" + MIME_SEPARATION);
+        int boundary = ThreadLocalRandom.current().nextInt(1 << 24);
+        response.setContentType("multipart/byteranges; boundary=" + boundary + "muA");
         if (serveContent) {
-          copy(path, ostream, ranges, contentType, new byte[Math.min((int) contentLength, 8192)]);
+          copy(path, ostream, ranges, contentType, new byte[Math.min((int) contentLength, 8192)], boundary);
         }
       }
     }
@@ -443,17 +440,18 @@ public class PathPartial {
    * @param ranges Enumeration of the ranges the client wanted to retrieve
    * @param contentType Content type of the resource
    * @param buffer buffer to copy the resource
+   * @param boundary boundary string
    * @exception IOException if an input/output error occurs
    */
   private void copy(Path path, ServletOutputStream ostream, Range[] ranges,
-          String contentType, byte[] buffer)
+          String contentType, byte[] buffer, int boundary)
           throws IOException {
     IOException exception = null;
     for (Range currentRange : ranges) {
       try (InputStream stream = Files.newInputStream(path)) {
         // Writing MIME header.
         ostream.println();
-        ostream.println("--" + MIME_SEPARATION);
+        ostream.println("--" + boundary + "muA");
         if (contentType != null) {
           ostream.println(HttpHeaders.CONTENT_TYPE + ": " + contentType);
         }
@@ -470,7 +468,7 @@ public class PathPartial {
       }
     }
     ostream.println();
-    ostream.print("--" + MIME_SEPARATION + "--");
+    ostream.print("--" + boundary + "muA--");
     if (exception != null) {
       throw exception;
     }
