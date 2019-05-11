@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.springframework.http.MediaType;
 
 /**
  * Base class to handle XML commands.
@@ -39,7 +40,8 @@ public abstract class XmlCommand<T> extends BaseCommand<T> {
     Connector connector = buildConnector(param, cmdContext);
     String result = XmlCreator.INSTANCE.toString(connector);
 
-    response.setContentType("text/xml;charset=UTF-8");
+    response.setContentType(MediaType.APPLICATION_XML_VALUE);
+    response.setCharacterEncoding("utf-8");
     response.setHeader("Cache-Control", "no-cache");
     try (PrintWriter out = response.getWriter()) {
       out.write(result);

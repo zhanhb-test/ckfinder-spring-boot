@@ -24,6 +24,7 @@ import java.io.PrintWriter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
 
 /**
@@ -62,8 +63,8 @@ public enum XmlExceptionHandler implements ExceptionHandler {
             .value(connectorException.getMessage()).build());
     String result = XmlCreator.INSTANCE.toString(connector.build());
 
-    response.setContentType("text/xml");
-    response.setCharacterEncoding("UTF-8");
+    response.setContentType(MediaType.APPLICATION_XML_VALUE);
+    response.setCharacterEncoding("utf-8");
     response.setHeader("Cache-Control", "no-cache");
     try (PrintWriter out = response.getWriter()) {
       out.write(result);
