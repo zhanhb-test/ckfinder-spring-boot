@@ -49,14 +49,14 @@ public class FileUploadParameter {
     this.newFileName = "";
   }
 
-  public void throwException(ErrorCode code) throws ConnectorException {
+  public ConnectorException toException(ErrorCode code) {
     String msg = MessageUtil.INSTANCE.getMessage(getLangCode(), code.getCode());
-    throw new ConnectorException(code, msg);
+    return new ConnectorException(code, msg);
   }
 
-  public void throwException(String message) throws ConnectorException {
+  public ConnectorException toException(String message) {
     Objects.requireNonNull(message);
-    throw new ConnectorException(ErrorCode.CUSTOM_ERROR, message);
+    return new ConnectorException(ErrorCode.CUSTOM_ERROR, message);
   }
 
 }

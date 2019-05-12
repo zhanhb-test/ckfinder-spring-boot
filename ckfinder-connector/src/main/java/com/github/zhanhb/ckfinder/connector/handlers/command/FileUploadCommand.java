@@ -152,13 +152,13 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
           multipartResolver.cleanupMultipart(resolveMultipart);
         }
       }
-      param.throwException("No file provided in the request.");
+      throw param.toException("No file provided in the request.");
     } catch (MultipartException e) {
       log.debug("catch MultipartException", e);
-      param.throwException(ErrorCode.UPLOADED_TOO_BIG);
+      throw param.toException(ErrorCode.UPLOADED_TOO_BIG);
     } catch (IOException e) {
       log.debug("catch IOException", e);
-      param.throwException(ErrorCode.ACCESS_DENIED);
+      throw param.toException(ErrorCode.ACCESS_DENIED);
     }
   }
 
@@ -181,12 +181,12 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
 
     if (ImageUtils.isImageExtension(file)) {
       if (!csas && !ImageUtils.isImageSizeInRange(item, context.getImage())) {
-        param.throwException(ErrorCode.UPLOADED_TOO_BIG);
+        throw param.toException(ErrorCode.UPLOADED_TOO_BIG);
       }
       ImageUtils.createTmpThumb(item, file, context);
       if (csas && cmdContext.getType().isFileSizeOutOfRange(Files.size(file))) {
         Files.deleteIfExists(file);
-        param.throwException(ErrorCode.UPLOADED_TOO_BIG);
+        throw param.toException(ErrorCode.UPLOADED_TOO_BIG);
       }
     } else {
       try (InputStream in = item.getInputStream()) {
@@ -240,7 +240,7 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
           FileUploadParameter param, CommandContext cmdContext) throws ConnectorException {
     CKFinderContext context = cmdContext.getCfCtx();
     if (StringUtils.isEmpty(item.getOriginalFilename())) {
-      param.throwException(ErrorCode.UPLOADED_INVALID);
+      throw param.toException(ErrorCode.UPLOADED_INVALID);
     }
 
     String fileName = param.getFileName();
@@ -252,15 +252,15 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
       newFileName = FileUtils.convertToAscii(newFileName);
     }
     if (context.isDirectoryHidden(cmdContext.getCurrentFolder())) {
-      param.throwException(ErrorCode.INVALID_REQUEST);
+      throw param.toException(ErrorCode.INVALID_REQUEST);
     }
     if (!FileUtils.isFileNameValid(newFileName)
             || context.isFileHidden(newFileName)) {
-      param.throwException(ErrorCode.INVALID_NAME);
+      throw param.toException(ErrorCode.INVALID_NAME);
     }
     final ResourceType resourceType = cmdContext.getType();
     if (!FileUtils.isFileExtensionAllowed(newFileName, resourceType)) {
-      param.throwException(ErrorCode.INVALID_EXTENSION);
+      throw param.toException(ErrorCode.INVALID_EXTENSION);
     }
     if (!context.isDoubleFileExtensionsAllowed()) {
       newFileName = FileUtils.renameFileWithBadExt(resourceType, newFileName);
@@ -272,12 +272,12 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
     Path file = cmdContext.resolve(getFinalFileName(cmdContext, param));
     if ((!ImageUtils.isImageExtension(file) || !context.isCheckSizeAfterScaling())
             && resourceType.isFileSizeOutOfRange(item.getSize())) {
-      param.throwException(ErrorCode.UPLOADED_TOO_BIG);
+      throw param.toException(ErrorCode.UPLOADED_TOO_BIG);
     }
 
     if (context.isSecureImageUploads() && ImageUtils.isImageExtension(file)
             && !ImageUtils.isValid(item)) {
-      param.throwException(ErrorCode.UPLOADED_CORRUPT);
+      throw param.toException(ErrorCode.UPLOADED_CORRUPT);
     }
   }
 
@@ -307,7 +307,7 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
   private void checkParam(FileUploadParameter param) throws ConnectorException {
     ErrorCode code = param.getErrorCode();
     if (code != null) {
-      param.throwException(code);
+      throw param.toException(code);
     }
   }
 
