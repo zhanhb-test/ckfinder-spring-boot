@@ -11,21 +11,19 @@ import lombok.NoArgsConstructor;
 
 /**
  *
- * @see com.github.zhanhb.ckfinder.connector.handlers.command.XmlCommand
+ * @see com.github.zhanhb.ckfinder.connector.handlers.command.CopyFilesCommand
  * @author zhanhb
  */
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
 @Builder(builderClassName = "Builder")
 @NoArgsConstructor
 @XmlAccessorType(XmlAccessType.NONE)
-@XmlRootElement(name = "CurrentFolder")
-public class CurrentFolder implements ConnectorElement {
+@XmlRootElement(name = "CopyFiles")
+public class CopyFilesElement extends Result implements ConnectorChild {
 
-  @XmlAttribute(name = "path")
-  private String path;
-  @XmlAttribute(name = "url")
-  private String url;
-  @XmlAttribute(name = "acl")
-  private int acl;
+  @XmlAttribute(name = "copied")
+  private int copied;
+  @XmlAttribute(name = "copiedTotal")
+  private int copiedTotal;
 
 }

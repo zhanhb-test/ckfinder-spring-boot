@@ -13,7 +13,7 @@ package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
-import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
+import com.github.zhanhb.ckfinder.connector.handlers.response.ConnectorElement;
 import com.github.zhanhb.ckfinder.connector.support.CommandContext;
 import com.github.zhanhb.ckfinder.connector.support.ErrorListResult;
 
@@ -26,9 +26,9 @@ public abstract class FailAtEndXmlCommand<T> extends XmlCommand<T> {
 
   @Override
   @SuppressWarnings("FinalMethod")
-  final Connector buildConnector(T param, CommandContext cmdContext)
+  final ConnectorElement buildConnector(T param, CommandContext cmdContext)
           throws ConnectorException {
-    Connector.Builder connector = Connector.builder();
+    ConnectorElement.Builder connector = ConnectorElement.builder();
     cmdContext.setResourceType(connector);
     ErrorListResult result = applyData(param, cmdContext);
     ErrorCode error = result.getErrorCode();
@@ -48,7 +48,7 @@ public abstract class FailAtEndXmlCommand<T> extends XmlCommand<T> {
    * @param rootElement XML root node
    * @param param the parameter
    */
-  protected abstract void addResultNode(Connector.Builder rootElement, T param);
+  protected abstract void addResultNode(ConnectorElement.Builder rootElement, T param);
 
   /**
    * gets all necessary data to create XML response.

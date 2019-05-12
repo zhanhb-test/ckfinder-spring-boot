@@ -1,9 +1,9 @@
 package com.github.zhanhb.ckfinder.connector.support;
 
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
-import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
-import com.github.zhanhb.ckfinder.connector.handlers.response.DetailError;
-import com.github.zhanhb.ckfinder.connector.handlers.response.Errors;
+import com.github.zhanhb.ckfinder.connector.handlers.response.ConnectorElement;
+import com.github.zhanhb.ckfinder.connector.handlers.response.ErrorElement;
+import com.github.zhanhb.ckfinder.connector.handlers.response.ErrorsElement;
 import java.util.List;
 import lombok.Builder;
 import lombok.Singular;
@@ -23,7 +23,7 @@ public class ErrorListResult {
    * errors list.
    */
   @Singular
-  private List<DetailError> errors;
+  private List<ErrorElement> errors;
   private boolean addResultNode;
   private ErrorCode errorCode;
 
@@ -32,9 +32,9 @@ public class ErrorListResult {
    *
    * @param rootElement XML root element
    */
-  public void addErrorsTo(Connector.Builder rootElement) {
+  public void addErrorsTo(ConnectorElement.Builder rootElement) {
     if (!errors.isEmpty()) {
-      rootElement.errors(Errors.builder().errors(errors).build());
+      rootElement.errors(ErrorsElement.builder().errors(errors).build());
     }
   }
 
@@ -53,7 +53,7 @@ public class ErrorListResult {
       String name = fileItem.getName();
       String folder = fileItem.getFolder();
       String type = fileItem.getType().getName();
-      return error(DetailError.builder().type(type).name(name).folder(folder).code(code).build());
+      return error(ErrorElement.builder().type(type).name(name).folder(folder).code(code).build());
     }
 
     /**

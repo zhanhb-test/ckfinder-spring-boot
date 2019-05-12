@@ -15,8 +15,8 @@ import com.github.zhanhb.ckfinder.connector.api.AccessControl;
 import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
-import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
-import com.github.zhanhb.ckfinder.connector.handlers.response.RenamedFolder;
+import com.github.zhanhb.ckfinder.connector.handlers.response.ConnectorElement;
+import com.github.zhanhb.ckfinder.connector.handlers.response.RenamedFolderElement;
 import com.github.zhanhb.ckfinder.connector.support.CommandContext;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import com.github.zhanhb.ckfinder.connector.utils.PathUtils;
@@ -41,7 +41,7 @@ public class RenameFolderCommand extends FinishOnErrorXmlCommand<String> impleme
    */
   @Override
   @SuppressWarnings("AssignmentToMethodParameter")
-  protected void createXml(Connector.Builder rootElement, String newFolderName, CommandContext cmdContext) throws ConnectorException {
+  protected void createXml(ConnectorElement.Builder rootElement, String newFolderName, CommandContext cmdContext) throws ConnectorException {
     checkRequestPath(newFolderName);
     CKFinderContext context = cmdContext.getCfCtx();
     cmdContext.checkType();
@@ -75,7 +75,7 @@ public class RenameFolderCommand extends FinishOnErrorXmlCommand<String> impleme
     } catch (IOException ex) {
       cmdContext.throwException(ErrorCode.ACCESS_DENIED);
     }
-    rootElement.result(RenamedFolder.builder()
+    rootElement.result(RenamedFolderElement.builder()
             .newName(newFolderName)
             .newPath(newFolderPath)
             .newUrl(cmdContext.getType().getUrl() + newFolderPath)

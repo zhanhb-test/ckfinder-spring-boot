@@ -11,19 +11,19 @@ import lombok.NoArgsConstructor;
 
 /**
  *
- * @see com.github.zhanhb.ckfinder.connector.handlers.command.MoveFilesCommand
+ * @see com.github.zhanhb.ckfinder.connector.plugins.ImageResizeInfoCommand
  * @author zhanhb
  */
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
 @Builder(builderClassName = "Builder")
 @NoArgsConstructor
 @XmlAccessorType(XmlAccessType.NONE)
-@XmlRootElement(name = "MoveFiles")
-public class MoveFiles extends Result implements ConnectorElement {
+@XmlRootElement(name = "ImageInfo")
+public class ImageInfoElement extends Result implements ConnectorChild {
 
-  @XmlAttribute(name = "moved")
-  private int moved;
-  @XmlAttribute(name = "movedTotal")
-  private int movedTotal;
+  @XmlAttribute(name = "width")
+  private int width;
+  @XmlAttribute(name = "height")
+  private int height;
 
 }

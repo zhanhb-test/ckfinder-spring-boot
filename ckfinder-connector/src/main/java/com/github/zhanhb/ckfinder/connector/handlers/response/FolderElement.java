@@ -4,7 +4,6 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlValue;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,20 +11,21 @@ import lombok.NoArgsConstructor;
 
 /**
  *
- * @see com.github.zhanhb.ckfinder.connector.support.XmlCreator
+ * @see com.github.zhanhb.ckfinder.connector.handlers.command.GetFoldersCommand
  * @author zhanhb
  */
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
 @Builder(builderClassName = "Builder")
 @NoArgsConstructor
 @XmlAccessorType(XmlAccessType.NONE)
-@XmlRootElement(name = "Error")
-public class Error implements ConnectorElement {
+@XmlRootElement(name = "Folder")
+public class FolderElement {
 
-  @XmlValue
-  private String value;
-
-  @XmlAttribute(name = "number")
-  private int number;
+  @XmlAttribute(name = "name", required = true)
+  private String name;
+  @XmlAttribute(name = "hasChildren")
+  private boolean hasChildren;
+  @XmlAttribute(name = "acl")
+  private int acl;
 
 }

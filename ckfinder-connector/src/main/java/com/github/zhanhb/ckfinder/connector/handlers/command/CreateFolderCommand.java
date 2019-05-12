@@ -15,8 +15,8 @@ import com.github.zhanhb.ckfinder.connector.api.AccessControl;
 import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
-import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
-import com.github.zhanhb.ckfinder.connector.handlers.response.NewFolder;
+import com.github.zhanhb.ckfinder.connector.handlers.response.ConnectorElement;
+import com.github.zhanhb.ckfinder.connector.handlers.response.NewFolderElement;
 import com.github.zhanhb.ckfinder.connector.support.CommandContext;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import java.io.IOException;
@@ -40,7 +40,7 @@ public class CreateFolderCommand extends FinishOnErrorXmlCommand<String> impleme
    */
   @Override
   @SuppressWarnings("AssignmentToMethodParameter")
-  protected void createXml(Connector.Builder rootElement, String newFolderName, CommandContext cmdContext) throws ConnectorException {
+  protected void createXml(ConnectorElement.Builder rootElement, String newFolderName, CommandContext cmdContext) throws ConnectorException {
     checkRequestPath(newFolderName);
 
     CKFinderContext context = cmdContext.getCfCtx();
@@ -71,7 +71,7 @@ public class CreateFolderCommand extends FinishOnErrorXmlCommand<String> impleme
       cmdContext.throwException(ErrorCode.UNAUTHORIZED);
     }
 
-    rootElement.result(NewFolder.builder().name(newFolderName).build());
+    rootElement.result(NewFolderElement.builder().name(newFolderName).build());
   }
 
   @Override

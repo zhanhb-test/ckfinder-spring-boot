@@ -4,7 +4,7 @@ import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.api.ResourceType;
-import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
+import com.github.zhanhb.ckfinder.connector.handlers.response.ConnectorElement;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -46,7 +46,7 @@ public class CommandContext {
     this.type = type;
   }
 
-  public void setResourceType(Connector.Builder builder) {
+  public void setResourceType(ConnectorElement.Builder builder) {
     if (type != null) {
       builder.resourceType(type.getName());
     }

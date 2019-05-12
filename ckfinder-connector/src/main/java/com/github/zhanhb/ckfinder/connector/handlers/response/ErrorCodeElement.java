@@ -4,6 +4,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlValue;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,23 +12,20 @@ import lombok.NoArgsConstructor;
 
 /**
  *
- * @see com.github.zhanhb.ckfinder.connector.handlers.command.GetFilesCommand
+ * @see com.github.zhanhb.ckfinder.connector.support.XmlCreator
  * @author zhanhb
  */
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
 @Builder(builderClassName = "Builder")
 @NoArgsConstructor
 @XmlAccessorType(XmlAccessType.NONE)
-@XmlRootElement(name = "File")
-public class File {
+@XmlRootElement(name = "Error")
+public class ErrorCodeElement implements ConnectorChild {
 
-  @XmlAttribute(name = "name", required = true)
-  private String name;
-  @XmlAttribute(name = "date", required = true)
-  private String date;
-  @XmlAttribute(name = "size", required = true)
-  private long size;
-  @XmlAttribute(name = "thumb")
-  private String thumb;
+  @XmlValue
+  private String value;
+
+  @XmlAttribute(name = "number")
+  private int number;
 
 }

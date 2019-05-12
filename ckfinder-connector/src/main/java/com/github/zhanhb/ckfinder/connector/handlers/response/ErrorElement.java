@@ -11,18 +11,22 @@ import lombok.NoArgsConstructor;
 
 /**
  *
- * @see
- * com.github.zhanhb.ckfinder.connector.handlers.command.CreateFolderCommand
  * @author zhanhb
  */
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
 @Builder(builderClassName = "Builder")
 @NoArgsConstructor
 @XmlAccessorType(XmlAccessType.NONE)
-@XmlRootElement(name = "NewFolder")
-public class NewFolder extends Result implements ConnectorElement {
+@XmlRootElement(name = "Error")
+public class ErrorElement {
 
+  @XmlAttribute(name = "code")
+  private int code;
   @XmlAttribute(name = "name")
   private String name;
+  @XmlAttribute(name = "type")
+  private String type;
+  @XmlAttribute(name = "folder")
+  private String folder;
 
 }

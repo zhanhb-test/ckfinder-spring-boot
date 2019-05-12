@@ -2,9 +2,9 @@ package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
-import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
-import com.github.zhanhb.ckfinder.connector.handlers.response.CurrentFolder;
-import com.github.zhanhb.ckfinder.connector.handlers.response.Error;
+import com.github.zhanhb.ckfinder.connector.handlers.response.ConnectorElement;
+import com.github.zhanhb.ckfinder.connector.handlers.response.CurrentFolderElement;
+import com.github.zhanhb.ckfinder.connector.handlers.response.ErrorCodeElement;
 import com.github.zhanhb.ckfinder.connector.support.CommandContext;
 import com.github.zhanhb.ckfinder.connector.support.XmlCreator;
 import java.io.IOException;
@@ -37,8 +37,8 @@ public abstract class XmlCommand<T> extends BaseCommand<T> {
   final void execute(T param, HttpServletRequest request, HttpServletResponse response,
           CKFinderContext context) throws IOException, ConnectorException {
     CommandContext cmdContext = populateCommandContext(request, context);
-    Connector connector = buildConnector(param, cmdContext);
-    String result = XmlCreator.INSTANCE.toString(connector);
+    ConnectorElement connectorElement = buildConnector(param, cmdContext);
+    String result = XmlCreator.INSTANCE.toString(connectorElement);
 
     response.setContentType(MediaType.APPLICATION_XML_VALUE);
     response.setCharacterEncoding("utf-8");
@@ -48,22 +48,22 @@ public abstract class XmlCommand<T> extends BaseCommand<T> {
     }
   }
 
-  abstract Connector buildConnector(T param, CommandContext cmdContext)
+  abstract ConnectorElement buildConnector(T param, CommandContext cmdContext)
           throws ConnectorException;
 
-  final void createErrorNode(Connector.Builder rootElement, int code) {
-    rootElement.error(Error.builder().number(code).build());
+  final void createErrorNode(ConnectorElement.Builder rootElement, int code) {
+    rootElement.error(ErrorCodeElement.builder().number(code).build());
   }
 
   /**
-   * creates <code>CurrentFolder</code> element.
+   * creates <code>CurrentFolderElement</code>.
    *
    * @param cmdContext command context
    * @param rootElement XML root node.
    */
-  final void createCurrentFolderNode(CommandContext cmdContext, Connector.Builder rootElement) {
+  final void createCurrentFolderNode(CommandContext cmdContext, ConnectorElement.Builder rootElement) {
     if (cmdContext.getType() != null && cmdContext.getCurrentFolder() != null) {
-      rootElement.currentFolder(CurrentFolder.builder()
+      rootElement.currentFolder(CurrentFolderElement.builder()
               .path(cmdContext.getCurrentFolder())
               .url(cmdContext.getType().getUrl()
                       + cmdContext.getCurrentFolder())

@@ -1,29 +1,29 @@
 package com.github.zhanhb.ckfinder.connector.handlers.response;
 
+import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlRootElement;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
+import lombok.Singular;
 
 /**
  *
- * @see com.github.zhanhb.ckfinder.connector.plugins.ImageResizeInfoCommand
  * @author zhanhb
  */
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
 @Builder(builderClassName = "Builder")
 @NoArgsConstructor
 @XmlAccessorType(XmlAccessType.NONE)
-@XmlRootElement(name = "ImageInfo")
-public class ImageInfo extends Result implements ConnectorElement {
+@XmlRootElement(name = "Folders")
+public class FoldersElement extends Result implements ConnectorChild {
 
-  @XmlAttribute(name = "width")
-  private int width;
-  @XmlAttribute(name = "height")
-  private int height;
+  @Singular
+  @XmlElementRef
+  private List<FolderElement> folders;
 
 }

@@ -16,8 +16,9 @@ import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.api.ThumbnailProperties;
-import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
-import com.github.zhanhb.ckfinder.connector.handlers.response.File;
+import com.github.zhanhb.ckfinder.connector.handlers.response.ConnectorElement;
+import com.github.zhanhb.ckfinder.connector.handlers.response.FileElement;
+import com.github.zhanhb.ckfinder.connector.handlers.response.FilesElement;
 import com.github.zhanhb.ckfinder.connector.support.CommandContext;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import com.github.zhanhb.ckfinder.connector.utils.ImageUtils;
@@ -56,7 +57,7 @@ public class GetFilesCommand extends FinishOnErrorXmlCommand<String> {
   }
 
   @Override
-  protected void createXml(Connector.Builder rootElement, String showThumbs, CommandContext cmdContext) throws ConnectorException {
+  protected void createXml(ConnectorElement.Builder rootElement, String showThumbs, CommandContext cmdContext) throws ConnectorException {
     cmdContext.checkType();
     cmdContext.checkAllPermission(AccessControl.FILE_VIEW);
 
@@ -79,10 +80,10 @@ public class GetFilesCommand extends FinishOnErrorXmlCommand<String> {
    * @param showThumbs the request parameter showThumbs
    * @param cmdContext command context
    */
-  private void createFilesData(List<Path> list, Connector.Builder rootElement,
+  private void createFilesData(List<Path> list, ConnectorElement.Builder rootElement,
           String showThumbs, CommandContext cmdContext) {
     CKFinderContext context = cmdContext.getCfCtx();
-    com.github.zhanhb.ckfinder.connector.handlers.response.Files.Builder files = com.github.zhanhb.ckfinder.connector.handlers.response.Files.builder();
+    FilesElement.Builder files = FilesElement.builder();
     for (Path file : list) {
       String fileName = file.getFileName().toString();
       if (!FileUtils.isFileExtensionAllowed(fileName, cmdContext.getType())) {
@@ -97,7 +98,7 @@ public class GetFilesCommand extends FinishOnErrorXmlCommand<String> {
       } catch (IOException ex) {
         continue;
       }
-      files.file(File.builder()
+      files.file(FileElement.builder()
               .name(file.getFileName().toString())
               .date(FileUtils.parseLastModifiedDate(attrs))
               .size(getSizeInKB(attrs).longValue())

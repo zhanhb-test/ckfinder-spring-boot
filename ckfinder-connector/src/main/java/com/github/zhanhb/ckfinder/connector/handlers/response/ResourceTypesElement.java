@@ -1,32 +1,29 @@
 package com.github.zhanhb.ckfinder.connector.handlers.response;
 
+import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlRootElement;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
+import lombok.Singular;
 
 /**
  *
- * @see
- * com.github.zhanhb.ckfinder.connector.handlers.command.RenameFolderCommand
  * @author zhanhb
  */
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
 @Builder(builderClassName = "Builder")
 @NoArgsConstructor
 @XmlAccessorType(XmlAccessType.NONE)
-@XmlRootElement(name = "RenamedFolder")
-public class RenamedFolder extends Result implements ConnectorElement {
+@XmlRootElement(name = "ResourceTypes")
+public class ResourceTypesElement extends Result implements ConnectorChild {
 
-  @XmlAttribute(name = "newName")
-  private String newName;
-  @XmlAttribute(name = "newPath")
-  private String newPath;
-  @XmlAttribute(name = "newUrl")
-  private String newUrl;
+  @Singular
+  @XmlElementRef
+  private List<ResourceTypeElement> resourceTypes;
 
 }

@@ -12,7 +12,7 @@
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
-import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
+import com.github.zhanhb.ckfinder.connector.handlers.response.ConnectorElement;
 import com.github.zhanhb.ckfinder.connector.support.CommandContext;
 
 /**
@@ -24,9 +24,9 @@ public abstract class FinishOnErrorXmlCommand<T> extends XmlCommand<T> {
 
   @Override
   @SuppressWarnings("FinalMethod")
-  final Connector buildConnector(T param, CommandContext cmdContext)
+  final ConnectorElement buildConnector(T param, CommandContext cmdContext)
           throws ConnectorException {
-    Connector.Builder connector = Connector.builder();
+    ConnectorElement.Builder connector = ConnectorElement.builder();
     cmdContext.setResourceType(connector);
     createCurrentFolderNode(cmdContext, connector);
     createErrorNode(connector, 0);
@@ -42,6 +42,6 @@ public abstract class FinishOnErrorXmlCommand<T> extends XmlCommand<T> {
    * @param cmdContext command context
    * @throws ConnectorException when error occurs
    */
-  protected abstract void createXml(Connector.Builder rootElement, T param, CommandContext cmdContext) throws ConnectorException;
+  protected abstract void createXml(ConnectorElement.Builder rootElement, T param, CommandContext cmdContext) throws ConnectorException;
 
 }

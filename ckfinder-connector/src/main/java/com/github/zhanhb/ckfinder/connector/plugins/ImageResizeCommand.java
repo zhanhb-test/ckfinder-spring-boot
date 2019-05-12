@@ -19,7 +19,7 @@ import com.github.zhanhb.ckfinder.connector.api.ImageProperties;
 import com.github.zhanhb.ckfinder.connector.handlers.command.FinishOnErrorXmlCommand;
 import com.github.zhanhb.ckfinder.connector.handlers.command.IPostCommand;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.ImageResizeParameter;
-import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
+import com.github.zhanhb.ckfinder.connector.handlers.response.ConnectorElement;
 import com.github.zhanhb.ckfinder.connector.support.CommandContext;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import com.github.zhanhb.ckfinder.connector.utils.ImageUtils;
@@ -40,7 +40,7 @@ public class ImageResizeCommand extends FinishOnErrorXmlCommand<ImageResizeParam
   }
 
   @Override
-  protected void createXml(Connector.Builder rootElement, ImageResizeParameter param, CommandContext cmdContext) throws ConnectorException {
+  protected void createXml(ConnectorElement.Builder rootElement, ImageResizeParameter param, CommandContext cmdContext) throws ConnectorException {
     CKFinderContext context = cmdContext.getCfCtx();
     cmdContext.checkType();
     cmdContext.checkAllPermission(AccessControl.FILE_DELETE | AccessControl.FILE_UPLOAD);

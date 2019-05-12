@@ -18,7 +18,7 @@ import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.handlers.command.FinishOnErrorXmlCommand;
 import com.github.zhanhb.ckfinder.connector.handlers.command.IPostCommand;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.SaveFileParameter;
-import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
+import com.github.zhanhb.ckfinder.connector.handlers.response.ConnectorElement;
 import com.github.zhanhb.ckfinder.connector.support.CommandContext;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import java.io.IOException;
@@ -32,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 public class SaveFileCommand extends FinishOnErrorXmlCommand<SaveFileParameter> implements IPostCommand {
 
   @Override
-  protected void createXml(Connector.Builder rootElement, SaveFileParameter param,
+  protected void createXml(ConnectorElement.Builder rootElement, SaveFileParameter param,
           CommandContext cmdContext) throws ConnectorException {
     cmdContext.checkType();
 

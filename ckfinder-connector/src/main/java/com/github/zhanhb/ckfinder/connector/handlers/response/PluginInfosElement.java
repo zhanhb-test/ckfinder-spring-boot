@@ -25,7 +25,7 @@ import lombok.Singular;
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlRootElement(name = "PluginsInfo")
 @XmlSeeAlso(PluginInfoElement.class)
-public class PluginInfos extends Result implements ConnectorElement {
+public class PluginInfosElement extends Result implements ConnectorChild {
 
   @Singular
   @XmlAnyElement

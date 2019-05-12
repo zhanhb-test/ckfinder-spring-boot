@@ -11,19 +11,30 @@ import lombok.NoArgsConstructor;
 
 /**
  *
- * @see com.github.zhanhb.ckfinder.connector.handlers.command.RenameFileCommand
  * @author zhanhb
  */
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
 @Builder(builderClassName = "Builder")
 @NoArgsConstructor
 @XmlAccessorType(XmlAccessType.NONE)
-@XmlRootElement(name = "RenamedFile")
-public class RenamedFile extends Result implements ConnectorElement {
+@XmlRootElement(name = "ResourceType")
+public class ResourceTypeElement {
 
-  @XmlAttribute(name = "name")
+  @XmlAttribute(name = "name", required = true)
   private String name;
-  @XmlAttribute(name = "newName")
-  private String newName;
+  @XmlAttribute(name = "url")
+  private String url;
+  @XmlAttribute(name = "allowedExtensions")
+  private String allowedExtensions;
+  @XmlAttribute(name = "deniedExtensions")
+  private String deniedExtensions;
+  @XmlAttribute(name = "hash")
+  private String hash;
+  @XmlAttribute(name = "hasChildren")
+  private boolean hasChildren;
+  @XmlAttribute(name = "acl")
+  private int acl;
+  @XmlAttribute(name = "maxSize")
+  private long maxSize;
 
 }

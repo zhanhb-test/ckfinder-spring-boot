@@ -16,8 +16,8 @@ import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.handlers.command.FinishOnErrorXmlCommand;
-import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
-import com.github.zhanhb.ckfinder.connector.handlers.response.ImageInfo;
+import com.github.zhanhb.ckfinder.connector.handlers.response.ConnectorElement;
+import com.github.zhanhb.ckfinder.connector.handlers.response.ImageInfoElement;
 import com.github.zhanhb.ckfinder.connector.support.CommandContext;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import java.awt.image.BufferedImage;
@@ -34,7 +34,7 @@ import org.springframework.util.StringUtils;
 public class ImageResizeInfoCommand extends FinishOnErrorXmlCommand<String> {
 
   @Override
-  protected void createXml(Connector.Builder rootElement, String fileName, CommandContext cmdContext) throws ConnectorException {
+  protected void createXml(ConnectorElement.Builder rootElement, String fileName, CommandContext cmdContext) throws ConnectorException {
     CKFinderContext context = cmdContext.getCfCtx();
     cmdContext.checkType();
 
@@ -61,7 +61,7 @@ public class ImageResizeInfoCommand extends FinishOnErrorXmlCommand<String> {
       try (InputStream is = Files.newInputStream(imageFile)) {
         image = ImageIO.read(is);
       }
-      rootElement.result(ImageInfo.builder()
+      rootElement.result(ImageInfoElement.builder()
               .width(image.getWidth())
               .height(image.getHeight()).build());
     } catch (IOException e) {

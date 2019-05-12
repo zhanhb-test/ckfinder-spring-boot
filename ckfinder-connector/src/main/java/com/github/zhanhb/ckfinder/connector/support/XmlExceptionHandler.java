@@ -16,9 +16,9 @@ import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ExceptionHandler;
 import com.github.zhanhb.ckfinder.connector.api.ResourceType;
-import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
-import com.github.zhanhb.ckfinder.connector.handlers.response.CurrentFolder;
-import com.github.zhanhb.ckfinder.connector.handlers.response.Error;
+import com.github.zhanhb.ckfinder.connector.handlers.response.ConnectorElement;
+import com.github.zhanhb.ckfinder.connector.handlers.response.CurrentFolderElement;
+import com.github.zhanhb.ckfinder.connector.handlers.response.ErrorCodeElement;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.servlet.http.HttpServletRequest;
@@ -41,7 +41,7 @@ public enum XmlExceptionHandler implements ExceptionHandler {
     HttpSession session = request.getSession(false);
     String userRole = session == null ? null : (String) session.getAttribute(context.getUserRoleName());
 
-    Connector.Builder connector = Connector.builder();
+    ConnectorElement.Builder connector = ConnectorElement.builder();
     String currentFolder = connectorException.getCurrentFolder();
     ResourceType type = connectorException.getType();
 
@@ -51,14 +51,14 @@ public enum XmlExceptionHandler implements ExceptionHandler {
       connector.resourceType(type.getName());
       if (StringUtils.hasLength(currentFolder)) {
         AccessControl ac = context.getAccessControl();
-        connector.currentFolder(CurrentFolder.builder()
+        connector.currentFolder(CurrentFolderElement.builder()
                 .path(currentFolder)
                 .url(type.getUrl() + currentFolder)
                 .acl(ac.getAcl(type.getName(), currentFolder, userRole))
                 .build());
       }
     }
-    connector.error(Error.builder()
+    connector.error(ErrorCodeElement.builder()
             .number(errorNum)
             .value(connectorException.getMessage()).build());
     String result = XmlCreator.INSTANCE.toString(connector.build());

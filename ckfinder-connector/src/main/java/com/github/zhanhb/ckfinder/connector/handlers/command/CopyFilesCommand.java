@@ -17,8 +17,8 @@ import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.api.ResourceType;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.CopyMoveParameter;
-import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
-import com.github.zhanhb.ckfinder.connector.handlers.response.CopyFiles;
+import com.github.zhanhb.ckfinder.connector.handlers.response.ConnectorElement;
+import com.github.zhanhb.ckfinder.connector.handlers.response.CopyFilesElement;
 import com.github.zhanhb.ckfinder.connector.support.CommandContext;
 import com.github.zhanhb.ckfinder.connector.support.ErrorListResult;
 import com.github.zhanhb.ckfinder.connector.support.FileItem;
@@ -40,8 +40,8 @@ import lombok.extern.slf4j.Slf4j;
 public class CopyFilesCommand extends FailAtEndXmlCommand<CopyMoveParameter> implements IPostCommand {
 
   @Override
-  protected void addResultNode(Connector.Builder rootElement, CopyMoveParameter param) {
-    rootElement.result(CopyFiles.builder()
+  protected void addResultNode(ConnectorElement.Builder rootElement, CopyMoveParameter param) {
+    rootElement.result(CopyFilesElement.builder()
             .copied(param.getNfiles())
             .copiedTotal(param.getAll() + param.getNfiles())
             .build());

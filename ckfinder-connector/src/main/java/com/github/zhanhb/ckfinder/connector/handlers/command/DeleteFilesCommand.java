@@ -16,8 +16,8 @@ import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.DeleteFilesParameter;
-import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
-import com.github.zhanhb.ckfinder.connector.handlers.response.DeleteFiles;
+import com.github.zhanhb.ckfinder.connector.handlers.response.ConnectorElement;
+import com.github.zhanhb.ckfinder.connector.handlers.response.DeleteFilesElement;
 import com.github.zhanhb.ckfinder.connector.support.CommandContext;
 import com.github.zhanhb.ckfinder.connector.support.ErrorListResult;
 import com.github.zhanhb.ckfinder.connector.support.FileItem;
@@ -35,8 +35,8 @@ import lombok.extern.slf4j.Slf4j;
 public class DeleteFilesCommand extends FailAtEndXmlCommand<DeleteFilesParameter> implements IPostCommand {
 
   @Override
-  protected void addResultNode(Connector.Builder rootElement, DeleteFilesParameter param) {
-    rootElement.result(DeleteFiles.builder()
+  protected void addResultNode(ConnectorElement.Builder rootElement, DeleteFilesParameter param) {
+    rootElement.result(DeleteFilesElement.builder()
             .deleted(param.getFilesDeleted())
             .build());
   }

@@ -15,9 +15,9 @@ import com.github.zhanhb.ckfinder.connector.api.AccessControl;
 import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
-import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
-import com.github.zhanhb.ckfinder.connector.handlers.response.Folder;
-import com.github.zhanhb.ckfinder.connector.handlers.response.Folders;
+import com.github.zhanhb.ckfinder.connector.handlers.response.ConnectorElement;
+import com.github.zhanhb.ckfinder.connector.handlers.response.FolderElement;
+import com.github.zhanhb.ckfinder.connector.handlers.response.FoldersElement;
 import com.github.zhanhb.ckfinder.connector.support.CommandContext;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import java.io.IOException;
@@ -35,7 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 public class GetFoldersCommand extends FinishOnErrorXmlCommand<Void> {
 
   @Override
-  protected void createXml(Connector.Builder rootElement, Void param, CommandContext cmdContext) throws ConnectorException {
+  protected void createXml(ConnectorElement.Builder rootElement, Void param, CommandContext cmdContext) throws ConnectorException {
     CKFinderContext context = cmdContext.getCfCtx();
     cmdContext.checkType();
     cmdContext.checkAllPermission(AccessControl.FOLDER_VIEW);
@@ -66,9 +66,9 @@ public class GetFoldersCommand extends FinishOnErrorXmlCommand<Void> {
    * @param cmdContext command context
    * @param directories list of children folder
    */
-  private void createFoldersData(Connector.Builder rootElement, CommandContext cmdContext, List<Path> directories) {
+  private void createFoldersData(ConnectorElement.Builder rootElement, CommandContext cmdContext, List<Path> directories) {
     CKFinderContext context = cmdContext.getCfCtx();
-    Folders.Builder folders = Folders.builder();
+    FoldersElement.Builder folders = FoldersElement.builder();
     for (Path dir : directories) {
       String dirName = dir.getFileName().toString();
       if (!context.getAccessControl().hasPermission(cmdContext.getType().getName(), cmdContext.getCurrentFolder() + dirName, cmdContext.getUserRole(),
@@ -82,7 +82,7 @@ public class GetFoldersCommand extends FinishOnErrorXmlCommand<Void> {
               cmdContext.getCurrentFolder() + dirName + "/", dir,
               context, cmdContext.getType().getName(), cmdContext.getUserRole());
 
-      folders.folder(Folder.builder()
+      folders.folder(FolderElement.builder()
               .name(dirName)
               .hasChildren(hasChildren)
               .acl(context.getAccessControl()

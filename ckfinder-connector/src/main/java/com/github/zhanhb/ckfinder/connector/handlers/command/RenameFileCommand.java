@@ -16,8 +16,8 @@ import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.RenameFileParameter;
-import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
-import com.github.zhanhb.ckfinder.connector.handlers.response.RenamedFile;
+import com.github.zhanhb.ckfinder.connector.handlers.response.ConnectorElement;
+import com.github.zhanhb.ckfinder.connector.handlers.response.RenamedFileElement;
 import com.github.zhanhb.ckfinder.connector.support.CommandContext;
 import com.github.zhanhb.ckfinder.connector.support.ErrorListResult;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
@@ -123,8 +123,8 @@ public class RenameFileCommand extends FailAtEndXmlCommand<RenameFileParameter> 
   }
 
   @Override
-  protected void addResultNode(Connector.Builder rootElement, RenameFileParameter param) {
-    RenamedFile.Builder element = RenamedFile.builder().name(param.getFileName());
+  protected void addResultNode(ConnectorElement.Builder rootElement, RenameFileParameter param) {
+    RenamedFileElement.Builder element = RenamedFileElement.builder().name(param.getFileName());
     if (param.isRenamed()) {
       element.newName(param.getNewFileName());
     }

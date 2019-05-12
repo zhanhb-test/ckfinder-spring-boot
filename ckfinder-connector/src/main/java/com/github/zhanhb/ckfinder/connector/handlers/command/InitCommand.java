@@ -17,10 +17,11 @@ import com.github.zhanhb.ckfinder.connector.api.License;
 import com.github.zhanhb.ckfinder.connector.api.PluginInfo;
 import com.github.zhanhb.ckfinder.connector.api.ResourceType;
 import com.github.zhanhb.ckfinder.connector.api.ThumbnailProperties;
-import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
-import com.github.zhanhb.ckfinder.connector.handlers.response.ConnectorInfo;
-import com.github.zhanhb.ckfinder.connector.handlers.response.PluginInfos;
-import com.github.zhanhb.ckfinder.connector.handlers.response.ResourceTypes;
+import com.github.zhanhb.ckfinder.connector.handlers.response.ConnectorElement;
+import com.github.zhanhb.ckfinder.connector.handlers.response.ConnectorInfoElement;
+import com.github.zhanhb.ckfinder.connector.handlers.response.PluginInfosElement;
+import com.github.zhanhb.ckfinder.connector.handlers.response.ResourceTypeElement;
+import com.github.zhanhb.ckfinder.connector.handlers.response.ResourceTypesElement;
 import com.github.zhanhb.ckfinder.connector.support.CommandContext;
 import com.github.zhanhb.ckfinder.connector.support.KeyGenerator;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
@@ -48,8 +49,8 @@ public class InitCommand extends XmlCommand<String> {
   private static final char[] hexChars = "0123456789abcdef".toCharArray();
 
   @Override
-  Connector buildConnector(String host, CommandContext cmdContext) {
-    Connector.Builder rootElement = Connector.builder();
+  ConnectorElement buildConnector(String host, CommandContext cmdContext) {
+    ConnectorElement.Builder rootElement = ConnectorElement.builder();
     CKFinderContext context = cmdContext.getCfCtx();
     cmdContext.setResourceType(rootElement);
     createErrorNode(rootElement, 0);
@@ -66,12 +67,12 @@ public class InitCommand extends XmlCommand<String> {
    * @param host request head host
    * @param context connector context
    */
-  private void createConnectorData(Connector.Builder rootElement, String host, CKFinderContext context) {
+  private void createConnectorData(ConnectorElement.Builder rootElement, String host, CKFinderContext context) {
     ThumbnailProperties thumbnail = context.getThumbnail();
     License license = context.getLicense(host);
 
     // connector info
-    ConnectorInfo.Builder element = ConnectorInfo.builder()
+    ConnectorInfoElement.Builder element = ConnectorInfoElement.builder()
             .enabled(context.isEnabled())
             .licenseName(getLicenseName(license))
             .licenseKey(createLicenseKey(license.getKey()))
@@ -140,10 +141,10 @@ public class InitCommand extends XmlCommand<String> {
    * @param rootElement root element in XML
    * @param context ckfinder context
    */
-  private void createPluginsData(Connector.Builder rootElement, CKFinderContext context) {
+  private void createPluginsData(ConnectorElement.Builder rootElement, CKFinderContext context) {
     Collection<PluginInfo> pluginInfos = context.getPluginInfos();
     if (pluginInfos != null && !pluginInfos.isEmpty()) {
-      PluginInfos.Builder builder = PluginInfos.builder();
+      PluginInfosElement.Builder builder = PluginInfosElement.builder();
       for (PluginInfo pluginInfo : pluginInfos) {
         builder.add(pluginInfo.getName(), pluginInfo.getAttributes());
       }
@@ -157,16 +158,16 @@ public class InitCommand extends XmlCommand<String> {
    * @param rootElement root element in XML
    * @param context ckfinder context
    */
-  private void createResourceTypesData(Connector.Builder rootElement, CommandContext cmdContext, CKFinderContext context) {
+  private void createResourceTypesData(ConnectorElement.Builder rootElement, CommandContext cmdContext, CKFinderContext context) {
     //resource types
-    ResourceTypes.Builder resourceTypes = ResourceTypes.builder();
+    ResourceTypesElement.Builder resourceTypes = ResourceTypesElement.builder();
     Collection<ResourceType> types = cmdContext.typeToCollection();
 
     for (ResourceType resourceType : types) {
       int acl = cmdContext.getAcl(resourceType, "/");
       if ((acl & AccessControl.FOLDER_VIEW) != 0) {
         boolean hasChildren = FileUtils.hasChildren(context.getAccessControl(), "/", resourceType.getPath(), context, resourceType.getName(), cmdContext.getUserRole());
-        resourceTypes.resourceType(com.github.zhanhb.ckfinder.connector.handlers.response.ResourceType.builder()
+        resourceTypes.resourceType(ResourceTypeElement.builder()
                 .name(resourceType.getName())
                 .acl(acl)
                 .hash(randomHash(resourceType.getPath()))
