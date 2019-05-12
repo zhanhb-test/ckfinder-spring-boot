@@ -52,12 +52,13 @@ public class GetFilesCommand extends FinishOnErrorXmlCommand<String> {
    * @return the parameter
    */
   @Override
-  protected String popupParams(HttpServletRequest request, CKFinderContext context) {
+  protected String parseParameters(HttpServletRequest request, CKFinderContext context) {
     return request.getParameter("showThumbs");
   }
 
   @Override
-  protected void createXml(ConnectorElement.Builder rootElement, String showThumbs, CommandContext cmdContext) throws ConnectorException {
+  protected void createXml(String showThumbs, CommandContext cmdContext,
+          ConnectorElement.Builder rootElement) throws ConnectorException {
     cmdContext.checkType();
     cmdContext.checkAllPermission(AccessControl.FILE_VIEW);
 
@@ -68,7 +69,7 @@ public class GetFilesCommand extends FinishOnErrorXmlCommand<String> {
       createFilesData(files, rootElement, showThumbs, cmdContext);
     } catch (IOException e) {
       log.error("", e);
-      cmdContext.throwException(ErrorCode.ACCESS_DENIED);
+      throw cmdContext.toException(ErrorCode.ACCESS_DENIED);
     }
   }
 

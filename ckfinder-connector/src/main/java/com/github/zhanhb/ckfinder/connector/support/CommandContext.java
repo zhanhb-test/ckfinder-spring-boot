@@ -58,8 +58,8 @@ public class CommandContext {
     }
   }
 
-  public void throwException(ErrorCode code) throws ConnectorException {
-    throw new ConnectorException(code, type, currentFolder);
+  public ConnectorException toException(ErrorCode code) {
+    return new ConnectorException(code, type, currentFolder);
   }
 
   public Collection<ResourceType> typeToCollection() {
@@ -97,7 +97,7 @@ public class CommandContext {
   public void checkAllPermission(ResourceType type, String currentFolder, int acl)
           throws ConnectorException {
     if (!hasAllPermission(type, currentFolder, acl)) {
-      throwException(ErrorCode.UNAUTHORIZED);
+      throw toException(ErrorCode.UNAUTHORIZED);
     }
   }
 
@@ -128,10 +128,10 @@ public class CommandContext {
         try {
           Files.createDirectories(dir);
         } catch (IOException ex) {
-          throwException(ErrorCode.FOLDER_NOT_FOUND);
+          throw toException(ErrorCode.FOLDER_NOT_FOUND);
         }
       } else {
-        throwException(ErrorCode.FOLDER_NOT_FOUND);
+        throw toException(ErrorCode.FOLDER_NOT_FOUND);
       }
     }
     return dir;
@@ -145,22 +145,22 @@ public class CommandContext {
       String folder = file.getFolder();
       String name = file.getName();
       if (!FileUtils.isFileNameValid(name)) {
-        throwException(ErrorCode.INVALID_REQUEST);
+        throw toException(ErrorCode.INVALID_REQUEST);
       }
       if (FileUtils.isPathNameInvalid(folder)) {
-        throwException(ErrorCode.INVALID_REQUEST);
+        throw toException(ErrorCode.INVALID_REQUEST);
       }
       if (resource == null) {
-        throwException(ErrorCode.INVALID_REQUEST);
+        throw toException(ErrorCode.INVALID_REQUEST);
       }
       if (StringUtils.isEmpty(folder)) {
-        throwException(ErrorCode.INVALID_REQUEST);
+        throw toException(ErrorCode.INVALID_REQUEST);
       }
       if (context.isDirectoryHidden(folder)) {
-        throwException(ErrorCode.INVALID_REQUEST);
+        throw toException(ErrorCode.INVALID_REQUEST);
       }
       if (context.isFileHidden(name)) {
-        throwException(ErrorCode.INVALID_REQUEST);
+        throw toException(ErrorCode.INVALID_REQUEST);
       }
       checkAllPermission(resource, folder,
               requireAccess);

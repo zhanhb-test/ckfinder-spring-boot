@@ -50,28 +50,28 @@ public class DeleteFilesCommand extends FailAtEndXmlCommand<DeleteFilesParameter
 
     for (FileItem fileItem : param.getFiles()) {
       if (!FileUtils.isFileNameValid(fileItem.getName())) {
-        cmdContext.throwException(ErrorCode.INVALID_REQUEST);
+        throw cmdContext.toException(ErrorCode.INVALID_REQUEST);
       }
 
       if (fileItem.getType() == null) {
-        cmdContext.throwException(ErrorCode.INVALID_REQUEST);
+        throw cmdContext.toException(ErrorCode.INVALID_REQUEST);
       }
 
       if (fileItem.getFolder() == null || fileItem.getFolder().isEmpty()
               || FileUtils.isPathNameInvalid(fileItem.getFolder())) {
-        cmdContext.throwException(ErrorCode.INVALID_REQUEST);
+        throw cmdContext.toException(ErrorCode.INVALID_REQUEST);
       }
 
       if (context.isDirectoryHidden(fileItem.getFolder())) {
-        cmdContext.throwException(ErrorCode.INVALID_REQUEST);
+        throw cmdContext.toException(ErrorCode.INVALID_REQUEST);
       }
 
       if (context.isFileHidden(fileItem.getName())) {
-        cmdContext.throwException(ErrorCode.INVALID_REQUEST);
+        throw cmdContext.toException(ErrorCode.INVALID_REQUEST);
       }
 
       if (!FileUtils.isFileExtensionAllowed(fileItem.getName(), fileItem.getType())) {
-        cmdContext.throwException(ErrorCode.INVALID_REQUEST);
+        throw cmdContext.toException(ErrorCode.INVALID_REQUEST);
 
       }
 
@@ -122,7 +122,7 @@ public class DeleteFilesCommand extends FailAtEndXmlCommand<DeleteFilesParameter
    * @return the parameter
    */
   @Override
-  protected DeleteFilesParameter popupParams(HttpServletRequest request, CKFinderContext context) {
+  protected DeleteFilesParameter parseParameters(HttpServletRequest request, CKFinderContext context) {
     List<FileItem> files = RequestFileHelper.getFilesList(request, context);
     return new DeleteFilesParameter(files);
   }

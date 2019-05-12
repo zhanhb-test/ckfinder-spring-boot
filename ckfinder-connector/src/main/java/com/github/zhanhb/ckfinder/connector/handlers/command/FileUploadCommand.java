@@ -60,7 +60,7 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
    * @return the parameter
    */
   @Override
-  protected FileUploadParameter popupParams(HttpServletRequest request, CKFinderContext context) {
+  protected FileUploadParameter parseParameters(HttpServletRequest request, CKFinderContext context) {
     FileUploadParameter param = new FileUploadParameter();
     param.setCkFinderFuncNum(request.getParameter("CKFinderFuncNum"));
     param.setCkEditorFuncNum(request.getParameter("CKEditorFuncNum"));

@@ -42,18 +42,18 @@ public class ThumbnailCommand extends BaseCommand<String> {
           throws ConnectorException {
     CommandContext cmdContext = populateCommandContext(request, context);
     if (context.getThumbnail() == null) {
-      cmdContext.throwException(ErrorCode.THUMBNAILS_DISABLED);
+      throw cmdContext.toException(ErrorCode.THUMBNAILS_DISABLED);
     }
 
     cmdContext.checkType();
     cmdContext.checkAllPermission(AccessControl.FILE_VIEW);
 
     if (!FileUtils.isFileNameValid(fileName)) {
-      cmdContext.throwException(ErrorCode.INVALID_REQUEST);
+      throw cmdContext.toException(ErrorCode.INVALID_REQUEST);
     }
 
     if (context.isFileHidden(fileName)) {
-      cmdContext.throwException(ErrorCode.FILE_NOT_FOUND);
+      throw cmdContext.toException(ErrorCode.FILE_NOT_FOUND);
     }
 
     //noinspection OptionalGetWithoutIsPresent
@@ -73,12 +73,12 @@ public class ThumbnailCommand extends BaseCommand<String> {
       Path originFile = cmdContext.resolve(fileName);
       log.debug("original file: {}", originFile);
       if (!Files.exists(originFile)) {
-        cmdContext.throwException(ErrorCode.FILE_NOT_FOUND);
+        throw cmdContext.toException(ErrorCode.FILE_NOT_FOUND);
       }
       try {
         boolean success = ImageUtils.createThumb(originFile, thumbFile, context.getThumbnail());
         if (!success) {
-          cmdContext.throwException(ErrorCode.FILE_NOT_FOUND);
+          throw cmdContext.toException(ErrorCode.FILE_NOT_FOUND);
         }
       } catch (IOException | ConnectorException e) {
         try {
@@ -104,7 +104,7 @@ public class ThumbnailCommand extends BaseCommand<String> {
   }
 
   @Override
-  protected String popupParams(HttpServletRequest request, CKFinderContext context) {
+  protected String parseParameters(HttpServletRequest request, CKFinderContext context) {
     return request.getParameter("FileName");
   }
 

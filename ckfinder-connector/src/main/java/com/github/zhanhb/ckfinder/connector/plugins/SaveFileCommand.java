@@ -32,8 +32,8 @@ import lombok.extern.slf4j.Slf4j;
 public class SaveFileCommand extends FinishOnErrorXmlCommand<SaveFileParameter> implements IPostCommand {
 
   @Override
-  protected void createXml(ConnectorElement.Builder rootElement, SaveFileParameter param,
-          CommandContext cmdContext) throws ConnectorException {
+  protected void createXml(SaveFileParameter param, CommandContext cmdContext,
+          ConnectorElement.Builder builder) throws ConnectorException {
     cmdContext.checkType();
 
     cmdContext.checkAllPermission(AccessControl.FILE_DELETE);
@@ -42,37 +42,37 @@ public class SaveFileCommand extends FinishOnErrorXmlCommand<SaveFileParameter> 
     String content = param.getFileContent();
 
     if (fileName == null || fileName.isEmpty()) {
-      cmdContext.throwException(ErrorCode.INVALID_NAME);
+      throw cmdContext.toException(ErrorCode.INVALID_NAME);
     }
 
     if (content == null || content.isEmpty()) {
-      cmdContext.throwException(ErrorCode.INVALID_REQUEST);
+      throw cmdContext.toException(ErrorCode.INVALID_REQUEST);
     }
 
     if (!FileUtils.isFileExtensionAllowed(fileName, cmdContext.getType())) {
-      cmdContext.throwException(ErrorCode.INVALID_EXTENSION);
+      throw cmdContext.toException(ErrorCode.INVALID_EXTENSION);
     }
 
     if (!FileUtils.isFileNameValid(fileName)) {
-      cmdContext.throwException(ErrorCode.INVALID_REQUEST);
+      throw cmdContext.toException(ErrorCode.INVALID_REQUEST);
     }
 
     Path sourceFile = cmdContext.resolve(fileName);
 
     if (!Files.isRegularFile(sourceFile)) {
-      cmdContext.throwException(ErrorCode.FILE_NOT_FOUND);
+      throw cmdContext.toException(ErrorCode.FILE_NOT_FOUND);
     }
 
     try {
       Files.write(sourceFile, content.getBytes(StandardCharsets.UTF_8));
     } catch (IOException e) {
       log.error("", e);
-      cmdContext.throwException(ErrorCode.ACCESS_DENIED);
+      throw cmdContext.toException(ErrorCode.ACCESS_DENIED);
     }
   }
 
   @Override
-  protected SaveFileParameter popupParams(HttpServletRequest request, CKFinderContext context) {
+  protected SaveFileParameter parseParameters(HttpServletRequest request, CKFinderContext context) {
     return SaveFileParameter.builder()
             .fileContent(request.getParameter("content"))
             .fileName(request.getParameter("fileName"))

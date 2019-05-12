@@ -40,7 +40,8 @@ public class CreateFolderCommand extends FinishOnErrorXmlCommand<String> impleme
    */
   @Override
   @SuppressWarnings("AssignmentToMethodParameter")
-  protected void createXml(ConnectorElement.Builder rootElement, String newFolderName, CommandContext cmdContext) throws ConnectorException {
+  protected void createXml(String newFolderName, CommandContext cmdContext,
+          ConnectorElement.Builder rootElement) throws ConnectorException {
     checkRequestPath(newFolderName);
 
     CKFinderContext context = cmdContext.getCfCtx();
@@ -52,30 +53,30 @@ public class CreateFolderCommand extends FinishOnErrorXmlCommand<String> impleme
     }
 
     if (FileUtils.isFolderNameInvalid(newFolderName, context)) {
-      cmdContext.throwException(ErrorCode.INVALID_NAME);
+      throw cmdContext.toException(ErrorCode.INVALID_NAME);
     }
     if (context.isDirectoryHidden(cmdContext.getCurrentFolder())) {
-      cmdContext.throwException(ErrorCode.INVALID_REQUEST);
+      throw cmdContext.toException(ErrorCode.INVALID_REQUEST);
     }
     if (context.isDirectoryHidden(newFolderName)) {
-      cmdContext.throwException(ErrorCode.INVALID_NAME);
+      throw cmdContext.toException(ErrorCode.INVALID_NAME);
     }
 
     Path dir = cmdContext.resolve(newFolderName);
     if (Files.exists(dir)) {
-      cmdContext.throwException(ErrorCode.ALREADY_EXIST);
+      throw cmdContext.toException(ErrorCode.ALREADY_EXIST);
     }
     try {
       Files.createDirectories(dir);
     } catch (IOException ex) {
-      cmdContext.throwException(ErrorCode.UNAUTHORIZED);
+      throw cmdContext.toException(ErrorCode.UNAUTHORIZED);
     }
 
     rootElement.result(NewFolderElement.builder().name(newFolderName).build());
   }
 
   @Override
-  protected String popupParams(HttpServletRequest request, CKFinderContext context) {
+  protected String parseParameters(HttpServletRequest request, CKFinderContext context) {
     return request.getParameter("NewFolderName");
   }
 

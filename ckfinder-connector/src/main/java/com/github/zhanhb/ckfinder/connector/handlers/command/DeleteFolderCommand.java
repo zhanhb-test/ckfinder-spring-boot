@@ -30,24 +30,24 @@ import lombok.extern.slf4j.Slf4j;
 public class DeleteFolderCommand extends FinishOnErrorXmlCommand<Void> implements IPostCommand {
 
   @Override
-  protected void createXml(ConnectorElement.Builder rootElement, Void param,
-          CommandContext cmdContext) throws ConnectorException {
+  protected void createXml(Void param, CommandContext cmdContext,
+          ConnectorElement.Builder builder) throws ConnectorException {
     CKFinderContext context = cmdContext.getCfCtx();
     cmdContext.checkType();
     cmdContext.checkAllPermission(AccessControl.FOLDER_DELETE);
 
     if (cmdContext.getCurrentFolder().equals("/")) {
-      cmdContext.throwException(ErrorCode.INVALID_REQUEST);
+      throw cmdContext.toException(ErrorCode.INVALID_REQUEST);
     }
 
     if (context.isDirectoryHidden(cmdContext.getCurrentFolder())) {
-      cmdContext.throwException(ErrorCode.INVALID_REQUEST);
+      throw cmdContext.toException(ErrorCode.INVALID_REQUEST);
     }
 
     Path dir = cmdContext.toPath();
 
     if (!Files.isDirectory(dir)) {
-      cmdContext.throwException(ErrorCode.FOLDER_NOT_FOUND);
+      throw cmdContext.toException(ErrorCode.FOLDER_NOT_FOUND);
     }
 
     if (FileUtils.delete(dir)) {
@@ -57,12 +57,12 @@ public class DeleteFolderCommand extends FinishOnErrorXmlCommand<Void> implement
         FileUtils.delete(tdir);
       });
     } else {
-      cmdContext.throwException(ErrorCode.ACCESS_DENIED);
+      throw cmdContext.toException(ErrorCode.ACCESS_DENIED);
     }
   }
 
   @Override
-  protected Void popupParams(HttpServletRequest request, CKFinderContext context) {
+  protected Void parseParameters(HttpServletRequest request, CKFinderContext context) {
     return null;
   }
 

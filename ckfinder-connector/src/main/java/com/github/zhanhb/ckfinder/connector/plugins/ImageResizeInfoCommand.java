@@ -34,7 +34,7 @@ import org.springframework.util.StringUtils;
 public class ImageResizeInfoCommand extends FinishOnErrorXmlCommand<String> {
 
   @Override
-  protected void createXml(ConnectorElement.Builder rootElement, String fileName, CommandContext cmdContext) throws ConnectorException {
+  protected void createXml(String fileName, CommandContext cmdContext, ConnectorElement.Builder rootElement) throws ConnectorException {
     CKFinderContext context = cmdContext.getCfCtx();
     cmdContext.checkType();
 
@@ -43,17 +43,17 @@ public class ImageResizeInfoCommand extends FinishOnErrorXmlCommand<String> {
     if (StringUtils.isEmpty(fileName)
             || !FileUtils.isFileNameValid(fileName)
             || context.isFileHidden(fileName)) {
-      cmdContext.throwException(ErrorCode.INVALID_REQUEST);
+      throw cmdContext.toException(ErrorCode.INVALID_REQUEST);
     }
 
     if (!FileUtils.isFileExtensionAllowed(fileName, cmdContext.getType())) {
-      cmdContext.throwException(ErrorCode.INVALID_REQUEST);
+      throw cmdContext.toException(ErrorCode.INVALID_REQUEST);
     }
 
     Path imageFile = cmdContext.resolve(fileName);
 
     if (!Files.isRegularFile(imageFile)) {
-      cmdContext.throwException(ErrorCode.FILE_NOT_FOUND);
+      throw cmdContext.toException(ErrorCode.FILE_NOT_FOUND);
     }
 
     try {
@@ -66,12 +66,12 @@ public class ImageResizeInfoCommand extends FinishOnErrorXmlCommand<String> {
               .height(image.getHeight()).build());
     } catch (IOException e) {
       log.error("failed to access file '{}'", imageFile, e);
-      cmdContext.throwException(ErrorCode.ACCESS_DENIED);
+      throw cmdContext.toException(ErrorCode.ACCESS_DENIED);
     }
   }
 
   @Override
-  protected String popupParams(HttpServletRequest request, CKFinderContext context) {
+  protected String parseParameters(HttpServletRequest request, CKFinderContext context) {
     return request.getParameter("fileName");
   }
 

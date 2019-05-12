@@ -40,7 +40,7 @@ public class ImageResizeCommand extends FinishOnErrorXmlCommand<ImageResizeParam
   }
 
   @Override
-  protected void createXml(ConnectorElement.Builder rootElement, ImageResizeParameter param, CommandContext cmdContext) throws ConnectorException {
+  protected void createXml(ImageResizeParameter param, CommandContext cmdContext, ConnectorElement.Builder builder) throws ConnectorException {
     CKFinderContext context = cmdContext.getCfCtx();
     cmdContext.checkType();
     cmdContext.checkAllPermission(AccessControl.FILE_DELETE | AccessControl.FILE_UPLOAD);
@@ -49,50 +49,50 @@ public class ImageResizeCommand extends FinishOnErrorXmlCommand<ImageResizeParam
     String newFileName = param.getNewFileName();
 
     if (fileName == null || fileName.isEmpty()) {
-      cmdContext.throwException(ErrorCode.INVALID_NAME);
+      throw cmdContext.toException(ErrorCode.INVALID_NAME);
     }
 
     if (!FileUtils.isFileNameValid(fileName) || context.isFileHidden(fileName)) {
-      cmdContext.throwException(ErrorCode.INVALID_REQUEST);
+      throw cmdContext.toException(ErrorCode.INVALID_REQUEST);
     }
 
     if (!FileUtils.isFileExtensionAllowed(fileName, cmdContext.getType())) {
-      cmdContext.throwException(ErrorCode.INVALID_REQUEST);
+      throw cmdContext.toException(ErrorCode.INVALID_REQUEST);
     }
 
     Path file = cmdContext.resolve(fileName);
     if (!Files.isRegularFile(file)) {
-      cmdContext.throwException(ErrorCode.FILE_NOT_FOUND);
+      throw cmdContext.toException(ErrorCode.FILE_NOT_FOUND);
     }
 
     if (param.isWrongReqSizesParams()) {
-      cmdContext.throwException(ErrorCode.INVALID_REQUEST);
+      throw cmdContext.toException(ErrorCode.INVALID_REQUEST);
     }
 
     ImageProperties image = context.getImage();
     if (param.getWidth() != null && param.getHeight() != null) {
 
       if (!FileUtils.isFileNameValid(newFileName) && context.isFileHidden(newFileName)) {
-        cmdContext.throwException(ErrorCode.INVALID_NAME);
+        throw cmdContext.toException(ErrorCode.INVALID_NAME);
       }
 
       if (!FileUtils.isFileExtensionAllowed(newFileName, cmdContext.getType())) {
-        cmdContext.throwException(ErrorCode.INVALID_EXTENSION);
+        throw cmdContext.toException(ErrorCode.INVALID_EXTENSION);
       }
 
       Path thumbFile = cmdContext.resolve(newFileName);
 
       if (Files.exists(thumbFile) && !Files.isWritable(thumbFile)) {
-        cmdContext.throwException(ErrorCode.ACCESS_DENIED);
+        throw cmdContext.toException(ErrorCode.ACCESS_DENIED);
       }
       if (!"1".equals(param.getOverwrite()) && Files.exists(thumbFile)) {
-        cmdContext.throwException(ErrorCode.ALREADY_EXIST);
+        throw cmdContext.toException(ErrorCode.ALREADY_EXIST);
       }
       int maxImageHeight = image.getMaxHeight();
       int maxImageWidth = image.getMaxWidth();
       if ((maxImageWidth > 0 && param.getWidth() > maxImageWidth)
               || (maxImageHeight > 0 && param.getHeight() > maxImageHeight)) {
-        cmdContext.throwException(ErrorCode.INVALID_REQUEST);
+        throw cmdContext.toException(ErrorCode.INVALID_REQUEST);
       }
 
       try {
@@ -101,7 +101,7 @@ public class ImageResizeCommand extends FinishOnErrorXmlCommand<ImageResizeParam
 
       } catch (IOException e) {
         log.error("", e);
-        cmdContext.throwException(ErrorCode.ACCESS_DENIED);
+        throw cmdContext.toException(ErrorCode.ACCESS_DENIED);
       }
     }
 
@@ -118,7 +118,7 @@ public class ImageResizeCommand extends FinishOnErrorXmlCommand<ImageResizeParam
                     size.getHeight(), image.getQuality());
           } catch (IOException e) {
             log.error("", e);
-            cmdContext.throwException(ErrorCode.ACCESS_DENIED);
+            throw cmdContext.toException(ErrorCode.ACCESS_DENIED);
           }
         }
       }
@@ -127,7 +127,7 @@ public class ImageResizeCommand extends FinishOnErrorXmlCommand<ImageResizeParam
 
   @Override
   @SuppressWarnings("CollectionWithoutInitialCapacity")
-  protected ImageResizeParameter popupParams(HttpServletRequest request, CKFinderContext context) {
+  protected ImageResizeParameter parseParameters(HttpServletRequest request, CKFinderContext context) {
     ImageResizeParameter param = new ImageResizeParameter();
     param.setFileName(request.getParameter("fileName"));
     param.setNewFileName(request.getParameter("newFileName"));

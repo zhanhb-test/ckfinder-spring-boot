@@ -207,7 +207,7 @@ public class InitCommand extends XmlCommand<String> {
   }
 
   @Override
-  protected String popupParams(HttpServletRequest request, CKFinderContext context) {
+  protected String parseParameters(HttpServletRequest request, CKFinderContext context) {
     String serverName = request.getServerName();
     return serverName == null ? "localhost" : serverName;
   }

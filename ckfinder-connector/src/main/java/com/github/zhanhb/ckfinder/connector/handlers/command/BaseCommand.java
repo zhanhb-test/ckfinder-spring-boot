@@ -52,10 +52,10 @@ public abstract class BaseCommand<T> implements Command {
   public final void runCommand(HttpServletRequest request,
           HttpServletResponse response, CKFinderContext context)
           throws ConnectorException, IOException {
-    execute(popupParams(request, context), request, response, context);
+    execute(parseParameters(request, context), request, response, context);
   }
 
-  protected abstract T popupParams(HttpServletRequest request, CKFinderContext context);
+  protected abstract T parseParameters(HttpServletRequest request, CKFinderContext context);
 
   private String nullToEmpty(String s) {
     return s != null ? s : "";

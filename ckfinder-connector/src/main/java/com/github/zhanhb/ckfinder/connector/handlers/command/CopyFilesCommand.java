@@ -184,7 +184,7 @@ public class CopyFilesCommand extends FailAtEndXmlCommand<CopyMoveParameter> imp
   }
 
   @Override
-  protected CopyMoveParameter popupParams(HttpServletRequest request, CKFinderContext context) {
+  protected CopyMoveParameter parseParameters(HttpServletRequest request, CKFinderContext context) {
     String copied = request.getParameter("copied");
     int all = copied != null ? Integer.parseInt(copied) : 0;
     List<FileItem> files = RequestFileHelper.getFilesList(request, context);

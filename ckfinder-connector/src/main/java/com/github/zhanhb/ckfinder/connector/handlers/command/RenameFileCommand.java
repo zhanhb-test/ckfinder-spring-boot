@@ -131,7 +131,7 @@ public class RenameFileCommand extends FailAtEndXmlCommand<RenameFileParameter> 
   }
   
   @Override
-  protected RenameFileParameter popupParams(HttpServletRequest request, CKFinderContext context) {
+  protected RenameFileParameter parseParameters(HttpServletRequest request, CKFinderContext context) {
     RenameFileParameter param = new RenameFileParameter();
     param.setFileName(request.getParameter("fileName"));
     param.setNewFileName(request.getParameter("newFileName"));

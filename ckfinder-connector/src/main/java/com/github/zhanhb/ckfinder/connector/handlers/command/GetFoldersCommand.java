@@ -35,27 +35,28 @@ import lombok.extern.slf4j.Slf4j;
 public class GetFoldersCommand extends FinishOnErrorXmlCommand<Void> {
 
   @Override
-  protected void createXml(ConnectorElement.Builder rootElement, Void param, CommandContext cmdContext) throws ConnectorException {
+  protected void createXml(Void param, CommandContext cmdContext,
+          ConnectorElement.Builder builder) throws ConnectorException {
     CKFinderContext context = cmdContext.getCfCtx();
     cmdContext.checkType();
     cmdContext.checkAllPermission(AccessControl.FOLDER_VIEW);
 
     if (context.isDirectoryHidden(cmdContext.getCurrentFolder())) {
-      cmdContext.throwException(ErrorCode.INVALID_REQUEST);
+      throw cmdContext.toException(ErrorCode.INVALID_REQUEST);
     }
 
     Path dir = cmdContext.toPath();
 
     if (!Files.isDirectory(dir)) {
-      cmdContext.throwException(ErrorCode.FOLDER_NOT_FOUND);
+      throw cmdContext.toException(ErrorCode.FOLDER_NOT_FOUND);
     }
 
     try {
       List<Path> directories = FileUtils.listChildren(dir, true);
-      createFoldersData(rootElement, cmdContext, directories);
+      createFoldersData(builder, cmdContext, directories);
     } catch (IOException e) {
       log.error("", e);
-      cmdContext.throwException(ErrorCode.ACCESS_DENIED);
+      throw cmdContext.toException(ErrorCode.ACCESS_DENIED);
     }
   }
 
@@ -94,7 +95,7 @@ public class GetFoldersCommand extends FinishOnErrorXmlCommand<Void> {
   }
 
   @Override
-  protected Void popupParams(HttpServletRequest request, CKFinderContext context) {
+  protected Void parseParameters(HttpServletRequest request, CKFinderContext context) {
     return null;
   }
 

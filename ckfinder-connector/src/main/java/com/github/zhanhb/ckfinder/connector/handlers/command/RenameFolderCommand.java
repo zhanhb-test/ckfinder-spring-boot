@@ -41,7 +41,8 @@ public class RenameFolderCommand extends FinishOnErrorXmlCommand<String> impleme
    */
   @Override
   @SuppressWarnings("AssignmentToMethodParameter")
-  protected void createXml(ConnectorElement.Builder rootElement, String newFolderName, CommandContext cmdContext) throws ConnectorException {
+  protected void createXml(String newFolderName, CommandContext cmdContext,
+          ConnectorElement.Builder rootElement) throws ConnectorException {
     checkRequestPath(newFolderName);
     CKFinderContext context = cmdContext.getCfCtx();
     cmdContext.checkType();
@@ -53,27 +54,27 @@ public class RenameFolderCommand extends FinishOnErrorXmlCommand<String> impleme
 
     if (context.isDirectoryHidden(newFolderName)
             || FileUtils.isFolderNameInvalid(newFolderName, context)) {
-      cmdContext.throwException(ErrorCode.INVALID_NAME);
+      throw cmdContext.toException(ErrorCode.INVALID_NAME);
     }
 
     if (cmdContext.getCurrentFolder().equals("/")) {
-      cmdContext.throwException(ErrorCode.INVALID_REQUEST);
+      throw cmdContext.toException(ErrorCode.INVALID_REQUEST);
     }
 
     Path dir = cmdContext.toPath();
     if (!Files.isDirectory(dir)) {
-      cmdContext.throwException(ErrorCode.INVALID_REQUEST);
+      throw cmdContext.toException(ErrorCode.INVALID_REQUEST);
     }
     String newFolderPath = toNewFolder(newFolderName, cmdContext);
     Path newDir = cmdContext.getType().resolve(newFolderPath);
     if (Files.exists(newDir)) {
-      cmdContext.throwException(ErrorCode.ALREADY_EXIST);
+      throw cmdContext.toException(ErrorCode.ALREADY_EXIST);
     }
     try {
       Files.move(dir, newDir);
       renameThumb(newFolderPath, cmdContext);
     } catch (IOException ex) {
-      cmdContext.throwException(ErrorCode.ACCESS_DENIED);
+      throw cmdContext.toException(ErrorCode.ACCESS_DENIED);
     }
     rootElement.result(RenamedFolderElement.builder()
             .newName(newFolderName)
@@ -111,7 +112,7 @@ public class RenameFolderCommand extends FinishOnErrorXmlCommand<String> impleme
    * @return the parameter
    */
   @Override
-  protected String popupParams(HttpServletRequest request, CKFinderContext context) {
+  protected String parseParameters(HttpServletRequest request, CKFinderContext context) {
     return request.getParameter("NewFolderName");
   }
 

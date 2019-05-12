@@ -31,18 +31,19 @@ public abstract class FinishOnErrorXmlCommand<T> extends XmlCommand<T> {
     cmdContext.setResourceType(connector);
     createCurrentFolderNode(cmdContext, connector);
     connector.error(ErrorCodeElement.builder().number(0).build());
-    createXml(connector, param, cmdContext);
+    createXml(param, cmdContext, connector);
     return connector.build();
   }
 
   /**
    * abstract method to create XML nodes for commands.
    *
-   * @param rootElement XML root node
    * @param param the parameter
    * @param cmdContext command context
+   * @param builder XML root node
    * @throws ConnectorException when error occurs
    */
-  protected abstract void createXml(ConnectorElement.Builder rootElement, T param, CommandContext cmdContext) throws ConnectorException;
+  protected abstract void createXml(T param, CommandContext cmdContext,
+          ConnectorElement.Builder builder) throws ConnectorException;
 
 }

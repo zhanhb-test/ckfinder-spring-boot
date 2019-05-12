@@ -50,15 +50,15 @@ public class DownloadFileCommand extends BaseCommand<String> {
     if (!FileUtils.isFileNameValid(fileName)
             || !FileUtils.isFileExtensionAllowed(fileName,
                     cmdContext.getType())) {
-      cmdContext.throwException(ErrorCode.INVALID_REQUEST);
+      throw cmdContext.toException(ErrorCode.INVALID_REQUEST);
     }
 
     if (context.isDirectoryHidden(cmdContext.getCurrentFolder())) {
-      cmdContext.throwException(ErrorCode.INVALID_REQUEST);
+      throw cmdContext.toException(ErrorCode.INVALID_REQUEST);
     }
 
     if (context.isFileHidden(fileName)) {
-      cmdContext.throwException(ErrorCode.FILE_NOT_FOUND);
+      throw cmdContext.toException(ErrorCode.FILE_NOT_FOUND);
     }
 
     Path file = cmdContext.resolve(fileName);
@@ -84,7 +84,7 @@ public class DownloadFileCommand extends BaseCommand<String> {
    * @return the parameter
    */
   @Override
-  protected String popupParams(HttpServletRequest request, CKFinderContext context) {
+  protected String parseParameters(HttpServletRequest request, CKFinderContext context) {
     // problem with showing filename when dialog window appear
     return request.getParameter("FileName");
   }
