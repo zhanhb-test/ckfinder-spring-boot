@@ -2,7 +2,8 @@ package com.github.zhanhb.ckfinder.connector.support;
 
 import com.github.zhanhb.ckfinder.connector.api.License;
 import com.github.zhanhb.ckfinder.connector.api.LicenseFactory;
-import java.util.concurrent.atomic.AtomicReferenceArray;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import javax.annotation.Nonnull;
 
 /**
@@ -11,7 +12,7 @@ import javax.annotation.Nonnull;
  */
 public class HostLicenseFactory implements LicenseFactory {
 
-  private final AtomicReferenceArray<String> keys = new AtomicReferenceArray<>(256);
+  private final ConcurrentMap<Integer, String> keys = new ConcurrentHashMap<>(4);
 
   @Override
   @Nonnull
@@ -21,19 +22,7 @@ public class HostLicenseFactory implements LicenseFactory {
   }
 
   private String getKey(String name) {
-    int index = name.length();
-    if (index < keys.length()) {
-      String result;
-      do {
-        result = this.keys.get(index);
-        if (result != null) {
-          break;
-        }
-        result = this.generateKey(name);
-      } while (!this.keys.compareAndSet(index, null, result));
-      return result;
-    }
-    return generateKey(name);
+    return keys.computeIfAbsent(name.length(), __ -> generateKey(name));
   }
 
   private String generateKey(String name) {
