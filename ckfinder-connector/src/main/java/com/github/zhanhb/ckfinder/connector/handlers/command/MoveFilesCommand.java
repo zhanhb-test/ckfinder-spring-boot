@@ -80,13 +80,11 @@ public class MoveFilesCommand extends FailAtEndXmlCommand<CopyMoveParameter> imp
       }
       if (!attrs.isRegularFile()) {
         builder.appendError(file, ErrorCode.FILE_NOT_FOUND);
+        continue;
       }
-      if (cmdContextType != type) {
-        if (cmdContextType.isFileSizeOutOfRange(attrs.size())) {
-          builder.appendError(file, ErrorCode.UPLOADED_TOO_BIG);
-          continue;
-        }
-        // fail through
+      if (cmdContextType != type && cmdContextType.isFileSizeOutOfRange(attrs.size())) {
+        builder.appendError(file, ErrorCode.UPLOADED_TOO_BIG);
+        continue;
       }
       try {
         if (Files.isSameFile(sourceFile, destFile)) {
