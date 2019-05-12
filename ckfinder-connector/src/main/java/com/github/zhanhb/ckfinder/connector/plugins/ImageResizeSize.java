@@ -27,7 +27,7 @@ public class ImageResizeSize {
       try {
         width = requirePositive(Integer.parseInt(matcher.group(1)), "width");
         height = requirePositive(Integer.parseInt(matcher.group(2)), "height");
-        this.strVal = width + "x" + height;
+        strVal = width + "x" + height;
         return;
       } catch (NumberFormatException ignored) {
       }
@@ -36,8 +36,8 @@ public class ImageResizeSize {
   }
 
   ImageResizeSize(int width, int height) {
-    this.width = width;
-    this.height = height;
+    this.width = requirePositive(width, "width");
+    this.height = requirePositive(height, "height");
     this.strVal = width + "x" + height;
   }
 
