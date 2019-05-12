@@ -15,7 +15,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 @Configuration
 @EnableAutoConfiguration
 @WebAppConfiguration
-public class MockServlecContextConfiguration {
+public class MockServletContextConfiguration {
 
   @Bean
   public ServletContext servletContext() {

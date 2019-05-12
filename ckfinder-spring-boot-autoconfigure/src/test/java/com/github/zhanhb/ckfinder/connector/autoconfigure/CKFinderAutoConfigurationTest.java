@@ -28,7 +28,7 @@ public class CKFinderAutoConfigurationTest {
 
   @Test
   public void test() {
-    context.register(MockServlecContextConfiguration.class);
+    context.register(MockServletContextConfiguration.class);
     context.refresh();
     context.getBean(CKFinderContext.class);
   }
