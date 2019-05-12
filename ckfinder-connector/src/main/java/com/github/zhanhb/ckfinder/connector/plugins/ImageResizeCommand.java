@@ -101,7 +101,7 @@ public class ImageResizeCommand extends FinishOnErrorXmlCommand<ImageResizeParam
 
       } catch (IOException e) {
         log.error("", e);
-        throw cmdContext.toException(ErrorCode.ACCESS_DENIED);
+        throw cmdContext.toException(ErrorCode.ACCESS_DENIED).initCause(e);
       }
     }
 
@@ -118,7 +118,7 @@ public class ImageResizeCommand extends FinishOnErrorXmlCommand<ImageResizeParam
                     size.getHeight(), image.getQuality());
           } catch (IOException e) {
             log.error("", e);
-            throw cmdContext.toException(ErrorCode.ACCESS_DENIED);
+            throw cmdContext.toException(ErrorCode.ACCESS_DENIED).initCause(e);
           }
         }
       }

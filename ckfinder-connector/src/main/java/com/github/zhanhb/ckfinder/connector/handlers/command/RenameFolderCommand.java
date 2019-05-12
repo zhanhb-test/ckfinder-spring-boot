@@ -74,7 +74,7 @@ public class RenameFolderCommand extends FinishOnErrorXmlCommand<String> impleme
       Files.move(dir, newDir);
       renameThumb(newFolderPath, cmdContext);
     } catch (IOException ex) {
-      throw cmdContext.toException(ErrorCode.ACCESS_DENIED);
+      throw cmdContext.toException(ErrorCode.ACCESS_DENIED).initCause(ex);
     }
     rootElement.result(RenamedFolderElement.builder()
             .newName(newFolderName)

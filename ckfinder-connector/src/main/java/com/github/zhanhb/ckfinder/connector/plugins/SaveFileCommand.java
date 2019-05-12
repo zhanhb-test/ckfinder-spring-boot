@@ -67,7 +67,7 @@ public class SaveFileCommand extends FinishOnErrorXmlCommand<SaveFileParameter> 
       Files.write(sourceFile, content.getBytes(StandardCharsets.UTF_8));
     } catch (IOException e) {
       log.error("", e);
-      throw cmdContext.toException(ErrorCode.ACCESS_DENIED);
+      throw cmdContext.toException(ErrorCode.ACCESS_DENIED).initCause(e);
     }
   }
 

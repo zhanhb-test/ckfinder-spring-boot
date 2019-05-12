@@ -56,7 +56,7 @@ public class GetFoldersCommand extends FinishOnErrorXmlCommand<Void> {
       createFoldersData(builder, cmdContext, directories);
     } catch (IOException e) {
       log.error("", e);
-      throw cmdContext.toException(ErrorCode.ACCESS_DENIED);
+      throw cmdContext.toException(ErrorCode.ACCESS_DENIED).initCause(e);
     }
   }
 

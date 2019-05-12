@@ -69,7 +69,7 @@ public class GetFilesCommand extends FinishOnErrorXmlCommand<String> {
       createFilesData(files, rootElement, showThumbs, cmdContext);
     } catch (IOException e) {
       log.error("", e);
-      throw cmdContext.toException(ErrorCode.ACCESS_DENIED);
+      throw cmdContext.toException(ErrorCode.ACCESS_DENIED).initCause(e);
     }
   }
 

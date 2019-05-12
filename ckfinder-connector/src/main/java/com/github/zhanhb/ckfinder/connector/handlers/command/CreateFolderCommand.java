@@ -69,7 +69,7 @@ public class CreateFolderCommand extends FinishOnErrorXmlCommand<String> impleme
     try {
       Files.createDirectories(dir);
     } catch (IOException ex) {
-      throw cmdContext.toException(ErrorCode.UNAUTHORIZED);
+      throw cmdContext.toException(ErrorCode.UNAUTHORIZED).initCause(ex);
     }
 
     rootElement.result(NewFolderElement.builder().name(newFolderName).build());

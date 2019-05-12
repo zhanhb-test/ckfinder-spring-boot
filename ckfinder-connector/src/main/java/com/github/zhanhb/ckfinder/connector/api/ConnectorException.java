@@ -34,7 +34,7 @@ public class ConnectorException extends Exception {
    * @param code error code number
    */
   public ConnectorException(ErrorCode code, ResourceType type, String currentFolder) {
-    super(code.name(), null);
+    super(code.name());
     this.errorCode = code;
     this.type = type;
     this.currentFolder = currentFolder;
@@ -46,7 +46,7 @@ public class ConnectorException extends Exception {
    * @param code error code number
    */
   public ConnectorException(ErrorCode code) {
-    super(code.name(), null);
+    super(code.name());
     this.errorCode = code;
     this.type = null;
     this.currentFolder = null;
@@ -83,6 +83,12 @@ public class ConnectorException extends Exception {
 
   @Override
   public Throwable fillInStackTrace() {
+    return this;
+  }
+
+  @Override
+  public ConnectorException initCause(Throwable cause) {
+    super.initCause(cause);
     return this;
   }
 

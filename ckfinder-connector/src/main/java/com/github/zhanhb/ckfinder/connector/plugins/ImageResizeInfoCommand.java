@@ -66,7 +66,7 @@ public class ImageResizeInfoCommand extends FinishOnErrorXmlCommand<String> {
               .height(image.getHeight()).build());
     } catch (IOException e) {
       log.error("failed to access file '{}'", imageFile, e);
-      throw cmdContext.toException(ErrorCode.ACCESS_DENIED);
+      throw cmdContext.toException(ErrorCode.ACCESS_DENIED).initCause(e);
     }
   }
 
