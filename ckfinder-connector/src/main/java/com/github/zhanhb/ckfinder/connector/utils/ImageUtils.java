@@ -94,7 +94,7 @@ public class ImageUtils {
     }
     Dimension dimension = createThumbDimension(image,
             thumbnail.getMaxWidth(), thumbnail.getMaxHeight());
-    FileUtils.createPath(file);
+    FileUtils.touch(file);
     if (image.getHeight() <= dimension.height
             && image.getWidth() <= dimension.width) {
       writeUntouchedImage(originFile, file);

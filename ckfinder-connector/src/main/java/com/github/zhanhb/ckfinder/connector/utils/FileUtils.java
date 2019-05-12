@@ -218,7 +218,7 @@ public class FileUtils {
    * @param file file to create.
    * @throws IOException when IO Exception occurs.
    */
-  public static void createPath(Path file) throws IOException {
+  public static void touch(Path file) throws IOException {
     Path dir = file.getParent();
     if (dir != null) {
       Files.createDirectories(dir);
