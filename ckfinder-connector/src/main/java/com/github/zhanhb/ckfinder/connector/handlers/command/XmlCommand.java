@@ -4,7 +4,6 @@ import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.response.ConnectorElement;
 import com.github.zhanhb.ckfinder.connector.handlers.response.CurrentFolderElement;
-import com.github.zhanhb.ckfinder.connector.handlers.response.ErrorCodeElement;
 import com.github.zhanhb.ckfinder.connector.support.CommandContext;
 import com.github.zhanhb.ckfinder.connector.support.XmlCreator;
 import java.io.IOException;

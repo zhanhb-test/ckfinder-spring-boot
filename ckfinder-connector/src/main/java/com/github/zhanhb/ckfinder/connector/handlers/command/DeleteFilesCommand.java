@@ -15,7 +15,6 @@ import com.github.zhanhb.ckfinder.connector.api.AccessControl;
 import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
-import com.github.zhanhb.ckfinder.connector.handlers.parameter.DeleteFilesParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.ConnectorElement;
 import com.github.zhanhb.ckfinder.connector.handlers.response.DeleteFilesElement;
 import com.github.zhanhb.ckfinder.connector.support.CommandContext;
@@ -32,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
  * Class used to handle <code>DeleteFiles</code> command.
  */
 @Slf4j
-public class DeleteFilesCommand extends FailAtEndXmlCommand<DeleteFilesParameter> implements IPostCommand {
+public class DeleteFilesCommand extends FailAtEndXmlCommand<List<FileItem>> implements IPostCommand {
 
   /**
    * Prepares data for XML response.
@@ -43,12 +42,12 @@ public class DeleteFilesCommand extends FailAtEndXmlCommand<DeleteFilesParameter
    * @throws ConnectorException when error occurs
    */
   @Override
-  protected void createXml(DeleteFilesParameter param, CommandContext cmdContext, ConnectorElement.Builder rootElement)
+  protected void createXml(List<FileItem> files, CommandContext cmdContext, ConnectorElement.Builder rootElement)
           throws ConnectorException {
     CKFinderContext context = cmdContext.getCfCtx();
     cmdContext.checkType();
 
-    for (FileItem fileItem : param.getFiles()) {
+    for (FileItem fileItem : files) {
       if (!FileUtils.isFileNameValid(fileItem.getName())) {
         throw cmdContext.toException(ErrorCode.INVALID_REQUEST);
       }
@@ -81,7 +80,8 @@ public class DeleteFilesCommand extends FailAtEndXmlCommand<DeleteFilesParameter
     ErrorListResult.Builder builder = ErrorListResult.builder();
 
     boolean addExtraNode = false;
-    for (FileItem fileItem : param.getFiles()) {
+    int success = 0;
+    for (FileItem fileItem : files) {
       Path file = fileItem.toPath();
 
       addExtraNode = true;
@@ -92,7 +92,7 @@ public class DeleteFilesCommand extends FailAtEndXmlCommand<DeleteFilesParameter
 
       log.debug("prepare delete file '{}'", file);
       if (FileUtils.delete(file)) {
-        param.filesDeletedPlus();
+        ++success;
         fileItem.toThumbnailPath().ifPresent(thumbFile -> {
           try {
             log.debug("prepare delete thumb file '{}'", thumbFile);
@@ -109,7 +109,7 @@ public class DeleteFilesCommand extends FailAtEndXmlCommand<DeleteFilesParameter
     builder.ifError(ErrorCode.DELETE_FAILED).addErrorsTo(rootElement);
     if (addExtraNode) {
       rootElement.result(DeleteFilesElement.builder()
-              .deleted(param.getFilesDeleted())
+              .deleted(success)
               .build());
     }
   }
@@ -122,9 +122,8 @@ public class DeleteFilesCommand extends FailAtEndXmlCommand<DeleteFilesParameter
    * @return the parameter
    */
   @Override
-  protected DeleteFilesParameter parseParameters(HttpServletRequest request, CKFinderContext context) {
-    List<FileItem> files = RequestFileHelper.getFilesList(request, context);
-    return new DeleteFilesParameter(files);
+  protected List<FileItem> parseParameters(HttpServletRequest request, CKFinderContext context) {
+    return RequestFileHelper.getFilesList(request, context);
   }
 
 }

@@ -51,6 +51,8 @@ public class CopyFilesCommand extends FailAtEndXmlCommand<CopyMoveParameter> imp
     ErrorListResult.Builder builder = ErrorListResult.builder();
     ResourceType cmdContextType = cmdContext.getType();
 
+    int success = 0;
+
     for (FileItem file : param.getFiles()) {
       String name = file.getName();
       ResourceType type = file.getType();
@@ -121,13 +123,13 @@ public class CopyFilesCommand extends FailAtEndXmlCommand<CopyMoveParameter> imp
         builder.appendError(file, ErrorCode.ACCESS_DENIED);
         continue;
       }
-      param.increase();
+      ++success;
       copyThumb(file, sourceFile.relativize(destFile));
     }
     builder.ifError(ErrorCode.COPY_FAILED).addErrorsTo(rootElement);
     rootElement.result(CopyFilesElement.builder()
-            .copied(param.getNfiles())
-            .copiedTotal(param.getAll() + param.getNfiles())
+            .copied(success)
+            .copiedTotal(param.getAll() + success)
             .build());
   }
 
@@ -188,7 +190,7 @@ public class CopyFilesCommand extends FailAtEndXmlCommand<CopyMoveParameter> imp
     String copied = request.getParameter("copied");
     int all = copied != null ? Integer.parseInt(copied) : 0;
     List<FileItem> files = RequestFileHelper.getFilesList(request, context);
-    return new CopyMoveParameter(files, all);
+    return CopyMoveParameter.builder().files(files).all(all).build();
   }
 
 }

@@ -1,18 +1,17 @@
 package com.github.zhanhb.ckfinder.connector.handlers.parameter;
 
+import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 
 /**
  *
  * @author zhanhb
  */
+@Builder(builderClassName = "Builder")
 @Getter
-@Setter
 public class RenameFileParameter {
 
   private String fileName;
   private String newFileName;
-  private boolean renamed;
 
 }

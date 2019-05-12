@@ -68,31 +68,30 @@ public class RenameFileCommand extends FailAtEndXmlCommand<RenameFileParameter> 
     CKFinderContext context = cmdContext.getCfCtx();
     cmdContext.checkType();
     cmdContext.checkAllPermission(AccessControl.FILE_RENAME);
-    
+
     String fileName = param.getFileName();
     String newFileName = param.getNewFileName();
-    
+    boolean renamed = false;
+
     if (context.isForceAscii()) {
       newFileName = FileUtils.convertToAscii(newFileName);
-      param.setNewFileName(newFileName);
     }
-    
+
     ErrorListResult.Builder builder = ErrorListResult.builder();
-    
+
     boolean addExtraNode = false;
     if (!StringUtils.isEmpty(fileName) && !StringUtils.isEmpty(newFileName)) {
       addExtraNode = true;
     }
-    
+
     ErrorListResult result;
     if (!FileUtils.isFileExtensionAllowed(newFileName, cmdContext.getType())) {
       result = builder.errorCode(ErrorCode.INVALID_EXTENSION).build();
     } else {
       if (!context.isDoubleFileExtensionsAllowed()) {
         newFileName = FileUtils.renameFileWithBadExt(cmdContext.getType(), newFileName);
-        param.setNewFileName(newFileName);
       }
-      
+
       if (!FileUtils.isFileNameValid(fileName) || context.isFileHidden(fileName)) {
         result = builder.errorCode(ErrorCode.INVALID_REQUEST).build();
       } else if (!FileUtils.isFileNameValid(newFileName, context) || context.isFileHidden(newFileName)) {
@@ -100,13 +99,13 @@ public class RenameFileCommand extends FailAtEndXmlCommand<RenameFileParameter> 
       } else if (!FileUtils.isFileExtensionAllowed(fileName, cmdContext.getType())) {
         result = builder.errorCode(ErrorCode.INVALID_REQUEST).build();
       } else {
-        
+
         Path file = cmdContext.resolve(fileName);
         Path newFile = cmdContext.resolve(newFileName);
-        
+
         try {
           Files.move(file, newFile);
-          param.setRenamed(true);
+          renamed = true;
           renameThumb(param, cmdContext);
           result = builder.build();
         } catch (NoSuchFileException ex) {
@@ -114,7 +113,7 @@ public class RenameFileCommand extends FailAtEndXmlCommand<RenameFileParameter> 
         } catch (FileAlreadyExistsException ex) {
           result = builder.errorCode(ErrorCode.ALREADY_EXIST).build();
         } catch (IOException ex) {
-          param.setRenamed(false);
+          renamed = false;
           log.error("IOException", ex);
           result = builder.errorCode(ErrorCode.ACCESS_DENIED).build();
         }
@@ -123,19 +122,19 @@ public class RenameFileCommand extends FailAtEndXmlCommand<RenameFileParameter> 
     result.addErrorsTo(rootElement);
     if (addExtraNode) {
       RenamedFileElement.Builder element = RenamedFileElement.builder().name(param.getFileName());
-      if (param.isRenamed()) {
+      if (renamed) {
         element.newName(param.getNewFileName());
       }
       rootElement.result(element.build());
     }
   }
-  
+
   @Override
   protected RenameFileParameter parseParameters(HttpServletRequest request, CKFinderContext context) {
-    RenameFileParameter param = new RenameFileParameter();
-    param.setFileName(request.getParameter("fileName"));
-    param.setNewFileName(request.getParameter("newFileName"));
-    return param;
+    return RenameFileParameter.builder()
+            .fileName(request.getParameter("fileName"))
+            .newFileName(request.getParameter("newFileName"))
+            .build();
   }
-  
+
 }
