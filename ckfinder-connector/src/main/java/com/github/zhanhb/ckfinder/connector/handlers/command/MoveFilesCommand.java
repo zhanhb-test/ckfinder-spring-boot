@@ -142,12 +142,14 @@ public class MoveFilesCommand extends FailAtEndXmlCommand<CopyMoveParameter> imp
    */
   private Path handleAutoRename(Path sourceFile, Path destFile) {
     String fileName = destFile.getFileName().toString();
-    String fileNameWithoutExtension = FileUtils.getNameWithoutLongExtension(fileName);
-    String fileExtension = FileUtils.getLongExtension(fileName);
+    String[] nameAndExtension = FileUtils.getNameAndExtension(fileName);
+    String name = nameAndExtension[0];
+    StringBuilder sb = new StringBuilder(name).append("(");
+    String suffix = ")." + nameAndExtension[1];
+    int len = sb.length();
     for (int counter = 1;; counter++) {
-      String newFileName = fileNameWithoutExtension
-              + "(" + counter + ")."
-              + fileExtension;
+      sb.append(counter).append(suffix);
+      String newFileName = sb.toString();
       Path newDestFile = destFile.resolveSibling(newFileName);
       try {
         log.debug("move file, '{}'->'{}'", sourceFile, newDestFile);
@@ -159,6 +161,7 @@ public class MoveFilesCommand extends FailAtEndXmlCommand<CopyMoveParameter> imp
       } catch (IOException ex) {
         return null;
       }
+      sb.setLength(len);
     }
   }
 

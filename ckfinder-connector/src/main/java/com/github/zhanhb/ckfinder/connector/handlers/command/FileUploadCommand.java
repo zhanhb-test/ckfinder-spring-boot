@@ -207,12 +207,12 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
     String name = param.getNewFileName();
     Path file = cmdContext.resolve(name);
 
-    String nameWithoutExtension = FileUtils.getNameWithoutLongExtension(name);
-
-    if (Files.exists(file) || isProtectedName(nameWithoutExtension)) {
+    if (Files.exists(file) || isProtectedName(name)) {
+      String[] nameAndExtension = FileUtils.getNameAndExtension(name);
+      String nameWithoutExtension = nameAndExtension[0];
       @SuppressWarnings("StringBufferWithoutInitialCapacity")
       StringBuilder sb = new StringBuilder(nameWithoutExtension).append("(");
-      String suffix = ")." + FileUtils.getLongExtension(name);
+      String suffix = ")." + nameAndExtension[1];
       int len = sb.length();
       int number = 0;
       do {

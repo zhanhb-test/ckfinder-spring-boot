@@ -62,22 +62,6 @@ public class FileUtils {
   }
 
   /**
-   * Gets file extension.
-   *
-   * @param fileName name of file.
-   * @return file extension
-   */
-  @Nullable
-  public static String getLongExtension(@Nullable String fileName) {
-    int indexOf;
-    if (fileName == null || (indexOf = fileName.indexOf('.')) == -1
-            || indexOf == fileName.length() - 1) {
-      return null;
-    }
-    return fileName.substring(indexOf + 1);
-  }
-
-  /**
    * Gets file last extension.
    *
    * @param fileName name of file.
@@ -93,19 +77,13 @@ public class FileUtils {
     return fileName.substring(lastIndexOf + 1);
   }
 
-  /**
-   * Gets file name without its extension.
-   *
-   * @param fileName name of file
-   * @return file extension
-   */
-  @Nullable
-  public static String getNameWithoutLongExtension(@Nullable String fileName) {
-    int indexOf;
-    if (fileName == null || (indexOf = fileName.indexOf('.')) == -1) {
-      return null;
+  public static String[] getNameAndExtension(@NonNull String name) {
+    int indexOf = name.indexOf('.');
+    if (indexOf != -1) {
+      return new String[]{name.substring(0, indexOf), name.substring(indexOf + 1)};
+    } else {
+      return new String[]{name, ""};
     }
-    return fileName.substring(0, indexOf);
   }
 
   /**
