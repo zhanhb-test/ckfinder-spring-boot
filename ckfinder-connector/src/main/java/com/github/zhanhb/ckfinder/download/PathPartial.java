@@ -237,17 +237,13 @@ public class PathPartial {
           log.debug("serveFile: contentType='{}'", contentType);
           response.setContentType(contentType);
         }
-        if (serveContent) {
-          try (InputStream stream = Files.newInputStream(path)) {
-            copyRange(stream, ostream, range, new byte[Math.min((int) length, 8192)]);
-          }
+        try (InputStream stream = Files.newInputStream(path)) {
+          copyRange(stream, ostream, range, new byte[Math.min((int) length, 8192)]);
         }
       } else {
         int boundary = ThreadLocalRandom.current().nextInt(1 << 24);
         response.setContentType("multipart/byteranges; boundary=" + boundary + "muA");
-        if (serveContent) {
-          copy(path, ostream, ranges, contentType, new byte[Math.min((int) contentLength, 8192)], boundary);
-        }
+        copy(path, ostream, ranges, contentType, new byte[Math.min((int) contentLength, 8192)], boundary);
       }
     }
   }
