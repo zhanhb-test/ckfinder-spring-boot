@@ -25,7 +25,6 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.OptionalInt;
 import java.util.StringTokenizer;
 import java.util.concurrent.ThreadLocalRandom;
 import javax.annotation.Nonnull;
@@ -116,14 +115,20 @@ public class PathPartial {
    */
   private boolean checkIfHeaders(HttpServletRequest request, HttpServletResponse response,
           BasicFileAttributes attr, String etag) throws IOException {
-    int code = checkIfMatch(request, etag).orElseGet(()
-            -> checkIfUnmodifiedSince(request, attr).orElseGet(()
-                    -> checkIfNoneMatch(request, etag).orElseGet(()
-                    -> checkIfModifiedSince(request, attr).orElse(0)
-            )));
+    int code = checkIfMatch(request, etag);
     if (code == 0) {
-      return true;
-    } else if (code >= HttpServletResponse.SC_BAD_REQUEST) {
+      code = checkIfUnmodifiedSince(request, attr);
+      if (code == 0) {
+        code = checkIfNoneMatch(request, etag);
+        if (code == 0) {
+          code = checkIfModifiedSince(request, attr);
+          if (code == 0) {
+            return true;
+          }
+        }
+      }
+    }
+    if (code >= HttpServletResponse.SC_BAD_REQUEST) {
       response.sendError(code);
     } else {
       response.setStatus(code);
@@ -349,15 +354,15 @@ public class PathPartial {
    * @param request The servlet request we are processing
    * @param etag ETag of the entity
    */
-  private OptionalInt checkIfMatch(HttpServletRequest request, String etag) {
+  private int checkIfMatch(HttpServletRequest request, String etag) {
     String headerValue = request.getHeader(HttpHeaders.IF_MATCH);
     if (headerValue != null && headerValue.indexOf('*') == -1
             && !anyMatches(headerValue, etag)) {
       // If none of the given ETags match, 412 Precondition failed is
       // sent back
-      return OptionalInt.of(HttpServletResponse.SC_PRECONDITION_FAILED);
+      return HttpServletResponse.SC_PRECONDITION_FAILED;
     }
-    return OptionalInt.empty();
+    return 0;
   }
 
   /**
@@ -367,7 +372,7 @@ public class PathPartial {
    * @param attr File attributes
    */
   @SuppressWarnings("NestedAssignment")
-  private OptionalInt checkIfModifiedSince(HttpServletRequest request, BasicFileAttributes attr) {
+  private int checkIfModifiedSince(HttpServletRequest request, BasicFileAttributes attr) {
     try {
       long headerValue;
       // If an If-None-Match header has been specified, if modified since
@@ -377,11 +382,11 @@ public class PathPartial {
               && attr.lastModifiedTime().toMillis() < headerValue + 1000) {
         // The entity has not been modified since the date
         // specified by the client. This is not an error case.
-        return OptionalInt.of(HttpServletResponse.SC_NOT_MODIFIED);
+        return HttpServletResponse.SC_NOT_MODIFIED;
       }
     } catch (IllegalArgumentException ignored) {
     }
-    return OptionalInt.empty();
+    return 0;
   }
 
   /**
@@ -390,7 +395,7 @@ public class PathPartial {
    * @param request The servlet request we are processing
    * @param etag ETag of the entity
    */
-  private OptionalInt checkIfNoneMatch(HttpServletRequest request, String etag) {
+  private int checkIfNoneMatch(HttpServletRequest request, String etag) {
     String headerValue = request.getHeader(HttpHeaders.IF_NONE_MATCH);
     if (headerValue != null && (headerValue.equals("*") || anyMatches(headerValue, etag))) {
       // For GET and HEAD, we should respond with
@@ -399,12 +404,12 @@ public class PathPartial {
       // back.
       String method = request.getMethod();
       if ("GET".equals(method) || "HEAD".equals(method)) {
-        return OptionalInt.of(HttpServletResponse.SC_NOT_MODIFIED);
+        return HttpServletResponse.SC_NOT_MODIFIED;
       } else {
-        return OptionalInt.of(HttpServletResponse.SC_PRECONDITION_FAILED);
+        return HttpServletResponse.SC_PRECONDITION_FAILED;
       }
     }
-    return OptionalInt.empty();
+    return 0;
   }
 
   /**
@@ -413,7 +418,7 @@ public class PathPartial {
    * @param request The servlet request we are processing
    * @param attr File attributes
    */
-  private OptionalInt checkIfUnmodifiedSince(HttpServletRequest request, BasicFileAttributes attr) {
+  private int checkIfUnmodifiedSince(HttpServletRequest request, BasicFileAttributes attr) {
     if (request.getHeader(HttpHeaders.IF_MATCH) == null) {
       try {
         long lastModified = attr.lastModifiedTime().toMillis();
@@ -421,13 +426,13 @@ public class PathPartial {
         if (headerValue != -1 && lastModified >= headerValue + 1000) {
           // The entity has not been modified since the date
           // specified by the client. This is not an error case.
-          return OptionalInt.of(HttpServletResponse.SC_PRECONDITION_FAILED);
+          return HttpServletResponse.SC_PRECONDITION_FAILED;
         }
       } catch (IllegalArgumentException ex) {
-        return OptionalInt.of(HttpServletResponse.SC_PRECONDITION_FAILED);
+        return HttpServletResponse.SC_PRECONDITION_FAILED;
       }
     }
-    return OptionalInt.empty();
+    return 0;
   }
 
   /**
