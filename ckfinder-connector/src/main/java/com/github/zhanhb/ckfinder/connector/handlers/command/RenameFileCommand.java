@@ -58,7 +58,6 @@ public class RenameFileCommand extends FailAtEndXmlCommand<RenameFileParameter> 
    *
    * @param param the parameter
    * @param cmdContext command context
-   * @return error code or null if it's correct.
    * @throws ConnectorException when error occurs
    */
   @Override

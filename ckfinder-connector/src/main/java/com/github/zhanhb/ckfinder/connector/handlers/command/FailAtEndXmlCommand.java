@@ -39,7 +39,6 @@ public abstract class FailAtEndXmlCommand<T> extends XmlCommand<T> {
    * @param param the parameter
    * @param cmdContext command context
    * @param builder XML root node
-   * @return the warning code or null if it's correct.
    * {@link com.github.zhanhb.ckfinder.connector.api.ErrorCode} if no error
    * occurred.
    * @throws ConnectorException when error occurs

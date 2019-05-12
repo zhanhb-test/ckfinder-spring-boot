@@ -36,9 +36,8 @@ public class DeleteFilesCommand extends FailAtEndXmlCommand<List<FileItem>> impl
   /**
    * Prepares data for XML response.
    *
-   * @param param the parameter
+   * @param files the files
    * @param cmdContext command context
-   * @return error code or null if action ended with success.
    * @throws ConnectorException when error occurs
    */
   @Override
