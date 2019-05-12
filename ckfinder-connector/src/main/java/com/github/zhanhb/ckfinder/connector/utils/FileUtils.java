@@ -249,18 +249,6 @@ public class FileUtils {
   }
 
   /**
-   * check if file size isn't bigger then max size for type.
-   *
-   * @param type resource type
-   * @param fileSize file size
-   * @return true if file size isn't bigger then max size for type.
-   */
-  public static boolean isFileSizeOutOfRange(ResourceType type, long fileSize) {
-    final long maxSize = type.getMaxSize();
-    return maxSize != 0 && maxSize <= fileSize;
-  }
-
-  /**
    * Checks if folder has any sub directory but respects ACL and hide directory
    * setting from context.
    *

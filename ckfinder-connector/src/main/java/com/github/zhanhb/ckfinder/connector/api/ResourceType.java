@@ -51,6 +51,17 @@ public interface ResourceType {
    */
   long getMaxSize();
 
+  /**
+   * check if file size isn't bigger then max size for type.
+   *
+   * @param fileSize file size
+   * @return true if file size isn't bigger then max size for type.
+   */
+  default boolean isFileSizeOutOfRange(long fileSize) {
+    final long maxSize = getMaxSize();
+    return maxSize != 0 && fileSize > maxSize;
+  }
+
   Path resolve(String... names);
 
   Optional<Path> resolveThumbnail(String... names);

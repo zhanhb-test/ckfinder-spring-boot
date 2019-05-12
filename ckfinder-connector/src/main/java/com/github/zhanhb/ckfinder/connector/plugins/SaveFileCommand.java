@@ -38,30 +38,33 @@ public class SaveFileCommand extends FinishOnErrorXmlCommand<SaveFileParameter> 
 
     cmdContext.checkAllPermission(AccessControl.FILE_DELETE);
 
-    if (param.getFileName() == null || param.getFileName().isEmpty()) {
+    String fileName = param.getFileName();
+    String content = param.getFileContent();
+
+    if (fileName == null || fileName.isEmpty()) {
       cmdContext.throwException(ErrorCode.INVALID_NAME);
     }
 
-    if (param.getFileContent() == null || param.getFileContent().isEmpty()) {
+    if (content == null || content.isEmpty()) {
       cmdContext.throwException(ErrorCode.INVALID_REQUEST);
     }
 
-    if (!FileUtils.isFileExtensionAllowed(param.getFileName(), cmdContext.getType())) {
+    if (!FileUtils.isFileExtensionAllowed(fileName, cmdContext.getType())) {
       cmdContext.throwException(ErrorCode.INVALID_EXTENSION);
     }
 
-    if (!FileUtils.isFileNameValid(param.getFileName())) {
+    if (!FileUtils.isFileNameValid(fileName)) {
       cmdContext.throwException(ErrorCode.INVALID_REQUEST);
     }
 
-    Path sourceFile = cmdContext.resolve(param.getFileName());
+    Path sourceFile = cmdContext.resolve(fileName);
 
     if (!Files.isRegularFile(sourceFile)) {
       cmdContext.throwException(ErrorCode.FILE_NOT_FOUND);
     }
 
     try {
-      Files.write(sourceFile, param.getFileContent().getBytes(StandardCharsets.UTF_8));
+      Files.write(sourceFile, content.getBytes(StandardCharsets.UTF_8));
     } catch (IOException e) {
       log.error("", e);
       cmdContext.throwException(ErrorCode.ACCESS_DENIED);

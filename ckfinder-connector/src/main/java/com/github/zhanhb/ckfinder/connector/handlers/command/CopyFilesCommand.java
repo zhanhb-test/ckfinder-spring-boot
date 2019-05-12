@@ -15,6 +15,7 @@ import com.github.zhanhb.ckfinder.connector.api.AccessControl;
 import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
+import com.github.zhanhb.ckfinder.connector.api.ResourceType;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.CopyMoveParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.Connector;
 import com.github.zhanhb.ckfinder.connector.handlers.response.CopyFiles;
@@ -56,22 +57,25 @@ public class CopyFilesCommand extends FailAtEndXmlCommand<CopyMoveParameter> imp
     cmdContext.checkFilePostParam(param.getFiles(), AccessControl.FILE_VIEW);
 
     ErrorListResult.Builder builder = ErrorListResult.builder();
+    ResourceType cmdContextType = cmdContext.getType();
 
     for (FileItem file : param.getFiles()) {
-      if (!FileUtils.isFileExtensionAllowed(file.getName(), cmdContext.getType())) {
+      String name = file.getName();
+      ResourceType type = file.getType();
+      if (!FileUtils.isFileExtensionAllowed(name, cmdContextType)) {
         builder.appendError(file, ErrorCode.INVALID_EXTENSION);
         continue;
       }
       // check #4 (extension) - when copy to another resource type,
       //double check extension
-      if (cmdContext.getType() != file.getType()
-              && !FileUtils.isFileExtensionAllowed(file.getName(), file.getType())) {
+      if (cmdContextType != type
+              && !FileUtils.isFileExtensionAllowed(name, type)) {
         builder.appendError(file, ErrorCode.INVALID_EXTENSION);
         continue;
       }
 
       Path sourceFile = file.toPath();
-      Path destFile = cmdContext.resolve(file.getName());
+      Path destFile = cmdContext.resolve(name);
 
       BasicFileAttributes attrs;
       try {
@@ -83,9 +87,8 @@ public class CopyFilesCommand extends FailAtEndXmlCommand<CopyMoveParameter> imp
       if (!attrs.isRegularFile()) {
         builder.appendError(file, ErrorCode.FILE_NOT_FOUND);
       }
-      if (cmdContext.getType() != file.getType()) {
-        long maxSize = cmdContext.getType().getMaxSize();
-        if (maxSize != 0 && maxSize < attrs.size()) {
+      if (cmdContextType != type) {
+        if (cmdContextType.isFileSizeOutOfRange(attrs.size())) {
           builder.appendError(file, ErrorCode.UPLOADED_TOO_BIG);
           continue;
         }

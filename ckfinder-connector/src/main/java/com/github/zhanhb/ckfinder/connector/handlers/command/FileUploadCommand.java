@@ -95,7 +95,7 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
       cmdContext.checkType();
       uploadFile(request, param, cmdContext);
       uploaded = true;
-      uri = cmdContext.getType().getUrl() + cmdContext.getCurrentFolder() 
+      uri = cmdContext.getType().getUrl() + cmdContext.getCurrentFolder()
               + FileUtils.encodeURIComponent(param.getNewFileName());
       checkParam(param);
     } catch (ConnectorException ex) {
@@ -184,7 +184,7 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
         param.throwException(ErrorCode.UPLOADED_TOO_BIG);
       }
       ImageUtils.createTmpThumb(item, file, context);
-      if (csas && FileUtils.isFileSizeOutOfRange(cmdContext.getType(), Files.size(file))) {
+      if (csas && cmdContext.getType().isFileSizeOutOfRange(Files.size(file))) {
         Files.deleteIfExists(file);
         param.throwException(ErrorCode.UPLOADED_TOO_BIG);
       }
@@ -271,7 +271,7 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
     param.setNewFileName(newFileName);
     Path file = cmdContext.resolve(getFinalFileName(cmdContext, param));
     if ((!ImageUtils.isImageExtension(file) || !context.isCheckSizeAfterScaling())
-            && FileUtils.isFileSizeOutOfRange(resourceType, item.getSize())) {
+            && resourceType.isFileSizeOutOfRange(item.getSize())) {
       param.throwException(ErrorCode.UPLOADED_TOO_BIG);
     }
 
