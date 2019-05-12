@@ -34,13 +34,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class DeleteFilesCommand extends FailAtEndXmlCommand<DeleteFilesParameter> implements IPostCommand {
 
-  @Override
-  protected void addResultNode(ConnectorElement.Builder rootElement, DeleteFilesParameter param) {
-    rootElement.result(DeleteFilesElement.builder()
-            .deleted(param.getFilesDeleted())
-            .build());
-  }
-
   /**
    * Prepares data for XML response.
    *
@@ -50,7 +43,7 @@ public class DeleteFilesCommand extends FailAtEndXmlCommand<DeleteFilesParameter
    * @throws ConnectorException when error occurs
    */
   @Override
-  protected ErrorListResult applyData(DeleteFilesParameter param, CommandContext cmdContext)
+  protected void createXml(DeleteFilesParameter param, CommandContext cmdContext, ConnectorElement.Builder rootElement)
           throws ConnectorException {
     CKFinderContext context = cmdContext.getCfCtx();
     cmdContext.checkType();
@@ -87,10 +80,11 @@ public class DeleteFilesCommand extends FailAtEndXmlCommand<DeleteFilesParameter
 
     ErrorListResult.Builder builder = ErrorListResult.builder();
 
+    boolean addExtraNode = false;
     for (FileItem fileItem : param.getFiles()) {
       Path file = fileItem.toPath();
 
-      builder.addResultNode(true);
+      addExtraNode = true;
       if (!Files.exists(file)) {
         builder.appendError(fileItem, ErrorCode.FILE_NOT_FOUND);
         continue;
@@ -112,7 +106,12 @@ public class DeleteFilesCommand extends FailAtEndXmlCommand<DeleteFilesParameter
         builder.appendError(fileItem, ErrorCode.ACCESS_DENIED);
       }
     }
-    return builder.ifError(ErrorCode.DELETE_FAILED);
+    builder.ifError(ErrorCode.DELETE_FAILED).addErrorsTo(rootElement);
+    if (addExtraNode) {
+      rootElement.result(DeleteFilesElement.builder()
+              .deleted(param.getFilesDeleted())
+              .build());
+    }
   }
 
   /**

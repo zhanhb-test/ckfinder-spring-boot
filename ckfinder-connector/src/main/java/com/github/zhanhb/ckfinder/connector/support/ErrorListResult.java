@@ -2,6 +2,7 @@ package com.github.zhanhb.ckfinder.connector.support;
 
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.handlers.response.ConnectorElement;
+import com.github.zhanhb.ckfinder.connector.handlers.response.ErrorCodeElement;
 import com.github.zhanhb.ckfinder.connector.handlers.response.ErrorElement;
 import com.github.zhanhb.ckfinder.connector.handlers.response.ErrorsElement;
 import java.util.List;
@@ -24,7 +25,6 @@ public class ErrorListResult {
    */
   @Singular
   private List<ErrorElement> errors;
-  private boolean addResultNode;
   private ErrorCode errorCode;
 
   /**
@@ -33,8 +33,14 @@ public class ErrorListResult {
    * @param rootElement XML root element
    */
   public void addErrorsTo(ConnectorElement.Builder rootElement) {
-    if (!errors.isEmpty()) {
-      rootElement.errors(ErrorsElement.builder().errors(errors).build());
+    ErrorCode error = errorCode;
+    int code = error != null ? error.getCode() : 0;
+    rootElement.error(
+            ErrorCodeElement.builder().number(code).build()
+    );
+    List<ErrorElement> errorElements = errors;
+    if (!errorElements.isEmpty()) {
+      rootElement.errors(ErrorsElement.builder().errors(errorElements).build());
     }
   }
 

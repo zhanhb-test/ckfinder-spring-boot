@@ -13,6 +13,7 @@ package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.handlers.response.ConnectorElement;
+import com.github.zhanhb.ckfinder.connector.handlers.response.ErrorCodeElement;
 import com.github.zhanhb.ckfinder.connector.support.CommandContext;
 
 /**
@@ -29,7 +30,7 @@ public abstract class FinishOnErrorXmlCommand<T> extends XmlCommand<T> {
     ConnectorElement.Builder connector = ConnectorElement.builder();
     cmdContext.setResourceType(connector);
     createCurrentFolderNode(cmdContext, connector);
-    createErrorNode(connector, 0);
+    connector.error(ErrorCodeElement.builder().number(0).build());
     createXml(connector, param, cmdContext);
     return connector.build();
   }

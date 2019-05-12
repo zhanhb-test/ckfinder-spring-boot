@@ -51,9 +51,6 @@ public abstract class XmlCommand<T> extends BaseCommand<T> {
   abstract ConnectorElement buildConnector(T param, CommandContext cmdContext)
           throws ConnectorException;
 
-  final void createErrorNode(ConnectorElement.Builder rootElement, int code) {
-    rootElement.error(ErrorCodeElement.builder().number(code).build());
-  }
 
   /**
    * creates <code>CurrentFolderElement</code>.

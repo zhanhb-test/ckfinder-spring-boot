@@ -40,15 +40,7 @@ import lombok.extern.slf4j.Slf4j;
 public class CopyFilesCommand extends FailAtEndXmlCommand<CopyMoveParameter> implements IPostCommand {
 
   @Override
-  protected void addResultNode(ConnectorElement.Builder rootElement, CopyMoveParameter param) {
-    rootElement.result(CopyFilesElement.builder()
-            .copied(param.getNfiles())
-            .copiedTotal(param.getAll() + param.getNfiles())
-            .build());
-  }
-
-  @Override
-  protected ErrorListResult applyData(CopyMoveParameter param, CommandContext cmdContext)
+  protected void createXml(CopyMoveParameter param, CommandContext cmdContext, ConnectorElement.Builder rootElement)
           throws ConnectorException {
     cmdContext.checkType();
     cmdContext.checkAllPermission(AccessControl.FILE_RENAME
@@ -132,7 +124,11 @@ public class CopyFilesCommand extends FailAtEndXmlCommand<CopyMoveParameter> imp
       param.increase();
       copyThumb(file, sourceFile.relativize(destFile));
     }
-    return builder.addResultNode(true).ifError(ErrorCode.COPY_FAILED);
+    builder.ifError(ErrorCode.COPY_FAILED).addErrorsTo(rootElement);
+    rootElement.result(CopyFilesElement.builder()
+            .copied(param.getNfiles())
+            .copiedTotal(param.getAll() + param.getNfiles())
+            .build());
   }
 
   /**

@@ -19,6 +19,7 @@ import com.github.zhanhb.ckfinder.connector.api.ResourceType;
 import com.github.zhanhb.ckfinder.connector.api.ThumbnailProperties;
 import com.github.zhanhb.ckfinder.connector.handlers.response.ConnectorElement;
 import com.github.zhanhb.ckfinder.connector.handlers.response.ConnectorInfoElement;
+import com.github.zhanhb.ckfinder.connector.handlers.response.ErrorCodeElement;
 import com.github.zhanhb.ckfinder.connector.handlers.response.PluginInfosElement;
 import com.github.zhanhb.ckfinder.connector.handlers.response.ResourceTypeElement;
 import com.github.zhanhb.ckfinder.connector.handlers.response.ResourceTypesElement;
@@ -53,7 +54,7 @@ public class InitCommand extends XmlCommand<String> {
     ConnectorElement.Builder rootElement = ConnectorElement.builder();
     CKFinderContext context = cmdContext.getCfCtx();
     cmdContext.setResourceType(rootElement);
-    createErrorNode(rootElement, 0);
+    rootElement.error(ErrorCodeElement.builder().number(0).build());
     createConnectorData(rootElement, host, context);
     createResourceTypesData(rootElement, cmdContext, context);
     createPluginsData(rootElement, context);

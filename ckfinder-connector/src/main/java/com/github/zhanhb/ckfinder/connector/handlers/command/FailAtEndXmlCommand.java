@@ -12,10 +12,8 @@
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
-import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.handlers.response.ConnectorElement;
 import com.github.zhanhb.ckfinder.connector.support.CommandContext;
-import com.github.zhanhb.ckfinder.connector.support.ErrorListResult;
 
 /**
  * Base class to handle XML commands with error list.
@@ -30,36 +28,23 @@ public abstract class FailAtEndXmlCommand<T> extends XmlCommand<T> {
           throws ConnectorException {
     ConnectorElement.Builder connector = ConnectorElement.builder();
     cmdContext.setResourceType(connector);
-    ErrorListResult result = applyData(param, cmdContext);
-    ErrorCode error = result.getErrorCode();
-    int errorCode = error != null ? error.getCode() : 0;
     createCurrentFolderNode(cmdContext, connector);
-    createErrorNode(connector, errorCode);
-    result.addErrorsTo(connector);
-    if (result.isAddResultNode()) {
-      addResultNode(connector, param);
-    }
+    createXml(param, cmdContext, connector);
     return connector.build();
   }
-
-  /**
-   * abstract method to create XML nodes for commands.
-   *
-   * @param rootElement XML root node
-   * @param param the parameter
-   */
-  protected abstract void addResultNode(ConnectorElement.Builder rootElement, T param);
 
   /**
    * gets all necessary data to create XML response.
    *
    * @param param the parameter
    * @param cmdContext command context
+   * @param builder XML root node
    * @return the warning code or null if it's correct.
    * {@link com.github.zhanhb.ckfinder.connector.api.ErrorCode} if no error
    * occurred.
    * @throws ConnectorException when error occurs
    */
-  protected abstract ErrorListResult applyData(T param, CommandContext cmdContext) throws ConnectorException;
+  protected abstract void createXml(T param, CommandContext cmdContext,
+          ConnectorElement.Builder builder) throws ConnectorException;
 
 }
