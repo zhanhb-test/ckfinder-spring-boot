@@ -8,4 +8,8 @@
   </parent>
   <artifactId>ckfinder-spring-boot-sample-xml</artifactId>
   <name>CKFinder Spring Boot Sample xml</name>
+
+  <properties>
+    <module.name>com.github.zhanhb.ckfinder.spring.boot.sample.xml</module.name>
+  </properties>
 </project>

@@ -9,6 +9,10 @@
   <artifactId>ckfinder-spring-boot-sample-webjars</artifactId>
   <name>CKFinder Spring Boot Sample webjars</name>
 
+  <properties>
+    <module.name>com.github.zhanhb.ckfinder.spring.boot.sample.properties</module.name>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>

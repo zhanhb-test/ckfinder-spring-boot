@@ -9,6 +9,10 @@
   <artifactId>ckfinder-spring-boot-sample-yml</artifactId>
   <name>CKFinder Spring Boot Sample yml</name>
 
+  <properties>
+    <module.name>com.github.zhanhb.ckfinder.spring.boot.sample.yml</module.name>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>

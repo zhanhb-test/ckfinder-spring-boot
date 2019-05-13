@@ -7,8 +7,20 @@
     <version>${revision}</version>
   </parent>
   <artifactId>ckfinder-connector</artifactId>
-  <packaging>bundle</packaging>
   <name>CKFinder Connector</name>
+
+  <properties>
+    <module.name>com.github.zhanhb.ckfinder.connector</module.name>
+    <osgi.export>com.github.zhanhb.ckfinder.*</osgi.export>
+    <osgi.import>javax.annotation;resolution:=optional,
+      javax.servlet.*;version="[3.1,5)",
+      javax.imageio,
+      javax.xml.*,
+      net.coobird.*;version="0.4.8",
+      org.w3c.dom;resolution:=optional,
+      org.xml.sax;resolution:=optional,
+      org.springframework.*;version="[5.1,6)"</osgi.import>
+  </properties>
 
   <dependencies>
     <dependency>
@@ -52,43 +64,8 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-bundle-plugin</artifactId>
-        <extensions>true</extensions>
-        <executions>
-          <execution>
-            <id>bundle-manifest</id>
-            <phase>process-classes</phase>
-            <goals>
-              <goal>manifest</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <instructions>
-            <Export-Package>com.github.zhanhb.ckfinder.*</Export-Package>
-            <Import-Package>javax.annotation;resolution:=optional,
-              javax.servlet.*;version="[3.1,5)",
-              javax.imageio,
-              javax.xml.*,
-              net.coobird.*;version="0.4.8",
-              org.w3c.dom;resolution:=optional,
-              org.xml.sax;resolution:=optional,
-              org.springframework.*;version="[5.1,6)"</Import-Package>
-            <Bundle-DocURL>https://github.com/zhanhb/ckfinder-spring-boot</Bundle-DocURL>
-          </instructions>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <configuration>
-          <archive>
-            <manifestEntries>
-              <Automatic-Module-Name>com.github.zhanhb.ckfinder.connector</Automatic-Module-Name>
-            </manifestEntries>
-          </archive>
-        </configuration>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
       </plugin>
     </plugins>
   </build>

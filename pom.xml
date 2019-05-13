@@ -75,6 +75,12 @@
     <guava.version>27.1-jre</guava.version>
     <jacoco-maven-plugin.version>0.8.3</jacoco-maven-plugin.version>
     <maven-bundle-plugin.version>4.2.0</maven-bundle-plugin.version>
+    <module.name>com.github.zhanhb.ckfinder</module.name>
+    <osgi.dynamicImport />
+    <osgi.export>${project.groupId}.*;version=${project.version};-noimport:=true</osgi.export>
+    <osgi.import>*</osgi.import>
+    <osgi.private />
+    <osgi.symbolicName>${project.groupId}.${project.artifactId}</osgi.symbolicName>
     <revision>0.0.1.BUILD-SNAPSHOT</revision>
     <sortpom-maven-plugin.version>2.10.0</sortpom-maven-plugin.version>
     <start-class />
@@ -161,6 +167,34 @@
           <groupId>org.apache.felix</groupId>
           <artifactId>maven-bundle-plugin</artifactId>
           <version>${maven-bundle-plugin.version}</version>
+          <executions>
+            <execution>
+              <id>bundle-manifest</id>
+              <phase>process-classes</phase>
+              <goals>
+                <goal>manifest</goal>
+              </goals>
+            </execution>
+          </executions>
+          <configuration>
+            <excludeDependencies>true</excludeDependencies>
+            <manifestLocation>${project.build.directory}/osgi</manifestLocation>
+            <supportedProjectTypes>
+              <supportedProjectType>jar</supportedProjectType>
+              <supportedProjectType>bundle</supportedProjectType>
+              <supportedProjectType>war</supportedProjectType>
+              <supportedProjectType>maven-plugin</supportedProjectType>
+            </supportedProjectTypes>
+            <instructions>
+              <_nouses>true</_nouses>
+              <Bundle-SymbolicName>${osgi.symbolicName}</Bundle-SymbolicName>
+              <Export-Package>${osgi.export}</Export-Package>
+              <Private-Package>${osgi.private}</Private-Package>
+              <Import-Package>${osgi.import}</Import-Package>
+              <DynamicImport-Package>${osgi.dynamicImport}</DynamicImport-Package>
+              <Bundle-DocURL>${project.url}</Bundle-DocURL>
+            </instructions>
+          </configuration>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -190,6 +224,11 @@
         <artifactId>sortpom-maven-plugin</artifactId>
       </plugin>
       <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+      </plugin>
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
@@ -206,7 +245,9 @@
         <artifactId>maven-jar-plugin</artifactId>
         <configuration>
           <archive>
+            <manifestFile>${project.build.directory}/osgi/MANIFEST.MF</manifestFile>
             <manifestEntries>
+              <Automatic-Module-Name>${module.name}</Automatic-Module-Name>
               <Built-By>zhanhb</Built-By>
             </manifestEntries>
             <manifest>
@@ -304,7 +345,7 @@
 
   <profiles>
     <profile>
-      <id>build</id>
+      <id>netbeans</id>
       <activation>
         <activeByDefault>true</activeByDefault>
       </activation>

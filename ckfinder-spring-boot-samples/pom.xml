@@ -10,6 +10,7 @@
   <packaging>pom</packaging>
   <name>CKFinder Spring Boot Samples</name>
   <description>Spring Boot Samples for CKFinder</description>
+
   <modules>
     <module>ckfinder-spring-boot-sample-yml</module>
     <module>ckfinder-spring-boot-sample-xml</module>
