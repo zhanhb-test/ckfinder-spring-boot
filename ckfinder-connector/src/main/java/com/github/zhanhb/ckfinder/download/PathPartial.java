@@ -113,20 +113,69 @@ public class PathPartial {
    * and false if any of the conditions is not satisfied, in which case request
    * processing is stopped
    */
+  @SuppressWarnings("NestedAssignment")
   private boolean checkIfHeaders(HttpServletRequest request, HttpServletResponse response,
           BasicFileAttributes attr, String etag) throws IOException {
-    int code = checkIfMatch(request, etag);
-    if (code == 0) {
-      code = checkIfUnmodifiedSince(request, attr);
-      if (code == 0) {
-        code = checkIfNoneMatch(request, etag);
-        if (code == 0) {
-          code = checkIfModifiedSince(request, attr);
-          if (code == 0) {
-            return true;
+    int code;
+    //noinspection LoopStatementThatDoesntLoop
+    while (true) {
+      {
+        String ifMatch = request.getHeader(HttpHeaders.IF_MATCH);
+        if (ifMatch != null) {
+          if (ifMatch.indexOf('*') == -1 && !anyMatches(ifMatch, etag)) {
+            // If none of the given ETags match, 412 Precondition failed is
+            // sent back
+            code = HttpServletResponse.SC_PRECONDITION_FAILED;
+            break;
+          }
+        } else {
+          try {
+            long lastModified = attr.lastModifiedTime().toMillis();
+            long headerValue;
+            if ((headerValue = request.getDateHeader(HttpHeaders.IF_UNMODIFIED_SINCE)) != -1
+                    && lastModified >= headerValue + 1000) {
+              // The entity has not been modified since the date
+              // specified by the client. This is not an error case.
+              code = HttpServletResponse.SC_PRECONDITION_FAILED;
+              break;
+            }
+          } catch (IllegalArgumentException ex) {
+            code = HttpServletResponse.SC_PRECONDITION_FAILED;
+            break;
           }
         }
       }
+      {
+        String ifNoneMatch = request.getHeader(HttpHeaders.IF_NONE_MATCH);
+        if (ifNoneMatch != null) {
+          if ("*".equals(ifNoneMatch) || anyMatches(ifNoneMatch, etag)) {
+            // For GET and HEAD, we should respond with
+            // 304 Not Modified.
+            // For every other method, 412 Precondition Failed is sent
+            // back.
+            String method = request.getMethod();
+            code = ("GET".equals(method) || "HEAD".equals(method))
+                    ? HttpServletResponse.SC_NOT_MODIFIED
+                    : HttpServletResponse.SC_PRECONDITION_FAILED;
+            break;
+          }
+        } else {
+          try {
+            long headerValue;
+            // If an If-None-Match header has been specified, if modified since
+            // is ignored.
+            if ((headerValue = request.getDateHeader(HttpHeaders.IF_MODIFIED_SINCE)) != -1
+                    && attr.lastModifiedTime().toMillis() < headerValue + 1000) {
+              // The entity has not been modified since the date
+              // specified by the client. This is not an error case.
+              code = HttpServletResponse.SC_NOT_MODIFIED;
+              break;
+            }
+          } catch (IllegalArgumentException ignored) {
+          }
+        }
+      }
+      return true;
     }
     if (code >= HttpServletResponse.SC_BAD_REQUEST) {
       response.sendError(code);
@@ -342,93 +391,6 @@ public class PathPartial {
     response.addHeader(HttpHeaders.CONTENT_RANGE, "bytes */" + fileLength);
     response.sendError(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
     return null;
-  }
-
-  /**
-   * Check if the if-match condition is satisfied.
-   *
-   * @param request The servlet request we are processing
-   * @param etag ETag of the entity
-   */
-  private int checkIfMatch(HttpServletRequest request, String etag) {
-    String headerValue = request.getHeader(HttpHeaders.IF_MATCH);
-    if (headerValue != null && headerValue.indexOf('*') == -1
-            && !anyMatches(headerValue, etag)) {
-      // If none of the given ETags match, 412 Precondition failed is
-      // sent back
-      return HttpServletResponse.SC_PRECONDITION_FAILED;
-    }
-    return 0;
-  }
-
-  /**
-   * Check if the if-modified-since condition is satisfied.
-   *
-   * @param request The servlet request we are processing
-   * @param attr File attributes
-   */
-  @SuppressWarnings("NestedAssignment")
-  private int checkIfModifiedSince(HttpServletRequest request, BasicFileAttributes attr) {
-    try {
-      long headerValue;
-      // If an If-None-Match header has been specified, if modified since
-      // is ignored.
-      if (request.getHeader(HttpHeaders.IF_NONE_MATCH) == null
-              && (headerValue = request.getDateHeader(HttpHeaders.IF_MODIFIED_SINCE)) != -1
-              && attr.lastModifiedTime().toMillis() < headerValue + 1000) {
-        // The entity has not been modified since the date
-        // specified by the client. This is not an error case.
-        return HttpServletResponse.SC_NOT_MODIFIED;
-      }
-    } catch (IllegalArgumentException ignored) {
-    }
-    return 0;
-  }
-
-  /**
-   * Check if the if-none-match condition is satisfied.
-   *
-   * @param request The servlet request we are processing
-   * @param etag ETag of the entity
-   */
-  private int checkIfNoneMatch(HttpServletRequest request, String etag) {
-    String headerValue = request.getHeader(HttpHeaders.IF_NONE_MATCH);
-    if (headerValue != null && (headerValue.equals("*") || anyMatches(headerValue, etag))) {
-      // For GET and HEAD, we should respond with
-      // 304 Not Modified.
-      // For every other method, 412 Precondition Failed is sent
-      // back.
-      String method = request.getMethod();
-      if ("GET".equals(method) || "HEAD".equals(method)) {
-        return HttpServletResponse.SC_NOT_MODIFIED;
-      } else {
-        return HttpServletResponse.SC_PRECONDITION_FAILED;
-      }
-    }
-    return 0;
-  }
-
-  /**
-   * Check if the if-unmodified-since condition is satisfied.
-   *
-   * @param request The servlet request we are processing
-   * @param attr File attributes
-   */
-  private int checkIfUnmodifiedSince(HttpServletRequest request, BasicFileAttributes attr) {
-    if (request.getHeader(HttpHeaders.IF_MATCH) == null) {
-      try {
-        long lastModified = attr.lastModifiedTime().toMillis();
-        long headerValue = request.getDateHeader(HttpHeaders.IF_UNMODIFIED_SINCE);
-        if (headerValue != -1 && lastModified >= headerValue + 1000) {
-          // The entity has not been modified since the date
-          // specified by the client. This is not an error case.
-          return HttpServletResponse.SC_PRECONDITION_FAILED;
-        }
-      } catch (IllegalArgumentException ex) {
-        return HttpServletResponse.SC_PRECONDITION_FAILED;
-      }
-    }
-    return 0;
   }
 
   /**
