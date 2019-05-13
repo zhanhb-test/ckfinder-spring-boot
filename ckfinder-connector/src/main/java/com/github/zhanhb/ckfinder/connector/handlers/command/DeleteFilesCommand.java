@@ -15,6 +15,7 @@ import com.github.zhanhb.ckfinder.connector.api.AccessControl;
 import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
+import com.github.zhanhb.ckfinder.connector.api.ResourceType;
 import com.github.zhanhb.ckfinder.connector.handlers.response.ConnectorElement;
 import com.github.zhanhb.ckfinder.connector.handlers.response.DeleteFilesElement;
 import com.github.zhanhb.ckfinder.connector.support.CommandContext;
@@ -26,6 +27,7 @@ import java.nio.file.Path;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.StringUtils;
 
 /**
  * Class used to handle <code>DeleteFiles</code> command.
@@ -41,39 +43,36 @@ public class DeleteFilesCommand extends FailAtEndXmlCommand<List<FileItem>> impl
    * @throws ConnectorException when error occurs
    */
   @Override
-  protected void createXml(List<FileItem> files, CommandContext cmdContext, ConnectorElement.Builder rootElement)
-          throws ConnectorException {
-    CKFinderContext context = cmdContext.getCfCtx();
+  protected void createXml(List<FileItem> files, CommandContext cmdContext,
+          ConnectorElement.Builder rootElement) throws ConnectorException {
     cmdContext.checkType();
-
-    for (FileItem fileItem : files) {
-      if (!FileUtils.isFileNameValid(fileItem.getName())) {
+    CKFinderContext context = cmdContext.getCfCtx();
+    for (FileItem file : files) {
+      ResourceType resource = file.getType();
+      if (resource == null) {
         throw cmdContext.toException(ErrorCode.INVALID_REQUEST);
       }
-
-      if (fileItem.getType() == null) {
+      String folder = file.getFolder();
+      if (StringUtils.isEmpty(folder)) {
         throw cmdContext.toException(ErrorCode.INVALID_REQUEST);
       }
-
-      if (fileItem.getFolder() == null || fileItem.getFolder().isEmpty()
-              || FileUtils.isPathNameInvalid(fileItem.getFolder())) {
+      if (FileUtils.isPathNameInvalid(folder)) {
         throw cmdContext.toException(ErrorCode.INVALID_REQUEST);
       }
-
-      if (context.isDirectoryHidden(fileItem.getFolder())) {
+      if (context.isDirectoryHidden(folder)) {
         throw cmdContext.toException(ErrorCode.INVALID_REQUEST);
       }
-
-      if (context.isFileHidden(fileItem.getName())) {
+      String name = file.getName();
+      if (FileUtils.isFileNameInvalid(name)) {
         throw cmdContext.toException(ErrorCode.INVALID_REQUEST);
       }
-
-      if (!FileUtils.isFileExtensionAllowed(fileItem.getName(), fileItem.getType())) {
+      if (context.isFileHidden(name)) {
         throw cmdContext.toException(ErrorCode.INVALID_REQUEST);
-
       }
-
-      cmdContext.checkAllPermission(fileItem.getType(), fileItem.getFolder(), AccessControl.FILE_DELETE);
+      if (!FileUtils.isFileExtensionAllowed(name, resource)) {
+        throw cmdContext.toException(ErrorCode.INVALID_REQUEST);
+      }
+      cmdContext.checkAllPermission(resource, folder, AccessControl.FILE_DELETE);
     }
 
     ErrorListResult.Builder builder = ErrorListResult.builder();
@@ -107,9 +106,7 @@ public class DeleteFilesCommand extends FailAtEndXmlCommand<List<FileItem>> impl
     }
     builder.ifError(ErrorCode.DELETE_FAILED).addErrorsTo(rootElement);
     if (addExtraNode) {
-      rootElement.result(DeleteFilesElement.builder()
-              .deleted(success)
-              .build());
+      rootElement.result(new DeleteFilesElement(success));
     }
   }
 

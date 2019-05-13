@@ -32,18 +32,12 @@ public class DeleteFolderCommand extends FinishOnErrorXmlCommand<Void> implement
   @Override
   protected void createXml(Void param, CommandContext cmdContext,
           ConnectorElement.Builder builder) throws ConnectorException {
-    CKFinderContext context = cmdContext.getCfCtx();
     cmdContext.checkType();
     cmdContext.checkAllPermission(AccessControl.FOLDER_DELETE);
 
-    if (cmdContext.getCurrentFolder().equals("/")) {
+    if ("/".equals(cmdContext.getCurrentFolder())) {
       throw cmdContext.toException(ErrorCode.INVALID_REQUEST);
     }
-
-    if (context.isDirectoryHidden(cmdContext.getCurrentFolder())) {
-      throw cmdContext.toException(ErrorCode.INVALID_REQUEST);
-    }
-
     Path dir = cmdContext.toPath();
 
     if (!Files.isDirectory(dir)) {

@@ -4,9 +4,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.NoArgsConstructor;
 
 /**
@@ -15,8 +13,7 @@ import lombok.NoArgsConstructor;
  * com.github.zhanhb.ckfinder.connector.handlers.command.CreateFolderCommand
  * @author zhanhb
  */
-@AllArgsConstructor(access = AccessLevel.PACKAGE)
-@Builder(builderClassName = "Builder")
+@AllArgsConstructor
 @NoArgsConstructor
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlRootElement(name = "NewFolder")

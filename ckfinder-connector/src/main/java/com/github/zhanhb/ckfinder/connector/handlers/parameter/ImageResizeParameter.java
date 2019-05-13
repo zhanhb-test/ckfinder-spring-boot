@@ -24,7 +24,7 @@ public class ImageResizeParameter {
   private Integer width;
   private Integer height;
   private boolean wrongReqSizesParams;
-  private final Map<ImageResizeParam, String> sizesFromReq
+  private final Map<ImageResizeParam, String> sizes
           = new EnumMap<>(ImageResizeParam.class);
 
 }

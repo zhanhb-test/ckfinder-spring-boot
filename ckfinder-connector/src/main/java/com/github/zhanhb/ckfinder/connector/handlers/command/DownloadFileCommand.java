@@ -47,16 +47,11 @@ public class DownloadFileCommand extends BaseCommand<String> {
     cmdContext.checkType();
     cmdContext.checkAllPermission(AccessControl.FILE_VIEW);
 
-    if (!FileUtils.isFileNameValid(fileName)
+    if (FileUtils.isFileNameInvalid(fileName)
             || !FileUtils.isFileExtensionAllowed(fileName,
                     cmdContext.getType())) {
       throw cmdContext.toException(ErrorCode.INVALID_REQUEST);
     }
-
-    if (context.isDirectoryHidden(cmdContext.getCurrentFolder())) {
-      throw cmdContext.toException(ErrorCode.INVALID_REQUEST);
-    }
-
     if (context.isFileHidden(fileName)) {
       throw cmdContext.toException(ErrorCode.FILE_NOT_FOUND);
     }
@@ -89,13 +84,12 @@ public class DownloadFileCommand extends BaseCommand<String> {
     return request.getParameter("FileName");
   }
 
-  @SuppressWarnings("UtilityClassWithoutPrivateConstructor")
-  private static class PartialHolder {
+  private interface PartialHolder {
 
-    static PathPartial INSTANCE = PathPartial.builder()
-            .contentType(context -> Optional.of(ContentTypeResolver.getDefault().apply(context)).map(mt
-            -> (mt.startsWith("text/") || mt.endsWith("/javascript") || mt.endsWith("/xml"))
-            ? mt + ";charset=UTF-8" : mt).orElse("application/octet-stream"))
+    PathPartial INSTANCE = PathPartial.builder()
+            .contentType(context -> Optional.ofNullable(ContentTypeResolver.getDefault().apply(context)).map(mt
+            -> (mt.startsWith("text/") || mt.endsWith("/javascript") || mt.endsWith("/xml") || mt.endsWith("/html"))
+            ? "text/plain;charset=UTF-8" : mt).orElse("application/octet-stream"))
             .notFound(__ -> {
               throw new UncheckedConnectorException(ErrorCode.FILE_NOT_FOUND);
             })

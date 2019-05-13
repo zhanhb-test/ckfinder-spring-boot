@@ -16,11 +16,11 @@ import static org.junit.Assert.*;
 public class FileUtilsTest {
 
   /**
-   * Test of renameFileWithBadExt method, of class FileUtils.
+   * Test of renameDoubleExtension method, of class FileUtils.
    */
   @Test
-  public void testRenameFileWithBadExt() {
-    log.debug("renameFileWithBadExt");
+  public void testRenameDoubleExtension() {
+    log.debug("renameDoubleExtension");
     ResourceType type = DefaultResourceType.builder()
             .name("test")
             .allowedExtensions("html,htm")
@@ -28,7 +28,7 @@ public class FileUtilsTest {
             .deniedExtensions("exe,jsp").build();
     String fileName = "test.exe.html.jsp.jsp";
     String expResult = "test_exe.html_jsp.jsp";
-    String result = FileUtils.renameFileWithBadExt(type, fileName);
+    String result = FileUtils.renameDoubleExtension(type, fileName);
     assertEquals(expResult, result);
   }
 

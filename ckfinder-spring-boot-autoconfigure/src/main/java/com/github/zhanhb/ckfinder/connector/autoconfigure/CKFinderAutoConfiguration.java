@@ -157,11 +157,11 @@ public class CKFinderAutoConfiguration {
       if (properties.getUserRoleSessionVar() != null) {
         builder.userRoleName(properties.getUserRoleSessionVar());
       }
-      builder.csrf(properties.isCsrf()).accessControl(defaultAccessControl);
+      builder.csrfProtectionEnabled(properties.isCsrf()).accessControl(defaultAccessControl);
       ThumbnailProperties thumbnail = createThumbs(properties.getThumbs(), basePathBuilder);
       builder.thumbnail(thumbnail)
               .disallowUnsafeCharacters(properties.isDisallowUnsafeCharacters())
-              .doubleFileExtensionsAllowed(properties.isAllowDoubleExtension())
+              .doubleFileExtensionsDisallowed(!properties.isAllowDoubleExtension())
               .checkSizeAfterScaling(properties.isCheckSizeAfterScaling())
               .secureImageUploads(properties.isSecureImageUploads());
       if (properties.getTypes() != null) {

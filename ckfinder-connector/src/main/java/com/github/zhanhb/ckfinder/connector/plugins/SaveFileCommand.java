@@ -53,7 +53,7 @@ public class SaveFileCommand extends FinishOnErrorXmlCommand<SaveFileParameter> 
       throw cmdContext.toException(ErrorCode.INVALID_EXTENSION);
     }
 
-    if (!FileUtils.isFileNameValid(fileName)) {
+    if (FileUtils.isFileNameInvalid(fileName)) {
       throw cmdContext.toException(ErrorCode.INVALID_REQUEST);
     }
 

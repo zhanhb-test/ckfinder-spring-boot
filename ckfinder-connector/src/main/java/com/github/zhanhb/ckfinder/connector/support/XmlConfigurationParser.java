@@ -150,7 +150,7 @@ public enum XmlConfigurationParser {
             setHiddenFiles(builder, childNode.getChildNodes());
             break;
           case "checkDoubleExtension":
-            builder.doubleFileExtensionsAllowed(!Boolean.parseBoolean(nullNodeToString(childNode)));
+            builder.doubleFileExtensionsDisallowed(Boolean.parseBoolean(nullNodeToString(childNode)));
             break;
           case "disallowUnsafeCharacters":
             builder.disallowUnsafeCharacters(Boolean.parseBoolean(nullNodeToString(childNode)));
@@ -162,7 +162,7 @@ public enum XmlConfigurationParser {
             builder.checkSizeAfterScaling(Boolean.parseBoolean(nullNodeToString(childNode)));
             break;
           case "enableCsrfProtection":
-            builder.csrf(Boolean.parseBoolean(nullNodeToString(childNode)));
+            builder.csrfProtectionEnabled(Boolean.parseBoolean(nullNodeToString(childNode)));
             break;
           case "secureImageUploads":
             builder.secureImageUploads(Boolean.parseBoolean(nullNodeToString(childNode)));

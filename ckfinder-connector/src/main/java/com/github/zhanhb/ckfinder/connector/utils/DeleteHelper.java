@@ -26,11 +26,10 @@ import java.nio.file.Path;
  */
 interface DeleteHelper {
 
-  static Path delete(Path path) throws IOException {
+  static void delete(Path path) throws IOException {
     try {
-      return Files.walkFileTree(path, DeleteFileVisitor.INSTANCE);
+      Files.walkFileTree(path, DeleteFileVisitor.INSTANCE);
     } catch (NoSuchFileException ignore) {
-      return path;
     }
   }
 

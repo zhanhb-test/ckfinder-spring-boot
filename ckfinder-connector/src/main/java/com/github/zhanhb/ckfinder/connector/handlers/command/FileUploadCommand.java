@@ -208,7 +208,7 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
     Path file = cmdContext.resolve(name);
 
     if (Files.exists(file) || isProtectedName(name)) {
-      String[] nameAndExtension = FileUtils.getNameAndExtension(name);
+      String[] nameAndExtension = FileUtils.getLongNameAndExtension(name);
       String nameWithoutExtension = nameAndExtension[0];
       @SuppressWarnings("StringBufferWithoutInitialCapacity")
       StringBuilder sb = new StringBuilder(nameWithoutExtension).append("(");
@@ -251,10 +251,7 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
     if (context.isForceAscii()) {
       newFileName = FileUtils.convertToAscii(newFileName);
     }
-    if (context.isDirectoryHidden(cmdContext.getCurrentFolder())) {
-      throw param.toException(ErrorCode.INVALID_REQUEST);
-    }
-    if (!FileUtils.isFileNameValid(newFileName)
+    if (FileUtils.isFileNameInvalid(newFileName)
             || context.isFileHidden(newFileName)) {
       throw param.toException(ErrorCode.INVALID_NAME);
     }
@@ -262,8 +259,8 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
     if (!FileUtils.isFileExtensionAllowed(newFileName, resourceType)) {
       throw param.toException(ErrorCode.INVALID_EXTENSION);
     }
-    if (!context.isDoubleFileExtensionsAllowed()) {
-      newFileName = FileUtils.renameFileWithBadExt(resourceType, newFileName);
+    if (context.isDoubleFileExtensionsDisallowed()) {
+      newFileName = FileUtils.renameDoubleExtension(resourceType, newFileName);
     }
     if (!newFileName.equals(fileName)) {
       param.setErrorCode(ErrorCode.UPLOADED_INVALID_NAME_RENAMED);

@@ -5,6 +5,7 @@ import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.api.ResourceType;
 import com.github.zhanhb.ckfinder.connector.handlers.response.ConnectorElement;
+import com.github.zhanhb.ckfinder.connector.handlers.response.CurrentFolderElement;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -142,28 +143,42 @@ public class CommandContext {
     CKFinderContext context = cfCtx;
     for (FileItem file : files) {
       ResourceType resource = file.getType();
+      if (resource == null) {
+        throw toException(ErrorCode.INVALID_REQUEST);
+      }
       String folder = file.getFolder();
-      String name = file.getName();
-      if (!FileUtils.isFileNameValid(name)) {
+      if (StringUtils.isEmpty(folder)) {
         throw toException(ErrorCode.INVALID_REQUEST);
       }
       if (FileUtils.isPathNameInvalid(folder)) {
         throw toException(ErrorCode.INVALID_REQUEST);
       }
-      if (resource == null) {
-        throw toException(ErrorCode.INVALID_REQUEST);
-      }
-      if (StringUtils.isEmpty(folder)) {
-        throw toException(ErrorCode.INVALID_REQUEST);
-      }
       if (context.isDirectoryHidden(folder)) {
+        throw toException(ErrorCode.INVALID_REQUEST);
+      }
+      String name = file.getName();
+      if (FileUtils.isFileNameInvalid(name)) {
         throw toException(ErrorCode.INVALID_REQUEST);
       }
       if (context.isFileHidden(name)) {
         throw toException(ErrorCode.INVALID_REQUEST);
       }
-      checkAllPermission(resource, folder,
-              requireAccess);
+      checkAllPermission(resource, folder, requireAccess);
+    }
+  }
+
+  /**
+   * creates <code>CurrentFolderElement</code>.
+   *
+   * @param builder XML root node.
+   */
+  public void createCurrentFolderNode(ConnectorElement.Builder builder) {
+    if (type != null && currentFolder != null) {
+      builder.currentFolder(CurrentFolderElement.builder()
+              .path(currentFolder)
+              .url(getType().getUrl() + currentFolder)
+              .acl(getAcl())
+              .build());
     }
   }
 

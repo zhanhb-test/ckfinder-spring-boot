@@ -37,13 +37,8 @@ public class GetFoldersCommand extends FinishOnErrorXmlCommand<Void> {
   @Override
   protected void createXml(Void param, CommandContext cmdContext,
           ConnectorElement.Builder builder) throws ConnectorException {
-    CKFinderContext context = cmdContext.getCfCtx();
     cmdContext.checkType();
     cmdContext.checkAllPermission(AccessControl.FOLDER_VIEW);
-
-    if (context.isDirectoryHidden(cmdContext.getCurrentFolder())) {
-      throw cmdContext.toException(ErrorCode.INVALID_REQUEST);
-    }
 
     Path dir = cmdContext.toPath();
 
@@ -67,7 +62,7 @@ public class GetFoldersCommand extends FinishOnErrorXmlCommand<Void> {
    * @param cmdContext command context
    * @param directories list of children folder
    */
-  private void createFoldersData(ConnectorElement.Builder rootElement, CommandContext cmdContext, List<Path> directories) {
+  private void createFoldersData(ConnectorElement.Builder rootElement, CommandContext cmdContext, List<? extends Path> directories) {
     CKFinderContext context = cmdContext.getCfCtx();
     FoldersElement.Builder folders = FoldersElement.builder();
     for (Path dir : directories) {

@@ -92,9 +92,9 @@ public abstract class BaseCommand<T> implements Command {
   }
 
   @SuppressWarnings("FinalMethod")
-  protected final CommandContext populateCommandContext(HttpServletRequest request,
+  final CommandContext populateCommandContext(HttpServletRequest request,
           CKFinderContext context) throws ConnectorException {
-    if (context.isCsrf() && this instanceof IPostCommand) {
+    if (context.isCsrfProtectionEnabled() && this instanceof IPostCommand) {
       checkCsrfToken(request);
     }
     checkConnectorEnabled(context);
@@ -102,8 +102,7 @@ public abstract class BaseCommand<T> implements Command {
     String currentFolder = checkRequestPath(getCurrentFolder(request));
 
     ResourceType resource = context.getResource(request.getParameter("type"));
-    CommandContext cmdContext = new CommandContext(context, userRole, currentFolder, resource);
-    return cmdContext;
+    return new CommandContext(context, userRole, currentFolder, resource);
   }
 
   /**
@@ -149,11 +148,7 @@ public abstract class BaseCommand<T> implements Command {
    */
   String getCurrentFolder(HttpServletRequest request) {
     String currentFolder = request.getParameter("currentFolder");
-    if (StringUtils.hasLength(currentFolder)) {
-      return PathUtils.normalize('/' + currentFolder + '/');
-    } else {
-      return "/";
-    }
+    return currentFolder != null ? PathUtils.normalize('/' + currentFolder + '/') : "/";
   }
 
   @Override

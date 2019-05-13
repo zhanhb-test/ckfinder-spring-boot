@@ -41,7 +41,7 @@ public class ImageResizeInfoCommand extends FinishOnErrorXmlCommand<String> {
     cmdContext.checkAllPermission(AccessControl.FILE_VIEW);
 
     if (StringUtils.isEmpty(fileName)
-            || !FileUtils.isFileNameValid(fileName)
+            || FileUtils.isFileNameInvalid(fileName)
             || context.isFileHidden(fileName)) {
       throw cmdContext.toException(ErrorCode.INVALID_REQUEST);
     }

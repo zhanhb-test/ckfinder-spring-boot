@@ -52,11 +52,20 @@ public class ImageResizeCommand extends FinishOnErrorXmlCommand<ImageResizeParam
       throw cmdContext.toException(ErrorCode.INVALID_NAME);
     }
 
-    if (!FileUtils.isFileNameValid(fileName) || context.isFileHidden(fileName)) {
+    if (FileUtils.isFileNameInvalid(fileName) || context.isFileHidden(fileName)) {
       throw cmdContext.toException(ErrorCode.INVALID_REQUEST);
     }
 
+    String[] nameAndExtension = FileUtils.getNameAndExtension(fileName);
+    if (nameAndExtension == null) {
+      throw cmdContext.toException(ErrorCode.INVALID_NAME);
+    }
+
     if (!FileUtils.isFileExtensionAllowed(fileName, cmdContext.getType())) {
+      throw cmdContext.toException(ErrorCode.INVALID_REQUEST);
+    }
+
+    if (param.isWrongReqSizesParams()) {
       throw cmdContext.toException(ErrorCode.INVALID_REQUEST);
     }
 
@@ -65,14 +74,12 @@ public class ImageResizeCommand extends FinishOnErrorXmlCommand<ImageResizeParam
       throw cmdContext.toException(ErrorCode.FILE_NOT_FOUND);
     }
 
-    if (param.isWrongReqSizesParams()) {
-      throw cmdContext.toException(ErrorCode.INVALID_REQUEST);
-    }
-
     ImageProperties image = context.getImage();
-    if (param.getWidth() != null && param.getHeight() != null) {
+    Integer width = param.getWidth();
+    Integer height = param.getHeight();
+    if (width != null && height != null) {
 
-      if (!FileUtils.isFileNameValid(newFileName) && context.isFileHidden(newFileName)) {
+      if (FileUtils.isFileNameInvalid(newFileName) && context.isFileHidden(newFileName)) {
         throw cmdContext.toException(ErrorCode.INVALID_NAME);
       }
 
@@ -80,36 +87,34 @@ public class ImageResizeCommand extends FinishOnErrorXmlCommand<ImageResizeParam
         throw cmdContext.toException(ErrorCode.INVALID_EXTENSION);
       }
 
-      Path thumbFile = cmdContext.resolve(newFileName);
+      Path target = cmdContext.resolve(newFileName);
 
-      if (Files.exists(thumbFile) && !Files.isWritable(thumbFile)) {
+      if (Files.exists(target) && !Files.isWritable(target)) {
         throw cmdContext.toException(ErrorCode.ACCESS_DENIED);
       }
-      if (!"1".equals(param.getOverwrite()) && Files.exists(thumbFile)) {
+      if (!"1".equals(param.getOverwrite()) && Files.exists(target)) {
         throw cmdContext.toException(ErrorCode.ALREADY_EXIST);
       }
       int maxImageHeight = image.getMaxHeight();
       int maxImageWidth = image.getMaxWidth();
-      if ((maxImageWidth > 0 && param.getWidth() > maxImageWidth)
-              || (maxImageHeight > 0 && param.getHeight() > maxImageHeight)) {
+      if ((maxImageWidth > 0 && width > maxImageWidth)
+              || (maxImageHeight > 0 && height > maxImageHeight)) {
         throw cmdContext.toException(ErrorCode.INVALID_REQUEST);
       }
 
       try {
-        ImageUtils.createResizedImage(file, thumbFile,
-                param.getWidth(), param.getHeight(), image.getQuality());
-
+        ImageUtils.createResizedImage(file, target,
+                width, height, image.getQuality());
       } catch (IOException e) {
         log.error("", e);
         throw cmdContext.toException(ErrorCode.ACCESS_DENIED).initCause(e);
       }
     }
 
-    String fileNameWithoutExt = FileUtils.getNameWithoutExtension(fileName);
-    String fileExt = FileUtils.getExtension(fileName);
-    for (ImageResizeParam key : ImageResizeParam.values()) {
-      if ("1".equals(param.getSizesFromReq().get(key))) {
-        String thumbName = fileNameWithoutExt + "_" + key.getParameter() + "." + fileExt;
+    for (Map.Entry<ImageResizeParam, String> entry : param.getSizes().entrySet()) {
+      ImageResizeParam key = entry.getKey();
+      if ("1".equals(entry.getValue())) {
+        String thumbName = nameAndExtension[0] + "_" + key.getParameter() + "." + nameAndExtension[1];
         Path thumbFile = cmdContext.resolve(thumbName);
         ImageResizeSize size = pluginParams.get(key);
         if (size != null) {
@@ -150,7 +155,7 @@ public class ImageResizeCommand extends FinishOnErrorXmlCommand<ImageResizeParam
       param.setHeight(null);
       param.setWrongReqSizesParams(true);
     }
-    Map<ImageResizeParam, String> requestSizes = param.getSizesFromReq();
+    Map<ImageResizeParam, String> requestSizes = param.getSizes();
     for (ImageResizeParam size : ImageResizeParam.values()) {
       requestSizes.put(size, request.getParameter(size.getParameter()));
     }

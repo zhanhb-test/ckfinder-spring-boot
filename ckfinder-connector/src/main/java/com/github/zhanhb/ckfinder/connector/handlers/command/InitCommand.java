@@ -80,7 +80,7 @@ public class InitCommand extends XmlCommand<String> {
             .uploadCheckImages(!context.isCheckSizeAfterScaling())
             .imgWidth(context.getImage().getMaxWidth())
             .imgHeight(context.getImage().getMaxHeight())
-            .csrfProtection(context.isCsrf())
+            .csrfProtection(context.isCsrfProtectionEnabled())
             .thumbsEnabled(thumbnail != null)
             .plugins(context.getPublicPluginNames());
     if (thumbnail != null) {

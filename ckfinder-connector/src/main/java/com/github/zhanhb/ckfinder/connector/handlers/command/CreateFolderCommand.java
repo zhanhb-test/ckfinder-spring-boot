@@ -51,12 +51,8 @@ public class CreateFolderCommand extends FinishOnErrorXmlCommand<String> impleme
     if (context.isForceAscii()) {
       newFolderName = FileUtils.convertToAscii(newFolderName);
     }
-
     if (FileUtils.isFolderNameInvalid(newFolderName, context)) {
       throw cmdContext.toException(ErrorCode.INVALID_NAME);
-    }
-    if (context.isDirectoryHidden(cmdContext.getCurrentFolder())) {
-      throw cmdContext.toException(ErrorCode.INVALID_REQUEST);
     }
     if (context.isDirectoryHidden(newFolderName)) {
       throw cmdContext.toException(ErrorCode.INVALID_NAME);
@@ -72,7 +68,7 @@ public class CreateFolderCommand extends FinishOnErrorXmlCommand<String> impleme
       throw cmdContext.toException(ErrorCode.UNAUTHORIZED).initCause(ex);
     }
 
-    rootElement.result(NewFolderElement.builder().name(newFolderName).build());
+    rootElement.result(new NewFolderElement(newFolderName));
   }
 
   @Override

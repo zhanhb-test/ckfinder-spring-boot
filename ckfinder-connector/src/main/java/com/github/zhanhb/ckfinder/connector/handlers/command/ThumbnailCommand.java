@@ -48,7 +48,7 @@ public class ThumbnailCommand extends BaseCommand<String> {
     cmdContext.checkType();
     cmdContext.checkAllPermission(AccessControl.FILE_VIEW);
 
-    if (!FileUtils.isFileNameValid(fileName)) {
+    if (FileUtils.isFileNameInvalid(fileName)) {
       throw cmdContext.toException(ErrorCode.INVALID_REQUEST);
     }
 
@@ -108,20 +108,14 @@ public class ThumbnailCommand extends BaseCommand<String> {
     return request.getParameter("FileName");
   }
 
-  @SuppressWarnings("UtilityClassWithoutPrivateConstructor")
-  private static class PartialHolder {
+  private interface PartialHolder {
 
-    static PathPartial INSTANCE;
-
-    static {
-      INSTANCE = PathPartial.builder()
-              .notFound(context -> {
-                throw new UncheckedConnectorException(ErrorCode.FILE_NOT_FOUND);
-              })
-              .contentDisposition(ContentDispositionStrategy.inline())
-              .build();
-    }
-
+    PathPartial INSTANCE = PathPartial.builder()
+            .notFound(context -> {
+              throw new UncheckedConnectorException(ErrorCode.FILE_NOT_FOUND);
+            })
+            .contentDisposition(ContentDispositionStrategy.inline())
+            .build();
   }
 
 }

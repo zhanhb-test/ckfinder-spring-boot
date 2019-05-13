@@ -52,12 +52,12 @@ public class RenameFolderCommand extends FinishOnErrorXmlCommand<String> impleme
       newFolderName = FileUtils.convertToAscii(newFolderName);
     }
 
-    if (context.isDirectoryHidden(newFolderName)
-            || FileUtils.isFolderNameInvalid(newFolderName, context)) {
+    if (FileUtils.isFolderNameInvalid(newFolderName, context)
+            ||context.isDirectoryHidden(newFolderName)) {
       throw cmdContext.toException(ErrorCode.INVALID_NAME);
     }
 
-    if (cmdContext.getCurrentFolder().equals("/")) {
+    if ("/".equals(cmdContext.getCurrentFolder())) {
       throw cmdContext.toException(ErrorCode.INVALID_REQUEST);
     }
 
@@ -87,14 +87,12 @@ public class RenameFolderCommand extends FinishOnErrorXmlCommand<String> impleme
    * renames thumb folder.
    */
   private void renameThumb(String newFolderPath, CommandContext cmdContext) {
-    cmdContext.toThumbnail().ifPresent(thumbDir -> {
-      cmdContext.resolveThumbnail(newFolderPath).ifPresent(newThumbDir -> {
-        try {
-          Files.move(thumbDir, newThumbDir);
-        } catch (IOException ignored) {
-        }
-      });
-    });
+    cmdContext.toThumbnail().ifPresent(thumbDir -> cmdContext.resolveThumbnail(newFolderPath).ifPresent(newThumbDir -> {
+      try {
+        Files.move(thumbDir, newThumbDir);
+      } catch (IOException ignored) {
+      }
+    }));
   }
 
   /**

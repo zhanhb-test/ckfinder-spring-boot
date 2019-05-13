@@ -55,7 +55,7 @@ public class DefaultCKFinderContext implements CKFinderContext {
   private List<String> hiddenFolders;
   @Singular
   private List<String> hiddenFiles;
-  private boolean doubleFileExtensionsAllowed;
+  private boolean doubleFileExtensionsDisallowed;
   private boolean forceAscii;
   private boolean checkSizeAfterScaling;
   @NonNull
@@ -66,7 +66,7 @@ public class DefaultCKFinderContext implements CKFinderContext {
   @Singular
   private Set<String> defaultResourceTypes;
   private boolean disallowUnsafeCharacters;
-  private boolean csrf;
+  private boolean csrfProtectionEnabled;
   @Delegate
   @NonNull
   private EventHandler events;
@@ -138,7 +138,7 @@ public class DefaultCKFinderContext implements CKFinderContext {
   public static class Builder {
 
     Builder() {
-      csrf = true;
+      csrfProtectionEnabled = true;
       checkSizeAfterScaling = true;
       userRoleName = "";
     }

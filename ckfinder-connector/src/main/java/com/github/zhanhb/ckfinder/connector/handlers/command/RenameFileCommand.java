@@ -42,15 +42,13 @@ public class RenameFileCommand extends FailAtEndXmlCommand<RenameFileParameter> 
    * @param param the parameter
    */
   private void renameThumb(RenameFileParameter param, CommandContext cmdContext) {
-    cmdContext.resolveThumbnail(param.getFileName()).ifPresent(thumbFile -> {
-      cmdContext.resolveThumbnail(param.getNewFileName()).ifPresent(newThumbFile -> {
-        try {
-          log.debug("remove thumb '{}'->'{}'", thumbFile, newThumbFile);
-          Files.move(thumbFile, newThumbFile);
-        } catch (IOException ignored) {
-        }
-      });
-    });
+    cmdContext.resolveThumbnail(param.getFileName()).ifPresent(thumbFile -> cmdContext.resolveThumbnail(param.getNewFileName()).ifPresent(newThumbFile -> {
+      try {
+        log.debug("remove thumb '{}'->'{}'", thumbFile, newThumbFile);
+        Files.move(thumbFile, newThumbFile);
+      } catch (IOException ignored) {
+      }
+    }));
   }
 
   /**
@@ -87,13 +85,13 @@ public class RenameFileCommand extends FailAtEndXmlCommand<RenameFileParameter> 
     if (!FileUtils.isFileExtensionAllowed(newFileName, cmdContext.getType())) {
       result = builder.errorCode(ErrorCode.INVALID_EXTENSION).build();
     } else {
-      if (!context.isDoubleFileExtensionsAllowed()) {
-        newFileName = FileUtils.renameFileWithBadExt(cmdContext.getType(), newFileName);
+      if (context.isDoubleFileExtensionsDisallowed()) {
+        newFileName = FileUtils.renameDoubleExtension(cmdContext.getType(), newFileName);
       }
 
-      if (!FileUtils.isFileNameValid(fileName) || context.isFileHidden(fileName)) {
+      if (FileUtils.isFileNameInvalid(fileName) || context.isFileHidden(fileName)) {
         result = builder.errorCode(ErrorCode.INVALID_REQUEST).build();
-      } else if (!FileUtils.isFileNameValid(newFileName, context) || context.isFileHidden(newFileName)) {
+      } else if (FileUtils.isFileNameInvalid(newFileName, context) || context.isFileHidden(newFileName)) {
         result = builder.errorCode(ErrorCode.INVALID_NAME).build();
       } else if (!FileUtils.isFileExtensionAllowed(fileName, cmdContext.getType())) {
         result = builder.errorCode(ErrorCode.INVALID_REQUEST).build();
@@ -112,7 +110,6 @@ public class RenameFileCommand extends FailAtEndXmlCommand<RenameFileParameter> 
         } catch (FileAlreadyExistsException ex) {
           result = builder.errorCode(ErrorCode.ALREADY_EXIST).build();
         } catch (IOException ex) {
-          renamed = false;
           log.error("IOException", ex);
           result = builder.errorCode(ErrorCode.ACCESS_DENIED).build();
         }

@@ -81,7 +81,7 @@ public class GetFilesCommand extends FinishOnErrorXmlCommand<String> {
    * @param showThumbs the request parameter showThumbs
    * @param cmdContext command context
    */
-  private void createFilesData(List<Path> list, ConnectorElement.Builder rootElement,
+  private void createFilesData(List<? extends Path> list, ConnectorElement.Builder rootElement,
           String showThumbs, CommandContext cmdContext) {
     CKFinderContext context = cmdContext.getCfCtx();
     FilesElement.Builder files = FilesElement.builder();

@@ -16,7 +16,7 @@ class DeleteFileVisitor extends SimpleFileVisitor<Path> {
   public static final DeleteFileVisitor INSTANCE = new DeleteFileVisitor();
 
   @Override
-  public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+  public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
     try {
       Files.deleteIfExists(dir);
       return FileVisitResult.SKIP_SUBTREE;

@@ -61,6 +61,15 @@ public class FileUtils {
     }
   }
 
+  public static String[] getLongNameAndExtension(@NonNull String name) {
+    int indexOf = name.indexOf('.');
+    if (indexOf != -1) {
+      return new String[]{name.substring(0, indexOf), name.substring(indexOf + 1)};
+    } else {
+      return new String[]{name, ""};
+    }
+  }
+
   /**
    * Gets file last extension.
    *
@@ -77,28 +86,18 @@ public class FileUtils {
     return fileName.substring(lastIndexOf + 1);
   }
 
-  public static String[] getNameAndExtension(@NonNull String name) {
-    int indexOf = name.indexOf('.');
-    if (indexOf != -1) {
-      return new String[]{name.substring(0, indexOf), name.substring(indexOf + 1)};
-    } else {
-      return new String[]{name, ""};
-    }
-  }
-
   /**
    * Gets file name without its last extension.
    *
    * @param fileName name of file
    * @return file extension
    */
-  @Nullable
-  public static String getNameWithoutExtension(@Nullable String fileName) {
-    int lastIndexOf;
-    if (fileName == null || (lastIndexOf = fileName.lastIndexOf('.')) == -1) {
+  public static String[] getNameAndExtension(@NonNull String fileName) {
+    int i;
+    if ((i = fileName.lastIndexOf('.')) == -1) {
       return null;
     }
-    return fileName.substring(0, lastIndexOf);
+    return new String[]{fileName.substring(0, i), fileName.substring(i + 1)};
   }
 
   /**
@@ -132,20 +131,18 @@ public class FileUtils {
    * check if file or folder name doesn't match invalid name.
    *
    * @param fileName file name
-   * @return true if file name is correct
    */
-  public static boolean isFileNameValid(@Nullable String fileName) {
-    return !(fileName == null || fileName.isEmpty()
+  public static boolean isFileNameInvalid(@Nullable String fileName) {
+    return fileName == null || fileName.isEmpty()
             || fileName.charAt(fileName.length() - 1) == '.'
             || fileName.contains("..")
-            || hasInvalidCharacter(fileName));
+            || hasInvalidCharacter(fileName);
   }
 
   /**
    * test if new folder name contains disallowed chars.
    *
    * @param fileName file name
-   * @return true if it contains disallowed characters.
    */
   private static boolean hasInvalidCharacter(@NonNull String fileName) {
     return InvalidFileNamePatternHolder.INVALID_FILENAME_PATTERN.matcher(fileName).find();
@@ -156,7 +153,6 @@ public class FileUtils {
    *
    * @param fileName filename
    * @param type resource type
-   * @return true if extension is allowed
    */
   public static boolean isFileExtensionAllowed(@Nullable String fileName, @Nullable ResourceType type) {
     if (type == null || fileName == null) {
@@ -218,7 +214,7 @@ public class FileUtils {
    * @param file file to create.
    * @throws IOException when IO Exception occurs.
    */
-  public static void touch(Path file) throws IOException {
+  static void touch(Path file) throws IOException {
     Path dir = file.getParent();
     if (dir != null) {
       Files.createDirectories(dir);
@@ -263,7 +259,7 @@ public class FileUtils {
    * @param fileName file name
    * @return new file name with . replaced with _ (but not last)
    */
-  public static String renameFileWithBadExt(ResourceType type, String fileName) {
+  public static String renameDoubleExtension(ResourceType type, String fileName) {
     if (type == null || fileName == null) {
       return null;
     }
@@ -305,9 +301,9 @@ public class FileUtils {
             || hasInvalidCharacter(folderName);
   }
 
-  public static boolean isFileNameValid(String fileName, CKFinderContext context) {
+  public static boolean isFileNameInvalid(String fileName, CKFinderContext context) {
     return (!context.isDisallowUnsafeCharacters() || !fileName.contains(";"))
-            && isFileNameValid(fileName);
+            && isFileNameInvalid(fileName);
   }
 
   public static String escapeJavaScript(String fileName) {
@@ -316,13 +312,13 @@ public class FileUtils {
 
   private interface InvalidPathHolder {
 
-    Pattern INVALID_PATH = Pattern.compile("(/\\.|\\p{Cntrl}|//|\\\\|[:*?<>\"\\|])");
+    Pattern INVALID_PATH = Pattern.compile("(/\\.|\\p{Cntrl}|//|\\\\|[:*?<>\"|])");
 
   }
 
   private interface InvalidFileNamePatternHolder {
 
-    Pattern INVALID_FILENAME_PATTERN = Pattern.compile("\\p{Cntrl}|[/\\\\\\:\\*\\?\"\\<\\>\\|]");
+    Pattern INVALID_FILENAME_PATTERN = Pattern.compile("\\p{Cntrl}|[/\\\\:*?\"<>|]");
 
   }
 

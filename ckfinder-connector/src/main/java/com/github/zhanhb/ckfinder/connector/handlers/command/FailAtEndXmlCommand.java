@@ -28,7 +28,7 @@ public abstract class FailAtEndXmlCommand<T> extends XmlCommand<T> {
           throws ConnectorException {
     ConnectorElement.Builder connector = ConnectorElement.builder();
     cmdContext.setResourceType(connector);
-    createCurrentFolderNode(cmdContext, connector);
+    cmdContext.createCurrentFolderNode(connector);
     createXml(param, cmdContext, connector);
     return connector.build();
   }

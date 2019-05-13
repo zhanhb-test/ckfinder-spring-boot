@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 /**
@@ -29,20 +30,15 @@ import lombok.Setter;
  * @author zhanhb
  */
 @Getter
-@Setter(AccessLevel.PACKAGE)
+@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
+@SuppressWarnings("WeakerAccess")
 public class PartialContext {
 
-  private HttpServletRequest request;
-  private HttpServletResponse response;
-  private ServletContext servletContext;
-  private Path path;
+  private final HttpServletRequest request;
+  private final HttpServletResponse response;
+  private final ServletContext servletContext;
+  private final Path path;
+  @Setter(AccessLevel.PACKAGE)
   private BasicFileAttributes attributes;
-
-  public PartialContext(HttpServletRequest request, HttpServletResponse response, ServletContext servletContext, Path path) {
-    this.request = request;
-    this.response = response;
-    this.servletContext = servletContext;
-    this.path = path;
-  }
 
 }

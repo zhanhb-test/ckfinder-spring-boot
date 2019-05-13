@@ -84,7 +84,7 @@ public interface CKFinderContext extends CommandFactory, EventHandler, LicenseFa
    *
    * @return check double extensions
    */
-  boolean isDoubleFileExtensionsAllowed();
+  boolean isDoubleFileExtensionsDisallowed();
 
   /**
    * flag to check if force ASCII.
@@ -107,7 +107,7 @@ public interface CKFinderContext extends CommandFactory, EventHandler, LicenseFa
    * @return {@code boolean} flag indicating if CSRF protection has been
    * enabled.
    */
-  boolean isCsrf();
+  boolean isCsrfProtectionEnabled();
 
   /**
    * flag if check image size after resizing image.
