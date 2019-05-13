@@ -17,6 +17,7 @@
     <ckfinder.version>2.6.2.1</ckfinder.version>
     <ckfinder.zip.name>ckfinder_java_${ckfinder.version}.zip</ckfinder.zip.name>
     <ckfinder.zip.name.php>ckfinder_php_${ckfinder.version}.zip</ckfinder.zip.name.php>
+    <module.name>com.github.zhanhb.ckfinder.webjars</module.name>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
@@ -115,8 +116,7 @@ try {
   }
 } catch (Throwable t) {
   log.error(t); throw t
-}
-]]></script>
+}]]></script>
               </scripts>
               <properties>
                 <ant>null</ant>

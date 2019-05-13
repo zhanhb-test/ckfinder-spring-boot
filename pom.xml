@@ -13,7 +13,7 @@
   <packaging>pom</packaging>
   <name>CKFinder Spring Boot</name>
   <description>Spring Boot Support for CKFinder</description>
-  <url>https://github.com/zhanhb/ckfinder-spring-boot</url>
+  <url>https://zhanhb.github.io/ckfinder-spring-boot</url>
   <inceptionYear>2016</inceptionYear>
 
   <organization>

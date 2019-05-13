@@ -11,7 +11,7 @@
   <description>Spring Boot Starter Support for CKFinder</description>
 
   <properties>
-    <module.name>com.github.zhanhb.ckfinder.spring.boot.startr</module.name>
+    <module.name>com.github.zhanhb.ckfinder.spring.boot.starter</module.name>
   </properties>
 
   <dependencies>
