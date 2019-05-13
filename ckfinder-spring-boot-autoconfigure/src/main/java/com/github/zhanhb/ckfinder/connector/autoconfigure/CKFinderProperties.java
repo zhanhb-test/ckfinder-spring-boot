@@ -22,8 +22,7 @@ public class CKFinderProperties {
 
   private boolean enabled = true;
   private Connector connector = new Connector();
-  private String basePath;
-  private String baseUrl = "/userfiles";
+  private Base base = new Base();
   private License license = new License();
   private Image image = new Image();
   private String[] defaultResourceTypes = {};
@@ -51,12 +50,8 @@ public class CKFinderProperties {
     return this.connector;
   }
 
-  public String getBasePath() {
-    return this.basePath;
-  }
-
-  public String getBaseUrl() {
-    return this.baseUrl;
+  public Base getBase() {
+    return this.base;
   }
 
   public License getLicense() {
@@ -139,12 +134,8 @@ public class CKFinderProperties {
     this.connector = connector;
   }
 
-  public void setBasePath(String basePath) {
-    this.basePath = basePath;
-  }
-
-  public void setBaseUrl(String baseUrl) {
-    this.baseUrl = baseUrl;
+  public void setBase(Base base) {
+    this.base = base;
   }
 
   public void setLicense(License license) {
@@ -215,8 +206,31 @@ public class CKFinderProperties {
     this.imageResize = imageResize;
   }
 
-  public void setServlet(final Servlet servlet) {
+  public void setServlet(Servlet servlet) {
     this.servlet = servlet;
+  }
+
+  public static class Base {
+
+    private String path;
+    private String url = "/userfiles";
+
+    public String getPath() {
+      return path;
+    }
+
+    public String getUrl() {
+      return url;
+    }
+
+    public void setPath(String path) {
+      this.path = path;
+    }
+
+    public void setUrl(String url) {
+      this.url = url;
+    }
+
   }
 
   public static class Connector {
@@ -281,15 +295,15 @@ public class CKFinderProperties {
       return this.quality;
     }
 
-    public void setMaxWidth(final int maxWidth) {
+    public void setMaxWidth(int maxWidth) {
       this.maxWidth = maxWidth;
     }
 
-    public void setMaxHeight(final int maxHeight) {
+    public void setMaxHeight(int maxHeight) {
       this.maxHeight = maxHeight;
     }
 
-    public void setQuality(final float quality) {
+    public void setQuality(float quality) {
       this.quality = quality;
     }
   }
@@ -323,23 +337,23 @@ public class CKFinderProperties {
       return this.deniedExtensions;
     }
 
-    public void setUrl(final String url) {
+    public void setUrl(String url) {
       this.url = url;
     }
 
-    public void setDirectory(final String directory) {
+    public void setDirectory(String directory) {
       this.directory = directory;
     }
 
-    public void setMaxSize(final DataSize maxSize) {
+    public void setMaxSize(DataSize maxSize) {
       this.maxSize = maxSize;
     }
 
-    public void setAllowedExtensions(final String[] allowedExtensions) {
+    public void setAllowedExtensions(String[] allowedExtensions) {
       this.allowedExtensions = allowedExtensions;
     }
 
-    public void setDeniedExtensions(final String[] deniedExtensions) {
+    public void setDeniedExtensions(String[] deniedExtensions) {
       this.deniedExtensions = deniedExtensions;
     }
   }
@@ -382,31 +396,31 @@ public class CKFinderProperties {
       return this.quality;
     }
 
-    public void setEnabled(final boolean enabled) {
+    public void setEnabled(boolean enabled) {
       this.enabled = enabled;
     }
 
-    public void setUrl(final String url) {
+    public void setUrl(String url) {
       this.url = url;
     }
 
-    public void setDirectory(final String directory) {
+    public void setDirectory(String directory) {
       this.directory = directory;
     }
 
-    public void setDirectAccess(final boolean directAccess) {
+    public void setDirectAccess(boolean directAccess) {
       this.directAccess = directAccess;
     }
 
-    public void setMaxHeight(final int maxHeight) {
+    public void setMaxHeight(int maxHeight) {
       this.maxHeight = maxHeight;
     }
 
-    public void setMaxWidth(final int maxWidth) {
+    public void setMaxWidth(int maxWidth) {
       this.maxWidth = maxWidth;
     }
 
-    public void setQuality(final float quality) {
+    public void setQuality(float quality) {
       this.quality = quality;
     }
   }
@@ -469,47 +483,47 @@ public class CKFinderProperties {
       return this.fileDelete;
     }
 
-    public void setRole(final String role) {
+    public void setRole(String role) {
       this.role = role;
     }
 
-    public void setResourceType(final String resourceType) {
+    public void setResourceType(String resourceType) {
       this.resourceType = resourceType;
     }
 
-    public void setFolder(final String folder) {
+    public void setFolder(String folder) {
       this.folder = folder;
     }
 
-    public void setFolderView(final boolean folderView) {
+    public void setFolderView(boolean folderView) {
       this.folderView = folderView;
     }
 
-    public void setFolderCreate(final boolean folderCreate) {
+    public void setFolderCreate(boolean folderCreate) {
       this.folderCreate = folderCreate;
     }
 
-    public void setFolderRename(final boolean folderRename) {
+    public void setFolderRename(boolean folderRename) {
       this.folderRename = folderRename;
     }
 
-    public void setFolderDelete(final boolean folderDelete) {
+    public void setFolderDelete(boolean folderDelete) {
       this.folderDelete = folderDelete;
     }
 
-    public void setFileView(final boolean fileView) {
+    public void setFileView(boolean fileView) {
       this.fileView = fileView;
     }
 
-    public void setFileUpload(final boolean fileUpload) {
+    public void setFileUpload(boolean fileUpload) {
       this.fileUpload = fileUpload;
     }
 
-    public void setFileRename(final boolean fileRename) {
+    public void setFileRename(boolean fileRename) {
       this.fileRename = fileRename;
     }
 
-    public void setFileDelete(final boolean fileDelete) {
+    public void setFileDelete(boolean fileDelete) {
       this.fileDelete = fileDelete;
     }
   }
@@ -527,11 +541,11 @@ public class CKFinderProperties {
       return this.params;
     }
 
-    public void setEnabled(final boolean enabled) {
+    public void setEnabled(boolean enabled) {
       this.enabled = enabled;
     }
 
-    public void setParams(final Map<ImageResizeParam, ImageResizeSize> params) {
+    public void setParams(Map<ImageResizeParam, ImageResizeSize> params) {
       this.params = params;
     }
   }
@@ -569,27 +583,27 @@ public class CKFinderProperties {
       return this.marginRight;
     }
 
-    public void setEnabled(final boolean enabled) {
+    public void setEnabled(boolean enabled) {
       this.enabled = enabled;
     }
 
-    public void setSource(final Resource source) {
+    public void setSource(Resource source) {
       this.source = source;
     }
 
-    public void setTransparency(final float transparency) {
+    public void setTransparency(float transparency) {
       this.transparency = transparency;
     }
 
-    public void setQuality(final float quality) {
+    public void setQuality(float quality) {
       this.quality = quality;
     }
 
-    public void setMarginBottom(final int marginBottom) {
+    public void setMarginBottom(int marginBottom) {
       this.marginBottom = marginBottom;
     }
 
-    public void setMarginRight(final int marginRight) {
+    public void setMarginRight(int marginRight) {
       this.marginRight = marginRight;
     }
   }
@@ -616,7 +630,7 @@ public class CKFinderProperties {
       return this.path;
     }
 
-    public void setEnabled(final boolean enabled) {
+    public void setEnabled(boolean enabled) {
       this.enabled = enabled;
     }
   }

@@ -1,8 +1,9 @@
 ckfinder:
   enabled: true
   connector.enabled: true
-  base-url:
-  base-path:
+  base:
+    url: /userfiles
+    path:
   license:
     name:
     key:
