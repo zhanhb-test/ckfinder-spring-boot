@@ -1,1 +1,1 @@
-provides: ckfinder-spring-boot-autoconfigure
+provides: ckfinder-spring-boot-autoconfigure,ckfinder-connector
