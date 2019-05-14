@@ -12,16 +12,14 @@
 
   <properties>
     <module.name>com.github.zhanhb.ckfinder.spring.boot.autoconfigure</module.name>
-    <osgi.export>com.github.zhanhb.ckfinder.connector.autoconfigure</osgi.export>
-    <osgi.import>javax.annotation;resolution:=optional,
+    <osgi.import>javax.annotation.*;resolution:=optional,
       javax.servlet.*;version="[3.1,5)",
-      javax.imageio,
-      javax.xml.*,
       net.coobird.*;version="0.4.8",
-      org.w3c.dom;resolution:=optional,
-      org.xml.sax;resolution:=optional,
-      org.springframework.boot.*;version="[2.1,3)",
-      org.springframework.*;version="[5.1,6)"</osgi.import>
+      org.w3c.dom.*;resolution:=optional,
+      org.xml.sax.*;resolution:=optional,
+      org.springframework.*;version="[5.1,6)",
+      org.unbescape.*;version="[1.1.2,1.2)",
+      *</osgi.import>
   </properties>
 
   <dependencies>
