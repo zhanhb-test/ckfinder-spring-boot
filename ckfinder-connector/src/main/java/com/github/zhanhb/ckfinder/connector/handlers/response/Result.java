@@ -1,6 +1,7 @@
 package com.github.zhanhb.ckfinder.connector.handlers.response;
 
 import javax.xml.bind.annotation.XmlSeeAlso;
+import javax.xml.bind.annotation.XmlTransient;
 
 @XmlSeeAlso({
   ConnectorInfoElement.class,
@@ -16,6 +17,7 @@ import javax.xml.bind.annotation.XmlSeeAlso;
   RenamedFolderElement.class,
   ResourceTypesElement.class
 })
+@XmlTransient
 @SuppressWarnings("ClassMayBeInterface")
 public abstract class Result implements ConnectorChild {
 }
