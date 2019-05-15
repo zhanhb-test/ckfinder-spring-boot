@@ -26,6 +26,7 @@ import java.util.Optional;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.springframework.http.MediaType;
 
 /**
  * Class to handle <code>DownloadFile</code> command.
@@ -88,8 +89,8 @@ public class DownloadFileCommand extends BaseCommand<String> {
 
     PathPartial INSTANCE = PathPartial.builder()
             .contentType(context -> Optional.ofNullable(ContentTypeResolver.getDefault().apply(context)).map(mt
-            -> (mt.startsWith("text/") || mt.endsWith("/javascript") || mt.endsWith("/xml") || mt.endsWith("/html"))
-            ? "text/plain;charset=UTF-8" : mt).orElse("application/octet-stream"))
+            -> mt.matches("(?i)^text/.+|.+[/\\+](?:html|javascript|xml)$")
+            ? MediaType.TEXT_PLAIN_VALUE : mt).orElse(MediaType.APPLICATION_OCTET_STREAM_VALUE))
             .notFound(__ -> {
               throw new UncheckedConnectorException(ErrorCode.FILE_NOT_FOUND);
             })
