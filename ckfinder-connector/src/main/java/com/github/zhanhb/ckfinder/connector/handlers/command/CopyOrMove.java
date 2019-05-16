@@ -6,6 +6,6 @@ import java.nio.file.Path;
 
 interface CopyOrMove {
 
-  void apply(Path a, Path b, CopyOption... options) throws IOException;
+  void apply(Path source, Path target, CopyOption... options) throws IOException;
 
 }
