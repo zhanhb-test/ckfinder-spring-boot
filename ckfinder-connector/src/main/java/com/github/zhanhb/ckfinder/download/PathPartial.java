@@ -409,7 +409,6 @@ public class PathPartial {
   private void copy(Path path, ServletOutputStream ostream, Range[] ranges,
           String contentType, byte[] buffer, int boundary)
           throws IOException {
-    IOException exception = null;
     for (Range currentRange : ranges) {
       try (InputStream stream = Files.newInputStream(path)) {
         // Writing MIME header.
@@ -422,19 +421,10 @@ public class PathPartial {
         ostream.println();
         // Printing content
         copyRange(stream, ostream, currentRange, buffer);
-      } catch (IOException ex) {
-        if (exception == null) {
-          exception = ex;
-        } else {
-          exception.addSuppressed(ex);
-        }
       }
     }
     ostream.println();
     ostream.print("--" + boundary + "muA--");
-    if (exception != null) {
-      throw exception;
-    }
   }
 
   /**
