@@ -13,7 +13,6 @@ package com.github.zhanhb.ckfinder.connector.utils;
 
 import java.util.Locale;
 import java.util.MissingResourceException;
-import java.util.Optional;
 import java.util.ResourceBundle;
 import javax.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
@@ -37,7 +36,7 @@ public enum MessageUtil {
    * @return localized error message.
    */
   public String getMessage(@Nullable String lang, int errorCode) {
-    Locale locale = Optional.ofNullable(lang).map(Locale::forLanguageTag).orElse(Locale.ROOT);
+    Locale locale = lang != null ? Locale.forLanguageTag(lang) : Locale.ROOT;
     try {
       return ResourceBundle.getBundle(BUNDLE_NAME, locale).getString(Integer.toString(errorCode));
     } catch (MissingResourceException ex) {
