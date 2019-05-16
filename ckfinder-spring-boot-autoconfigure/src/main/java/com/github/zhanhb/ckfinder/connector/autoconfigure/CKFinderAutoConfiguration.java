@@ -29,9 +29,9 @@ import com.github.zhanhb.ckfinder.connector.utils.PathUtils;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -142,8 +142,9 @@ public class CKFinderAutoConfiguration {
     public CKFinderContext ckfinderConfiguration(CKFinderProperties properties,
             BasePathBuilder basePathBuilder,
             AccessControl defaultAccessControl,
-            ObjectProvider<Collection<Plugin>> pluginsProvider) {
-      Collection<Plugin> plugins = pluginsProvider.getIfAvailable();
+            ObjectProvider<List<Plugin>> pluginsProvider,
+            ObjectProvider<List<CKFinderContextCustomizer>> customizersProvider) {
+      List<Plugin> plugins = pluginsProvider.getIfAvailable();
       DefaultCKFinderContext.Builder builder = DefaultCKFinderContext.builder()
               .enabled(properties.getConnector().isEnabled())
               .licenseFactory(createLiceFactory(properties.getLicense()));
@@ -179,11 +180,17 @@ public class CKFinderAutoConfiguration {
       if (plugins != null) {
         plugins.forEach(plugin -> plugin.register(registry));
       }
-      return builder.events(registry.buildEventHandler()).
+      builder.events(registry.buildEventHandler()).
               commandFactory(registry.buildCommandFactory())
               .publicPluginNames(registry.getPluginNames())
-              .pluginInfos(registry.getPluginInfos())
-              .build();
+              .pluginInfos(registry.getPluginInfos());
+      List<CKFinderContextCustomizer> customizers = customizersProvider.getIfAvailable();
+      if (customizers != null) {
+        for (CKFinderContextCustomizer customizer : customizers) {
+          builder = customizer.custom(builder);
+        }
+      }
+      return builder.build();
     }
 
     private void setTypes(DefaultCKFinderContext.Builder builder,
