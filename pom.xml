@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>2.1.4.RELEASE</version>
+    <version>2.1.5.RELEASE</version>
     <relativePath />
   </parent>
   <groupId>com.github.zhanhb</groupId>
@@ -273,7 +273,7 @@
           <sourcepath>${delombok.directory}</sourcepath>
           <locale>en_US</locale>
           <links>
-            <link>https://docs.spring.io/spring-boot/docs/2.1.4.RELEASE/api/</link>
+            <link>https://docs.spring.io/spring-boot/docs/2.1.5.RELEASE/api/</link>
             <link>https://docs.spring.io/spring-framework/docs/${spring.version}/javadoc-api/</link>
           </links>
         </configuration>
