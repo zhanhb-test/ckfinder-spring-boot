@@ -196,8 +196,8 @@ public class CKFinderAutoConfiguration {
     private void setTypes(DefaultCKFinderContext.Builder builder,
             BasePathBuilder basePathBuilder, Map<String, CKFinderProperties.Type> types,
             @Nullable Path rootThumbnail) {
-      Path basePath = basePathBuilder.getBasePath();
-      String baseUrl = basePathBuilder.getBaseUrl();
+      Path basePath = Objects.requireNonNull(basePathBuilder.getBasePath(), "ckfinder base path");
+      String baseUrl = Objects.requireNonNull(basePathBuilder.getBaseUrl(), "ckfinder base url");
       for (Map.Entry<String, CKFinderProperties.Type> entry : types.entrySet()) {
         final String typeName = entry.getKey();
         CKFinderProperties.Type type = entry.getValue();
