@@ -95,7 +95,7 @@ try {
   def stringify = { org.unbescape.javascript.JavaScriptEscape.escapeJavaScript(it) }
   def parse = { org.unbescape.javascript.JavaScriptEscape.unescapeJavaScript(it) }
 
-  def dir = Paths.get('''${project.build.directory}''')
+  def dir = Paths.get(project.build.directory)
 
   Files.walk(dir).filter{ Files.isRegularFile(it)
   }.filter { it.fileName.toString().endsWith('.js')
