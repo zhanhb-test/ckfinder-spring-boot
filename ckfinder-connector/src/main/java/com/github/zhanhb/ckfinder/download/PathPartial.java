@@ -310,6 +310,9 @@ public class PathPartial {
   @SuppressWarnings("ReturnOfCollectionOrArrayField")
   private Range[] parseRange(HttpServletRequest request, HttpServletResponse response,
           BasicFileAttributes attr, String etag) throws IOException {
+    if (!"GET".equals(request.getMethod())) {
+      return FULL;
+    }
     // Checking If-Range
     String headerValue = request.getHeader(HttpHeaders.IF_RANGE);
     if (headerValue != null) {
@@ -319,13 +322,16 @@ public class PathPartial {
       } catch (IllegalArgumentException e) {
         // Ignore
       }
-      // If the ETag the client gave does not match the entity
-      // eTag, then the entire entity is returned.
-      if (headerValueTime == -1 && !headerValue.trim().equals(etag)
-              || attr.lastModifiedTime().toMillis() > headerValueTime + 1000) {
-        // If the timestamp of the entity the client got is older than
+      // If the ETag given by the client is not strongly equals to the
+      // entity etag, then the entire entity is returned.
+      if (headerValueTime == -1) {
+        if (etag.startsWith("W/") || !headerValue.trim().equals(etag)) {
+          return FULL;
+        }
+        // If the timestamp of the entity the client got is not same as
         // the last modification date of the entity, the entire entity
         // is returned.
+      } else if (Math.abs(attr.lastModifiedTime().toMillis() - headerValueTime) > 1000) {
         return FULL;
       }
       // fail through
@@ -358,16 +364,16 @@ public class PathPartial {
         try {
           if (dashPos == 0) {
             final long offset = Long.parseLong(rangeDefinition);
-            if (offset == 0) { // -0, --0
-              break;
-            }
             long start = Math.max(fileLength + offset, 0);
             currentRange = new Range(fileLength, start);
           } else {
             long start = Long.parseLong(rangeDefinition.substring(0, dashPos));
             if (dashPos < rangeDefinition.length() - 1) {
               long end = Long.parseLong(rangeDefinition.substring(dashPos + 1));
-              currentRange = new Range(fileLength, start, end);
+              if (end < start) {
+                break;
+              }
+              currentRange = new Range(fileLength, start, Math.min(end, fileLength - 1));
             } else {
               currentRange = new Range(fileLength, start);
             }
@@ -375,10 +381,9 @@ public class PathPartial {
         } catch (NumberFormatException e) {
           break;
         }
-        if (!currentRange.validate()) {
-          break;
+        if (currentRange.validate()) {
+          result.add(currentRange);
         }
-        result.add(currentRange);
         if (index == -1) {
           int size = result.size();
           if (size == 0) {
@@ -472,7 +477,7 @@ public class PathPartial {
      * Validate range.
      */
     boolean validate() {
-      return start <= Math.min(end, total - 1);
+      return start <= end;
     }
 
     @Override
