@@ -6,7 +6,6 @@ cache:
   directories:
   - $HOME/.ckfinder
   - $HOME/.m2
-jdk: oraclejdk8
 install: true
 script: .travis/publish.sh "-Dckfinder.cache.directory=$HOME/.ckfinder"
 after_success:
