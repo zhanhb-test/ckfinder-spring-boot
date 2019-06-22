@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 zhanhb.
+ * Copyright 2017-2019 zhanhb.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,49 +15,38 @@
  */
 package com.github.zhanhb.ckfinder.download;
 
-import java.nio.file.attribute.BasicFileAttributes;
-import java.util.Objects;
 import java.util.function.Function;
+import javax.annotation.Nullable;
 
 /**
  *
  * @author zhanhb
  */
-public class ETagStrategy {
+@SuppressWarnings("unused")
+public interface ETagStrategy extends Strategy<String> {
 
-  public static final Function<PartialContext, String> DEFAULT_ETAG_MAPPER
-          = context -> {
-            BasicFileAttributes attributes = context.getAttributes();
-            return attributes.size() + "-" + attributes.lastModifiedTime().toMillis();
-          };
-
-  public static ETagStrategy weak() {
-    return weak(DEFAULT_ETAG_MAPPER);
+  static ETagStrategy none() {
+    return __ -> null;
   }
 
-  public static ETagStrategy strong() {
-    return strong(DEFAULT_ETAG_MAPPER);
+  static ETagStrategy weak() {
+    return DefaultETagStrategy.weak();
   }
 
-  public static ETagStrategy weak(Function<PartialContext, String> eTagMapper) {
-    return new ETagStrategy(true, eTagMapper);
+  static ETagStrategy strong() {
+    return DefaultETagStrategy.strong();
   }
 
-  public static ETagStrategy strong(Function<PartialContext, String> eTagMapper) {
-    return new ETagStrategy(false, eTagMapper);
+  static ETagStrategy weak(Function<PartialContext, String> eTagMapper) {
+    return DefaultETagStrategy.weak(eTagMapper);
   }
 
-  private final String prefix;
-  private final Function<PartialContext, String> eTagMapper;
-
-  private ETagStrategy(boolean weak, Function<PartialContext, String> eTagMapper) {
-    this.prefix = weak ? "W/" : "";
-    this.eTagMapper = Objects.requireNonNull(eTagMapper, "eTagMapper");
+  static ETagStrategy strong(Function<PartialContext, String> eTagMapper) {
+    return DefaultETagStrategy.strong(eTagMapper);
   }
 
-  public String apply(PartialContext context) {
-    String result = Objects.requireNonNull(eTagMapper.apply(context));
-    return prefix + "\"" + result + "\"";
-  }
+  @Nullable
+  @Override
+  String apply(PartialContext context);
 
 }

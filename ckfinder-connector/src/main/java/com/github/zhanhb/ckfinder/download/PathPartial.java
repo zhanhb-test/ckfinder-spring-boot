@@ -1,10 +1,9 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Copyright 2019 zhanhb.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -115,14 +114,14 @@ public class PathPartial {
    */
   @SuppressWarnings("NestedAssignment")
   private boolean checkIfHeaders(HttpServletRequest request, HttpServletResponse response,
-          BasicFileAttributes attr, String etag) throws IOException {
+          BasicFileAttributes attr, @Nullable String etag) throws IOException {
     int code;
     //noinspection LoopStatementThatDoesntLoop
     while (true) {
       {
         String ifMatch = request.getHeader(HttpHeaders.IF_MATCH);
         if (ifMatch != null) {
-          if (ifMatch.indexOf('*') == -1 && !anyMatches(ifMatch, etag)) {
+          if (ifMatch.indexOf('*') == -1 && (etag == null || !anyMatches(ifMatch, etag))) {
             // If none of the given ETags match, 412 Precondition failed is
             // sent back
             code = HttpServletResponse.SC_PRECONDITION_FAILED;
@@ -130,10 +129,9 @@ public class PathPartial {
           }
         } else {
           try {
+            long ifUnmodifiedSince = request.getDateHeader(HttpHeaders.IF_UNMODIFIED_SINCE);
             long lastModified = attr.lastModifiedTime().toMillis();
-            long headerValue;
-            if ((headerValue = request.getDateHeader(HttpHeaders.IF_UNMODIFIED_SINCE)) != -1
-                    && lastModified >= headerValue + 1000) {
+            if (ifUnmodifiedSince != -1 && lastModified >= ifUnmodifiedSince + 1000) {
               // The entity has not been modified since the date
               // specified by the client. This is not an error case.
               code = HttpServletResponse.SC_PRECONDITION_FAILED;
@@ -148,7 +146,7 @@ public class PathPartial {
       {
         String ifNoneMatch = request.getHeader(HttpHeaders.IF_NONE_MATCH);
         if (ifNoneMatch != null) {
-          if ("*".equals(ifNoneMatch) || anyMatches(ifNoneMatch, etag)) {
+          if ("*".equals(ifNoneMatch) || etag != null && anyMatches(ifNoneMatch, etag)) {
             // For GET and HEAD, we should respond with
             // 304 Not Modified.
             // For every other method, 412 Precondition Failed is sent
@@ -161,11 +159,10 @@ public class PathPartial {
           }
         } else {
           try {
-            long headerValue;
             // If an If-None-Match header has been specified, if modified since
             // is ignored.
-            if ((headerValue = request.getDateHeader(HttpHeaders.IF_MODIFIED_SINCE)) != -1
-                    && attr.lastModifiedTime().toMillis() < headerValue + 1000) {
+            long ifModifiedSince = request.getDateHeader(HttpHeaders.IF_MODIFIED_SINCE);
+            if (ifModifiedSince != -1 && attr.lastModifiedTime().toMillis() < ifModifiedSince + 1000) {
               // The entity has not been modified since the date
               // specified by the client. This is not an error case.
               code = HttpServletResponse.SC_NOT_MODIFIED;
@@ -224,6 +221,7 @@ public class PathPartial {
     // satisfied.
     // Checking If headers
     boolean included = request.getAttribute(RequestDispatcher.INCLUDE_CONTEXT_PATH) != null;
+    @Nullable
     String etag = this.eTag.apply(context);
     if (!included && !isError && !checkIfHeaders(request, response, attr, etag)) {
       return;
@@ -235,7 +233,7 @@ public class PathPartial {
     // Special case for zero length files, which would cause a
     // (silent) ISE
     boolean serveContent = content && contentLength != 0;
-    Range[] ranges = null;
+    final Range[] ranges;
     if (!isError) {
       if (useAcceptRanges) {
         // Accept ranges header
@@ -247,6 +245,8 @@ public class PathPartial {
       response.setHeader(HttpHeaders.ETAG, etag);
       // Last-Modified header
       response.setDateHeader(HttpHeaders.LAST_MODIFIED, attr.lastModifiedTime().toMillis());
+    } else {
+      ranges = null;
     }
     final ServletOutputStream ostream = serveContent ? response.getOutputStream() : null;
 
@@ -304,12 +304,14 @@ public class PathPartial {
    * @param response The servlet response we are creating
    * @param attr File attributes
    * @param etag ETag of the entity
-   * @return array of ranges
+   * @return array of ranges. {@code null} if no further processing needed,
+   * {@link #FULL} if the request should be handled as if without header Range,
+   * a non empty array is returned otherwise.
    */
   @Nullable
   @SuppressWarnings("ReturnOfCollectionOrArrayField")
   private Range[] parseRange(HttpServletRequest request, HttpServletResponse response,
-          BasicFileAttributes attr, String etag) throws IOException {
+          BasicFileAttributes attr, @Nullable String etag) throws IOException {
     if (!"GET".equals(request.getMethod())) {
       return FULL;
     }
@@ -325,7 +327,7 @@ public class PathPartial {
       // If the ETag given by the client is not strongly equals to the
       // entity etag, then the entire entity is returned.
       if (headerValueTime == -1) {
-        if (etag.startsWith("W/") || !headerValue.trim().equals(etag)) {
+        if (etag == null || etag.startsWith("W/") || !headerValue.trim().equals(etag)) {
           return FULL;
         }
         // If the timestamp of the entity the client got is not same as
@@ -449,7 +451,7 @@ public class PathPartial {
     IOUtils.copy(istream, ostream, start, end + 1 - start, buffer);
   }
 
-  private boolean anyMatches(String headerValue, String etag) {
+  private boolean anyMatches(@Nonnull String headerValue, @Nonnull String etag) {
     StringTokenizer tokenizer = new StringTokenizer(headerValue, ",");
     while (tokenizer.hasMoreTokens()) {
       if (tokenizer.nextToken().trim().equals(etag)) {
