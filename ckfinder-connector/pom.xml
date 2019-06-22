@@ -12,6 +12,7 @@
   <properties>
     <module.name>com.github.zhanhb.ckfinder.connector</module.name>
     <osgi.import>javax.annotation.*;resolution:=optional,
+      javax.xml.*;version="[2.3,3)",
       javax.servlet.*;version="[3.1,5)",
       net.coobird.*;version="0.4.8",
       org.w3c.dom.*;resolution:=optional,
@@ -33,6 +34,10 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
+      <groupId>javax.xml.bind</groupId>
+      <artifactId>jaxb-api</artifactId>
+    </dependency>
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
@@ -40,6 +45,11 @@
     <dependency>
       <groupId>net.coobird</groupId>
       <artifactId>thumbnailator</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jaxb</groupId>
+      <artifactId>jaxb-runtime</artifactId>
+      <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>org.projectlombok</groupId>
