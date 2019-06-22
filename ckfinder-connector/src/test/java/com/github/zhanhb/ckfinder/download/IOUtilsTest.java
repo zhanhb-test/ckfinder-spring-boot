@@ -24,68 +24,54 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 
 import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
- *
  * @author zhanhb
  */
 @Slf4j
 public class IOUtilsTest {
 
   /**
-   * Test of copyLarge method, of class IOUtils.
+   * Test of copyFully method, of class IOUtils.
    *
    * @throws java.lang.Exception
    */
-  @Test(timeout = 5000)
+  @Test
   @SuppressWarnings("NestedAssignment")
-  public void testCopy() throws Exception {
+  public void testCopyFully() throws Exception {
     log.info("copy");
     String str = "abcdefghijklmnopq";
     byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
     for (int i = 1; i <= 8; ++i) {
       for (int j = 0; j <= str.length(); ++j) {
-        for (int k = j; k <= str.length() + 1; ++k) {
+        for (int k = j + 1; k <= str.length() + 1; ++k) {
           final int length = k - j;
           InputStream input = new ByteArrayInputStream(bytes);
           ByteArrayOutputStream output = new ByteArrayOutputStream();
-          long copied = IOUtils.copy(input, output, j, length, new byte[i]);
+          try {
+            IOUtils.copyFully(input, output, j, length, new byte[i]);
+            if (k > str.length()) {
+              fail();
+            }
+          } catch (EOFException ex) {
+            if (k <= str.length()) {
+              throw ex;
+            }
+          }
           String expResult = str.substring(j, Math.min(k, str.length()));
           assertArrayEquals(i + " " + j + " " + k, expResult.getBytes(StandardCharsets.UTF_8), output.toByteArray());
-          if (length == 0 || k <= str.length()) {
-            assertEquals(length, copied);
-          } else {
-            int expectCopied = str.length() - j;
-            assertEquals(expectCopied == 0 ? -1 : expectCopied, copied);
-          }
         }
       }
     }
   }
 
-  @Test(timeout = 5000, expected = EOFException.class)
+  @Test(expected = EOFException.class)
   public void testEofException() throws Exception {
     byte[] bytes = new byte[4];
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-    IOUtils.copy(bais, baos, 5, 0, bytes);
-  }
-
-  @Test(timeout = 5000)
-  public void testNegate() throws Exception {
-    String str = "abcdefghijklmnopq";
-    byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
-    for (int j = 0; j <= str.length(); ++j) {
-      for (int i = 1; i <= 8; ++i) {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-        long copy = IOUtils.copy(bais, baos, j, -1, new byte[i]);
-        assertEquals(str.substring(j), baos.toString("UTF-8"));
-        int expResult = str.length() - j;
-        assertEquals(expResult == 0 ? -1 : expResult, copy);
-      }
-    }
+    IOUtils.copyFully(bais, baos, 4, 1, bytes);
   }
 
 }

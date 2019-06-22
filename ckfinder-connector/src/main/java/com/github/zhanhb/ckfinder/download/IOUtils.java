@@ -24,9 +24,13 @@ import java.io.OutputStream;
 interface IOUtils {
 
   @SuppressWarnings({"NestedAssignment", "ValueOfIncrementOrDecrementUsed"})
-  static long copy(final InputStream input, final OutputStream output,
+  static void copyFully(
+          final InputStream input, final OutputStream output,
           final long inputOffset, final long length,
           final byte[] buffer) throws IOException {
+    if (length <= 0) {
+        throw new IllegalArgumentException();
+    }
     if (inputOffset > 0) {
       long remain = inputOffset, n;
       do {
@@ -34,16 +38,6 @@ interface IOUtils {
           throw new EOFException("Bytes to skip: " + inputOffset + " actual: " + (inputOffset - remain));
         }
       } while ((remain -= n) > 0);
-    }
-    if (length <= 0) {
-      if (length != 0) {
-        long count = 0;
-        for (int n; (n = input.read(buffer)) != -1; count += n) {
-          output.write(buffer, 0, n);
-        }
-        return count == 0 ? -1 : count;
-      }
-      return 0;
     }
     int len = buffer.length, n;
     long rem = length;
@@ -60,7 +54,9 @@ interface IOUtils {
       }
       output.write(buffer, 0, n);
     }
-    return length == rem ? -1 : length - rem;
+    if (rem != 0) {
+      throw new EOFException("Body changed, bytes to write: " + length + " actual: " + (length - rem));
+    }
   }
 
 }

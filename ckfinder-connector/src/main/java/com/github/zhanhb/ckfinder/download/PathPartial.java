@@ -448,7 +448,7 @@ public class PathPartial {
           throws IOException {
     long start = range.start, end = range.end;
     log.trace("Serving bytes: {}-{}", start, end);
-    IOUtils.copy(istream, ostream, start, end + 1 - start, buffer);
+    IOUtils.copyFully(istream, ostream, start, end + 1 - start, buffer);
   }
 
   private boolean anyMatches(@Nonnull String headerValue, @Nonnull String etag) {
