@@ -44,7 +44,7 @@ public class PathPartial {
   /**
    * Full range marker.
    */
-  private static final Range[] FULL = {};
+  private static final Object FULL = new Object();
 
   // ----------------------------------------------------- Static Initializer
   public static PathPartialBuilder builder() {
@@ -196,7 +196,7 @@ public class PathPartial {
   private void serveResource(HttpServletRequest request, HttpServletResponse response,
           boolean content, Path path) throws IOException, ServletException {
 
-    PartialContext context = new PartialContext(request, response,
+    final PartialContext context = new PartialContext(request, response,
             request.getServletContext(), path);
 
     if (path == null) {
@@ -216,24 +216,24 @@ public class PathPartial {
       return;
     }
 
-    boolean isError = response.getStatus() >= HttpServletResponse.SC_BAD_REQUEST;
+    final boolean isError = response.getStatus() >= HttpServletResponse.SC_BAD_REQUEST;
     // Check if the conditions specified in the optional If headers are
     // satisfied.
     // Checking If headers
-    boolean included = request.getAttribute(RequestDispatcher.INCLUDE_CONTEXT_PATH) != null;
+    final boolean included = request.getAttribute(RequestDispatcher.INCLUDE_CONTEXT_PATH) != null;
     @Nullable
-    String etag = this.eTag.apply(context);
+    final String etag = this.eTag.apply(context);
     if (!included && !isError && !checkIfHeaders(request, response, attr, etag)) {
       return;
     }
     // Find content type.
-    String contentType = contentTypeResolver.apply(context);
+    final String contentType = contentTypeResolver.apply(context);
     // Get content length
-    long contentLength = attr.size();
+    final long contentLength = attr.size();
     // Special case for zero length files, which would cause a
     // (silent) ISE
-    boolean serveContent = content && contentLength != 0;
-    final Range[] ranges;
+    final boolean serveContent = content && contentLength != 0;
+    final Object ranges;
     if (!isError) {
       if (useAcceptRanges) {
         // Accept ranges header
@@ -277,8 +277,8 @@ public class PathPartial {
     } else if (ranges != null) {
       // Partial content response.
       response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
-      if (ranges.length == 1) {
-        Range range = ranges[0];
+      if (ranges instanceof Range) {
+        final Range range = (Range) ranges;
         response.addHeader(HttpHeaders.CONTENT_RANGE, range.toString());
         long length = range.end - range.start + 1;
         response.setContentLengthLong(length);
@@ -290,9 +290,9 @@ public class PathPartial {
           copyRange(stream, ostream, range, new byte[Math.min((int) length, 8192)]);
         }
       } else {
-        int boundary = ThreadLocalRandom.current().nextInt(1 << 24);
+        final int boundary = ThreadLocalRandom.current().nextInt(1 << 24);
         response.setContentType("multipart/byteranges; boundary=" + boundary + "muA");
-        copy(path, ostream, ranges, contentType, new byte[Math.min((int) contentLength, 8192)], boundary);
+        copy(path, ostream, (Range[]) ranges, contentType, new byte[Math.min((int) contentLength, 8192)], boundary);
       }
     }
   }
@@ -306,11 +306,12 @@ public class PathPartial {
    * @param etag ETag of the entity
    * @return array of ranges. {@code null} if no further processing needed,
    * {@link #FULL} if the request should be handled as if without header Range,
-   * a non empty array is returned otherwise.
+   * result type is Range for a single-range request, a non empty array is
+   * returned otherwise(length &gt; 1 is NOT guaranteed).
    */
   @Nullable
   @SuppressWarnings("ReturnOfCollectionOrArrayField")
-  private Range[] parseRange(HttpServletRequest request, HttpServletResponse response,
+  private Object parseRange(HttpServletRequest request, HttpServletResponse response,
           BasicFileAttributes attr, @Nullable String etag) throws IOException {
     if (!"GET".equals(request.getMethod())) {
       return FULL;
@@ -352,6 +353,7 @@ public class PathPartial {
       List<Range> result = new ArrayList<>(4);
       // Parsing the range list
       // "bytes=".length() = 6
+      int count = 0;
       for (int index, last = 6;; last = index + 1) {
         index = rangeHeader.indexOf(',', last);
         String rangeDefinition = (index == -1 ? rangeHeader.substring(last) : rangeHeader.substring(last, index)).trim();
@@ -363,7 +365,10 @@ public class PathPartial {
         try {
           if (dashPos == 0) {
             final long offset = Long.parseLong(rangeDefinition);
-            long start = Math.max(fileLength + offset, 0);
+            long start = fileLength + offset;
+            if (start < 0) {
+              return FULL;
+            }
             currentRange = new Range(fileLength, start);
           } else {
             long start = Long.parseLong(rangeDefinition.substring(0, dashPos));
@@ -380,15 +385,20 @@ public class PathPartial {
         } catch (NumberFormatException e) {
           break;
         }
-        if (currentRange.validate()) {
+        //noinspection StatementWithEmptyBody
+        if (currentRange.isSatisfied()) {
           result.add(currentRange);
+        } else {
+          // Don't add to the list instead break directly.
+          // different if multi-range is requested.
         }
+        ++count;
         if (index == -1) {
           int size = result.size();
           if (size == 0) {
             break;
           }
-          return result.toArray(new Range[size]);
+          return count == 1 ? result.get(0) : result.toArray(new Range[size]);
         }
       }
     }
@@ -469,13 +479,11 @@ public class PathPartial {
     Range(long length, long start, long end) {
       this.total = length;
       this.start = start;
+      // end will always be less than length
       this.end = end;
     }
 
-    /**
-     * Validate range.
-     */
-    boolean validate() {
+    boolean isSatisfied() {
       return start <= end;
     }
 
