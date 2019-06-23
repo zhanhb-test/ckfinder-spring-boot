@@ -149,7 +149,7 @@ public class PathPartial {
           if ("*".equals(ifNoneMatch) || etag != null && anyMatches(ifNoneMatch, etag)) {
             // For GET and HEAD, we should respond with
             // 304 Not Modified.
-            // For every other method, 412 Precondition Failed is sent
+            // For every other methods, 412 Precondition Failed is sent
             // back.
             String method = request.getMethod();
             code = ("GET".equals(method) || "HEAD".equals(method))
@@ -246,7 +246,7 @@ public class PathPartial {
       // Last-Modified header
       response.setDateHeader(HttpHeaders.LAST_MODIFIED, attr.lastModifiedTime().toMillis());
     } else {
-      ranges = null;
+      ranges = FULL;
     }
     final ServletOutputStream ostream = serveContent ? response.getOutputStream() : null;
 
@@ -260,7 +260,7 @@ public class PathPartial {
     // Check to see if a Filter, Valve of wrapper has written some content.
     // If it has, disable range requests and setting of a content length
     // since neither can be done reliably.
-    if (isError || ranges == FULL) {
+    if (ranges == FULL) {
       // Set the appropriate output headers
       if (contentType != null) {
         log.debug("serveFile: contentType='{}'", contentType);
@@ -274,7 +274,7 @@ public class PathPartial {
         log.trace("Serving bytes");
         Files.copy(path, ostream);
       }
-    } else if (ranges != null && ranges.length != 0) {
+    } else if (ranges != null) {
       // Partial content response.
       response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
       if (ranges.length == 1) {
@@ -324,16 +324,13 @@ public class PathPartial {
       } catch (IllegalArgumentException e) {
         // Ignore
       }
-      // If the ETag given by the client is not strongly equals to the
+      // If the ETag given by the client is not equals to the
       // entity etag, then the entire entity is returned.
-      if (headerValueTime == -1) {
-        if (etag == null || etag.startsWith("W/") || !headerValue.trim().equals(etag)) {
-          return FULL;
-        }
-        // If the timestamp of the entity the client got is not same as
-        // the last modification date of the entity, the entire entity
-        // is returned.
-      } else if (Math.abs(attr.lastModifiedTime().toMillis() - headerValueTime) > 1000) {
+      if (headerValueTime == -1 ? !headerValue.trim().equals(etag)
+              // If the timestamp of the entity the client got is not same as
+              // the last modification date of the entity, the entire entity
+              // is returned.
+              : Math.abs(attr.lastModifiedTime().toMillis() - headerValueTime) > 1000) {
         return FULL;
       }
       // fail through
