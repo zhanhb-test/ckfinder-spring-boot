@@ -1,4 +1,4 @@
-package com.github.zhanhb.ckfinder.connector.handlers.response;
+package com.github.zhanhb.ckfinder.connector.plugins;
 
 import com.github.zhanhb.ckfinder.connector.api.PluginInfo;
 import java.util.Map;
@@ -16,7 +16,7 @@ import lombok.Value;
 @Builder(builderClassName = "Builder")
 @Value
 @SuppressWarnings("FinalClass")
-public class ImageResizeInfo implements PluginInfo {
+class ImageResizeInfo implements PluginInfo {
 
   private String name;
 

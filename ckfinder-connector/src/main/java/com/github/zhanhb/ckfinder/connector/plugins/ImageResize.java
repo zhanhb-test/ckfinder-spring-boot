@@ -13,7 +13,6 @@ package com.github.zhanhb.ckfinder.connector.plugins;
 
 import com.github.zhanhb.ckfinder.connector.api.Plugin;
 import com.github.zhanhb.ckfinder.connector.api.PluginRegistry;
-import com.github.zhanhb.ckfinder.connector.handlers.response.ImageResizeInfo;
 import java.util.Map;
 import javax.xml.namespace.QName;
 import lombok.RequiredArgsConstructor;
