@@ -1,5 +1,6 @@
 package com.github.zhanhb.ckfinder.connector.handlers.response;
 
+import javax.annotation.Nullable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -29,10 +30,13 @@ public class ConnectorInfoElement extends Result implements ConnectorChild {
   private String licenseKey;
   @XmlAttribute(name = "thumbsEnabled")
   private boolean thumbsEnabled;
+  @Nullable
   @XmlAttribute(name = "thumbsUrl")
   private String thumbsUrl;
+  @Nullable
   @XmlAttribute(name = "thumbsWidth")
   private Integer thumbsWidth;
+  @Nullable
   @XmlAttribute(name = "thumbsHeight")
   private Integer thumbsHeight;
   @XmlAttribute(name = "imgWidth")
@@ -45,7 +49,8 @@ public class ConnectorInfoElement extends Result implements ConnectorChild {
   private boolean uploadCheckImages;
   @XmlAttribute(name = "plugins")
   private String plugins;
+  @Nullable
   @XmlAttribute(name = "thumbsDirectAccess")
-  private boolean thumbsDirectAccess;
+  private Boolean thumbsDirectAccess;
 
 }

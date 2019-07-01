@@ -9,19 +9,19 @@ import javax.xml.namespace.QName;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.NoArgsConstructor;
 import lombok.Singular;
-import lombok.Value;
 
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
 @Builder(builderClassName = "Builder")
-@SuppressWarnings("FinalClass")
+@NoArgsConstructor
+@SuppressWarnings({"FinalClass", "WeakerAccess"})
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlType
-@Value
 public class PluginInfoElement {
 
   @Singular
   @XmlAnyAttribute
-  private Map<QName, String> attributes;
+  private Map<? extends QName, String> attributes;
 
 }

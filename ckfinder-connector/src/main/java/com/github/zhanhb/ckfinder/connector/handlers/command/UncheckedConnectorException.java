@@ -5,7 +5,6 @@ import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import java.io.IOException;
 import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
-import java.util.Objects;
 
 /**
  *
@@ -15,12 +14,8 @@ class UncheckedConnectorException extends RuntimeException {
 
   private static final long serialVersionUID = 1L;
 
-  private UncheckedConnectorException(ConnectorException cause) {
-    super(Objects.requireNonNull(cause));
-  }
-
   UncheckedConnectorException(ErrorCode code) {
-    this(new ConnectorException(code));
+    super(new ConnectorException(code));
   }
 
   @Override
@@ -38,7 +33,7 @@ class UncheckedConnectorException extends RuntimeException {
     s.defaultReadObject();
     Throwable cause = super.getCause();
     if (!(cause instanceof ConnectorException)) {
-      throw new InvalidObjectException("Cause must be an IOException");
+      throw new InvalidObjectException("Cause must be a ConnectorException");
     }
   }
 

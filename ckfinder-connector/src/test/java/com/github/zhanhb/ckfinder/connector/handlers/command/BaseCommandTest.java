@@ -1,8 +1,6 @@
 package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 
@@ -36,14 +34,6 @@ public class BaseCommandTest {
         // ok
       }
     }
-  }
-
-  @Test
-  public void test1() {
-    Path path = Paths.get("/Users/zhahb");
-    Path path1 = path.getFileSystem().getPath(path.toString(), "/");
-    System.out.println(path.resolveSibling("/"));
-    System.out.println(path1);
   }
 
 }

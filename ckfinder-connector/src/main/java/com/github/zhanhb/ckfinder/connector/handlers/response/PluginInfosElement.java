@@ -34,7 +34,7 @@ public class PluginInfosElement extends Result implements ConnectorChild {
   @SuppressWarnings("PublicInnerClass")
   public static class Builder {
 
-    public Builder add(String name, Map<QName, String> attributes) {
+    public Builder add(String name, Map<? extends QName, String> attributes) {
       PluginInfoElement pie = PluginInfoElement.builder().attributes(attributes).build();
       return pluginInfo(new JAXBElement<>(QName.valueOf(name), PluginInfoElement.class, pie));
     }
