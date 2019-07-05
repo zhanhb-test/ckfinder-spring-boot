@@ -211,7 +211,7 @@ public class PathPartial {
       return;
     }
     context.setAttributes(attr);
-    if (attr.isDirectory()) {
+    if (!attr.isRegularFile()) {
       notFound.handle(context);
       return;
     }
@@ -280,14 +280,14 @@ public class PathPartial {
       if (ranges instanceof Range) {
         final Range range = (Range) ranges;
         response.addHeader(HttpHeaders.CONTENT_RANGE, range.toString());
-        long length = range.end - range.start + 1;
+        long length = range.size;
         response.setContentLengthLong(length);
         if (contentType != null) {
           log.debug("serveFile: contentType='{}'", contentType);
           response.setContentType(contentType);
         }
         try (InputStream stream = Files.newInputStream(path)) {
-          copyRange(stream, ostream, range, new byte[Math.min((int) length, 8192)]);
+          copyRange(stream, ostream, range, new byte[(int) Math.min(length, 8192)]);
         }
       } else {
         final int boundary = ThreadLocalRandom.current().nextInt(1 << 24);
@@ -398,7 +398,18 @@ public class PathPartial {
           if (size == 0) {
             break;
           }
-          return count == 1 ? result.get(0) : result.toArray(new Range[size]);
+          if (count == 1) {
+            return result.get(0);
+          }
+          Range[] array = result.toArray(new Range[size]);
+          long sum = 0;
+          for (Range range : array) {
+            sum += range.size;
+          }
+          if (sum > fileLength) {
+            break;
+          }
+          return array;
         }
       }
     }
@@ -453,9 +464,9 @@ public class PathPartial {
    */
   private void copyRange(InputStream istream, OutputStream ostream, Range range, byte[] buffer)
           throws IOException {
-    long start = range.start, end = range.end;
-    log.trace("Serving bytes: {}-{}", start, end);
-    IOUtils.copyFully(istream, ostream, start, end + 1 - start, buffer);
+    long start = range.start;
+    log.trace("Serving bytes: {}-{}", start, range.end);
+    IOUtils.copyFully(istream, ostream, start, range.size, buffer);
   }
 
   private boolean anyMatches(@Nonnull String headerValue, @Nonnull String etag) {
@@ -470,7 +481,7 @@ public class PathPartial {
 
   private static class Range {
 
-    final long start, end, total;
+    final long start, end, total, size;
 
     Range(long length, long start) {
       this(length, start, length - 1);
@@ -481,6 +492,7 @@ public class PathPartial {
       this.start = start;
       // end will always be less than length
       this.end = end;
+      this.size = end - start + 1;
     }
 
     boolean isSatisfied() {
