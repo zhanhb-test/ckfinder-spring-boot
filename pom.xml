@@ -248,7 +248,6 @@
             <manifestFile>${project.build.directory}/osgi/MANIFEST.MF</manifestFile>
             <manifestEntries>
               <Automatic-Module-Name>${module.name}</Automatic-Module-Name>
-              <Built-By>zhanhb</Built-By>
             </manifestEntries>
             <manifest>
               <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
