@@ -17,4 +17,17 @@
     <module>ckfinder-spring-boot-sample-properties</module>
     <module>ckfinder-spring-boot-sample-webjars</module>
   </modules>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>flatten-maven-plugin</artifactId>
+        <inherited>false</inherited>
+        <configuration>
+          <flattenMode>bom</flattenMode>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>
