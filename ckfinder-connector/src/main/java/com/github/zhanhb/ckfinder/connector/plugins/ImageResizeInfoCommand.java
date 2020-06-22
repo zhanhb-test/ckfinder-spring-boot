@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +35,7 @@ import org.springframework.util.StringUtils;
 public class ImageResizeInfoCommand extends FinishOnErrorXmlCommand<String> {
 
   @Override
-  protected void createXml(String fileName, CommandContext cmdContext, ConnectorElement.Builder rootElement) throws ConnectorException {
+  protected void createXml(@Nullable String fileName, CommandContext cmdContext, ConnectorElement.Builder rootElement) throws ConnectorException {
     CKFinderContext context = cmdContext.getCfCtx();
     cmdContext.checkType();
 

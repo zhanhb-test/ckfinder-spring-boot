@@ -29,6 +29,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.List;
+import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
@@ -57,7 +58,7 @@ public class GetFilesCommand extends FinishOnErrorXmlCommand<String> {
   }
 
   @Override
-  protected void createXml(String showThumbs, CommandContext cmdContext,
+  protected void createXml(@Nullable String showThumbs, CommandContext cmdContext,
           ConnectorElement.Builder rootElement) throws ConnectorException {
     cmdContext.checkType();
     cmdContext.checkAllPermission(AccessControl.FILE_VIEW);

@@ -23,6 +23,7 @@ import com.github.zhanhb.ckfinder.connector.utils.PathUtils;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
@@ -41,7 +42,7 @@ public class RenameFolderCommand extends FinishOnErrorXmlCommand<String> impleme
    */
   @Override
   @SuppressWarnings("AssignmentToMethodParameter")
-  protected void createXml(String newFolderName, CommandContext cmdContext,
+  protected void createXml(@Nullable String newFolderName, CommandContext cmdContext,
           ConnectorElement.Builder rootElement) throws ConnectorException {
     checkRequestPath(newFolderName);
     CKFinderContext context = cmdContext.getCfCtx();
@@ -53,7 +54,7 @@ public class RenameFolderCommand extends FinishOnErrorXmlCommand<String> impleme
     }
 
     if (FileUtils.isFolderNameInvalid(newFolderName, context)
-            ||context.isDirectoryHidden(newFolderName)) {
+            || context.isDirectoryHidden(newFolderName)) {
       throw cmdContext.toException(ErrorCode.INVALID_NAME);
     }
 

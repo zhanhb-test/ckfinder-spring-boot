@@ -28,14 +28,16 @@ import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import lombok.NonNull;
+import javax.annotation.ParametersAreNonnullByDefault;
 import org.unbescape.javascript.JavaScriptEscape;
 
 /**
  * Utils for files.
  *
  */
+@ParametersAreNonnullByDefault
 @SuppressWarnings({"UtilityClassWithoutPrivateConstructor", "NestedAssignment"})
 public class FileUtils {
 
@@ -61,7 +63,8 @@ public class FileUtils {
     }
   }
 
-  public static String[] getLongNameAndExtension(@NonNull String name) {
+  @Nonnull
+  public static String[] getLongNameAndExtension(String name) {
     int indexOf = name.indexOf('.');
     if (indexOf != -1) {
       return new String[]{name.substring(0, indexOf), name.substring(indexOf + 1)};
@@ -92,7 +95,8 @@ public class FileUtils {
    * @param fileName name of file
    * @return file extension
    */
-  public static String[] getNameAndExtension(@NonNull String fileName) {
+  @Nullable
+  public static String[] getNameAndExtension(String fileName) {
     int i;
     if ((i = fileName.lastIndexOf('.')) == -1) {
       return null;
@@ -144,7 +148,7 @@ public class FileUtils {
    *
    * @param fileName file name
    */
-  private static boolean hasInvalidCharacter(@NonNull String fileName) {
+  private static boolean hasInvalidCharacter(String fileName) {
     return InvalidFileNamePatternHolder.INVALID_FILENAME_PATTERN.matcher(fileName).find();
   }
 
@@ -204,7 +208,7 @@ public class FileUtils {
    * @param fileName file name
    * @return encoded file name
    */
-  public static String convertToAscii(String fileName) {
+  public static String convertToAscii(@Nonnull String fileName) {
     return Utf8AccentsHolder.convert(fileName);
   }
 
@@ -259,7 +263,7 @@ public class FileUtils {
    * @param fileName file name
    * @return new file name with . replaced with _ (but not last)
    */
-  public static String renameDoubleExtension(ResourceType type, String fileName) {
+  public static String renameDoubleExtension(@Nullable ResourceType type, @Nullable String fileName) {
     if (type == null || fileName == null) {
       return null;
     }
@@ -287,7 +291,7 @@ public class FileUtils {
     return currToken;
   }
 
-  public static String encodeURIComponent(@NonNull String str) {
+  public static String encodeURIComponent(String str) {
     return UriComponentHolder.URI_COMPONENT.encode(str);
   }
 

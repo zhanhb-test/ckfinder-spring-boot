@@ -66,7 +66,7 @@ public class RenameFileCommand extends FailAtEndXmlCommand<RenameFileParameter> 
     cmdContext.checkType();
     cmdContext.checkAllPermission(AccessControl.FILE_RENAME);
 
-    String fileName = param.getFileName();
+    final String fileName = param.getFileName();
     String newFileName = param.getNewFileName();
     boolean renamed = false;
 
@@ -76,10 +76,7 @@ public class RenameFileCommand extends FailAtEndXmlCommand<RenameFileParameter> 
 
     ErrorListResult.Builder builder = ErrorListResult.builder();
 
-    boolean addExtraNode = false;
-    if (!StringUtils.isEmpty(fileName) && !StringUtils.isEmpty(newFileName)) {
-      addExtraNode = true;
-    }
+    final boolean addExtraNode = !StringUtils.isEmpty(fileName) && !StringUtils.isEmpty(newFileName);
 
     ErrorListResult result;
     if (!FileUtils.isFileExtensionAllowed(newFileName, cmdContext.getType())) {

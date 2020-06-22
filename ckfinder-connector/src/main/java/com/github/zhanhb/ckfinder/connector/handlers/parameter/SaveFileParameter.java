@@ -1,5 +1,6 @@
 package com.github.zhanhb.ckfinder.connector.handlers.parameter;
 
+import javax.annotation.Nullable;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -11,7 +12,9 @@ import lombok.Getter;
 @Getter
 public class SaveFileParameter {
 
+  @Nullable
   private final String fileName;
+  @Nullable
   private final String fileContent;
 
 }

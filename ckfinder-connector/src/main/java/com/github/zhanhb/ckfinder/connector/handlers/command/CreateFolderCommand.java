@@ -22,6 +22,7 @@ import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
@@ -40,7 +41,7 @@ public class CreateFolderCommand extends FinishOnErrorXmlCommand<String> impleme
    */
   @Override
   @SuppressWarnings("AssignmentToMethodParameter")
-  protected void createXml(String newFolderName, CommandContext cmdContext,
+  protected void createXml(@Nullable String newFolderName, CommandContext cmdContext,
           ConnectorElement.Builder rootElement) throws ConnectorException {
     checkRequestPath(newFolderName);
 

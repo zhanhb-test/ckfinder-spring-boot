@@ -4,6 +4,8 @@ import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.utils.MessageUtil;
 import java.util.Objects;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -26,22 +28,27 @@ public class FileUploadParameter {
   /**
    * Function number to call after file upload is completed.
    */
+  @Nullable
   private String ckEditorFuncNum;
   /**
    * The selected response type to be used after file upload is completed.
    */
+  @Nullable
   private String responseType;
   /**
    * Function number to call after file upload is completed.
    */
+  @Nullable
   private String ckFinderFuncNum;
   /**
    * Language (locale) code.
    */
+  @Nullable
   private String langCode;
   /**
    * Error code number.
    */
+  @Nullable
   private ErrorCode errorCode;
 
   public FileUploadParameter() {
@@ -54,7 +61,7 @@ public class FileUploadParameter {
     return new ConnectorException(code, msg);
   }
 
-  public ConnectorException toException(String message) {
+  public ConnectorException toException(@Nonnull String message) {
     Objects.requireNonNull(message);
     return new ConnectorException(ErrorCode.CUSTOM_ERROR, message);
   }
