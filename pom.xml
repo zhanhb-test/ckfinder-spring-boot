@@ -156,6 +156,7 @@
             </execution>
           </executions>
           <configuration>
+            <createBackupFile>false</createBackupFile>
             <sortProperties>true</sortProperties>
             <nrOfIndentSpace>2</nrOfIndentSpace>
             <sortDependencies>groupId,artifactId</sortDependencies>
