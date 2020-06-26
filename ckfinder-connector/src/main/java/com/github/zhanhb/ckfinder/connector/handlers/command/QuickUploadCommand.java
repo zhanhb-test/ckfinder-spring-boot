@@ -37,18 +37,19 @@ public class QuickUploadCommand extends FileUploadCommand {
     final ErrorCode errorCode = param.getErrorCode();
     final int errorNum = errorCode != null ? errorCode.getCode() : 0;
 
+    response.setCharacterEncoding("UTF-8");
     if ("json".equalsIgnoreCase(responseType)) {
-      response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
+      response.setContentType(MediaType.APPLICATION_JSON_VALUE);
       try (PrintWriter writer = response.getWriter()) {
         writeJSON(writer, errorMsg, uri, name, errorNum);
       }
     } else if ("txt".equalsIgnoreCase(responseType)) {
-      response.setContentType("text/plain;charset=UTF-8");
+      response.setContentType(MediaType.TEXT_PLAIN_VALUE);
       try (PrintWriter writer = response.getWriter()) {
         writer.write(name + "|" + errorMsg);
       }
     } else {
-      response.setContentType("text/html;charset=UTF-8");
+      response.setContentType(MediaType.TEXT_HTML_VALUE);
       try (PrintWriter writer = response.getWriter()) {
         if (ckEditorFuncNum != null) {
           writer.write("<script>//<![CDATA[\nwindow.parent.CKEDITOR.tools.callFunction("
