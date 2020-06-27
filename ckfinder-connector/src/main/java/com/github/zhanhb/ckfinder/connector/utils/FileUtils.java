@@ -291,10 +291,6 @@ public class FileUtils {
     return currToken;
   }
 
-  public static String encodeURIComponent(String str) {
-    return UriComponentHolder.URI_COMPONENT.encode(str);
-  }
-
   public static boolean isPathNameInvalid(String path) {
     return InvalidPathHolder.INVALID_PATH.matcher(path).find();
   }
@@ -323,12 +319,6 @@ public class FileUtils {
   private interface InvalidFileNamePatternHolder {
 
     Pattern INVALID_FILENAME_PATTERN = Pattern.compile("\\p{Cntrl}|[/\\\\:*?\"<>|]");
-
-  }
-
-  private interface UriComponentHolder {
-
-    URLEncoder URI_COMPONENT = new URLEncoder("-_.*!'()~");
 
   }
 

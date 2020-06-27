@@ -39,6 +39,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
+import org.unbescape.uri.UriEscape;
 
 /**
  * Class to handle <code>FileUpload</code> command.
@@ -73,6 +74,25 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
     return param;
   }
 
+  private String buildUrl(String base, String folder, String name) {
+    String additional = (folder + "/" + name).replaceAll("/+", "/");
+    if (base.contains("#")) {
+      return base + UriEscape.escapeUriFragmentId(additional);
+    } else if (base.contains("?")) {
+      return base + UriEscape.escapeUriQueryParam(additional);
+    } else {
+      boolean a = base.endsWith("/");
+      boolean b = additional.startsWith("/");
+      if (a && b) {
+        return base + additional.substring(1);
+      } else if (a || b) {
+        return base + additional;
+      } else {
+        return base + "/" + additional;
+      }
+    }
+  }
+
   /**
    * Executes file upload command.
    *
@@ -95,8 +115,7 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> implemen
       cmdContext.checkType();
       uploadFile(request, param, cmdContext);
       uploaded = true;
-      uri = cmdContext.getType().getUrl() + cmdContext.getCurrentFolder()
-              + FileUtils.encodeURIComponent(param.getNewFileName());
+      uri = buildUrl(cmdContext.getType().getUrl(), cmdContext.getCurrentFolder(), param.getNewFileName());
       checkParam(param);
     } catch (ConnectorException ex) {
       log.info("got ConnectorException", ex);
