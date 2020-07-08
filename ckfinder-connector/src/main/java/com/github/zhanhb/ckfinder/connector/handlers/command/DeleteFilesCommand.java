@@ -15,6 +15,7 @@ import com.github.zhanhb.ckfinder.connector.api.AccessControl;
 import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
+import com.github.zhanhb.ckfinder.connector.api.PostCommand;
 import com.github.zhanhb.ckfinder.connector.api.ResourceType;
 import com.github.zhanhb.ckfinder.connector.handlers.response.ConnectorElement;
 import com.github.zhanhb.ckfinder.connector.handlers.response.DeleteFilesElement;
@@ -33,7 +34,8 @@ import org.springframework.util.StringUtils;
  * Class used to handle <code>DeleteFiles</code> command.
  */
 @Slf4j
-public class DeleteFilesCommand extends FailAtEndXmlCommand<List<FileItem>> implements IPostCommand {
+@PostCommand
+public class DeleteFilesCommand extends FailAtEndXmlCommand<List<FileItem>> {
 
   /**
    * Prepares data for XML response.

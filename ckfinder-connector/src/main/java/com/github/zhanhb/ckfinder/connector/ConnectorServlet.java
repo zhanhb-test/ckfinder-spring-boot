@@ -16,8 +16,8 @@ import com.github.zhanhb.ckfinder.connector.api.Command;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.api.ExceptionHandler;
+import com.github.zhanhb.ckfinder.connector.api.PostCommand;
 import com.github.zhanhb.ckfinder.connector.handlers.command.FileUploadCommand;
-import com.github.zhanhb.ckfinder.connector.handlers.command.IPostCommand;
 import com.github.zhanhb.ckfinder.connector.handlers.command.XmlCommand;
 import com.github.zhanhb.ckfinder.connector.support.FallbackExceptionHandler;
 import com.github.zhanhb.ckfinder.connector.support.XmlExceptionHandler;
@@ -102,7 +102,7 @@ public class ConnectorServlet extends HttpServlet {
       // checks if command should go via POST request or it's a post request
       // and it's not upload command
       Class<?> commandClass = command.getClass();
-      if (IPostCommand.class.isAssignableFrom(commandClass) != post) {
+      if (commandClass.isAnnotationPresent(PostCommand.class) != post) {
         throw new ConnectorException(ErrorCode.INVALID_REQUEST);
       }
       if (post && !FileUploadCommand.class.isAssignableFrom(commandClass)

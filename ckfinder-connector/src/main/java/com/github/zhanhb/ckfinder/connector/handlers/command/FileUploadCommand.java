@@ -16,6 +16,7 @@ import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.api.FileUploadEvent;
+import com.github.zhanhb.ckfinder.connector.api.PostCommand;
 import com.github.zhanhb.ckfinder.connector.api.ResourceType;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.FileUploadParameter;
 import com.github.zhanhb.ckfinder.connector.support.CommandContext;
@@ -46,7 +47,8 @@ import org.unbescape.uri.UriEscape;
  *
  */
 @Slf4j
-public class FileUploadCommand extends BaseCommand<FileUploadParameter> implements IPostCommand {
+@PostCommand
+public class FileUploadCommand extends BaseCommand<FileUploadParameter> {
 
   /**
    * Array containing unsafe characters which can't be used in file name.

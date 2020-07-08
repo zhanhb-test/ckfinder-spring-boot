@@ -15,6 +15,7 @@ import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.Command;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
+import com.github.zhanhb.ckfinder.connector.api.PostCommand;
 import com.github.zhanhb.ckfinder.connector.api.ResourceType;
 import com.github.zhanhb.ckfinder.connector.support.CommandContext;
 import com.github.zhanhb.ckfinder.connector.utils.FileUtils;
@@ -94,7 +95,7 @@ public abstract class BaseCommand<T> implements Command {
   @SuppressWarnings("FinalMethod")
   final CommandContext populateCommandContext(HttpServletRequest request,
           CKFinderContext context) throws ConnectorException {
-    if (context.isCsrfProtectionEnabled() && this instanceof IPostCommand) {
+    if (context.isCsrfProtectionEnabled() && getClass().isAnnotationPresent(PostCommand.class)) {
       checkCsrfToken(request);
     }
     checkConnectorEnabled(context);

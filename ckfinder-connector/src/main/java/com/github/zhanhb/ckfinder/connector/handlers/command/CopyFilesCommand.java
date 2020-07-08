@@ -15,6 +15,7 @@ import com.github.zhanhb.ckfinder.connector.api.AccessControl;
 import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
+import com.github.zhanhb.ckfinder.connector.api.PostCommand;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.CopyMoveParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.ConnectorElement;
 import com.github.zhanhb.ckfinder.connector.handlers.response.CopyFilesElement;
@@ -30,7 +31,8 @@ import lombok.extern.slf4j.Slf4j;
  * Class to handle <code>CopyFiles</code> command.
  */
 @Slf4j
-public class CopyFilesCommand extends FailAtEndXmlCommand<CopyMoveParameter> implements IPostCommand {
+@PostCommand
+public class CopyFilesCommand extends FailAtEndXmlCommand<CopyMoveParameter> {
 
   @Override
   protected void createXml(CopyMoveParameter param, CommandContext cmdContext, ConnectorElement.Builder rootElement)

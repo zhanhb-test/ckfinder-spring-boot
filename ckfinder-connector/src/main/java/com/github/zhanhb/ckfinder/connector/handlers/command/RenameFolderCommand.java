@@ -15,6 +15,7 @@ import com.github.zhanhb.ckfinder.connector.api.AccessControl;
 import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
+import com.github.zhanhb.ckfinder.connector.api.PostCommand;
 import com.github.zhanhb.ckfinder.connector.handlers.response.ConnectorElement;
 import com.github.zhanhb.ckfinder.connector.handlers.response.RenamedFolderElement;
 import com.github.zhanhb.ckfinder.connector.support.CommandContext;
@@ -31,7 +32,8 @@ import lombok.extern.slf4j.Slf4j;
  * Class to handle <code>RenameFolder</code> command.
  */
 @Slf4j
-public class RenameFolderCommand extends FinishOnErrorXmlCommand<String> implements IPostCommand {
+@PostCommand
+public class RenameFolderCommand extends FinishOnErrorXmlCommand<String> {
 
   /**
    * creates XML node for renamed folder.

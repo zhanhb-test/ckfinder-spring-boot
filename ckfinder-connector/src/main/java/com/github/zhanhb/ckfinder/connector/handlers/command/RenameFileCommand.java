@@ -15,6 +15,7 @@ import com.github.zhanhb.ckfinder.connector.api.AccessControl;
 import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
+import com.github.zhanhb.ckfinder.connector.api.PostCommand;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.RenameFileParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.ConnectorElement;
 import com.github.zhanhb.ckfinder.connector.handlers.response.RenamedFileElement;
@@ -34,7 +35,8 @@ import org.springframework.util.StringUtils;
  * Class to handle <code>RenameFile</code> command.
  */
 @Slf4j
-public class RenameFileCommand extends FailAtEndXmlCommand<RenameFileParameter> implements IPostCommand {
+@PostCommand
+public class RenameFileCommand extends FailAtEndXmlCommand<RenameFileParameter> {
 
   /**
    * rename thumb file.

@@ -15,6 +15,7 @@ import com.github.zhanhb.ckfinder.connector.api.AccessControl;
 import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
+import com.github.zhanhb.ckfinder.connector.api.PostCommand;
 import com.github.zhanhb.ckfinder.connector.handlers.response.ConnectorElement;
 import com.github.zhanhb.ckfinder.connector.handlers.response.NewFolderElement;
 import com.github.zhanhb.ckfinder.connector.support.CommandContext;
@@ -30,7 +31,8 @@ import lombok.extern.slf4j.Slf4j;
  * Class to handle <code>CreateFolder</code> command. Create subfolder.
  */
 @Slf4j
-public class CreateFolderCommand extends FinishOnErrorXmlCommand<String> implements IPostCommand {
+@PostCommand
+public class CreateFolderCommand extends FinishOnErrorXmlCommand<String> {
 
   /**
    * creates current folder XML node.

@@ -16,8 +16,8 @@ import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import com.github.zhanhb.ckfinder.connector.api.ErrorCode;
 import com.github.zhanhb.ckfinder.connector.api.ImageProperties;
+import com.github.zhanhb.ckfinder.connector.api.PostCommand;
 import com.github.zhanhb.ckfinder.connector.handlers.command.FinishOnErrorXmlCommand;
-import com.github.zhanhb.ckfinder.connector.handlers.command.IPostCommand;
 import com.github.zhanhb.ckfinder.connector.handlers.parameter.ImageResizeParameter;
 import com.github.zhanhb.ckfinder.connector.handlers.response.ConnectorElement;
 import com.github.zhanhb.ckfinder.connector.support.CommandContext;
@@ -31,7 +31,8 @@ import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class ImageResizeCommand extends FinishOnErrorXmlCommand<ImageResizeParameter> implements IPostCommand {
+@PostCommand
+public class ImageResizeCommand extends FinishOnErrorXmlCommand<ImageResizeParameter> {
 
   private final Map<ImageResizeParam, ImageResizeSize> pluginParams;
 
