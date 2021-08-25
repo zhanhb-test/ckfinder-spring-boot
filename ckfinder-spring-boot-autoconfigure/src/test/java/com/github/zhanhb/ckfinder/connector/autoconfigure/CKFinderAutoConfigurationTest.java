@@ -1,9 +1,9 @@
 package com.github.zhanhb.ckfinder.connector.autoconfigure;
 
 import com.github.zhanhb.ckfinder.connector.api.CKFinderContext;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 
 /**
@@ -14,12 +14,12 @@ public class CKFinderAutoConfigurationTest {
 
   private AnnotationConfigWebApplicationContext context;
 
-  @Before
+  @BeforeEach
   public void init() {
     context = new AnnotationConfigWebApplicationContext();
   }
 
-  @After
+  @AfterEach
   public void closeContext() {
     if (this.context != null) {
       this.context.close();

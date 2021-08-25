@@ -7,7 +7,7 @@ cache:
   - $HOME/.ckfinder
   - $HOME/.m2
 install: true
-jdk: openjdk14
+jdk: openjdk11
 script: .travis/publish.sh "-Dckfinder.cache.directory=$HOME/.ckfinder"
 after_success:
 - bash <(curl -s https://codecov.io/bash)
