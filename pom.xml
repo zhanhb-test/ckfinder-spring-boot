@@ -220,6 +220,8 @@
           <version>${flatten-maven-plugin.version}</version>
           <configuration>
             <flattenMode>oss</flattenMode>
+            <flattenedPomFilename>flattened-pom.xml</flattenedPomFilename>
+            <outputDirectory>${project.build.directory}</outputDirectory>
           </configuration>
           <executions>
             <execution>
