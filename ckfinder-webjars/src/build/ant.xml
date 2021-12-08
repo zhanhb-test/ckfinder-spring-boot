@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project>
+    <mkdir dir="${ckfinder.cache.directory}"/>
+    <if>
+        <available file="${ckfinder.cache.path}"/>
+        <else>
+            <delete file="${ckfinder.cache.path}.tmp"/>
+            <get dest="${ckfinder.cache.path}.tmp"
+                 src="https://download.cksource.com/CKFinder/CKFinder%20for%20Java/${ckfinder.version}/${ckfinder.zip.name}"/>
+            <move file="${ckfinder.cache.path}.tmp" tofile="${ckfinder.cache.path}"/>
+        </else>
+    </if>
+    <if>
+        <available file="${ckfinder.cache.path.php}"/>
+        <else>
+            <delete file="${ckfinder.cache.path.php}.tmp"/>
+            <get dest="${ckfinder.cache.path.php}.tmp"
+                 src="https://download.cksource.com/CKFinder/CKFinder%20for%20PHP/${ckfinder.version}/${ckfinder.zip.name.php}"/>
+            <move file="${ckfinder.cache.path.php}.tmp" tofile="${ckfinder.cache.path.php}"/>
+        </else>
+    </if>
+
+    <unzip dest="${project.build.directory}" src="${ckfinder.cache.path}"/>
+    <unzip dest="${project.build.directory}" src="${ckfinder.cache.path.php}"/>
+    <copy preservelastmodified="true" todir="${ckfinder.build.directory}">
+        <fileset dir="${project.build.directory}/ckfinder/_source/CKFinder for Java/WebApp/src/main/webapp/ckfinder"
+                 excludes="_samples/**" includes="**"/>
+    </copy>
+    <copy preservelastmodified="true" todir="${ckfinder.build.directory}/plugins/zip">
+        <fileset dir="${project.build.directory}/ckfinder/plugins/zip" excludes="*.php,**/*.php" includes="**"/>
+    </copy>
+</project>

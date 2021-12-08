@@ -21,6 +21,19 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
+  <dependencies>
+    <dependency>
+      <groupId>org.codehaus.groovy</groupId>
+      <artifactId>groovy</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.unbescape</groupId>
+      <artifactId>unbescape</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
   <build>
     <plugins>
       <plugin>
@@ -42,32 +55,7 @@
             <configuration>
               <target>
                 <taskdef classpathref="maven.plugin.classpath" resource="net/sf/antcontrib/antcontrib.properties"/>
-                <mkdir dir="${ckfinder.cache.directory}"/>
-                <if>
-                  <available file="${ckfinder.cache.path}"/>
-                  <else>
-                    <delete file="${ckfinder.cache.path}.tmp"/>
-                    <get dest="${ckfinder.cache.path}.tmp" src="https://download.cksource.com/CKFinder/CKFinder%20for%20Java/${ckfinder.version}/${ckfinder.zip.name}"/>
-                    <move file="${ckfinder.cache.path}.tmp" tofile="${ckfinder.cache.path}"/>
-                  </else>
-                </if>
-                <if>
-                  <available file="${ckfinder.cache.path.php}"/>
-                  <else>
-                    <delete file="${ckfinder.cache.path.php}.tmp"/>
-                    <get dest="${ckfinder.cache.path.php}.tmp" src="https://download.cksource.com/CKFinder/CKFinder%20for%20PHP/${ckfinder.version}/${ckfinder.zip.name.php}"/>
-                    <move file="${ckfinder.cache.path.php}.tmp" tofile="${ckfinder.cache.path.php}"/>
-                  </else>
-                </if>
-
-                <unzip dest="${project.build.directory}" src="${ckfinder.cache.path}"/>
-                <unzip dest="${project.build.directory}" src="${ckfinder.cache.path.php}"/>
-                <copy preservelastmodified="true" todir="${ckfinder.build.directory}">
-                  <fileset dir="${project.build.directory}/ckfinder/_source/CKFinder for Java/WebApp/src/main/webapp/ckfinder" excludes="_samples/**" includes="**"/>
-                </copy>
-                <copy preservelastmodified="true" todir="${ckfinder.build.directory}/plugins/zip">
-                  <fileset dir="${project.build.directory}/ckfinder/plugins/zip" excludes="*.php,**/*.php" includes="**"/>
-                </copy>
+                <ant antfile="${project.basedir}/src/build/ant.xml"/>
               </target>
             </configuration>
           </execution>
@@ -76,20 +64,6 @@
       <plugin>
         <groupId>org.codehaus.gmavenplus</groupId>
         <artifactId>gmavenplus-plugin</artifactId>
-        <dependencies>
-          <dependency>
-            <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy</artifactId>
-            <version>${groovy.version}</version>
-            <scope>runtime</scope>
-          </dependency>
-          <dependency>
-            <groupId>org.unbescape</groupId>
-            <artifactId>unbescape</artifactId>
-            <version>${unbescape.version}</version>
-            <scope>runtime</scope>
-          </dependency>
-        </dependencies>
         <executions>
           <execution>
             <id>unescape-javascript</id>
@@ -99,38 +73,7 @@
             <phase>process-resources</phase>
             <configuration>
               <scripts>
-                <script><![CDATA[import java.io.*
-import java.nio.*
-import java.nio.charset.*
-import java.nio.file.*
-import java.nio.file.attribute.*
-
-try {
-  def stringify = { org.unbescape.javascript.JavaScriptEscape.escapeJavaScript(it) }
-  def parse = { org.unbescape.javascript.JavaScriptEscape.unescapeJavaScript(it) }
-
-  def dir = Paths.get(project.build.directory)
-
-  Files.walk(dir).filter{ Files.isRegularFile(it)
-  }.filter { it.fileName.toString().endsWith('.js')
-  }.forEach { path ->
-    def charset = StandardCharsets.UTF_8
-    def str = charset.newDecoder().decode(ByteBuffer.wrap(Files.readAllBytes(path))).toString()
-    def old = str
-    if (str[0] == "\ufeff") {
-      str = str.substring(1);
-    }
-    str = str.replaceAll(/(?:\\x[0-9A-Fa-f]{2}|\\u[0-9A-Fa-f]{4}|\\[0-7]{3})+/) { stringify(parse(it)) }
-    str = str.replaceAll(/[^\000-\x7E\u2028\u2029]++/) { stringify(it) }
-    if (str != old) {
-      def bfa = Files.readAttributes(path, BasicFileAttributes)
-      Files.write(path, str.getBytes(charset))
-      Files.setLastModifiedTime(path, bfa.lastModifiedTime())
-    }
-  }
-} catch (Throwable t) {
-  log.error(t); throw t
-}]]></script>
+                <script>${project.basedir}/src/build/clean-source.groovy</script>
               </scripts>
               <properties>
                 <ant>null</ant>
