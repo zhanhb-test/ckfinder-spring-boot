@@ -2,9 +2,9 @@ package com.github.zhanhb.ckfinder.connector.handlers.command;
 
 import com.github.zhanhb.ckfinder.connector.api.ConnectorException;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Slf4j
 public class BaseCommandTest {
@@ -27,12 +27,7 @@ public class BaseCommandTest {
       BaseCommand.checkRequestPath(succes);
     }
     for (String string : failure) {
-      try {
-        BaseCommand.checkRequestPath(string);
-        fail(string);
-      } catch (ConnectorException ex) {
-        // ok
-      }
+      assertThrows(ConnectorException.class, () -> BaseCommand.checkRequestPath(string), string);
     }
   }
 

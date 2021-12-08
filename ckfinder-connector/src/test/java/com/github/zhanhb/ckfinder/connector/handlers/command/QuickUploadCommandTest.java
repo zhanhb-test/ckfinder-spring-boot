@@ -4,10 +4,10 @@ import java.io.StringWriter;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.util.StringUtils;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  *
@@ -17,10 +17,10 @@ import static org.junit.Assert.assertEquals;
 public class QuickUploadCommandTest {
 
   // use null class loader, ensure access of system script engine manager.
-  // usually our classloader will extends system class loader.
+  // usually our classloader will extend system class loader.
   // but surefire won't do like this when not forking
-  // the enigine manager can be found though system class loader.
-  private final ScriptEngine javascript = new ScriptEngineManager(null).getEngineByName("javascript");
+  // the engine manager can be found though system class loader.
+  private final ScriptEngine javascript = new ScriptEngineManager(QuickUploadCommandTest.class.getClassLoader()).getEngineByName("javascript");
 
   /**
    * Test of writeJSON method, of class QuickUploadCommand.
@@ -35,7 +35,7 @@ public class QuickUploadCommandTest {
       for (String path : paths) {
         String[] fileNames = {"te\"s't.jpg", "", null};
         for (String fileName : fileNames) {
-          if (!StringUtils.isEmpty(path) && fileName == null) {
+          if (StringUtils.hasLength(path) && fileName == null) {
             continue;
           }
           QuickUploadCommand instance = new QuickUploadCommand();

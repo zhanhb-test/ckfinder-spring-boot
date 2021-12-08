@@ -21,10 +21,9 @@ import java.io.EOFException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * @author zhanhb
@@ -60,18 +59,18 @@ public class IOUtilsTest {
             }
           }
           String expResult = str.substring(j, Math.min(k, str.length()));
-          assertArrayEquals(i + " " + j + " " + k, expResult.getBytes(StandardCharsets.UTF_8), output.toByteArray());
+          assertArrayEquals(expResult.getBytes(StandardCharsets.UTF_8), output.toByteArray(), i + " " + j + " " + k);
         }
       }
     }
   }
 
-  @Test(expected = EOFException.class)
-  public void testEofException() throws Exception {
+  @Test
+  public void testEofException() {
     byte[] bytes = new byte[4];
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-    IOUtils.copyFully(bais, baos, 4, 1, bytes);
+    assertThrows(EOFException.class, () -> IOUtils.copyFully(bais, baos, 4, 1, bytes));
   }
 
 }

@@ -3,11 +3,11 @@ package com.github.zhanhb.ckfinder.connector.utils;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Slf4j
 public class Utf8AccentsHolderTest {
@@ -33,7 +33,7 @@ public class Utf8AccentsHolderTest {
       String raw = sb.toString();
       String result = Utf8AccentsHolder.convert(raw);
       assertEquals(len, result.length());
-      assertTrue(result, result.matches("I+"));
+      assertTrue(result.matches("I+"), result);
       assertSame(result, Utf8AccentsHolder.convert(result));
 
       assertSame("", Utf8AccentsHolder.convert(""));
