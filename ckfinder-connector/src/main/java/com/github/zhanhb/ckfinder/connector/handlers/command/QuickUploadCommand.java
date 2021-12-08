@@ -57,7 +57,7 @@ public class QuickUploadCommand extends FileUploadCommand {
                   + FileUtils.escapeJavaScript(uri)
                   + "', '" + errorMsg + "')//]]></script>");
         } else {
-          boolean success = !StringUtils.isEmpty(uri);
+          boolean success = StringUtils.hasLength(uri);
           writer.write("<script>//<![CDATA[\nwindow.parent.OnUploadCompleted(" + errorNum + ", '");
           if (success) {
             writer.write(FileUtils.escapeJavaScript(uri) + "', '"
@@ -74,7 +74,7 @@ public class QuickUploadCommand extends FileUploadCommand {
   // for test
   void writeJSON(Writer writer, String errorMsg, String uri,
           String fileName, int errorNum) throws IOException {
-    boolean success = !StringUtils.isEmpty(uri);
+    boolean success = StringUtils.hasLength(uri);
 
     writer.write("{\"fileName\":");
     if (fileName != null) {
@@ -86,7 +86,7 @@ public class QuickUploadCommand extends FileUploadCommand {
     }
     writer.write(",\"uploaded\":");
     writer.write(success ? '1' : '0');
-    if (!StringUtils.isEmpty(errorMsg)) {
+    if (StringUtils.hasLength(errorMsg)) {
       writer.write(",\"error\":{\"number\":");
       writer.write(Integer.toString(errorNum));
       writer.write(",\"message\":\"");

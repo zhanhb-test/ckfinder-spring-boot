@@ -74,9 +74,9 @@ public class CKFinderAutoConfiguration {
       CKFinderProperties.Base base = properties.getBase();
       String baseUrl = base.getUrl();
       baseUrl = PathUtils.addSlashToBegin(PathUtils.addSlashToEnd(
-              StringUtils.isEmpty(baseUrl) ? DEFAULT_BASE_URL : baseUrl));
+              StringUtils.hasLength(baseUrl) ? baseUrl : DEFAULT_BASE_URL));
       String basePath = base.getPath();
-      basePath = StringUtils.isEmpty(basePath) ? baseUrl.replaceAll("^/+", "") : basePath;
+      basePath = StringUtils.hasLength(basePath) ? basePath : baseUrl.replaceAll("^/+", "");
       Path path = Paths.get(basePath).normalize();
       try {
         if (!path.isAbsolute()) {

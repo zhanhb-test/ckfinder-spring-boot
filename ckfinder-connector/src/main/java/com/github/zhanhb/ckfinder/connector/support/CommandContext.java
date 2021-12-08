@@ -147,7 +147,7 @@ public class CommandContext {
         throw toException(ErrorCode.INVALID_REQUEST);
       }
       String folder = file.getFolder();
-      if (StringUtils.isEmpty(folder)) {
+      if (!StringUtils.hasLength(folder)) {
         throw toException(ErrorCode.INVALID_REQUEST);
       }
       if (FileUtils.isPathNameInvalid(folder)) {

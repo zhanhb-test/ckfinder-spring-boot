@@ -55,7 +55,7 @@ public class SampleController {
     final String uri = request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE).toString();
     final String pattern = request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE).toString();
     String more = matcher.extractPathWithinPattern(pattern, uri);
-    String pathName = StringUtils.isEmpty(more) ? type : type + "/" + more;
+    String pathName = StringUtils.hasLength(more) ? type + "/" + more : type;
     log.info("serve file {}", pathName);
 
     Path path = null;

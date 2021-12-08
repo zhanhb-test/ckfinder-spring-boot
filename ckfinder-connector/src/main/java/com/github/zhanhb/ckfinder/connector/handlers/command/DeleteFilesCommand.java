@@ -55,7 +55,7 @@ public class DeleteFilesCommand extends FailAtEndXmlCommand<List<FileItem>> {
         throw cmdContext.toException(ErrorCode.INVALID_REQUEST);
       }
       String folder = file.getFolder();
-      if (StringUtils.isEmpty(folder)) {
+      if (!StringUtils.hasLength(folder)) {
         throw cmdContext.toException(ErrorCode.INVALID_REQUEST);
       }
       if (FileUtils.isPathNameInvalid(folder)) {

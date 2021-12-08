@@ -260,7 +260,7 @@ public class FileUploadCommand extends BaseCommand<FileUploadParameter> {
   private void validateUploadItem(MultipartFile item,
           FileUploadParameter param, CommandContext cmdContext) throws ConnectorException {
     CKFinderContext context = cmdContext.getCfCtx();
-    if (StringUtils.isEmpty(item.getOriginalFilename())) {
+    if (!StringUtils.hasLength(item.getOriginalFilename())) {
       throw param.toException(ErrorCode.UPLOADED_INVALID);
     }
 

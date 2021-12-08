@@ -34,7 +34,7 @@ public class PathUtils {
    * @return Escaped string, {@code null} or empty string.
    */
   public String normalizeUrl(String string) {
-    if (StringUtils.isEmpty(string)) {
+    if (!StringUtils.hasLength(string)) {
       return string;
     }
     final int prefixIndex = string.indexOf("://");

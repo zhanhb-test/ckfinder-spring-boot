@@ -78,7 +78,7 @@ public class RenameFileCommand extends FailAtEndXmlCommand<RenameFileParameter> 
 
     ErrorListResult.Builder builder = ErrorListResult.builder();
 
-    final boolean addExtraNode = !StringUtils.isEmpty(fileName) && !StringUtils.isEmpty(newFileName);
+    final boolean addExtraNode = StringUtils.hasLength(fileName) && StringUtils.hasLength(newFileName);
 
     ErrorListResult result;
     if (!FileUtils.isFileExtensionAllowed(newFileName, cmdContext.getType())) {
