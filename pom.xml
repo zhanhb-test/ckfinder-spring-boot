@@ -78,6 +78,7 @@
     <maven-bundle-plugin.version>5.1.2</maven-bundle-plugin.version>
     <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
     <module.name>com.github.zhanhb.ckfinder</module.name>
+    <nexus-staging-maven-plugin.version>1.6.8</nexus-staging-maven-plugin.version>
     <osgi.dynamicImport/>
     <osgi.export>${project.groupId}.*;version=${project.version};-noimport:=true</osgi.export>
     <osgi.import>*</osgi.import>
@@ -356,6 +357,17 @@
             </configuration>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.sonatype.plugins</groupId>
+        <artifactId>nexus-staging-maven-plugin</artifactId>
+        <version>${nexus-staging-maven-plugin.version}</version>
+        <extensions>true</extensions>
+        <configuration>
+          <serverId>ossrh</serverId>
+          <nexusUrl>https://oss.sonatype.org</nexusUrl>
+          <autoDropAfterRelease>false</autoDropAfterRelease>
+        </configuration>
       </plugin>
     </plugins>
   </build>
