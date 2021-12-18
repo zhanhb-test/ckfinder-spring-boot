@@ -31,39 +31,38 @@ public class DefaultResourceType implements ResourceType {
   /**
    * resource name.
    */
-  private String name;
+  String name;
 
   /**
    * resource url.
    */
-  private String url;
+  String url;
 
   /**
    * resource directory.
    */
-  @NonNull
-  private Path path;
+  @NonNull Path path;
 
   /**
    * max file size in resource.
    */
-  private long maxSize;
+  long maxSize;
 
   /**
    * resource directory.
    */
   @Nullable
-  private Path thumbnailPath;
+  Path thumbnailPath;
 
   /**
    * list of allowed extensions in resource (separated with comma).
    */
-  private String allowedExtensions;
+  String allowedExtensions;
 
   /**
    * list of denied extensions in resource (separated with comma).
    */
-  private String deniedExtensions;
+  String deniedExtensions;
 
   @Override
   public Path resolve(String... names) {

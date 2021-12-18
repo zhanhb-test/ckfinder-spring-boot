@@ -18,10 +18,10 @@ import lombok.Value;
 @SuppressWarnings("FinalClass")
 class ImageResizeInfo implements PluginInfo {
 
-  private String name;
+  String name;
 
   @Singular
   @XmlAnyAttribute
-  private Map<QName, String> attributes;
+  Map<QName, String> attributes;
 
 }

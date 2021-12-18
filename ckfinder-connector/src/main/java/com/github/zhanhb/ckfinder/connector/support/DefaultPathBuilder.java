@@ -25,9 +25,7 @@ import lombok.Value;
 @Value
 public class DefaultPathBuilder implements BasePathBuilder {
 
-  @NonNull
-  private Path basePath;
-  @NonNull
-  private String baseUrl;
+  @NonNull Path basePath;
+  @NonNull String baseUrl;
 
 }

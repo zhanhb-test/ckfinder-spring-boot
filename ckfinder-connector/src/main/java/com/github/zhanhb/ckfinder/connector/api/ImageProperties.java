@@ -13,9 +13,9 @@ import lombok.Value;
 @Value
 public class ImageProperties {
 
-  private int maxWidth;
-  private int maxHeight;
-  private float quality;
+  int maxWidth;
+  int maxHeight;
+  float quality;
 
   @SuppressWarnings("PublicInnerClass")
   public static class Builder {

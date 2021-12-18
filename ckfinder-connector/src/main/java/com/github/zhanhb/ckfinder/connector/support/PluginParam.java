@@ -10,8 +10,8 @@ import lombok.Value;
 @Value
 class PluginParam {
 
-  private String name;
+  String name;
   @Singular
-  private Map<String, String> params;
+  Map<String, String> params;
 
 }

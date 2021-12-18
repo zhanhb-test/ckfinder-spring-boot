@@ -17,14 +17,12 @@ import lombok.Value;
 @Value
 public class ThumbnailProperties {
 
-  @NonNull
-  private String url;
-  @NonNull
-  private Path path;
-  private boolean directAccess;
-  private int maxHeight;
-  private int maxWidth;
-  private float quality;
+  @NonNull String url;
+  @NonNull Path path;
+  boolean directAccess;
+  int maxHeight;
+  int maxWidth;
+  float quality;
 
   public static class Builder {
 

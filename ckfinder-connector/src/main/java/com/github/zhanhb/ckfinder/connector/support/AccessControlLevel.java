@@ -22,9 +22,9 @@ import lombok.Value;
 @Value
 public class AccessControlLevel {
 
-  private String role;
-  private String resourceType;
-  private String folder;
-  private int mask;
+  String role;
+  String resourceType;
+  String folder;
+  int mask;
 
 }

@@ -25,10 +25,10 @@ import lombok.Value;
 @Value
 public class FileItem {
 
-  private String folder;
-  private String name;
-  private String options;
-  private ResourceType type;
+  String folder;
+  String name;
+  String options;
+  ResourceType type;
 
   public Path toPath() {
     return type.resolve(folder, name);

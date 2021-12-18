@@ -13,7 +13,7 @@ import lombok.Value;
 @Value
 public class License {
 
-  private String name;
-  private String key;
+  String name;
+  String key;
 
 }

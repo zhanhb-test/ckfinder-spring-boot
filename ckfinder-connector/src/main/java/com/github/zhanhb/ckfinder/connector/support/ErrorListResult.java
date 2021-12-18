@@ -24,8 +24,8 @@ public class ErrorListResult {
    * errors list.
    */
   @Singular
-  private List<ErrorElement> errors;
-  private ErrorCode errorCode;
+  List<ErrorElement> errors;
+  ErrorCode errorCode;
 
   /**
    * add all error nodes from saved list to xml.

@@ -20,11 +20,11 @@ import org.springframework.core.io.InputStreamSource;
 @Value
 public class WatermarkSettings {
 
-  private InputStreamSource source;
-  private float transparency;
-  private float quality;
-  private int marginBottom;
-  private int marginRight;
+  InputStreamSource source;
+  float transparency;
+  float quality;
+  int marginBottom;
+  int marginRight;
 
   public static class Builder {
 

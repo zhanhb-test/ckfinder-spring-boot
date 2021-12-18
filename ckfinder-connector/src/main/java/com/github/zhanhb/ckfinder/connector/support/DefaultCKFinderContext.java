@@ -41,47 +41,41 @@ import lombok.experimental.NonFinal;
 @Value
 public class DefaultCKFinderContext implements CKFinderContext {
 
-  private boolean enabled;
+  boolean enabled;
   @Delegate
-  @NonNull
-  private LicenseFactory licenseFactory;
-  @NonNull
-  private ImageProperties image;
+  @NonNull LicenseFactory licenseFactory;
+  @NonNull ImageProperties image;
   @Singular
-  private Map<String, ResourceType> types;
+  Map<String, ResourceType> types;
   @Nullable
-  private ThumbnailProperties thumbnail;
+  ThumbnailProperties thumbnail;
   @Singular
-  private List<String> hiddenFolders;
+  List<String> hiddenFolders;
   @Singular
-  private List<String> hiddenFiles;
-  private boolean doubleFileExtensionsDisallowed;
-  private boolean forceAscii;
-  private boolean checkSizeAfterScaling;
-  @NonNull
-  private String userRoleName;
+  List<String> hiddenFiles;
+  boolean doubleFileExtensionsDisallowed;
+  boolean forceAscii;
+  boolean checkSizeAfterScaling;
+  @NonNull String userRoleName;
   @Nullable
-  private String publicPluginNames;
-  private boolean secureImageUploads;
+  String publicPluginNames;
+  boolean secureImageUploads;
   @Singular
-  private Set<String> defaultResourceTypes;
-  private boolean disallowUnsafeCharacters;
-  private boolean csrfProtectionEnabled;
+  Set<String> defaultResourceTypes;
+  boolean disallowUnsafeCharacters;
+  boolean csrfProtectionEnabled;
   @Delegate
-  @NonNull
-  private EventHandler events;
+  @NonNull EventHandler events;
   @Singular
-  private List<PluginInfo> pluginInfos;
+  List<PluginInfo> pluginInfos;
   @Delegate
-  @NonNull
-  private AccessControl accessControl;
+  @NonNull AccessControl accessControl;
   @Delegate
-  @NonNull
-  private CommandFactory commandFactory;
+  @NonNull CommandFactory commandFactory;
   @NonFinal
-  private transient Pattern fileHiddenPattern;
+  transient Pattern fileHiddenPattern;
   @NonFinal
-  private transient Pattern directoryHiddenPattern;
+  transient Pattern directoryHiddenPattern;
 
   @Override
   public ResourceType getResource(String typeName) {
