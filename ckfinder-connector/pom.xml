@@ -11,15 +11,21 @@
 
   <properties>
     <module.name>com.github.zhanhb.ckfinder.connector</module.name>
-    <osgi.import>javax.annotation.*;resolution:=optional,
-      javax.xml.*;version="[2.3,3)",
+    <osgi.import>
+      <!-- sortpom hack -->
+      javax.annotation.*;resolution:=optional;version=!,
+      javax.imageio,
       javax.servlet.*;version="[3.1,5)",
+      javax.xml.*,
       net.coobird.*;version="[0.4.8,1)",
-      org.w3c.dom.*;resolution:=optional,
-      org.xml.sax.*;resolution:=optional,
+      org.slf4j,
       org.springframework.*;version="[5.2,6)",
       org.unbescape.*;version="[1.1.2,1.2)",
-      *</osgi.import>
+      org.w3c.dom.*;resolution:=optional;version=!,
+      org.xml.sax.*;resolution:=optional;version=!,
+      *
+      <!-- sortpom hack -->
+    </osgi.import>
   </properties>
 
   <dependencies>

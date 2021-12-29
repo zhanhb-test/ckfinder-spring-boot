@@ -12,11 +12,15 @@
 
   <properties>
     <module.name>com.github.zhanhb.ckfinder.spring.boot.autoconfigure</module.name>
-    <osgi.import>javax.annotation.*;resolution:=optional,
+    <osgi.import>
+      <!-- sortpom hack -->
+      javax.annotation.*;resolution:=optional;version=!,
       javax.servlet.*;version="[3.1,5)",
       org.springframework.boot.*;version="[2.3,3)",
       org.springframework.*;version="[5.2,6)",
-      *</osgi.import>
+      *
+      <!-- sortpom hack -->
+    </osgi.import>
   </properties>
 
   <dependencies>

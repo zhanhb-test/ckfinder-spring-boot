@@ -68,6 +68,7 @@
   </distributionManagement>
 
   <properties>
+    <bnd.version>6.1.0</bnd.version>
     <delombok.directory>${project.build.directory}/delombok</delombok.directory>
     <findbugs-jsr305.version>3.0.2</findbugs-jsr305.version>
     <flatten-maven-plugin.version>1.2.7</flatten-maven-plugin.version>
@@ -80,9 +81,8 @@
     <module.name>com.github.zhanhb.ckfinder</module.name>
     <nexus-staging-maven-plugin.version>1.6.8</nexus-staging-maven-plugin.version>
     <osgi.dynamicImport/>
-    <osgi.export>${project.groupId}.*;version=${project.version};-noimport:=true</osgi.export>
+    <osgi.export>*;-noimport:=true</osgi.export>
     <osgi.import>*</osgi.import>
-    <osgi.private/>
     <osgi.symbolicName>${project.groupId}.${project.artifactId}</osgi.symbolicName>
     <prerequisites.maven>3.6.1</prerequisites.maven>
     <revision>0.1.0-SNAPSHOT</revision>
@@ -174,7 +174,15 @@
           <artifactId>maven-bundle-plugin</artifactId>
           <version>${maven-bundle-plugin.version}</version>
           <configuration>
-            <excludeDependencies>true</excludeDependencies>
+            <archive>
+              <manifest>
+                <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+              </manifest>
+              <manifestEntries>
+                <Automatic-Module-Name>${module.name}</Automatic-Module-Name>
+              </manifestEntries>
+            </archive>
             <manifestLocation>${project.build.directory}/osgi</manifestLocation>
             <supportedProjectTypes>
               <supportedProjectType>jar</supportedProjectType>
@@ -183,15 +191,21 @@
               <supportedProjectType>maven-plugin</supportedProjectType>
             </supportedProjectTypes>
             <instructions>
+              <_exportcontents>${osgi.export}</_exportcontents>
               <_nouses>true</_nouses>
               <Bundle-SymbolicName>${osgi.symbolicName}</Bundle-SymbolicName>
-              <Export-Package>${osgi.export}</Export-Package>
-              <Private-Package>${osgi.private}</Private-Package>
               <Import-Package>${osgi.import}</Import-Package>
               <DynamicImport-Package>${osgi.dynamicImport}</DynamicImport-Package>
               <Bundle-DocURL>${project.url}</Bundle-DocURL>
             </instructions>
           </configuration>
+          <dependencies>
+            <dependency>
+              <groupId>biz.aQute.bnd</groupId>
+              <artifactId>biz.aQute.bndlib</artifactId>
+              <version>${bnd.version}</version>
+            </dependency>
+          </dependencies>
           <executions>
             <execution>
               <id>bundle-manifest</id>
@@ -271,12 +285,6 @@
         <configuration>
           <archive>
             <manifestFile>${project.build.directory}/osgi/MANIFEST.MF</manifestFile>
-            <manifestEntries>
-              <Automatic-Module-Name>${module.name}</Automatic-Module-Name>
-            </manifestEntries>
-            <manifest>
-              <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-            </manifest>
           </archive>
         </configuration>
       </plugin>
