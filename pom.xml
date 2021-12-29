@@ -85,7 +85,7 @@
     <osgi.private/>
     <osgi.symbolicName>${project.groupId}.${project.artifactId}</osgi.symbolicName>
     <prerequisites.maven>3.6.1</prerequisites.maven>
-    <revision>0.0.1.BUILD-SNAPSHOT</revision>
+    <revision>0.1.0-SNAPSHOT</revision>
     <sortpom-maven-plugin.version>3.0.0</sortpom-maven-plugin.version>
     <spring-boot.version>2.6.1</spring-boot.version>
     <start-class/>
